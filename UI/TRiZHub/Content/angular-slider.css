@@ -1,0 +1,75 @@
+slider {
+    display: inline-block;
+    height: 8px;
+    margin: 25px 5px 25px 5px;
+    position: relative;
+    vertical-align: middle;
+    width: 100%;
+}
+
+slider span {
+    display: inline-block;
+    position: absolute;
+    white-space: nowrap;
+}
+
+slider span.base {
+    height: 100%;
+    padding: 0;
+    width: 100%;
+}
+
+slider span.bar {
+    -webkit-border-radius: 1em/1em;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 1em/1em;
+    height: 100%;
+    z-index: 0;
+}
+
+slider span.bar.selection {
+    -webkit-box-shadow: none;
+    background-color: #00a8f3;
+    box-shadow: none;
+    width: 0%;
+    z-index: 1;
+}
+
+slider span.pointer {
+    -webkit-border-radius: 1em/1em;
+    background-color: #fff;
+    border: 1px solid #dee5e7;
+    border-radius: 1em/1em;
+    cursor: pointer;
+    height: 20px;
+    top: -6px;
+    width: 20px;
+    z-index: 2;
+}
+
+slider span.pointer:after {
+    -webkit-border-radius: 1em/1em;
+    background-color: #dee5e7;
+    border-radius: 1em/1em;
+    content: '';
+    height: 8px;
+    left: 5px;
+    position: absolute;
+    top: 5px;
+    width: 8px;
+}
+
+slider span.pointer:hover:after { background-color: #000; }
+
+slider span.pointer.active:after { background-color: #00a8f3; }
+
+slider span.bubble {
+    cursor: default;
+    font-size: 0.7em;
+    padding: 1px 3px 1px 3px;
+    top: -22px;
+}
+
+slider span.bubble.selection { top: 15px; }
+
+slider span.bubble.limit { color: #808080; }

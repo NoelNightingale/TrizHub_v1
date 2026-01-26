@@ -1,0 +1,170 @@
+﻿<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box">
+                <div class="box-header b-b">
+                    <h2>Project Maintenance</h2>
+                </div>
+                <div class="box-body">
+                    <form class="row">
+                        <div class="col-sm-12 col-md-4">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control p-x b-a rounded" placeholder="Search" ng-model="vm.gridModel.searchFor">
+                                <span class="input-group-btn">
+                                    <button class="btn white b-a rounded no-shadow" ng-click="vm.pageGrid.search()"><i class="fa fa-search"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-4" style="line-height: 32px;">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.gridModel.showInactive" ng-click="vm.toggleInactiveProjectShow()">
+                                <i class="indigo"></i>
+                                Show Inactive Projects
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-responsive">
+                    <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th></th>
+
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('projectnumber')">Project Number</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='projectnumber'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='projectnumber'}"></i>
+                                </th>
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('projectname')">Project Name</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='projectname'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='projectname'}"></i>
+                                </th>
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('projectdescription')">Project Description</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='projectdescription'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='projectdescription'}"></i>
+                                </th>
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('clientname')">Client Name</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='clientname'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='clientname'}"></i>
+                                </th>
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('projectleadname')">Project Lead Name</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='projectleadname'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='projectleadname'}"></i>
+                                </th>
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('billable')">Billable</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='billable'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='billable'}"></i>
+                                </th>
+                                <th>
+                                    <a ng-click="vm.pageGrid.sort('isactive')">Is Active</a>
+                                    <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='isactive'}"></i>
+                                    <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='isactive'}"></i>
+                                </th>
+                                <th width="15%" style="padding-left: 10px;">
+                                    <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newProject()">
+                                        <i class="fa fa-plus"></i> New
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-ng-repeat="i in vm.gridModel.data">
+                                <td ng-show="!i.isDetail">
+                                    <button ng-show="vm.selectedProjectId != i.id" class="btn btn-icon white" ng-click="vm.toggleSubProjects(i)">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                    <button ng-show="vm.selectedProjectId == i.id" class="btn btn-icon white" ng-click="vm.toggleSubProjects(i)">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                </td>
+                                <td ng-show="!i.isDetail">{{i.projectNumber}}</td>
+                                <td ng-show="!i.isDetail">{{i.projectName}}</td>
+                                <td ng-show="!i.isDetail">{{i.projectDescription}}</td>
+                                <td ng-show="!i.isDetail">{{i.clientName}}</td>
+                                <td ng-show="!i.isDetail">{{i.projectLeadName}}</td>
+                                <td ng-style="i.billable === true && {'color': 'green'} || i.billable === false &&{'color' :'red'}" ng-show="!i.isDetail">{{i.billable}}</td>
+                                <td ng-style="i.isActive === true && {'color': 'green'} || i.isActive === false &&{'color' :'red'}" ng-show="!i.isDetail">{{i.isActive}}</td>
+                                <td ng-show="!i.isDetail">
+                                    <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+                                       ui-sref="mainState.maintenance.projectMaintenance.detail({id: i.id})">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </a>
+                                    <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.danger}} text-{{app.setting.theme.danger}}" ng-click="vm.deleteProject(i, $index)">
+                                        <i class="fa fa-remove"></i> Delete
+                                    </a>
+                                </td>
+                                <td ng-show="vm.selectedProjectId == i.id && i.isDetail" colspan="6">
+                                    <table st-table="rowCollectionBasic" class="col-xs-offset-1 col-xs-10 table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <a ng-click="vm.subProjectPageGrid.sort('subProjectNumber')">Sub Project Number</a>
+                                                    <i ng-class="{'fa fa-angle-double-up':vm.subProjectGridModel.sortKeyOrder.order=='ASC' && vm.subProjectGridModel.sortKeyOrder.key=='subProjectNumber'}"></i>
+                                                    <i ng-class="{'fa fa-angle-double-down':vm.subProjectGridModel.sortKeyOrder.order=='DESC' && vm.subProjectGridModel.sortKeyOrder.key=='subProjectNumber'}"></i>
+                                                </th>
+
+
+                                                <th>
+                                                    <a ng-click="vm.subProjectPageGrid.sort('projectname')">Sub Project Name</a>
+                                                    <i ng-class="{'fa fa-angle-double-up':vm.subProjectGridModel.sortKeyOrder.order=='ASC' && vm.subProjectGridModel.sortKeyOrder.key=='projectname'}"></i>
+                                                    <i ng-class="{'fa fa-angle-double-down':vm.subProjectGridModel.sortKeyOrder.order=='DESC' && vm.subProjectGridModel.sortKeyOrder.key=='projectname'}"></i>
+                                                </th>
+
+                                                <th>
+                                                    <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newSubProject(i.id)">
+                                                        <i class="fa fa-plus"></i> New
+                                                    </a>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr data-ng-repeat="s in vm.subProjectGridModel.data" st-select-row="row">
+                                                <td>{{s.subProjectNumber}}</td>
+                                                <td>{{s.projectName}}</td>
+                                                <td>
+                                                    <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+                                                       ui-sref="mainState.maintenance.projectMaintenance.subProjectDetail({id: i.id, subProjectId: s.id})">
+                                                        <i class="fa fa-edit"></i> Edit
+                                                    </a>
+                                                    <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.danger}} text-{{app.setting.theme.danger}}" ng-click="vm.deleteSubProject(s, $index)">
+                                                        <i class="fa fa-remove"></i> Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr ng-show="vm.subProjectGridModel.data.length == 0">
+                                                <td colspan="5">
+                                                    No Records
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                        </tfoot>
+                                    </table>
+                                    <div class="col-xs-offset-1 col-xs-10">
+                                        <uib-pagination total-items="vm.subProjectGridModel.totalItems" ng-model="vm.subProjectGridModel.currentPage" max-size="vm.subProjectGridModel.maxSize"
+                                                        class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.subProjectPageGrid.pageChanged()" items-per-page="vm.subProjectGridModel.recordsPerPage">
+                                        </uib-pagination>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                    <div class="w-full m-b-2 center-container">
+                        <uib-pagination total-items="vm.gridModel.totalItems" ng-model="vm.gridModel.currentPage" max-size="vm.gridModel.maxSize"
+                                        class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGrid.pageChanged()" items-per-page="vm.gridModel.recordsPerPage">
+                        </uib-pagination>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

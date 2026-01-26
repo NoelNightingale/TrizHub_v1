@@ -1,0 +1,190 @@
+﻿<div class="padding">
+    <div>
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    Timesheet Reports
+                    <div class="pull-right text-right">
+                        <input type="radio" name="optReportType" value="TimesheetSummaryExcel" ng-model="vm.viewModel.reportType" /> Summary Report&nbsp;&nbsp;
+                        <input type="radio" name="optReportType" value="TimesheetDetailExcel" ng-model="vm.viewModel.reportType" /> Detail Report&nbsp;&nbsp;
+                        <input type="radio" name="optReportType" value="BillableReportExcel" ng-model="vm.viewModel.reportType" /> Project Billing Summary
+                    </div>
+                </h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" class="form-horizontal">
+                    <fieldset>
+                        <div class="form-group">
+                            <div class="m-t-1 row">
+                                <div class="col-sm-4">
+                                    Billing Period:
+                                </div>
+                                <div class="col-sm-8">
+                                    <select name="user" class="form-control" ng-options="s.id as s.description for s in vm.filterOptions.billingCycles"
+                                            ng-model="vm.viewModel.billingCycleId" placeholder="Billing Cycle" ng-change="vm.updateFilter(popupModel)"></select>
+                                </div>
+                            </div>
+                            <div class="m-t-1 row">
+                                <div class="col-sm-2">
+                                    Start Date:
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="checkbox" ng-disabled="vm.disableFilter" name="startealiest" ng-model="vm.viewModel.startEarliest" ng-change="vm.clearDate('start')" /> Earliest <div class="pull-right">OR</div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <input type="text" ng-disabled="vm.disableFilter || vm.viewModel.startEarliest" class="form-control"
+                                           ng-model="vm.viewModel.startDate"
+                                           data-icon-left="fa fa-chevron-left"
+                                           data-icon-right="fa fa-chevron-right"
+                                           name="date" data-date-format="yyyy/MM/dd"
+                                           bs-datepicker placeholder="Start Date"
+                                           autoclose="true" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="m-t-1 row">
+                                <div class="col-sm-2">
+                                    End Date:
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="checkbox" ng-disabled="vm.disableFilter" name="endLatest" ng-model="vm.viewModel.endLatest" ng-change="vm.clearDate('end')" /> Latest<div class="pull-right">OR</div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <input type="text" ng-disabled="vm.disableFilter || vm.viewModel.endLatest" class="form-control"
+                                           ng-model="vm.viewModel.endDate"
+                                           data-icon-left="fa fa-chevron-left"
+                                           data-icon-right="fa fa-chevron-right"
+                                           name="date" data-date-format="yyyy/MM/dd"
+                                           bs-datepicker placeholder="End Date"
+                                           autoclose="true" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="m-t-1 row">
+                                <div class="col-sm-4">
+                                    Include Rates:
+                                </div>
+                                <div class="col-sm-8">
+                                    <label class="md-switch">
+                                        <input type="checkbox" ng-model="vm.viewModel.showRates">
+                                        <i class="indigo"></i>
+                                    </label>
+                                </div>
+                            </div>
+                            <div ng-hide="vm.viewModel.reportType=='BillableReportExcel'" class="m-t-1 row">
+                                <div class="col-sm-4">
+                                    Include Subprojects :
+                                </div>
+                                <div class="col-sm-8">
+                                    <label class="md-switch">
+                                        <input type="checkbox" ng-model="vm.viewModel.showPhases">
+                                        <i class="indigo"></i>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="m-t-1 row">
+                                <div class="col-sm-4">
+                                    Include Unassigned :
+                                </div>
+                                <div class="col-sm-8">
+                                    <label class="md-switch">
+                                        <input type="checkbox" ng-model="vm.viewModel.showUnassigned">
+                                        <i class="indigo"></i>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div ng-show="vm.viewModel.reportType=='TimesheetSummaryExcel'" class="m-t-1 row">
+                                <div class="col-sm-4">
+                                    Project / Subprojects Filter Text :
+                                </div>
+                                <div class="col-sm-8">
+                                    <input class="form-control" type="text" ng-model="vm.viewModel.projectWildCardSearch">
+                                </div>
+                            </div>
+                            <div class="m-t-1 row">
+                                <div class="col-sm-3" ng-hide="vm.viewModel.reportType=='BillableReportExcel'"><input type="checkbox" ng-change="vm.updateActiveUsers()" name="endLatest" ng-model="vm.viewModel.includeInactive" /> Show Inactive</div>
+                                <div class="col-sm-3" ng-hide="vm.viewModel.reportType=='BillableReportExcel'"><input type="checkbox" ng-change="vm.updateActiveClients()" name="showInactiveClients" ng-model="vm.viewModel.includeInactiveClients" /> Show Inactive</div>
+                                <div class="col-sm-3"><input type="checkbox" ng-change="vm.updateActiveEmployers()" name="showInactiveEmployers" ng-model="vm.viewModel.includeInactiveEmployers" /> Show Inactive</div>
+                                <div class="col-sm-3"><input type="checkbox" name="showInactiveProjects" ng-model="vm.viewModel.includeInactiveProjects" /> Show Inactive</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3" ng-hide="vm.viewModel.reportType=='BillableReportExcel'"><input type="radio" name="employees" value="All" ng-model="vm.viewModel.employees" /> Employees Unfiltered</div>
+                                <div class="col-sm-3" ng-hide="vm.viewModel.reportType=='BillableReportExcel'"><input type="radio" name="clients" value="All" ng-model="vm.viewModel.clients" /> Clients Unfiltered</div>
+                                <div class="col-sm-3"><input type="radio" name="employers" value="All" ng-model="vm.viewModel.employers" /> Employers Unfiltered</div>
+                                <div class="col-sm-3"><input type="radio" name="projects" value="All" ng-model="vm.viewModel.projects" /> Projects Unfiltered :</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3" ng-hide="vm.viewModel.reportType=='BillableReportExcel'"><input type="radio" name="employeess" value="Selected" ng-model="vm.viewModel.employees" /> Employeess Filtered By:</div>
+                                <div class="col-sm-3" ng-hide="vm.viewModel.reportType=='BillableReportExcel'"><input type="radio" name="clients" value="Selected" ng-model="vm.viewModel.clients" /> Clients Filtered By:</div>
+                                <div class="col-sm-3"><input type="radio" name="employers" value="Selected" ng-model="vm.viewModel.employers" /> Employers Filtered By:</div>
+                                <div class="col-sm-3"><input type="radio" name="projects" value="Selected" ng-model="vm.viewModel.projects" /> Projects Filtered By:</div>
+                            </div>
+                            <div class="row">
+                                <div ng-hide="vm.viewModel.reportType=='BillableReportExcel'" class="col-sm-3" style="height:400px; overflow-y:scroll;">
+                                    <div ng-repeat="employee in vm.filterOptions.employees">
+                                        <label class="md-check">
+                                            <input ng-disabled="vm.viewModel.employees=='All'" ng-model="employee.selected" type="checkbox">
+                                            <i class="indigo"></i>
+                                            {{employee.description}}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div ng-hide="vm.viewModel.reportType=='BillableReportExcel'" class="col-sm-3" style="height:400px; overflow-y:scroll;">
+                                    <div ng-repeat="client in vm.filterOptions.allClients">
+                                        <label class="md-check">
+                                            <input ng-disabled="vm.viewModel.clients=='All'" ng-model="client.selected" type="checkbox">
+                                            <i class="indigo"></i>
+                                            {{client.entityName}}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" style="height:400px; overflow-y:scroll;">
+                                    <div ng-repeat="employer in vm.filterOptions.employers">
+                                        <label class="md-check">
+                                            <input ng-disabled="vm.viewModel.employers=='All'" ng-model="employer.selected" type="checkbox">
+                                            <i class="indigo"></i>
+                                            {{employer.name}}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" style="height:400px; overflow-y:scroll;" ng-show="!vm.viewModel.includeInactiveProjects">
+                                    <div ng-repeat="project in vm.filterOptions.projects">
+                                        <label class="md-check">
+                                            <input ng-disabled="vm.viewModel.projects=='All'" ng-model="project.selected" type="checkbox">
+                                            <i class="indigo"></i>
+                                            {{project.description}}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" style="height:400px; overflow-y:scroll;" ng-show="vm.viewModel.includeInactiveProjects">
+                                    <div ng-repeat="project in vm.filterOptions.allProjects">
+                                        <label class="md-check">
+                                            <input ng-disabled="vm.viewModel.projects=='All'" ng-model="project.selected" type="checkbox">
+                                            <i class="indigo"></i>
+                                            {{project.description}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12 pull-right text-right">
+                                <button class="btn btn-fw primary" ng-click="vm.submitForm(vm.viewModel.reportType)">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

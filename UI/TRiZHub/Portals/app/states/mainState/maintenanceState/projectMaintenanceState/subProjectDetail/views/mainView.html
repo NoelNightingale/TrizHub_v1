@@ -1,0 +1,81 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.projectMaintenance.grid">Project Maintenance</a> / {{vm.viewModel.parentProjectName}} / {{vm.viewModel.projectName}}
+                </h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" novalidate>
+
+                    <div class="form-group row" show-errors>
+                        <label for="subProjectNumber" class="col-sm-2 form-control-label">Sub Project Number:</label>
+                        <div class="col-sm-4">
+                            <input name="parentProjectNumber" type="text" class="form-control" ng-model="vm.viewModel.parentProjectNumber" readonly>
+                        </div>
+                        <div class="col-sm-2 text-center text-2x">/</div>
+                        <div class="col-sm-4" show-errors>
+                            <input name="subProjectNumber" type="text" class="form-control" ng-model="vm.viewModel.subProjectNumber" required>
+                            <span class="text-help" ng-show="EditForm.subProjectNumber.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="projectName" class="col-sm-2 form-control-label">Project Name:</label>
+                        <div class="col-sm-10">
+                            <input name="projectName" type="text" class="form-control" ng-model="vm.viewModel.projectName" ng-required="true">
+                            <span class="text-help" ng-show="EditForm.projectName.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="projectLead" class="col-sm-2 form-control-label">Project Type:</label>
+                        <div class="col-sm-10">
+                            <select name="projectType" class="form-control" ng-options="s.id as s.name for s in vm.projectTypeDropdown" 
+                                    ng-model="vm.viewModel.subProjectTypeId" ng-required="true"
+                                    ng-disabled="!vm.viewModel.parentAllowSubProjectAlternativeType"></select>
+                            <span class="text-help" ng-show="EditForm.projectType.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="active" class="col-sm-2 form-control-label">Is Active:</label>
+                        <div class="col-sm-9">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.isActive">
+                                <i class="indigo"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+
+                            <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Cancel
+                            </button>
+
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

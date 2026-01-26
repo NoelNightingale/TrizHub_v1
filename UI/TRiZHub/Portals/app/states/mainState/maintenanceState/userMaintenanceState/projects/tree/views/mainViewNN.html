@@ -1,0 +1,141 @@
+﻿
+
+<div id="viewProjectAccess" class="padding">
+    <div class="container1">
+        <div class="container" ng-if="vm.saveSuccess">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})"> {{vm.user.firstName}} {{vm.user.surname}}</a> / Project Access
+                </h2>
+            </div>
+            <div class="box-body">
+
+                <form class="m-b-2 row">
+                    <div class="col-md-6">
+
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.includeInactive" ng-click="vm.toggleInactiveProjectShow()">
+                            <i class="indigo"></i>
+                            Show Inactive Projects
+                        </label>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="pull-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <h4>Allocated:</h4>
+                        </div>
+                        <div class="row">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th width="70%">Project [Sub Project]</th>
+                                        <th>Client</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in vm.assignedData" ng-style="{ 'background-color' : (item.isActive==true)? '#ffffff' : 'lightgray' }" ng-hide="item.isDeleted">
+                                        <td>{{item.description}}</td>
+                                        <td>{{item.clientName}}</td>
+                                        <td>
+                                            <a class="btn btn-xs btn-fw btn-outline b-danger text-danger" ng-click="vm.unassignItem(item)">
+                                                <i class="fa fa-remove"></i> Unassign
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <h4>Available:</h4>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                               
+                                <div class="row">
+                                    <div class="col-lg-2"><h5>Client :</h5></div>
+                                    <div class="col-lg-6">
+                                        <select name="client" class="form-control ng-pristine ng-not-empty ng-valid ng-valid-required ng-touched" ng-options="item.name for item in vm.treeData" ng-change="vm.setFirstClientProject()" ng-model="vm.selectedClient" ng-required="true" placeholder="Race" required="required" style="">                        </select>
+                                    </div>
+                                    <div class="col-lg-2">Assign All</div>
+
+                                </div>     
+                                <div class="row">
+                                    <div class="col-lg-2"><h5>Project :</h5></div>
+                                    <div class="col-lg-6">
+                                        <select name="client" class="form-control ng-pristine ng-not-empty ng-valid ng-valid-required ng-touched" ng-options="item.name for item in vm.selectedClient.listOfProjects" ng-model="vm.selectedProject" ng-required="true" placeholder="Race" required="required" style=""></select>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div><hr /></div>
+                                    <div class="col-lg-12"><h5>Detail Assignment:</h5></div>
+                                </div>
+
+                                <div class="row">
+                                    <table class="table table-bordered table-hover">
+                                        <tbody>
+                                            <tr ng-style="{ 'background-color' : (vm.selectedProject.isActive==true)? '#ffffff' : 'lightgray' }">
+                                                <td><b>[{{vm.selectedProject.code}}] {{vm.selectedProject.name}}</b></td>
+                                                <td>
+                                                    <a ng-show="vm.mustShowProject(vm.selectedProject.projectId)" class="btn btn-xs btn-fw btn-outline b-success text-success" ng-click="vm.assignProject(vm.selectedProject)">
+                                                        <i class="fa fa-plus"></i> Assign
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr ng-style="{ 'background-color' : (item.isActive==true)? '#ffffff' : 'lightgray' }" ng-repeat="item in vm.selectedProject.listOfProjects">
+                                                <td>&nbsp;&nbsp;&nbsp;[{{item.code}}] {{item.name}}</td>
+                                                <td>
+                                                    <a ng-show="vm.mustShowProject(item.subProjectId)" class="btn btn-xs btn-fw btn-outline b-success text-success" ng-click="vm.assignSubProject(item)">
+                                                        <i class="fa fa-remove"></i> Assign
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                         </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+</div>
+    </div>
+
+
+
+

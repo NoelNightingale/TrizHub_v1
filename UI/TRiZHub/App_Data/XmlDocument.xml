@@ -1,0 +1,1135 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TRiZHub</name>
+    </assembly>
+    <members>
+        <member name="M:TRiZHub.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Generates an URI-friendly ID for the <see cref="T:System.Web.Http.Description.ApiDescription"/>. E.g. "Get-Values-id_name" instead of "GetValues/{id}?name={name}"
+            </summary>
+            <param name="description">The <see cref="T:System.Web.Http.Description.ApiDescription"/>.</param>
+            <returns>The ID as a string.</returns>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.HelpPageConfig">
+            <summary>
+            Use this class to customize the Help Page.
+            For example you can set a custom <see cref="T:System.Web.Http.Description.IDocumentationProvider"/> to supply the documentation
+            or you can provide the samples for the requests/responses.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.Controllers.HelpController">
+            <summary>
+            The controller that will handle requests for the help page.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetDocumentationProvider(System.Web.Http.HttpConfiguration,System.Web.Http.Description.IDocumentationProvider)">
+            <summary>
+            Sets the documentation provider for help page.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="documentationProvider">The documentation provider.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleObjects(System.Web.Http.HttpConfiguration,System.Collections.Generic.IDictionary{System.Type,System.Object})">
+            <summary>
+            Sets the objects that will be used by the formatters to produce sample requests/responses.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sampleObjects">The sample objects.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleRequest(System.Web.Http.HttpConfiguration,System.Object,System.Net.Http.Headers.MediaTypeHeaderValue,System.String,System.String)">
+            <summary>
+            Sets the sample request directly for the specified media type and action.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sample">The sample request.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleRequest(System.Web.Http.HttpConfiguration,System.Object,System.Net.Http.Headers.MediaTypeHeaderValue,System.String,System.String,System.String[])">
+            <summary>
+            Sets the sample request directly for the specified media type and action with parameters.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sample">The sample request.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleResponse(System.Web.Http.HttpConfiguration,System.Object,System.Net.Http.Headers.MediaTypeHeaderValue,System.String,System.String)">
+            <summary>
+            Sets the sample request directly for the specified media type of the action.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sample">The sample response.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleResponse(System.Web.Http.HttpConfiguration,System.Object,System.Net.Http.Headers.MediaTypeHeaderValue,System.String,System.String,System.String[])">
+            <summary>
+            Sets the sample response directly for the specified media type of the action with specific parameters.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sample">The sample response.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleForMediaType(System.Web.Http.HttpConfiguration,System.Object,System.Net.Http.Headers.MediaTypeHeaderValue)">
+            <summary>
+            Sets the sample directly for all actions with the specified media type.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sample">The sample.</param>
+            <param name="mediaType">The media type.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetSampleForType(System.Web.Http.HttpConfiguration,System.Object,System.Net.Http.Headers.MediaTypeHeaderValue,System.Type)">
+            <summary>
+            Sets the sample directly for all actions with the specified type and media type.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sample">The sample.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="type">The parameter type or return type of an action.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetActualRequestType(System.Web.Http.HttpConfiguration,System.Type,System.String,System.String)">
+            <summary>
+            Specifies the actual type of <see cref="T:System.Net.Http.ObjectContent`1"/> passed to the <see cref="T:System.Net.Http.HttpRequestMessage"/> in an action.
+            The help page will use this information to produce more accurate request samples.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="type">The type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetActualRequestType(System.Web.Http.HttpConfiguration,System.Type,System.String,System.String,System.String[])">
+            <summary>
+            Specifies the actual type of <see cref="T:System.Net.Http.ObjectContent`1"/> passed to the <see cref="T:System.Net.Http.HttpRequestMessage"/> in an action.
+            The help page will use this information to produce more accurate request samples.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="type">The type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetActualResponseType(System.Web.Http.HttpConfiguration,System.Type,System.String,System.String)">
+            <summary>
+            Specifies the actual type of <see cref="T:System.Net.Http.ObjectContent`1"/> returned as part of the <see cref="T:System.Net.Http.HttpRequestMessage"/> in an action.
+            The help page will use this information to produce more accurate response samples.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="type">The type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetActualResponseType(System.Web.Http.HttpConfiguration,System.Type,System.String,System.String,System.String[])">
+            <summary>
+            Specifies the actual type of <see cref="T:System.Net.Http.ObjectContent`1"/> returned as part of the <see cref="T:System.Net.Http.HttpRequestMessage"/> in an action.
+            The help page will use this information to produce more accurate response samples.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="type">The type.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.GetHelpPageSampleGenerator(System.Web.Http.HttpConfiguration)">
+            <summary>
+            Gets the help page sample generator.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <returns>The help page sample generator.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.SetHelpPageSampleGenerator(System.Web.Http.HttpConfiguration,TRiZHub.Areas.HelpPage.HelpPageSampleGenerator)">
+            <summary>
+            Sets the help page sample generator.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="sampleGenerator">The help page sample generator.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.GetModelDescriptionGenerator(System.Web.Http.HttpConfiguration)">
+            <summary>
+            Gets the model description generator.
+            </summary>
+            <param name="config">The configuration.</param>
+            <returns>The <see cref="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelDescriptionGenerator"/></returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageConfigurationExtensions.GetHelpPageApiModel(System.Web.Http.HttpConfiguration,System.String)">
+            <summary>
+            Gets the model that represents an API displayed on the help page. The model is initialized on the first call and cached for subsequent calls.
+            </summary>
+            <param name="config">The <see cref="T:System.Web.Http.HttpConfiguration"/>.</param>
+            <param name="apiDescriptionId">The <see cref="T:System.Web.Http.Description.ApiDescription"/> ID.</param>
+            <returns>
+            An <see cref="T:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel"/>
+            </returns>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelDescription">
+            <summary>
+            Describes a type model.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelDescriptionGenerator">
+            <summary>
+            Generates model descriptions for given types.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelNameAttribute">
+            <summary>
+            Use this attribute to change the name of the <see cref="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelDescription"/> generated for a type.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel">
+            <summary>
+            The model that represents an API displayed on the help page.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel"/> class.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.ApiDescription">
+            <summary>
+            Gets or sets the <see cref="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.ApiDescription"/> that describes the API.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.UriParameters">
+            <summary>
+            Gets or sets the <see cref="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ParameterDescription"/> collection that describes the URI parameters for the API.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.RequestDocumentation">
+            <summary>
+            Gets or sets the documentation for the request.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.RequestModelDescription">
+            <summary>
+            Gets or sets the <see cref="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelDescription"/> that describes the request body.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.RequestBodyParameters">
+            <summary>
+            Gets the request body parameter descriptions.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.ResourceDescription">
+            <summary>
+            Gets or sets the <see cref="T:TRiZHub.Areas.HelpPage.ModelDescriptions.ModelDescription"/> that describes the resource.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.ResourceProperties">
+            <summary>
+            Gets the resource property descriptions.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.SampleRequests">
+            <summary>
+            Gets the sample requests associated with the API.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.SampleResponses">
+            <summary>
+            Gets the sample responses associated with the API.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.Models.HelpPageApiModel.ErrorMessages">
+            <summary>
+            Gets the error messages associated with this model.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator">
+            <summary>
+            This class will generate the samples for the help page.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator"/> class.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.ActualHttpMessageTypes">
+            <summary>
+            Gets CLR types that are used as the content of <see cref="T:System.Net.Http.HttpRequestMessage"/> or <see cref="T:System.Net.Http.HttpResponseMessage"/>.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.ActionSamples">
+            <summary>
+            Gets the objects that are used directly as samples for certain actions.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.SampleObjects">
+            <summary>
+            Gets the objects that are serialized as samples by the supported formatters.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.SampleObjectFactories">
+            <summary>
+            Gets factories for the objects that the supported formatters will serialize as samples. Processed in order,
+            stopping when the factory successfully returns a non-<see langref="null"/> object.
+            </summary>
+            <remarks>
+            Collection includes just <see cref="M:TRiZHub.Areas.HelpPage.ObjectGenerator.GenerateObject(System.Type)"/> initially. Use
+            <code>SampleObjectFactories.Insert(0, func)</code> to provide an override and
+            <code>SampleObjectFactories.Add(func)</code> to provide a fallback.</remarks>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.GetSampleRequests(System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Gets the request body samples for a given <see cref="T:System.Web.Http.Description.ApiDescription"/>.
+            </summary>
+            <param name="api">The <see cref="T:System.Web.Http.Description.ApiDescription"/>.</param>
+            <returns>The samples keyed by media type.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.GetSampleResponses(System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Gets the response body samples for a given <see cref="T:System.Web.Http.Description.ApiDescription"/>.
+            </summary>
+            <param name="api">The <see cref="T:System.Web.Http.Description.ApiDescription"/>.</param>
+            <returns>The samples keyed by media type.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.GetSample(System.Web.Http.Description.ApiDescription,TRiZHub.Areas.HelpPage.SampleDirection)">
+            <summary>
+            Gets the request or response body samples.
+            </summary>
+            <param name="api">The <see cref="T:System.Web.Http.Description.ApiDescription"/>.</param>
+            <param name="sampleDirection">The value indicating whether the sample is for a request or for a response.</param>
+            <returns>The samples keyed by media type.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.GetActionSample(System.String,System.String,System.Collections.Generic.IEnumerable{System.String},System.Type,System.Net.Http.Formatting.MediaTypeFormatter,System.Net.Http.Headers.MediaTypeHeaderValue,TRiZHub.Areas.HelpPage.SampleDirection)">
+            <summary>
+            Search for samples that are provided directly through <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.ActionSamples"/>.
+            </summary>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+            <param name="type">The CLR type.</param>
+            <param name="formatter">The formatter.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="sampleDirection">The value indicating whether the sample is for a request or for a response.</param>
+            <returns>The sample that matches the parameters.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.GetSampleObject(System.Type)">
+            <summary>
+            Gets the sample object that will be serialized by the formatters. 
+            First, it will look at the <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.SampleObjects"/>. If no sample object is found, it will try to create
+            one using <see cref="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.DefaultSampleObjectFactory(TRiZHub.Areas.HelpPage.HelpPageSampleGenerator,System.Type)"/> (which wraps an <see cref="T:TRiZHub.Areas.HelpPage.ObjectGenerator"/>) and other
+            factories in <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.SampleObjectFactories"/>.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The sample object.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.ResolveHttpRequestMessageType(System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Resolves the actual type of <see cref="T:System.Net.Http.ObjectContent`1"/> passed to the <see cref="T:System.Net.Http.HttpRequestMessage"/> in an action.
+            </summary>
+            <param name="api">The <see cref="T:System.Web.Http.Description.ApiDescription"/>.</param>
+            <returns>The type.</returns>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.ResolveType(System.Web.Http.Description.ApiDescription,System.String,System.String,System.Collections.Generic.IEnumerable{System.String},TRiZHub.Areas.HelpPage.SampleDirection,System.Collections.ObjectModel.Collection{System.Net.Http.Formatting.MediaTypeFormatter}@)">
+            <summary>
+            Resolves the type of the action parameter or return value when <see cref="T:System.Net.Http.HttpRequestMessage"/> or <see cref="T:System.Net.Http.HttpResponseMessage"/> is used.
+            </summary>
+            <param name="api">The <see cref="T:System.Web.Http.Description.ApiDescription"/>.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+            <param name="sampleDirection">The value indicating whether the sample is for a request or a response.</param>
+            <param name="formatters">The formatters.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleGenerator.WriteSampleObjectUsingFormatter(System.Net.Http.Formatting.MediaTypeFormatter,System.Object,System.Type,System.Net.Http.Headers.MediaTypeHeaderValue)">
+            <summary>
+            Writes the sample object using formatter.
+            </summary>
+            <param name="formatter">The formatter.</param>
+            <param name="value">The value.</param>
+            <param name="type">The type.</param>
+            <param name="mediaType">Type of the media.</param>
+            <returns></returns>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.HelpPageSampleKey">
+            <summary>
+            This is used to identify the place where the sample should be applied.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleKey.#ctor(System.Net.Http.Headers.MediaTypeHeaderValue)">
+            <summary>
+            Creates a new <see cref="T:TRiZHub.Areas.HelpPage.HelpPageSampleKey"/> based on media type.
+            </summary>
+            <param name="mediaType">The media type.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleKey.#ctor(System.Net.Http.Headers.MediaTypeHeaderValue,System.Type)">
+            <summary>
+            Creates a new <see cref="T:TRiZHub.Areas.HelpPage.HelpPageSampleKey"/> based on media type and CLR type.
+            </summary>
+            <param name="mediaType">The media type.</param>
+            <param name="type">The CLR type.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleKey.#ctor(TRiZHub.Areas.HelpPage.SampleDirection,System.String,System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates a new <see cref="T:TRiZHub.Areas.HelpPage.HelpPageSampleKey"/> based on <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.SampleDirection"/>, controller name, action name and parameter names.
+            </summary>
+            <param name="sampleDirection">The <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.SampleDirection"/>.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.HelpPageSampleKey.#ctor(System.Net.Http.Headers.MediaTypeHeaderValue,TRiZHub.Areas.HelpPage.SampleDirection,System.String,System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates a new <see cref="T:TRiZHub.Areas.HelpPage.HelpPageSampleKey"/> based on media type, <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.SampleDirection"/>, controller name, action name and parameter names.
+            </summary>
+            <param name="mediaType">The media type.</param>
+            <param name="sampleDirection">The <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.SampleDirection"/>.</param>
+            <param name="controllerName">Name of the controller.</param>
+            <param name="actionName">Name of the action.</param>
+            <param name="parameterNames">The parameter names.</param>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.ControllerName">
+            <summary>
+            Gets the name of the controller.
+            </summary>
+            <value>
+            The name of the controller.
+            </value>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.ActionName">
+            <summary>
+            Gets the name of the action.
+            </summary>
+            <value>
+            The name of the action.
+            </value>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.MediaType">
+            <summary>
+            Gets the media type.
+            </summary>
+            <value>
+            The media type.
+            </value>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.ParameterNames">
+            <summary>
+            Gets the parameter names.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.SampleDirection">
+            <summary>
+            Gets the <see cref="P:TRiZHub.Areas.HelpPage.HelpPageSampleKey.SampleDirection"/>.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.ImageSample">
+            <summary>
+            This represents an image sample on the help page. There's a display template named ImageSample associated with this class.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.ImageSample.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:TRiZHub.Areas.HelpPage.ImageSample"/> class.
+            </summary>
+            <param name="src">The URL of an image.</param>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.InvalidSample">
+            <summary>
+            This represents an invalid sample on the help page. There's a display template named InvalidSample associated with this class.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.ObjectGenerator">
+            <summary>
+            This class will create an object of a given type and populate it with sample data.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.ObjectGenerator.GenerateObject(System.Type)">
+            <summary>
+            Generates an object for a given type. The type needs to be public, have a public default constructor and settable public properties/fields. Currently it supports the following types:
+            Simple types: <see cref="T:System.Int32"/>, <see cref="T:System.String"/>, <see cref="T:System.Enum"/>, <see cref="T:System.DateTime"/>, <see cref="T:System.Uri"/>, etc.
+            Complex types: POCO types.
+            Nullables: <see cref="T:System.Nullable`1"/>.
+            Arrays: arrays of simple types or complex types.
+            Key value pairs: <see cref="T:System.Collections.Generic.KeyValuePair`2"/>
+            Tuples: <see cref="T:System.Tuple`1"/>, <see cref="T:System.Tuple`2"/>, etc
+            Dictionaries: <see cref="T:System.Collections.Generic.IDictionary`2"/> or anything deriving from <see cref="T:System.Collections.Generic.IDictionary`2"/>.
+            Collections: <see cref="T:System.Collections.Generic.IList`1"/>, <see cref="T:System.Collections.Generic.IEnumerable`1"/>, <see cref="T:System.Collections.Generic.ICollection`1"/>, <see cref="T:System.Collections.IList"/>, <see cref="T:System.Collections.IEnumerable"/>, <see cref="T:System.Collections.ICollection"/> or anything deriving from <see cref="T:System.Collections.Generic.ICollection`1"/> or <see cref="T:System.Collections.IList"/>.
+            Queryables: <see cref="T:System.Linq.IQueryable"/>, <see cref="T:System.Linq.IQueryable`1"/>.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>An object of the given type.</returns>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.SampleDirection">
+            <summary>
+            Indicates whether the sample is used for request or response
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.TextSample">
+            <summary>
+            This represents a preformatted text sample on the help page. There's a display template named TextSample associated with this class.
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Areas.HelpPage.XmlDocumentationProvider">
+            <summary>
+            A custom <see cref="T:System.Web.Http.Description.IDocumentationProvider"/> that reads the API documentation from an XML documentation file.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Areas.HelpPage.XmlDocumentationProvider.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:TRiZHub.Areas.HelpPage.XmlDocumentationProvider"/> class.
+            </summary>
+            <param name="documentPath">The physical path to XML document.</param>
+        </member>
+        <member name="M:TRiZHub.Controllers.ActivityController.ActivityDropdown">
+            <summary>
+            Retrieve list of all Activities ordered by Description
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ActivityController.SaveActivity(TRiZHub.Models.ActivityModels.ActivityEditModel)">
+            <summary>
+            Create or update Activity
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ActivityController.GetActivity(System.Guid)">
+            <summary>
+            Retrieve single Activity based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ActivityController.ActivityGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retieve list of all Activities filtered and sorted based on input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of active Billingcycles filtered and sorted based on input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Billingcycle based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleSave(TRiZHub.Models.BillingCycleModels.BillingCycleModel)">
+            <summary>
+            Create or update Billingcycle
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleListSave(System.Collections.Generic.List{TRiZHub.Models.BillingCycleModels.BillingCycleModel})">
+            <summary>
+            Create or update list of BillingCycles
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleDelete(TRiZHub.Models.BillingCycleModels.BillingCycleModel)">
+            <summary>
+            Delete Billingcycle based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleDropdown">
+            <summary>
+            Retrieve list of Billingcycles ordered by Startdate
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.SaveBillingRates(TRiZHub.Models.BillingRatesModels.BillingRatesEditModel)">
+            <summary>
+            Create or update Billing Rate
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesGet(System.Guid)">
+            <summary>
+            Retrieve single Billing rate based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve list of Billing rates sorted by Startdate
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesDelete(TRiZHub.Models.BillingRatesModels.BillingRatesEditModel)">
+            <summary>
+            Delete Billing Rate based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EmployerController.EmployerGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Clients filtered and sorted based on input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EmployerController.EmployerDropdown">
+            <summary>
+            Retrieve full list of Employers sorted by Name
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EmployerController.AllEmployerDropdown">
+            <summary>
+            Retrieve full list of Employers sorted by Name
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EmployerController.EmployerGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Employer based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EmployerController.Delete(System.Guid)">
+            <summary>
+            Delete team leader from user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Scorecard Templates based on filtered and sorted input values 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Scorecard Template
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateSave(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplateModel)">
+            <summary>
+            Create or update Scorecard Template
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateDelete(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplateModel)">
+            <summary>
+            Delete Scorecard Template
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve list of Scorecard Template periods based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Scorecard Template period based in id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodSave(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplatePeriodModel)">
+            <summary>
+            Save Scorecard Template Period
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodDelete(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplatePeriodModel)">
+            <summary>
+            Delete Scorecard Template Period
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateItemGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve list of Scorecard Template Items based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateItemGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Scorecard Template Item
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateItemSave(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplateItemModel)">
+            <summary>
+            Save Scorecard Template Item
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateItemDelete(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplateItemModel)">
+            <summary>
+            Delete Scorecard Template Item
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Scorecards based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.MyScorecardGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Scorecards based on current user and filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.TeamScorecardGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Scorecards based on team leader's employees and filter and sorted input values 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardGridAdmin(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Scorecards based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardGet1(System.Nullable{System.Guid})">
+            <summary>
+            N/A
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardSave(TRiZHub.Models.ScorecardModels.ScorecardModel)">
+            <summary>
+            Create or update Scorecard
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardReassign(TRiZHub.Models.ScorecardModels.ScorecardModel)">
+            <summary>
+            Create or update Scorecard
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Scorecard
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardCommentSave(TRiZHub.Models.ScorecardModels.ScorecardCollectionModel)">
+            <summary>
+            Save comment on Scorecard based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardRecordSave(TRiZHub.Models.ScorecardModels.ScorecardCollectionModel)">
+            <summary>
+            Save Scorecard Record
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardDelete(TRiZHub.Models.ScorecardModels.ScorecardModel)">
+            <summary>
+            Delete Scorecard
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardUnsubmit(TRiZHub.Models.ScorecardModels.ScorecardModel)">
+            <summary>
+            Save Unsubmit status on Scorecard based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardSubmit(TRiZHub.Models.ScorecardModels.ScorecardModel)">
+            <summary>
+            Save Unsubmit status on Scorecard based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateDropdown">
+            <summary>
+            Retrieve list of active Scorecard Templates
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateDropdownAll">
+            <summary>
+            Retrieve list of all Scorecard Templates
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateDropdownListYearMultiple(System.Int32[])">
+            <summary>
+            Retrieve list of all Scorecard Templates for years specified
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodDropdown(System.Guid)">
+            <summary>
+            Retrieve list of all Scorecard Template Periods
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodDropdownYear">
+            <summary>
+            Retrieve list of all years that have been assigned to Scorecard Template Periods
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodDropdownYear(System.Int32)">
+            <summary>
+            Retrieve list of all Scorecard Template Periods for a specific year
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodDropdownYearMultiple(System.Int32[])">
+            <summary>
+            Retrieve list of all Scorecard Template Periods for a specific year
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodSearchDropdownList(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplatePeriodSearchModel)">
+            <summary>
+            Retrieve list of all Scorecard Template Periods for a specific year
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateYearDropdownList(System.Int32[])">
+            <summary>
+            Retrieve list of all Scorecard Template Periods for a specific year
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TeamController.TeamDropdown">
+            <summary>
+            Retrieve list of active Teams
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TeamController.SaveTeam(TRiZHub.Models.TeamModels.TeamEditModel)">
+            <summary>
+            Create or update team
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TeamController.GetTeam(System.Guid)">
+            <summary>
+            Retrieve single Team based on ID
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TeamController.TeamGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve list of all Teams based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TimesheetController.TimesheetGrid(TRiZHub.Models.TimesheetSearchModel)">
+            <summary>
+            Retrieve list of Timesheets based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TimesheetController.TimesheetGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Timesheet entry based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TimesheetController.TimesheetSave(TRiZHub.Models.TimesheetModels.TimesheetModel)">
+            <summary>
+            Create or update Timesheet entry
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TimesheetController.TimesheetListSave(System.Collections.Generic.List{TRiZHub.Models.TimesheetModels.TimesheetModel})">
+            <summary>
+            Create or update list of Timesheet entries
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TimesheetController.TimesheetDelete(TRiZHub.Models.TimesheetModels.TimesheetModel)">
+            <summary>
+            Delete Timesheet entry
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectsGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Projects based on filter and sort input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Project 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectSave(TRiZHub.Models.ProjectModels.ProjectModel)">
+            <summary>
+            Create or update Project
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.DeleteProject(System.Guid)">
+            <summary>
+            Delete Project by ID
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.SubProjectsGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve list of SubProjects based on parent project and sorted by input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.SubProjectGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single subproject based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.SubProjectSave(TRiZHub.Models.ProjectModels.SubProjectModel)">
+            <summary>
+            Create or update Subproject
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.DeleteSubProject(System.Guid)">
+            <summary>
+            Delete Sub Project by ID
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectAndSubProjectDropdown">
+            <summary>
+            Retrieve combined list of Project and Subprojects sorted by Description
+            </summary>
+            
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectDropdown">
+            <summary>
+            Retrieve list of active Projects sorted by Description
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectDropdownForClientReporter">
+            <summary>
+            Retrieve list of active Projects belolling to a client reporter
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.AllProjectDropdownForClientReporter">
+            <summary>
+            Retrieve list of active Projects belolling to a client reporter
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.AllProjectDropdown">
+            <summary>
+            Retrieve list of all Projects sorted by Description
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.ProjectTypeDropdown">
+            <summary>
+            Retrieve list of all Project Types ordered by sort order
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ClientController.ClientsGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Clients filtered and sorted based on input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ClientController.ClientGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single Client based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ClientController.DeleteClient(System.Guid)">
+            <summary>
+            Delete Client by ID
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ClientController.ClientSave(TRiZHub.Models.ClientModels.ClientModel)">
+            <summary>
+            Create or update Client
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ClientController.ClientDropdown">
+            <summary>
+            Retrieve full list of Clients sorted by Name
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.ClientController.ClientReporterDropdown">
+            <summary>
+            Retrieve full list of Clients sorted by Name
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.MasterDataController.ProfileSave(TRiZHub.Models.AdminModels.ProfileViewModel)">
+            <summary>
+            Save profile information 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.MasterDataController.ProfileGet">
+            <summary>
+            Retrieve Profile information based on current logged in windows user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.AccountController.GetCurrentUser">
+            <summary>
+            Get full user information bases on current windows logged in user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.AccountController.GetMyProfile">
+            <summary>
+            Retrieve profile information based on windows logged in user 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.RoleController.RoleSave(TRiZHub.Models.SecurityData.RoleViewModel)">
+            <summary>
+            Create new Role
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.RoleController.RoleList">
+            <summary>
+            Retrieve list of Roles unsorted
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.RoleController.RoleGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve list of Roles filtered and sorted based on input values
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.RoleController.RoleGet(System.Guid)">
+            <summary>
+            Get Role based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.RoleController.RolePrivileges">
+            <summary>
+            Get list of Priviledges
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserScorecardEmployeeFilterDropdown">
+            <summary>
+            Retrieve full list of Active Users ordered by Firstname, to be used in Scorecard Employee dropdown
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserScorecardEvaluatorFilterDropdown">
+            <summary>
+            Retrieve full list of Active Users ordered by Firstname, to be used in Scorecard Evaluator dropdown
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserScorecardEvaluatorsDropdown">
+            <summary>
+            Retrieve full list of Users that are evaluators ordered by Firstname, to be used in Scorecard Reports dropdown
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserScorecardLineManagersDropdown">
+            <summary>
+            Retrieve full list of Users that are line managers ordered by Firstname, to be used in Scorecard Reports dropdown
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.SignUp(TRiZHub.Models.SecurityData.UserEditModel)">
+            <summary>
+            First Register of User
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserSave(TRiZHub.Models.SecurityData.UserEditModel)">
+            <summary>
+            Save basic detail of user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserGrid(TRiZHub.Models.GridModel)">
+            <summary>
+            Retrieve full user list, can be order in any way, and filters can be applied
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserGet(System.Nullable{System.Guid})">
+            <summary>
+            Get single user based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.ActivateUser(TRiZHub.Models.KeyValueModel)">
+            <summary>
+            Activate user based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.DeactivateUser(TRiZHub.Models.KeyValueModel)">
+            <summary>
+            Deactivate user based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.EmergencyContactSave(TRiZHub.Models.ContactModels.EmergencyContactEditModel)">
+            <summary>
+            Save Emergency Contact info linked to a User
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.EmergencyContactGet(System.Nullable{System.Guid})">
+            <summary>
+            Get Single Emergency Contact based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.EmergencyContactDelete(TRiZHub.Models.ContactModels.EmergencyContactEditModel)">
+            <summary>
+            Delete Single Emergency contact
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.EmergencyContactGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve full EmergencyContact list for a user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UploadImportOfficeEquiment">
+            <summary>
+            This call expects a full Import list on excel format of officeEquiment/Asset Register entries
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.OfficeEquipmentSave(TRiZHub.Models.OfficeEquipmentModels.OfficeEquipmentEditModel)">
+            <summary>
+            Save single officeequipment entry
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.OfficeEquipmentGet(System.Nullable{System.Guid})">
+            <summary>
+            Retrieve single office equipment base on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.OfficeEquipmentDelete(TRiZHub.Models.OfficeEquipmentModels.OfficeEquipmentEditModel)">
+            <summary>
+            Delete single office equipment entry based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.OfficeEquipmentGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve full list of office equipment/asset register entries ordered by Assigned Date
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.TeamJobDesignationSave(TRiZHub.Models.TeamJobDesignationModels.TeamJobDesignationEditModel)">
+            <summary>
+            Save team leader for a user, can only have one team leader in a given period
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.TeamJobDesignationGet(System.Nullable{System.Guid})">
+            <summary>
+            Get team leader of a user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.TeamJobDesignationDelete(TRiZHub.Models.TeamJobDesignationModels.TeamJobDesignationEditModel)">
+            <summary>
+            Delete team leader from user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.TeamJobDesignationGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve full team designation list
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.PersonalInformationGet(System.Guid)">
+            <summary>
+            Retrieve personal information based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.PersonalInformationSave(TRiZHub.BL.Entities.PersonalInformationData.PersonalInformation)">
+            <summary>
+            Save personal information on user
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserDropdown">
+            <summary>
+            General purpose active user list used in dropdowns
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.AllUserDropdown">
+            <summary>
+            General purpose full user list used in dropdowns
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.UserController.UserTimesheetFilterDropdown">
+            <summary>
+            Retrieve list of users, as used in Timesheet view's user dropdown
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EnumsController.SecurityEnum">
+            <summary>
+            Retrieve list of Privileges
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EnumsController.StatusTypeEnum">
+            <summary>
+            Retrieve list of Statuses. Active/Inactive/Archive
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EnumsController.ClientTypeEnum">
+            <summary>
+            Retrieve list of Client Types. 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.EnumsController.ScorecardScoreTypeEnum">
+            <summary>
+            Retrieve list of Scorecard ScoreTypes
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TravelInformationController.SaveTravelInformation(TRiZHub.Models.TravelInformationModels.TravelInformationEditModel)">
+            <summary>
+            Create or update Travel information based on a User
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TravelInformationController.TravelInformationGet(System.Guid)">
+            <summary>
+            Retrieve single Travel information record based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TravelInformationController.TravelInformationGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Retrieve list of Travel Information records sorted by Expiry date 
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.TravelInformationController.TravelInformationDelete(TRiZHub.Models.TravelInformationModels.TravelInformationEditModel)">
+            <summary>
+            Delete Travel Information record based on ID
+            </summary>
+        </member>
+        <member name="T:SqlServerTypes.Utilities">
+            <summary>
+            Utility methods related to CLR Types for SQL Server 
+            </summary>
+        </member>
+        <member name="M:SqlServerTypes.Utilities.LoadNativeAssemblies(System.String)">
+            <summary>
+            Loads the required native assemblies for the current architecture (x86 or x64)
+            </summary>
+            <param name="rootApplicationPath">
+            Root path of the current application. Use Server.MapPath(".") for ASP.NET applications
+            and AppDomain.CurrentDomain.BaseDirectory for desktop applications.
+            </param>
+        </member>
+    </members>
+</doc>

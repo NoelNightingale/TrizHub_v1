@@ -1,0 +1,153 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.scorecardTemplateItemMaintenance.grid({scorecardTemplateId: vm.scorecardTemplateId})">Score Card Template Item Maintenance</a> / {{vm.viewModel.scorecardName}} {{vm.viewModel.description}}
+                </h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" novalidate>
+                    <div class="form-group row" show-errors>
+                        <label for="description" class="col-sm-2 form-control-label">Performance Measure:</label>
+                        <div class="col-sm-9">
+                            <input name="description" type="text" class="form-control" ng-model="vm.viewModel.description" ng-required="true">
+                            <span class="text-help" ng-show="EditForm.description.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="order" class="col-sm-2 form-control-label">Definition:</label>
+                        <div class="col-sm-9">
+                            <summernote config="vm.summernoteOptions" class="summernote" ng-model="vm.viewModel.definition" ng-required="true"></summernote>
+                        </div>
+                    </div>
+
+                    <!--<div class="form-group row" show-errors>
+                        <label for="order" class="col-sm-2 form-control-label">Definition:</label>
+                        <div class="col-sm-9">
+                            <textarea ui-tinymce="vm.tinymceOptions" ng-model="vm.viewModel.definition"></textarea>
+                        </div>
+                    </div>-->
+
+                    <div class="form-group row" show-errors>
+                        <label for="order" class="col-sm-2 form-control-label">Order:</label>
+                        <div class="col-sm-9">
+                            <input name="order" type="text" class="form-control" ng-model="vm.viewModel.order" ng-required="true">
+                            <span class="text-help" ng-show="EditForm.order.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <!--<div class="form-group row" show-errors>
+                        <label for="code" class="col-sm-2 form-control-label">Code:</label>
+                        <div class="col-sm-9">
+                            <input name="code" type="text" class="form-control" ng-model="vm.viewModel.code" ng-required="true">
+                            <span class="text-help" ng-show="EditForm.code.$invalid">Required</span>
+                        </div>
+                    </div>-->
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Weight:</label>
+                        <div class="col-sm-9">
+                            <slider name="weight" ng-model="vm.viewModel.weight"
+                                    floor="0"
+                                    ceiling="{{vm.filterOptions.maxWeight}}"
+                                    translate-fn="vm.percentageFormatting"
+                                    ng-required="true">
+                            </slider>
+                        </div>
+                    </div>
+                    <div class="form-group pull-right">
+                        <label class="md-check">
+                            <input type="radio" name="radio" ng-model="vm.viewModel.scorecardScoring" value="0">
+                            <i class="indigo"></i>
+                            E,A,I Scoring
+                        </label>
+                        <label class="md-check">
+                            <input type="radio" name="radio" ng-model="vm.viewModel.scorecardScoring" value="1">
+                            <i class="blue"></i>
+                            Manual Score
+                        </label>
+                    </div>
+                    <div class="row"></div>
+                    <hr />
+                    <div ng-show="vm.viewModel.scorecardScoring == 0">
+                        <div st-select-row="row">
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label">Score type:</label>
+                                <div class="col-sm-9">
+                                    <span class="label label-lg cyan">E, A, I Scoring</span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label"><span class="text-2x">E </span> Criteria:</label>
+                                <div class="col-sm-6">
+                                    <textarea type="text" class="form-control" rows="4" style="resize: none" ng-model="vm.viewModel.excellentDefinition"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label"><span class="text-2x">A </span> Criteria:</label>
+                                <div class="col-sm-6">
+                                    <textarea type="text" class="form-control" rows="4" style="resize: none" ng-model="vm.viewModel.adequateDefinition"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label"><span class="text-2x">I</span> Criteria:</label>
+                                <div class="col-sm-6">
+                                    <textarea type="text" class="form-control" rows="4" style="resize: none" ng-model="vm.viewModel.inadequateDefinition"></textarea>
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                    <div ng-show="vm.viewModel.scorecardScoring == 1">
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Score type:</label>
+                            <div class="col-sm-9">
+                                <span class="label label-lg cyan">Manual Scoring</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Minimum Score:</label>
+                            <div class="col-sm-3">
+                                <input type="number" placeholder="Leave empty to allow any value" class="form-control" ng-model="vm.viewModel.minimum">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Maximum Score:</label>
+                            <div class="col-sm-3">
+                                <input type="number" placeholder="Leave empty to allow any value" class="form-control" ng-model="vm.viewModel.maximum">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Criteria:</label>
+                            <div class="col-sm-6">
+                                <textarea type="text" class="form-control" rows="4" style="resize: none" ng-model="vm.viewModel.manualDefinition"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelForm()">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

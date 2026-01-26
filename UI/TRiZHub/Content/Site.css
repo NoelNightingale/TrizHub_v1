@@ -1,0 +1,187 @@
+﻿
+.golden_medal{
+    font-size: 30px;
+    left: -7px;
+    top:-7px;
+    position: absolute;
+    color: white;
+}
+.silver_medal{
+    font-size: 30px;
+    left: -7px;
+    top:-7px;
+    position: absolute;
+    color: #C0C0C0;
+}
+.bronze_medal{
+    font-size: 30px;
+    left: -7px;
+    top:-7px;;
+    position: absolute;
+    color: #cd7f32;
+}
+
+.current_rank{
+    border-style: solid;
+    border-color: rgba(92, 184, 92, .4);
+}
+
+
+
+.customBox {
+    box-shadow:5px 5px 10px rgba(0,0,0,0.15);
+    position: relative;
+    margin-bottom: 10px;
+
+}
+.centerImage {
+    margin-left:38%
+}
+
+.t-a-c {
+    text-align:center !important;
+}
+
+.f-20 {
+    font-size:20px !important;
+}
+.f-18 {
+     font-size:18px !important;
+}
+.f-17 {
+     font-size:17px !important;
+}
+
+.display {
+    
+    display:block !important;
+    visibility:visible !important;
+}
+
+.hidden-visibility {
+    display: inline-block !important;
+    visibility:hidden !important;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+}
+
+.dark-background {
+   background-color : rgba(48, 49, 54, 1);
+}
+
+/* Form Styles*/
+.form-group .text-help { display: none; }
+
+.form-group.has-error .text-help { display: block; }
+
+.md-form-group .text-help { display: none; }
+
+.md-form-group.has-error .text-help { display: block; }
+
+.md-form-group .form-control  {  font-size: inherit; }
+
+.md-form-group .form-control-label {  padding: 0px; }
+
+.input-group-lg > .input-group-btn > .btn {
+    line-height: normal;
+}
+
+/*Modal Styles*/
+.modal-header {
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+}
+
+.modal-content {
+    border-width: 0px;
+}
+
+.modal-footer {
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+/*Main Body Styles*/
+
+.body-content {
+    padding-bottom: 100px;
+}
+
+.footer-container {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+}
+
+.angular-google-map-container { 
+    margin-top:15px;
+    height: 300px; 
+    width: 100%;
+}
+
+/*Table Styles*/
+
+.table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    vertical-align: middle;
+}
+
+/*Carousel Styles*/
+.carousel-inner > .active, .carousel-inner > .next, .carousel-inner > .prev{
+    display: flex;
+}
+
+/*Box Syltes*/
+.box-shadow-z0 .box {
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
+}
+
+/*For Iphone tables*/
+.table-responsive .table {
+    max-width: none;
+}
+
+
+.b-l-aa {
+    border-left-color: #5cb85c;
+}
+
+.b-l-ab {
+    border-left-color: #0275d8;
+}
+
+.b-l-ac {
+    border-left-color: #d9534f;
+}
+
+.b-l-ad {
+    border-left-color: #F0AD4E;
+}
+
+.datepicker th,
+.datepicker td {
+    padding: 0 !important;
+}
+
+.app-content {
+    background-color:White;
+}
+
+.spinnerwide {
+    width : 100px;
+}
+
+.note-editor .note-editable {
+    line-height: 1;
+}
+
+hr {
+    border-top: 1px solid rgba(0, 0, 0, 0.5);
+}

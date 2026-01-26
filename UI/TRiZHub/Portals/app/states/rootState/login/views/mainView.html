@@ -1,0 +1,18 @@
+﻿<div class="center-block w-xxl w-auto-xs p-y-md">
+    <div class="m-b navbar">
+    </div>
+    <h5 style="text-align: center;">Welcome to the Triz Admin Portal</h5>
+    <div class="p-a-md box-color r box-shadow-z1 text-color m-a">
+        <div class="m-b navbar">
+            <img style="width: 100%" src="Content/Images/newLogoUnleashed.jpg" />
+        </div>
+        <div class="m-b text-sm">
+            {{vm.headerMessage}}
+        </div>
+        <form role="form" name="loginForm" novalidate>
+            <button type="submit" ng-show="vm.viewModel.isUserProfileComplete" ng-click="vm.goTohome()" class="btn primary btn-block p-x-md">Proceed</button>
+            <button type="submit" ng-show="vm.viewModel && !vm.viewModel.isUserProfileComplete" ng-click="vm.goToProfile()" class="btn primary btn-block p-x-md">Update Profile</button>
+            <button type="submit" ng-hide="vm.viewModel" ng-click="vm.reload()" class="btn default btn-block p-x-md">Validate</button>
+        </form>
+    </div>
+</div>

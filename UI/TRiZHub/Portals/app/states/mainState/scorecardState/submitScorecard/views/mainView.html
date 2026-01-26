@@ -1,0 +1,313 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" ui-sref="mainState.scorecard.grid">Score Cards</a> / Score
+                </h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" novalidate ng-hide="vm.readOnly">
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Scorecard:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.scorecardName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Scorecard Period:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.scorecardPeriodName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Evaluator:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.evaluatorName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Employee:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.employeeName}}</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-sm-6 evaluatorComment">
+                            <label>General Evaluator Comment:</label>
+                            <summernote config="vm.summernoteOptions" class="summernote" ng-model="vm.viewModel.scorecardModel.evaluatorMessage"></summernote>
+                        </div>
+                        <div class="col-sm-6 employeeComment">
+                            <label>General Employee Comment:</label>
+                            <summernote config="vm.summernoteOptions" class="summernote" ng-model="vm.viewModel.scorecardModel.employeeMessage"></summernote>
+                        </div>
+                    </div>
+
+                    <!--<div ng-if="vm.currentUser.id == vm.viewModel.scorecardModel.employeeId">
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+                                <label>Evaluator Comment:</label>
+                                <textarea rows="4" class="form-control" ng-model="vm.viewModel.scorecardModel.evaluatorMessage" readonly />
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Employee Comment:</label>
+                                <textarea rows="4" class="form-control" ng-model="vm.viewModel.scorecardModel.employeeMessage" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-if="vm.currentUser.id == vm.viewModel.scorecardModel.evaluatorId">
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+                                <label><b>Evaluator Comment:</b></label>
+                                <summernote config="vm.summernoteOptions" class="summernote" ng-model="vm.viewModel.scorecardModel.evaluatorMessage"></summernote>
+                                
+                            </div>
+                            <div class="col-sm-6">
+                                <label><b>Employee Comment:</b></label>
+                                <summernote config="vm.summernoteOptions" class="summernote" ng-model="vm.viewModel.scorecardModel.employeeMessage"></summernote>
+                            </div>
+                        </div>
+                    </div>-->
+                    <hr />
+                    <div ng-repeat="i in vm.viewModel.scorecardRecordModels | orderBy : 'order'" st-select-row="row">
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label"><b>Performance Measure:</b></label>
+                            <div class="col-sm-5">
+                                <label class="form-control-label"><b>{{i.description}}</b>&nbsp;<i class="material-icons md-24" ng-if="i.definition" ng-click="vm.showMeasureDefinition(i.definition)">info</i></label>
+                            </div>
+                            <div ng-show="i.scorecardScoring == 0">
+                                <label class="col-sm-1 form-control-label"><b>Rating:</b></label>
+                                <div class="col-sm-1">
+                                    <select ng-disabled="vm.currentUser.id != vm.viewModel.scorecardModel.evaluatorId" name="scorecardTemplatePeriod" class="form-control"
+                                            ng-options="s.ordinalValue as s.name for s in vm.filterOptions.scorecardScoreTypes"
+                                            ng-model="i.scoreType" placeholder="Score Type"></select>
+                                </div>
+                            </div>
+                            <div ng-show="i.scorecardScoring == 1">
+                                <label class="col-sm-1 form-control-label"><b>Score:</b></label>
+                                <div class="col-sm-1">
+                                    <input type="number" ng-disabled="vm.currentUser.id != vm.viewModel.scorecardModel.evaluatorId" ng-model="i.value" class="spinnerwide form-control spinner-icon" />
+                                </div>
+                            </div>
+                        </div>
+                        <table ng-show="i.scorecardScoring == 0" st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Criteria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>E</td>
+                                    <td>{{i.eDefinition}}</td>
+                                </tr>
+                                <tr>
+                                    <td>A</td>
+                                    <td>{{i.aDefinition}}</td>
+                                </tr>
+                                <tr>
+                                    <td>I</td>
+                                    <td>{{i.iDefinition}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table ng-show="i.scorecardScoring == 1" st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Minimum</th>
+                                    <th>Maximum</th>
+                                    <th>Definition</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{i.minimum}}</td>
+                                    <td>{{i.maximum}}</td>
+                                    <td>{{i.manualDefinition}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="form-group row">
+                            <div class="col-sm-6 evaluatorComment">
+                                <label><b>Evaluator Comment:</b></label>
+                                <summernote config="vm.summernoteOptions" class="summernote" ng-model="i.evaluatorHtmlComment"></summernote>
+                            </div>
+                            <div class="col-sm-6 employeeComment">
+                                <label><b>Employee Comment:</b></label>
+                                <summernote config="vm.summernoteOptions" class="summernote" ng-model="i.employeeHtmlComment"></summernote>
+                            </div>
+                        </div>
+                        <hr />
+                    </div>
+                    <div class="form-group row" ng-if="vm.currentUser.id == vm.viewModel.scorecardModel.evaluatorId">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.scorecard.grid">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                            <button ng-hide="vm.readOnly" class="btn btn-fw success" ng-click="vm.submitForm(false)">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save Changes
+                            </button>
+
+                            <button ng-hide="vm.readOnly" class="btn btn-fw primary" ng-click="vm.submitForm(true)">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Submit Scorecard
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group row" ng-if="vm.currentUser.id == vm.viewModel.scorecardModel.employeeId">
+                        <div class="col-md-12 pull-right text-right">
+                            <button ng-hide="vm.readOnly" class="btn btn-fw success" ng-click="vm.saveComment()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save Comment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!-- Readonly View -->
+
+                <form role="form" name="ViewForm" novalidate ng-hide="!vm.readOnly">
+
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Scorecard:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.scorecardName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Scorecard Period:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.scorecardPeriodName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Evaluator:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.evaluatorName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 form-control-label">Employee:</label>
+                        <div class="col-sm-9">
+                            <label class="form-control-label">{{vm.viewModel.scorecardModel.employeeName}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group row">                        
+                        <div class="col-sm-6 evaluatorComment">
+                            <label>Evaluator Comment:</label>
+                            <summernote config="vm.summernoteOptionsDisabled" class="summernote" ng-model="vm.viewModel.scorecardModel.evaluatorMessage"></summernote>
+                        </div>
+                        <div class="col-sm-6 employeeComment">
+                            <label>Employee Comment:</label>
+                            <summernote config="vm.summernoteOptionsDisabled" class="summernote" ng-model="vm.viewModel.scorecardModel.employeeMessage"></summernote>
+                        </div>
+                    </div>
+                    <hr />
+                    <div ng-repeat="i in vm.viewModel.scorecardRecordModels | orderBy : 'order'" st-select-row="row">
+                        <div class="form-group row">
+
+                            <label class="col-sm-1 form-control-label"><b>Performance Measure:</b></label>
+                            <div class="col-sm-5">
+                                <label class="form-control-label"><b>{{i.description}}</b>&nbsp;<i class="material-icons md-24" ng-if="i.definition" ng-click="vm.showMeasureDefinition(i.definition)">info</i></label>
+                            </div>
+                            <div ng-if="i.scorecardScoring == 0">
+                                <label class="col-sm-2 form-control-label"><b>Rating:</b></label>
+                                <div class="col-sm-1">
+                                    <select ng-disabled="vm.readOnly" name="scorecardTemplatePeriod" class="form-control"
+                                            ng-options="s.ordinalValue as s.name for s in vm.filterOptions.scorecardScoreTypes"
+                                            ng-model="i.scoreType" placeholder="Score Type"></select>
+                                </div>
+                            </div>
+
+                            <div ng-if="i.scorecardScoring == 1">
+
+                                <label class="col-sm-1 form-control-label"><b>Score:</b></label>
+                                <div class="col-sm-1">
+                                    <input type="number" readonly ng-model="i.value" class="form-control inline" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <table ng-show="i.scorecardScoring == 0" st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Criteria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>A</td>
+                                    <td>{{i.aDefinition}}</td>
+                                </tr>
+                                <tr>
+                                    <td>E</td>
+                                    <td>{{i.eDefinition}}</td>
+                                </tr>
+                                <tr>
+                                    <td>I</td>
+                                    <td>{{i.iDefinition}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table ng-show="i.scorecardScoring == 1" st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Minimum</th>
+                                    <th>Maximum</th>
+                                    <th>Definition</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{i.minimum}}</td>
+                                    <td>{{i.maximum}}</td>
+                                    <td>{{i.manualDefinition}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="form-group row">
+                            <div class="col-sm-6 evaluatorComment">
+                                <label><b>Evaluator Comment:</b></label>
+                                <summernote config="vm.summernoteOptionsDisabled" class="summernote" ng-model="i.evaluatorHtmlComment"></summernote>
+                            </div>
+                            <div class="col-sm-6 employeeComment">
+                                <label><b>Employee Comment:</b></label>
+                                <summernote config="vm.summernoteOptionsDisabled" class="summernote" ng-model="i.employeeHtmlComment"></summernote>
+                            </div>
+                        </div>
+
+                        <!--<div class="form-group row">
+                            <label class="col-sm-12 form-control-label"><b>Evaluator Comment</b></label>
+                            <div class="col-sm-12">
+                                <summernote config="vm.summernoteOptionsDisabled" class="summernote" ng-model="i.evaluatorHtmlComment"></summernote>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-12 form-control-label"><b>Employee Comment</b></label>
+                            <div class="col-sm-12">
+                                <summernote config="vm.summernoteOptionsDisabled" class="summernote" ng-model="i.employeeHtmlComment"></summernote>
+                            </div>
+                        </div>-->
+                    </div>
+                    <hr />
+                    <div class="form-group row" ng-if="vm.currentUser.id == vm.viewModel.scorecardModel.evaluatorId">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.scorecard.grid">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

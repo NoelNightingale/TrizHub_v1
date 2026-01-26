@@ -1,0 +1,23 @@
+﻿<div class="modal-header {{app.setting.theme.info}}">
+    <h4 class="modal-title">{{popupModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    <form name="ReassignForm" role="form" class="form-horizontal">
+        <fieldset>
+            <div class="form-group" show-errors>
+                <label for="evaluator" class="col-sm-3 form-control-label">New Evaluator:</label>
+                <div class="col-sm-9">
+                    <select name="evaluator" class="form-control" ng-options="u as u.description for u in users"
+                            ng-model="popupModel.evaluator" ng-required="true" placeholder="Evaluator"></select>
+                    <span class="text-help" ng-show="ReassignForm.evaluator.$invalid">Required</span>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
+    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+</div>

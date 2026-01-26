@@ -1,0 +1,27 @@
+﻿<div class="modal-header {{app.setting.theme.warn}}" style="width:100%">
+    <h4 class="modal-title">Project Select</h4>
+</div>
+
+<div class="modal-body" style="height:440px;">
+    <input type="text" ng-model="filterText" class="form-control" style="margin-bottom: 15px;" autofocus/>
+
+    <div style="height: 316px; overflow: auto;">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th width="70%">Project</th>
+                    <th>Client</th>
+                    <th>Billable</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in dropDownList | filter: filterText" style="cursor: pointer;" ng-click="popupModel1.itemChoosen(item);">
+                    <td>{{item.description}}</td>
+                    <td>{{item.clientName}}</td>
+                    <td>{{item.isBillable ? 'Yes' : 'No'}}</td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</div>

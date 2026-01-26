@@ -1,0 +1,21 @@
+﻿<div class="modal-header {{app.setting.theme.warn}}">
+    <h4 class="modal-title">{{popupModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    {{popupModel.question}}
+    <form role="form" class="form-horizontal">
+        <fieldset>
+            <div class="form-group" show-errors>
+                <div class="col-sm-12">
+                    <textarea name="reason" class="form-control" rows="5" ng-model="popupModel.reasonText" placeholder="{{popupModel.reason}}" ng-required="true"></textarea>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
+    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+</div>

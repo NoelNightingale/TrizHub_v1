@@ -1,0 +1,78 @@
+﻿<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box">
+                <div class="box-header b-b">
+                    <h2>Role Maintenance</h2>
+                </div>
+                <div class="box-body">
+                    <form class="form-group row">
+                        <div class="col-sm-12 col-md-4">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control p-x b-a rounded" placeholder="Search" ng-model="vm.gridModel.searchFor">
+                                <span class="input-group-btn">
+                                    <button class="btn white b-a rounded no-shadow" ng-click="vm.pageGrid.search()"><i class="fa fa-search"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('rolename')">Role</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='rolename'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='rolename'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('description')">Description</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='description'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='description'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('status')">Is Active</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='status'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='status'}"></i>
+                                    </th>
+                                    <th>
+                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newRole()">
+                                            <i class="fa fa-plus"></i> New
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row">
+                                    <td>{{i.roleName}}</td>
+                                    <td>{{i.description}}</td>
+
+                                    <td ng-style="i.isActive === true &&{'color' : 'green'} || i.isActive === false &&{'color' : 'red'}">{{i.isActive}}</td>
+                                    <td>
+                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+                                           ui-sref="mainState.maintenance.roleMaintenance.detail({id: i.id})">
+                                            <i class="fa fa-edit"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr ng-show="vm.gridModel.data.length == 0">
+                                    <td colspan="4">
+                                        No Records
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                        <div class="w-full m-b-2 center-container">
+                            <uib-pagination total-items="vm.gridModel.totalItems" ng-model="vm.gridModel.currentPage" max-size="vm.gridModel.maxSize"
+                                            class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGrid.pageChanged()" items-per-page="vm.gridModel.recordsPerPage">
+                            </uib-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

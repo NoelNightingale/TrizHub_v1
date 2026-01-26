@@ -1,0 +1,199 @@
+'1852D649-B00C-4F55-B880-0016E2B81899','gvwholdings\_del_nrossouw', 0, 'Nelis Rossouw', 'Nelis Rossouw', 'PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'EBEBF54F-CDB6-42E6-8ED9-00F6EC31A43B','RAEZOR_W10\CA',1,'Aiyaaz Dollie','Aiyaaz Dollie','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'F0BF8144-CE9C-442E-B70B-01DBB8E77C22','GVWHOLDINGS\epaulsen',0,'Eldrich Paulsen','Eldrich Paulsen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'3A058BA9-BC4B-45AB-BC7F-023BEFF5ED0C','GVWHOLDINGS\JVivier',0,'Jacques Vivier','Jacques Vivier','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'239B0065-1690-4021-96CB-02DB459D5D85','GVWHOLDINGS\nrossouw',0,'Nelis Rossouw','Nelis Rossouw','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'CE09CDF9-D20F-4D6D-8C33-0484255E40E3','gvwholdings\tsmith',0,'Tracey Smith','Tracey Smith','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'803D425A-4253-41EF-A4EF-0559F95638CC','GVWHOLDINGS\fhough',0,'Francois Hough','Francois Hough','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C5755FD7-7376-49B5-821D-0631573F5037','gvwholdings\aleroux',0,'Anro Le Roux','Anro Le Roux','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'71518E49-C1DD-4FF5-AF50-06BD351AD33D','GVWHOLDINGS\PVanStryp',0,'Pieter Van Stryp','Pieter Van Stryp','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0B5B204C-BD46-4EF6-A1DD-081EE07CB4C4','GVWHOLDINGS\fdymond',0,'Francois Dymond','Francois Dymond','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'E2EFA374-B723-4B22-9CD9-09F58150D0E5','GVWHOLDINGS\fhans',0,'Fabian Hans','Fabian Hans','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'676B7B66-280B-429A-AB0B-0A4D0A1939D6','GVWHOLDINGS\rstrauss',0,'Renier Strauss','Renier Strauss','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'D94F768A-49A1-419F-A555-0ACEFB8AB04C','GVWHOLDINGS\mpikker',0,'Mark Pikker','Mark Pikker','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'B7C7AC65-5E34-4290-9553-0B4DFDD7E2F7','GVWHOLDINGS\',0,'Edgar Hunter','Edgar Hunter','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'6B859EF2-AFF2-4625-B179-0C21BD5A1B20','gvwholdings\dgiles',0,'David Giles','David Giles','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'E0AE13E5-51A1-489A-8681-0D4504E49401','gvwholdings\GHo',0,'George Ho','George Ho','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C390667B-EF48-452C-B3D3-0E2BAE357956','GVWHOLDINGS\wlouw',0,'Wynand Louw','Wynand Louw','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0628D601-4EED-4337-BBAF-0F4FB1A668C5','GVWHOLDINGS\mharmse',0,'Walter Harmse','Walter Harmse','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'ED7D842A-EDFE-46DB-8D54-12FB855BE917','GVWHOLDINGS\cserfontein_IA2',0,'Corne Serfontein','Corne Serfontein','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'506551FF-1CC3-4B21-8AD2-133AD2A1A08A','gvwholdings\djvrensburg',0,'Dirk Janse Van Rensburg','Dirk Janse Van Rensburg','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'A5C2350B-A7E1-4A90-B61E-15A6CBD59CE5','gvwholdings\ncarolissen',0,'Nathan Carolissen','Nathan Carolissen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'B5842F78-DD6B-41E1-8B93-16926ADA1D20','GVWHOLDINGS\BOdendaal',0,'Bellingan Odendaal','Bellingan Odendaal','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'559FD23F-23D2-4AC9-B7D2-1762BF531299','gvwholdings\fgreeff_old',0,'old_Francois Greeff','old_Francois Greeff','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'25A76277-566A-4BB2-9AEF-186B5014DF6B','gvwholdings\eehlers',0,'Edward Ehlers','Edward Ehlers','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C28F3A10-0865-47B9-A32C-19079B464AD5','GVWHOLDINGS\jgoosen',0,'Jackie Goosen','Jackie Goosen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0B320652-CE2E-49F7-95C9-191AE3DDF77C','GVWHOLDINGS\KLouw',0,'Kyle Louw','Kyle Louw','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'204796C1-FA7F-4AC9-BE24-1BD35E6E2C96','gvwholdings\rrobertson',0,'Rall Robertson','Rall Robertson','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'5FB7DCCC-BA9B-4526-B06B-1D5DC047476B','gvwholdings\nschreuder',0,'Nicolas Schreuder','Nicolas Schreuder','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'6F9CF915-9B90-4421-8FEC-2137035173AA','GVWHOLDINGS\gschlee',0,'Geoffrey Schlee','Geoffrey Schlee','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'665C0DB0-41E6-4045-99C4-22AE46EBE9BD','GVWHOLDINGS\GKahts',0,'Gary Kahts','Gary Kahts','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'E84C2817-B42E-4302-8E88-2381737AB563','GVWHOLDINGS\IBotha',0,'IBotha','IBotha','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'4FAD1E76-8649-44BE-882A-289D203C1C8C','gvwholdings\hbanderker',0,'Hanif Banderker','Hanif Banderker','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'B76D1C06-6713-4C89-93A4-2A2A42700E1B','gvwholdings\DSmit',0,'Daniel Smit','Daniel Smit','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'D8B8B2D2-4B8D-4D61-9B14-2B5662C6F4D1','GVWHOLDINGS\NZietsman',0,'Niel Zietsman','Niel Zietsman','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'421DBC6D-EB34-488A-A081-2E09E8E86022','gvwholdings\lteixeira',0,'Leonel Teixeira','Leonel Teixeira','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'B6AA36E8-86BD-45A3-96B9-2E0F4061EDF1','gvwholdings\barendse',0,'Byron Arendse','Byron Arendse','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'50037725-8348-429B-80D5-2F767639608E','GVWHOLDINGS\TOdendaal',0,'Tanja Odendaal','Tanja Odendaal','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'3AF1BEE7-1F05-4BBE-BB39-30FB028FDF2C','GVWHOLDINGS\rfrankiskos',0,'Richard Frankiskos','Richard Frankiskos','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'9F1C75F6-F247-48D1-BD43-311B9BB77277','GVWHOLDINGS\QVanHeerden',0,'Quintin Van Heerden','Quintin Van Heerden','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'3A13CCE9-6BDC-47C5-B8BB-318E4387463A','gvwholdings\cserfontein_IA',0,'Corne Serfontein','Corne Serfontein','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'7DE0DE52-C576-415F-BAB9-32603A0CBA4A','GVWHOLDINGS\JBotha',0,'JBotha','JBotha','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C1BCD471-DF68-4CFC-A29D-32C10CE1B8EE','GVWHOLDINGS\asaayman',0,'Anton Saayman','Anton Saayman','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'082B123C-13E7-434D-B455-3361A243367F','GVWHOLDINGS\hodendaal_IA',0,'Henry Odendaal','Henry Odendaal','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'BCCE61CB-E5D5-4B5B-9B2D-33F1B5A0487F','GVWHOLDINGS\tvisser',0,'Theuns Visser','Theuns Visser','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5B48E640-C8B2-4AFF-81B5-34525C4D8B70','GVWHOLDINGS\mgreyling',0,'Mark Greyling','Mark Greyling','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'55651018-E4BC-4D10-A9D2-36DE9E20E640','GVWHOLDINGS\msack',0,'Marty Sack','Marty Sack','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'814833E9-D793-4BFA-87C3-37F7561250BD','GVWHOLDINGS\HVanderMerwe',0,'Henroux Van Der Merwe','Henroux Van Der Merwe','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'39258CC5-C301-457C-9787-399378BA6BE8','gvwholdings\bvandermerwe',0,'Bennie Van Der Merwe','Bennie Van Der Merwe','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'12C740F8-2D35-4CE9-ABB3-3B9825AA0C2C','gvwholdings\BWortmann',0,'Bion Wortmann','Bion Wortmann','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'B2E5F27E-5C33-4410-A177-3BB48F2C7D48','gvwholdings\jmcdonagh',0,'Joe McDonagh','Joe McDonagh','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'989B8AEB-65FF-4CB7-B3DB-3C6DB0FA3A8E','RAEZOR_W10\CAa',1,'Franche','van den Berg','PROFIleimageGuid','2016-08-26 09:39:29.933',1
+'E2AA9272-BC66-4B88-AFFD-4141CCEDF71F','GVWHOLDINGS\WPienaar',0,'Willie Pienaar','Willie Pienaar','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5CD11F9F-C251-4D25-B6DC-424ED7680EDA','_del_jbondy',0,'Jake Bondy','Jake Bondy','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'0B87AC57-1BF5-4E61-A8F3-4339DDB8BE0F','gvwholdings\sneumuller_IA',0,'Stefan Neumuller','Stefan Neumuller','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'4EC6A367-4EA9-4BFD-96D9-45B6FE9B62B7','gvwholdings\ecupido',0,'Envor Cupido','Envor Cupido','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5B3750C5-89C7-4BF8-8A4B-45C0F27991D6','GVWHOLDINGS\ddiedericks',0,'Danie Diedericks','Danie Diedericks','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'7F3AA840-39E1-451C-9A3E-47612FDB89CF','gvwholdings\JVanDenMunckhof',0,'Jacques van den Munckhof','Jacques van den Munckhof','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'EA808044-9A34-409A-8FF2-49A4F8A466E9','GVWHOLDINGS\mcilliers',0,'Marie Cilliers','Marie Cilliers','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'0B87099A-72A3-4D54-93FA-49BE031031A5','gvwholdings\Rall Robertson',0,'Rall Robertson','Rall Robertson','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'BB254D55-F0B6-4F26-894D-4D77C1E0D5DF','GVWHOLDINGS\bmcphail',0,'Bruce McPhail','Bruce McPhail','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'98FF33C3-D841-4528-B44F-4FCFD1CD82ED','GVWHOLDINGS\rfrancis',0,'Russel Francis','Russel Francis','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'63221A6F-89F7-46EF-8967-50374392BE98','old_gvwholdings\jlucas',0,'Justus Lucas(old)','Justus Lucas(','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'429BB9E6-BAB1-4533-B416-503F900625B0','gvwholdings\edevries',0,'Elsje de Vries','Elsje de Vries','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'B2CEF658-A5E7-4DC2-9699-508BD5AD54F9','GVWHOLDINGS\GBasson',0,'Gabriel Basson','Gabriel Basson','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'A60FC46F-7B4B-430A-B5C4-50D12105197A','gvwholdings\CBothma',0,'Crayg Bothma','Crayg Bothma','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'E437E515-CA7A-40DB-9389-51D39E17CA99','GVWHOLDINGS\IOosthuizen',0,'Izak Oosthuizen','Izak Oosthuizen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'178F9850-A9B7-4CE9-A936-53208F6E08C6','gvwholdings\lvrooyen',0,'Louw Van Rooyen','Louw Van Rooyen','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'E9B53ED8-9B0B-4FCB-93A1-5326C3B401BE','gvwholdings\dvandyk',0,'Dirk Van Dyk','Dirk Van Dyk','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'AD30776E-A5E2-431F-975F-5337369D1326','GVWHOLDINGS\ecupido_IA',0,'Envor Cupido','Envor Cupido','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'C563FC4A-36BD-4BA5-9D8E-545CE4BFD46E','GVWHOLDINGS\njoubert',0,'Nic Joubert','Nic Joubert','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'85D2BFD7-5ECA-4B13-8CD5-550FB1AFC655','GVWHOLDINGS\NWehmeyer',0,'Niki Wehmeyer','Niki Wehmeyer','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5C1D400E-07E7-4809-A7B8-569D75F0B4C8','gvwholdings\mbotha',0,'Marie Botha','Marie Botha','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'2FF818E7-5EEA-4358-A61D-59CAACC25E77','GVWHOLDINGS\SMuller',0,'Stian Muller','Stian Muller','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'87A32A38-64C9-4E9A-B084-5A1DF4947DD6','gvwholdings\jdreyer',0,'Jaco Dreyer','Jaco Dreyer','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0ED7AC10-2C41-449D-8CF2-5E20D2F16A06','gvwholdings\RGiesler',0,'Rudi Giesler','Rudi Giesler','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'DC9DB6D7-CF4D-4F2D-B774-5E7766009D8B','gvwholdings\gburgess',0,'Geoff Burgess','Geoff Burgess','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'9346CAE8-7852-421F-8121-61341A65CD9B','GVWHOLDINGS\ameiring',0,'Anton Meiring','Anton Meiring','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'250CDFAD-5A78-4861-9958-619375AC5292','GVWHOLDINGS\FBarkhuizen',0,'Francois Barkhuizen','Francois Barkhuizen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'469E7C8B-4B6A-4B3A-AC71-6255FACF730F','gvwholdings\GRossouw',0,'Gerhard Rossouw','Gerhard Rossouw','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'92D71433-AFB7-46F9-82E0-62F4FA89B0C5','gvwholdings\bmathew',0,'Bob Mathew','Bob Mathew','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'9497643D-E1CA-4D0C-8722-6331377982B1','GVWHOLDINGS\canglin',0,'Chris Anglin','Chris Anglin','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'A61E5707-1575-4CDA-8992-63761081AF3A','GVWHOLDINGS\ASmit',0,'Albert Smit','Albert Smit','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0B5B2BC6-DE6D-45A8-AA66-638F34569A19','GVWHOLDINGS\Russell',0,'Russell Francis','Russell Francis','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'42F5E594-13F4-4BCD-BC4A-64FF035DD375','gvwholdings\bderby',0,'Byron Derby','Byron Derby','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'6C24F25D-3849-4248-A91E-6713528600D4','GVWHOLDINGS\PNel',0,'Petrus Nel','Petrus Nel','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'74A89FBB-EA68-4613-911B-6A62F94D1364','GVWHOLDINGS\KSwanson',0,'Kerwin Swanson','Kerwin Swanson','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0F4D80E4-108B-4AE1-9A43-6B5784F4D252','gvwholdings\DSpring',0,'Daniel Spring','Daniel Spring','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'31B765E5-6392-4B05-9368-6D292784B570','gvwholdings\atheron',0,'Appie Theron','Appie Theron','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'00F25C06-88FE-4470-8BAC-707E3AE32A1E','GVWHOLDINGS\nevert',0,'Neale Evert','Neale Evert','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'F1E8436A-AEEF-4A33-BDF7-70BC8B2D467F','gvwholdings\rlevitas',0,'Ryan Levitas','Ryan Levitas','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'E5D3142D-A5B0-4F1D-A891-714830037A75','gvwholdings\bvheerden',0,'Berni Van Heerden','Berni Van Heerden','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'DB2F1D42-7537-407A-BC7A-7295E6379332','gvwholdings\djstapelberg',0,'Diederick Johannes Stapelberg','Diederick Johannes Stapelberg','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'EC6D666B-152A-4F0C-A54F-72E5C9C1EBBE','GVWHOLDINGS\mdutoit',0,'Madeli Du Toit','Madeli Du Toit','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5C9D9D78-63E7-48A4-A4B9-75802D6E93E0','gvwholdings\elouwrens',0,'Eckard Louwrens','Eckard Louwrens','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'21DA7855-B823-4400-B8A6-7615E41F5B40','GVWHOLDINGS\bsilva',0,'Bruno Silva','Bruno Silva','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'360FA4B1-D1F1-48FD-BB40-76B6C0EA3752','GVWHOLDINGS\wclaassen',0,'Walter Claassen','Walter Claassen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'809AEAD2-5B40-4592-BA49-76B7A21800DD','gvwholdings\khearn',0,'Kasia Hearn','Kasia Hearn','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0979F793-E02A-446D-981C-77E7D32D5491','gvwholdings\rfourie',0,'Riaan Fourie','Riaan Fourie','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'11F8E26B-3FC5-4475-BB91-7904B28C2D19','gvwholdings\avanderpost',0,'Annaléne van der Post','Annaléne van der Post','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'CEB93C50-EFB9-4678-A802-7A8FDFE8D367','GVWHOLDINGS\BWortman',0,'Bion Wortman','Bion Wortman','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'01BA2112-5B87-431F-AB8D-7AB66B33ABB5','GVWHOLDINGS\rrall',0,'Reinhard Rall','Reinhard Rall','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'15E508E0-E666-4687-8411-7B1669605A0E','GVWHOLDINGS\GMalenich ',0,'Greg Malenich','Greg Malenich','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5A5F6A6C-0845-493C-B65D-7C2DA4801DFE','gvwholdings\AHBrand',0,'Albertus Hendrik Brand','Albertus Hendrik Brand','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'20E8D8D8-0488-4761-8EFD-7C6C7FD28D71','gvwholdings\JBlaauw',0,'Jacques Blaauw','Jacques Blaauw','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'14568C61-C251-48B2-81B9-7C7FC774890C','gvwholdings\AMeyer',0,'Adam Meyer','Adam Meyer','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'56732E75-D285-431B-AD78-7EA7991FA4A2','GVWHOLDINGS\CCrouse',0,'Christiaan Crouse','Christiaan Crouse','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'373E52FF-40C0-4DF7-A044-7EF88C67DFBA','GVWHOLDINGS\rvanas',0,'Rynhard van As','Rynhard van As','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'016DA033-1BB0-414E-9D88-7F98F0FD290D','gvwholdings\raspeling',0,'Robbie Aspeling','Robbie Aspeling','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'52181F70-8EC8-4C57-B7DB-8631FDAA275E','gvwholdings\dswingburn',0,'Devon Swingburn','Devon Swingburn','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'FEDD5673-272A-4576-9A27-863F26E8D201','GVWHOLDINGS\HVanAs',0,'Hendri Van As','Hendri Van As','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'E4E182BA-37ED-4FCD-9DD8-86C7EF1AD615','gvwholdings\mgrapendaal',0,'Maurice Grapendaal','Maurice Grapendaal','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'F3704F7A-6769-424A-B66A-881426B0E787','GVWHOLDINGS\elowrens',0,'Eckard Lowrens','Eckard Lowrens','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'D3B4D7FF-8CA3-4DF4-B35D-8A79322F98E8','GVWHOLDINGS\SMorrow',0,'Sean Morrow','Sean Morrow','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'7ECDB5C3-CE28-4C0E-A92E-8D3A95105059','GVWHOLDINGS\AXSmith',0,'Alida Smith','Alida Smith','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'AF4B47C5-2FD6-4CF1-B28E-8F0B8F918957','GVWHOLDINGS\JMBezuidenhout',0,'Jean-Marie Bezuidenhout','Jean-Marie Bezuidenhout','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'ED8C9357-A109-416A-9952-8F99320F3CE2','GVWHOLDINGS\sleppan',0,'Shane Leppan','Shane Leppan','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'8B385C5B-B8CF-4CB7-A018-90F63D8FD2AC','gvwholdings\jpretorius',0,'Johnathan Pretorius','Johnathan Pretorius','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'14229466-3125-43B4-8A83-93CA367DBDDA','GVWHOLDINGS\jmacdonagh',0,'Joe Macdonagh','Joe Macdonagh','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'5BC64851-8517-47D7-BB4E-977ACDBF766C','GVWHOLDINGS\DKelz',0,'Darryn Kelz','Darryn Kelz','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'25A2AF5C-07BB-423E-B649-9A5F0E2BFFD3','GVWHOLDINGS\RDuPreez',0,'Ruan du Preez','Ruan du Preez','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'F3DF9E6F-D2DD-4AAE-BBC3-9B6BD34EC3CC','GVWHOLDINGS\ismith',0,'Ian I. Smith (SA Contract Engineer)','Ian I. Smith (SA Contract Engineer)','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'50E8A83F-A382-4777-B41B-9BA608BC0FF5','GVWHOLDINGS\MPurnell',0,'Matthew Purnell','Matthew Purnell','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'2DAFCBAA-1CC5-44C0-B3AB-9BAF31267CEB','gvwholdings\TBosch',0,'Tracey Bosch','Tracey Bosch','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'2A82FA72-80FA-4321-B6E0-9C2E551E119F','GVWHOLDINGS\EMocke',0,'Evan Mocke','Evan Mocke','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'12E0D8AA-32FD-4D86-B3B5-9CF3474E8970','GVWHOLDINGS\NBradley',0,'Nicola Bradley','Nicola Bradley','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'6E1267F2-BAF7-4901-8388-9D314337194F','GVWHOLDINGS\JMaarschalk',0,'Joubert Maarschalk','Joubert Maarschalk','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'BEF5B7EA-4667-44C8-ABF1-9D3822D3BFED','GVWHOLDINGS\aboyes',0,'Andrew Boyes','Andrew Boyes','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'EA6DDBCA-AEF6-4154-8284-9D8C395D317A','GVWHOLDINGS\fburger',0,'Frikkie Burger','Frikkie Burger','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'5066E5B2-72E0-4995-8318-A00A897A2EEE','gvwholdings\josborne',0,'Jeremy Osborne','Jeremy Osborne','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'2C1531BE-7A02-4ADF-AB0B-A1290E2C309D','gvwholdings\DCollop',0,'Dillon Collop','Dillon Collop','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'27BC12C8-2541-464C-954A-A218159FB5C1','gvwholdings\wgerber',0,'Werner Gerber','Werner Gerber','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'7A464447-52FF-48F1-8B41-A3BCBB836485','GVWHOLDINGS\JStrydom',0,'Jano Strydom','Jano Strydom','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'87782CFD-3220-45B9-8BB4-A79B1A77A83C','gvwholdings\jpittman',0,'Jason Pittman','Jason Pittman','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'9A220B72-02F2-414E-A3CF-AA6AC90DAD8A','GVWHOLDINGS\MDaly',0,'Michael Daly','Michael Daly','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0022CEC8-7B95-4C9E-8D24-AB7BAC0813B8','GVWHOLDINGS\aflores-bartoli',0,'Antonio Flores-Bartoli','Antonio Flores-Bartoli','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'4E4C8F44-E5A7-4A8D-8EAC-AB9416E75600','GVWHOLDINGS\NSmith',0,'Niel Smith','Niel Smith','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C12912F9-C12B-4E41-A67A-ABBCCFD1E8CD','GVWHOLDINGS\TRowe',0,'Travis Rowe','Travis Rowe','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'293204FF-799B-42FA-BBA4-ACAE2273E2E5','GVWHOLDINGS\jzimnicki',0,'Jim Zimnicki','Jim Zimnicki','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'2225726A-F522-4646-B9D0-AD6787D982E6','GVWHOLDINGS\FVanTonder',0,'Francois Van Tonder','Francois Van Tonder','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'FD4E3224-90FB-4581-AA79-AD9D70D24E81','GVWHOLDINGS\HCollins',0,'Heino Collins','Heino Collins','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'D35F3CF9-F8E0-4B2F-A29D-AE492846CCB1','GVWHOLDINGS\APetersen',0,'Ashley Petersen','Ashley Petersen','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'1F8BCFB4-1BAA-43FB-9D13-B14601C55C7B','GVWHOLDINGS\jvorster',0,'Johann Vorster','Johann Vorster','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'98389EF9-7228-4D9A-8F01-B2AD4978D402','GVWHOLDINGS\jcoetzer',0,'Johan Coetzer','Johan Coetzer','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'6EC3AA58-619D-44E6-9713-B72CF6AE17FF','GVWHOLDINGS\sdemnitz',0,'Simon Demnitz','Simon Demnitz','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'2DF4FE27-C9AB-4A23-B5CC-B7DBC4FC822C','GVWHOLDINGS\CMouton',0,'Calvyn Mouton','Calvyn Mouton','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'D0F65358-96E2-4A57-813D-B86730B55C4D','GVWHOLDINGS\aflores',0,'Antonio Flores-Bartoli','Antonio Flores-Bartoli','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'56FBED62-3C1F-420F-8A05-B91147C947AC','GVWHOLDINGS\cvstaden',0,'Christopher van Staden','Christopher van Staden','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'53490646-3EC6-4670-987B-B93D650A28C3','gvwholdings\kgraham',0,'Karl Graham','Karl Graham','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'8D4D99BD-47DC-4819-9139-BC786F87EE80','gvwholdings\fgreeff',0,'Francois Greeff','Francois Greeff','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'7F364559-A44C-46AC-96C5-BC7BB00C3A6A','GVWHOLDINGS\LDuesimi',0,'Luca Duesimi','Luca Duesimi','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'0C1003BE-5CE8-4E0B-8EEC-C105179D93CA','gvwholdings\wthorne',0,'Walton Thorne','Walton Thorne','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'ECC7B470-44A1-46DC-9181-C290A2C165F1','gvwholdings\emooney',0,'Edwin Mooney','Edwin Mooney','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'A08EDB63-0D95-45D8-B8AA-C2FE562C1E24','GVWHOLDINGS\JHiggs',0,'Juan Higgs','Juan Higgs','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'6F6E06F9-758B-4F48-BF18-C3DF87D371AC','gvwholdings\jedwards',0,'Jerry Edwards','Jerry Edwards','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'997CA9A2-C51A-4E89-A70C-C43635325E49','DESKTOP-2SP9CAC\George',1,'George','Greyling','PROFIleimageGuid','2016-08-26 08:54:23.327',1
+'F38BDBE5-5856-4B3C-8F6C-C4CA8EF93DB9','GVWHOLDINGS\wzocher',0,'Walter Zocher','Walter Zocher','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'18788C51-4DC3-449F-94BF-C7D11232C830','gvwholdings\DVanDerWalt',0,'Dirk Van Der Walt','Dirk Van Der Walt','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'264DE3ED-E65E-4F5F-87FC-C8F2F5B57922','GVWHOLDINGS\svandermerwe',0,'Schalk Van Der Merwe','Schalk Van Der Merwe','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'920CF6E1-CFC1-4CAC-9FBA-CC1B25219F6A','gvwholdings\AButterworth',0,'Alex Butterworth','Alex Butterworth','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'98443E74-D1FA-4D5A-95DA-CEE0AF7C8DC6','GVWHOLDINGS\CNel',0,'Charl Nel','Charl Nel','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'D134F59A-87B3-4CE3-8A8D-CF275D4CD1AA','gvwholdings\RBurrows',0,'Ryan Burrows','Ryan Burrows','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'88289570-0F08-488F-86CE-D01B9DED956C','gvwholdings\cpretorius',0,'Christiaan Pretorius','Christiaan Pretorius','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'F7DE0FFD-817E-4BEA-9A58-D0661AEA0D76','GVWHOLDINGS\DASmit',0,'Dylan A. Smit','Dylan A. Smit','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'25B0BC0F-480C-4220-8796-D15547DE9F8F','gvwholdings\SRichards',0,'Sean Richards','Sean Richards','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'12A76C6F-78AC-46D2-B7BB-D30E2B88AF6C','gvwholdings\JBailie',0,'James Bailie','James Bailie','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'84533ACA-5A90-4538-8C7D-D32F65D1E7D9','gvwholdings\JSmit',0,'Johan Smit','Johan Smit','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'F34CCFF6-6180-43EA-99DD-D3437ED839F3','GVWHOLDINGS\ESmith',0,'Eugene Smith','Eugene Smith','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'6F47FC47-ADB0-4B6F-9114-D53ABD588859','GVWHOLDINGS\LMostert',0,'Luhan Mostert','Luhan Mostert','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'A6B67C61-0EFB-4F2E-90F1-D57BBC8D97D9','gvwholdings\sneumuller_IA2',0,'Stefan Neumüller','Stefan Neumüller','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'C713E42D-9099-4D57-B7BA-D5A6D50B706C','GVWHOLDINGS\SMentz',0,'Salomon Mentz','Salomon Mentz','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'75BA691F-7A79-4227-B378-D77E3B61D2E8','GVWHOLDINGS\HMarais',0,'Herman Marais','Herman Marais','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'BA5C2DAF-D56C-40F8-9AFA-D7F87517E64A','gvwholdings\opieters',0,'Oliver Pieters','Oliver Pieters','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'FFDF84A1-D85C-49B7-904B-D8A406CB4A47','GVWHOLDINGS\lturley',0,'Leonard Turley','Leonard Turley','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'63B13717-7396-4EFA-ABC9-DB1EB4E85006','gvwholdings\gsinclair',0,'Gregory Sinclair','Gregory Sinclair','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'5768552F-9CF9-4E47-88E5-DB8AA95336C8','gvwholdings\jfourie',0,'Jaco Fourie','Jaco Fourie','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'34B523CB-3920-459C-AA1D-DEBCD0E30E3A','GVWHOLDINGS\jhoffman',0,'Josua Hoffman','Josua Hoffman','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'35DFAC0E-2233-4D39-9E32-E28FC6551311','old_gvwholdings\jzimnicki',0,'Old_Jim Zimnicki','Old_Jim Zimnicki','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'F7B31331-CA11-482B-B658-E39FEE88AC4E','GVWHOLDINGS\hodendaal',0,'Henry Odendaal','Henry Odendaal','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'1D2E4A4A-1AC6-424F-B8B5-E67B291B0E99','gvwholdings\tpfolders',0,'TES Public Folders','TES Public Folders','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C48992C0-3B73-4D0B-87EC-E743D8FCFD96','GVWHOLDINGS\JVanNiekerk',0,'Janno Van Niekerk','Janno Van Niekerk','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'1FAEB829-42DE-478F-B5DF-E8B32C12EEC6','GVWHOLDINGS\hvanas_IA',0,'Heinrich van As','Heinrich van As','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'39A10CD0-183C-4C79-9BBC-ED81927974F9','GVWHOLDINGS\JVanTonder',0,'Jaco Van Tonder','Jaco Van Tonder','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'2BFB8F5C-6CB7-458C-9328-EE296D09EBCD','gvwholdings\KBrouwer',0,'Kevin Brouwer','Kevin Brouwer','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'4A34A15D-85FD-4608-B159-EE70D1F3F8D0','GVWHOLDINGS\kdekock',0,'Konrad De Kock','Konrad De Kock','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'AE040A99-A9C2-4402-BD16-EF064F02DD00','gvwholdings\tmantel',0,'Tyler Mantel','Tyler Mantel','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'66460121-997E-46D4-85AE-F2BF8BD9F487','_del_cvstaden',0,'Christopher Van Staden','Christopher Van Staden','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'CFBEBA58-D2B8-4E5E-8137-F3F88C5D750E','gvwholdings\cjpelser',0,'Chris-Jan Pelser','Chris-Jan Pelser','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'CB2A2C21-5E9A-4A3C-9364-F58F70C767FD','GVWHOLDINGS\deksteen',0,'Dewaal Eksteen','Dewaal Eksteen','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'9C4564B7-EFBE-49AE-BA36-F631B07F3752','GVWHOLDINGS\MDeSmidt',0,'Marc De Smidt','Marc De Smidt','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'FDB5344A-2544-43A7-A602-F6D67DEA69A4','GVWHOLDINGS\jschoevers',0,'Jaco Schoevers','Jaco Schoevers','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'982D023A-B0BD-4B86-962E-F74013C01E55','GVWHOLDINGS\jbondy',0,'Jake Bondy','Jake Bondy','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'502AC66A-1040-4BCA-BD00-F8EC3B758A92','gvwholdings\rodendaal',0,'Ruben Odendaal','Ruben Odendaal','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'BE830C58-01AB-4AC7-914C-FA29ED48D431','GVWHOLDINGS\DHuysamen',0,'Dean Huysamen','Dean Huysamen','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'8BAA8C07-DBF8-4A98-A116-FB5F67A0203F','GVWHOLDINGS\SVogel',0,'Simon Vogel','Simon Vogel','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'8C0ADD2D-DE8D-4ECA-874E-FD55FF2230AE','gvwholdings\pkrause',0,'Phillip Krause','Phillip Krause','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'C81D2AD8-5017-40E1-9393-FE9689C793EF','GVWHOLDINGS\gwalters',0,'Gavin Walters','Gavin Walters','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'77334E9C-2E37-4C91-8173-FF12FC97A8FE','gvwholdings\pcassidy',0,'Paul Cassidy','Paul Cassidy','PROFIleimageGuid','2016-08-26 10:43:51.627',1
+'F2A96FCB-1CB4-4161-A382-FF4D553A23E1','NA\atheron',0,'atheron','atheron','PROFIleimageGuid','2016-08-26 10:43:51.627',0
+'4E49E829-6DAE-4E29-8373-FF89721BA1B7','old_gvwholdings\fhough',0,'old_Francois Hough','old_Francois Hough','PROFIleimageGuid','2016-08-26 10:43:51.627',0

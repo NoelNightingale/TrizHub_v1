@@ -1,0 +1,120 @@
+﻿<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box">
+                <div class="box-header b-b">
+                    <h2>
+                        <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})">{{vm.user.firstName}} {{vm.user.surName}}</a>/ Asset Register
+                    </h2>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        <form role="form" name="RecordForm" novalidate>
+
+                            <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                    <th>
+
+                                        <a ng-click="vm.pageGrid.sort('type')"> Type</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='type'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='type'}"></i>
+                                    </th>
+                                    <th>
+
+                                        <a ng-click="vm.pageGrid.sort('model')"> Model</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='model'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='model'}"></i>
+                                    </th>
+                                    <th>
+
+                                        <a ng-click="vm.pageGrid.sort('supplierName')"> Supplier Name</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='supplierName'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='supplierName'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pagegrid.sort('serialNumber')"> Serial Number</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='serialNumber'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='serialNumber'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('cost')">Cost</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='cost'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='cost'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('purchaseDate')">Purchase Date</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='purchaseDate'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='purchaseDate'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('invoiceNumber')">Invoice Number</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='invoiceNumber'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='invoiceNumber'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('assignedDate')">Assigned Date</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='assignedDate'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='assignedDate'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('returnDate')">Returned Date</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='retunDate'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='returnDate'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('assetRegister')">Asset Register Number</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='assetRegister'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='assetRegister'}"></i>
+                                    </th>
+                                    <th>
+                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newOfficeEquipment()">
+                                            <i class="fa fa-plus"></i> New
+                                        </a>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row">
+                                    <td>{{i.type}}</td>
+                                    <td>{{i.model}}</td>
+                                    <td>{{i.supplierName}}</td>
+                                    <td>{{i.serialNumber}}</td>
+                                    <td>{{i.cost}}</td>
+                                    <td>{{i.purchaseDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{i.invoiceNumber}}</td>
+                                    <td>{{i.assignedDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{i.returnDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{i.assetRegister}}</td>
+                                    <td>
+                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+                                           ui-sref="mainState.maintenance.userMaintenance.officeEquipmentDetail({id: i.id})">
+                                            <i class="fa fa-edit"></i> Edit
+                                        </a>
+
+                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.danger}} text-{{app.setting.theme.danger}}"
+                                           ng-click="vm.deleteRecord(i)">
+                                            <i class="fa fa-delete"></i> Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr ng-show="vm.gridModel.data.length == 0">
+                                    <td colspan="4">
+                                        No Records
+                                    </td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+
+                        </form>
+                        <div class="row">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

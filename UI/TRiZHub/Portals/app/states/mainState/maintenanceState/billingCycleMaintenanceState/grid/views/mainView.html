@@ -1,0 +1,114 @@
+﻿<div class="col-sm-12 col-md-12 col-lg-12">
+    <div class="padding">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>Billing Cycle Maintenance</h2>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-4 navbar-form">
+                        <div class="input-group sm m-b-1">
+                            <span class="input-group-addon">
+                                Year
+                            </span>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default btn-sm " ng-click="vm.decYear()">&lt;</button>
+                            </span>
+                            <input type="number" class="form-control form-control-sm text-center" ng-model="vm.viewModel">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default btn-sm" ng-click="vm.incYear()">&gt;</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <form role="form" name="RecordForm" novalidate>
+                    <div class="table-responsive">
+                        <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+
+                                        <a ng-click="vm.pageGrid.sort('cycle')"> Cycle</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='cycle'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='cycle'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('year')"> Year</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='year'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='year'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('startDate')">Start Date</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='startDate'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='startDate'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('endDate')">End Date</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='endDate'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='endDate'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('weekdays')">Weekdays</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='weekdays'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='weekdays'}"></i>
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('publicHolidays')">Public Holidays</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='publicHolidays'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='publicHolidays'}"></i>
+                                    </th>
+                                    <th>
+
+                                        <a ng-click="vm.pageGrid.sort('workDays')">Work Days</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='workDays'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='workDays'}"></i>
+
+                                    </th>
+                                    <th>
+                                        <a ng-click="vm.pageGrid.sort('isclosed')">Is Closed</a>
+                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='isclosed'}"></i>
+                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='isclosed'}"></i>
+                                    </th>
+                                    <th>
+                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newBillingCycle()">
+                                            <i class="fa fa-plus"></i> New
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row">
+                                    <td>{{i.cycle}}</td>
+                                    <td>{{i.year}}</td>
+                                    <td>{{i.startDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{i.weekdays}}</td>
+                                    <td>{{i.publicHolidays}}</td>
+                                    <td>{{i.workDays}}</td>
+                                    <td ng-style="i.isClosed === true &&{'color' : 'red'} || i.isClosed === false &&{'color' : 'green'}">{{i.isClosed}}</td>
+                                    <td>
+                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+                                           ui-sref="mainState.maintenance.billingCycleMaintenance.detail({id: i.id})">
+                                            <i class="fa fa-edit"></i> Edit
+                                        </a>
+                                        <!--<a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.danger}} text-{{app.setting.theme.danger}}"
+                                            ng-click="vm.deleteRecord(i)">
+                                            <i class="fa fa-delete"></i> Delete
+                                        </a>-->
+                                    </td>
+                                </tr>
+                                <tr ng-show="vm.gridModel.data.length == 0">
+                                    <td colspan="9">
+                                        No Records
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+﻿<div class="padding">
+    <div class="box">
+        <div class="box-header b-b">
+            <h2>
+                Role Access Report
+            </h2>
+        </div>
+        <div class="box-body">
+            <form role="form" name="EditForm" class="form-horizontal">
+                <fieldset>
+
+                    <div class="m-t-1 row">
+                        <div class="col-sm-4">
+                            Include Inactive Roles:
+                        </div>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.includeInactiveRoles">
+                                <i class="indigo"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="m-t-1 row">
+                        <div class="col-sm-4">
+                            Include Inactive Users:
+                        </div>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.includeInactiveUsers">
+                                <i class="indigo"></i>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+                    <div class="m-t-1 row">
+                        <div class="col-sm-4"><input type="checkbox" ng-change="vm.updateActiveUsers()" name="endLatest" ng-model="vm.viewModel.showInactiveUsers" /> Show Inactive</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4"><input type="radio" name="employees" value="All" ng-model="vm.viewModel.employees" /> Employees Unfiltered</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4"><input type="radio" name="employeess" value="Selected" ng-model="vm.viewModel.employees" /> Employees Filtered By:</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4" style="height:400px; overflow-y:scroll;">
+                            <div ng-repeat="employee in vm.filterOptions.employees">
+                                <label class="md-check">
+                                    <input ng-disabled="vm.viewModel.employees=='All'" ng-model="employee.selected" type="checkbox">
+                                    <i class="indigo"></i>
+                                    {{employee.description}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="container">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+            <div class="alert alert-success" ng-if="vm.saveSuccess">
+                <strong>Success!</strong>
+            </div>
+        </div>
+    </div>
+</div>

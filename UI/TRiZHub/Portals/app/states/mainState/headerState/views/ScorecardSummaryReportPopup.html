@@ -1,0 +1,58 @@
+﻿<div class="modal-header {{app.setting.theme.warn}}">
+    <h4 class="modal-title">{{popupModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    {{popupModel.question}}
+    <hr />
+    <form role="form" class="form-horizontal">
+        <fieldset>
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    Scorecard Template:
+                </div>
+                <div class="col-md-8">
+                    <select name="scorecardTemplate" class="form-control" ng-options="s.id as s.description for s in vm.filterOptions.scorecardTemplates"
+                            ng-model="vm.viewModel.scorecardTemplateId" ng-required="true" placeholder="Scorecard Template" ng-change="vm.changedScorecardTemplate()"></select>
+                </div>
+            </div>
+
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    Scorecard Template Period
+                </div>
+
+                <div class="col-md-8">
+                    <div ng-repeat="period in vm.filterOptions.scorecardTemplatePeriods">
+                        <label class="md-check">
+                            <input type="checkbox" ng-click="vm.toggelPeriod(period)" name="period">
+                            <i class="indigo"></i>
+                            {{period.description}}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    Employee:
+                </div>
+                <div class="col-md-8">
+                    <select name="employee" class="form-control" ng-options="s.id as s.description for s in vm.filterOptions.employees"
+                            ng-model="vm.viewModel.employeeId" ng-required="true" placeholder="employee"></select>
+
+                </div>
+            </div>
+
+        </fieldset>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
+    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+</div>

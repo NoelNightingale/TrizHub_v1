@@ -1,0 +1,232 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.userAccountId})">{{vm.viewModel.firstName}} {{vm.viewModel.surName}}</a>/ Personal Information
+                </h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" novalidate>
+
+                    <div class="form-group row" show-errors>
+                        <label for="fullNames" class="col-sm-2 form-control-label">Full Names:</label>
+                        <div class="col-sm-9">
+                            <input name="fullNames" type="text" ng-model="vm.viewModel.fullNames" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.fullNames.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="surname" class="col-sm-2 form-control-label">Surname:</label>
+                        <div class="col-sm-9">
+                            <input name="surname" type="text" ng-model="vm.viewModel.surname" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.surname.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="title" class="col-sm-2 form-control-label">Title:</label>
+                        <div class="col-sm-9">
+                            <input name="title" type="text" ng-model="vm.viewModel.title" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.title.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="idNumber" class="col-sm-2 form-control-label">Id number:</label>
+                        <div class="col-sm-9">
+                            <input name="idNumber" type="text" ng-model="vm.viewModel.idNumber" class="form-control" maxlength="13" required />
+                            <span class="text-help" ng-show="EditForm.idNumber.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="dob" class="col-sm-2 form-control-label">Dob:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control"
+                                   ng-model="vm.viewModel.dob"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   name="dob" data-date-format="yyyy/MM/dd"
+                                   autoclose="true"
+                                   bs-datepicker placeholder="Date of Birth" ng-required="true" autocomplete="off"> 
+                            <span class="text-help" ng-show="EditForm.dob.$invalid">!*</span>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row" show-errors>
+                        <label for="spouseName" class="col-sm-2 form-control-label">Spouse Name:</label>
+                        <div class="col-sm-9">
+                            <input name="spouseName" type="text" ng-model="vm.viewModel.spouseName" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.spouseName.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="children" class="col-sm-2 form-control-label">Children:</label>
+                        <div class="col-sm-9">
+                            <input name="children" type="text" ng-model="vm.viewModel.children" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.children.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="company" class="col-sm-2 form-control-label">Company:</label>
+                        <div class="col-sm-9">
+                            <input name="company" type="text" ng-model="vm.viewModel.company" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.company.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="workExperienceStartDate" class="col-sm-2 form-control-label">Work Experience Start Date:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control"
+                                   ng-model="vm.viewModel.workExperienceStartDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   name="workExperienceStartDate" data-date-format="yyyy/MM/dd"
+                                   autoclose="true"
+                                   bs-datepicker placeholder="Work Experience Start Date" ng-required="true" autocomplete="off">
+                            <span class="text-help" ng-show="EditForm.workExperienceStartDate.$invalid">!*</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="employmentStartDate" class="col-sm-2 form-control-label">Employment Start Date:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control"
+                                   ng-model="vm.viewModel.employmentStartDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   name="employmentStartDate" data-date-format="yyyy/MM/dd"
+                                   autoclose="true"
+                                   bs-datepicker placeholder="Employment Start Date" ng-required="true" autocomplete="off">
+                            <span class="text-help" ng-show="EditForm.employmentStartDate.$invalid">!*</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="employmentEndDate" class="col-sm-2 form-control-label">Employment End Date:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control"
+                                   ng-model="vm.viewModel.employmentEndDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   name="employmentEndDate" data-date-format="yyyy/MM/dd"
+                                   autoclose="true"
+                                   ng-required="false"
+                                   bs-datepicker placeholder="Employment End Date" autocomplete="off">
+                            <span class="text-help" ng-show="EditForm.employmentEndDate.$invalid">!*</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="race" class="col-sm-2 form-control-label">Race:</label>
+                        <div class="col-md-9">
+                            <select name="user" class="form-control" ng-options="race as race for race in vm.races"
+                                    ng-model="vm.viewModel.race" ng-required="true" placeholder="Race" required></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="gender" class="col-sm-2 form-control-label">Gender:</label>
+                        <div class="col-md-9">
+                            <select name="user" class="form-control" ng-options="gender as gender for gender in vm.genders"
+                                    ng-model="vm.viewModel.gender" ng-required="true" placeholder="Gender" required></select>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row" show-errors>
+                        <label for="doorTagNumber" class="col-sm-2 form-control-label">Door Tag Number:</label>
+                        <div class="col-sm-9">
+                            <input name="doorTagNumber" type="text" ng-model="vm.viewModel.doorTagNumber" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.doorTagNumber.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="cellPhone" class="col-sm-2 form-control-label">Cellphone Number:</label>
+                        <div class="col-sm-9">
+                            <input name="cellPhone" type="text" ng-model="vm.viewModel.cellPhone" class="form-control" max="10" min="10" required />
+                            <span class="text-help" ng-show="EditForm.cellPhone.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="phoneExtension" class="col-sm-2 form-control-label">Phone Extension:</label>
+                        <div class="col-sm-9">
+                            <input name="phoneExtension" type="text" ng-model="vm.viewModel.phoneExtension" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.phoneExtension.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="landlinePhone" class="col-sm-2 form-control-label">Land Line Number :</label>
+                        <div class="col-sm-9">
+                            <input name="landlinePhone" type="text" ng-model="vm.viewModel.landLinePhone" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.landlinePhone.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="companyEmail" class="col-sm-2 form-control-label">Company Email:</label>
+                        <div class="col-sm-9">
+                            <input name="companyEmial" type="email" ng-model="vm.viewModel.companyEmail" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.companyEmail.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="otherEmail" class="col-sm-2 form-control-label">Other Email:</label>
+                        <div class="col-sm-9">
+                            <input name="otherEmail" type="email" ng-model="vm.viewModel.otherEmail" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.otherEmail.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <hr />
+
+                    <div class="form-group row" show-errors>
+                        <label for="medicalScheme" class="col-sm-2 form-control-label">Medical Aid Scheme:</label>
+                        <div class="col-sm-9">
+                            <input name="medicalScheme" type="text" ng-model="vm.viewModel.medicalScheme" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.medicalScheme.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors>
+                        <label for="medicalSchemeOption" class="col-sm-2 form-control-label">Medical Aid Scheme Option:</label>
+                        <div class="col-sm-9">
+                            <input name="medicalSchemeOption" type="text" ng-model="vm.viewModel.medicalSchemeOption" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.medicalSchemeOption.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="medicalAidNumber" class="col-sm-2 form-control-label">Medical Aid Number:</label>
+                        <div class="col-sm-9">
+                            <input name="medicalAidNumber" type="text" ng-model="vm.viewModel.medicalAidNumber" class="form-control" />
+                            <span class="text-help" ng-show="EditForm.medicalAidNumber.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.userAccountId})">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+
+
+                </form>
+
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

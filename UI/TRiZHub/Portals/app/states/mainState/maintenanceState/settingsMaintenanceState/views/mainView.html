@@ -1,0 +1,60 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>System Settings</h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" novalidate>
+                    <fieldset>
+                        <div class="form-group row" show-errors>
+                            <label for="emailFromName" class="col-sm-2 form-control-label">Email From Name:</label>
+                            <div class="col-sm-9">
+                                <input name="emailFromName" type="text" ng-model="vm.viewModel.emailFromName" class="form-control" ng-required="true"/>
+                                <span class="text-help" ng-show="EditForm.emailFromName.$invalid">Required</span>
+                            </div>
+                        </div>
+                        <div class="form-group row" show-errors>
+                            <label for="emailFromAddress" class="col-sm-2 form-control-label">Email From Address:</label>
+                            <div class="col-sm-9">
+                                <input name="emailFromAddress" type="text" ng-model="vm.viewModel.emailFromAddress" class="form-control" ng-required="true"/>
+                                <span class="text-help" ng-show="EditForm.emailFromAddress.$invalid">Required</span>
+                            </div>
+                        </div>
+                        <div class="form-group row" show-errors>
+                            <label for="aboutApp" class="col-sm-2 form-control-label">About Text:</label>
+                            <div class="col-sm-9">
+                                <textarea name="aboutApp" type="text" ng-model="vm.viewModel.aboutApp" class="form-control" ng-required="true" rows="6"></textarea>
+                                <span class="text-help" ng-show="EditForm.aboutApp.$invalid">Required</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <hr/>
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelForm()">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

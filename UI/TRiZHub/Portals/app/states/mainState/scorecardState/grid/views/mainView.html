@@ -1,0 +1,515 @@
+﻿<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box">
+                <div class="box-header">
+                    <h2>Performance Management</h2>
+                </div>
+                <div class="box-body">
+                    <div class="b-b b-primary nav-active-primary">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item" ng-if="vm.isAllowed('PerformanceManagementCreateScoreCards')">
+                                <a class="nav-link {{vm.cscActive}}" data-toggle="tab" data-target="#csc">Create Score Cards</a>
+                            </li>
+                            <li class="nav-item" ng-if="vm.isAllowed('PerformanceManagementViewMyScoreCards')">
+                                <a class="nav-link {{vm.pscActive}}" data-toggle="tab" data-target="#psc">View My Score Cards</a>
+                            </li>
+                            <li class="nav-item" ng-if="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards')">
+                                <a class="nav-link {{vm.yscActive}}" data-toggle="tab" data-target="#ysc">View My Team Score Cards</a>
+                            </li>
+                            <li class="nav-item" ng-if="vm.isAdmin === true">
+                                <a class="nav-link {{vm.ascActive}}" data-toggle="tab" data-target="#asc">Score Card Admin</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content m-t-1 m-b-1">
+                        <div ng-if="vm.isAllowed('PerformanceManagementCreateScoreCards')" class="tab-pane animated fadeIn text-muted {{vm.cscActive}}" id="csc">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <form class="form-inline v-m m-b-1" role="search" novalidate>
+                                        <div class="form-group l-h m-a-0">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control p-x b-a rounded" placeholder="Employee Name, Evaluator Name" ng-model="vm.gridScorecards.searchFor" ng-change="vm.searchValueChange()">
+                                                <span class="input-group-btn">  
+                                                    <button type="submit" class="btn white b-a rounded no-shadow" ng-click="vm.pageGridScorecards.search()"><i class="fa fa-search"></i></button>
+                                                </span>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                Locked
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModel.locked" ng-change="vm.lockedSubmittedChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                Submitted
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModel.submitted" ng-change="vm.lockedSubmittedChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            Review Year
+                                            <select class="form-control" ng-options="year for year in vm.filterOptions.years" ng-model="vm.filterModel.year"
+                                                    ng-change="vm.yearChange(vm.filterModel.year)"></select>
+                                            Period
+                                            <select class="form-control" ng-options="p as p.displayVal for p in vm.filterOptions.periods" ng-model="vm.filterOptions.period"
+                                                    ng-change="vm.periodChange(vm.filterOptions.period)"></select>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('employeename')">Employee Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('scorecardname')">Scorecard Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('period')">Period</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='period'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='period'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('evaluatorname')">Evaluator Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('datecreated')">Date Created</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('completed')">Submitted</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='completed'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='completed'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridScorecards.sort('locked')">Locked</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='locked'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='locked'}"></i>
+                                            </th>
+
+                                            <th>Actions</th>
+                                            <th>
+                                                <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newScorecard()">
+                                                    <i class="fa fa-plus"></i> New
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-ng-repeat="i in vm.gridScorecards.data" st-select-row="row">
+                                            <td>{{i.employeeName}}</td>
+                                            <td>{{i.scorecardName}}</td>
+                                            <td>{{i.scorecardPeriod}}</td>
+                                            <td>{{i.evaluatorName}}</td>
+                                            <td>{{i.dateCreated | date: 'yyyy/MM/dd'}}</td>
+                                            <td ng-style="i.completed === true &&{'color': 'green'} || i.completed === false &&{'color': 'red'}">{{i.completed}}</td>
+                                            <td ng-style="i.locked === true &&{'color': 'green'} || i.locked === false &&{'color': 'red'}">{{i.locked}}</td>
+                                            <td>
+                                                <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.info}} text-{{app.setting.theme.info}}"
+                                                   ui-sref="mainState.scorecard.submitScorecard({id: i.scorecardId, readOnly: i.locked})">
+                                                    <i class="fa fa-reorder"></i> {{ i.locked ? 'Review' : 'Score' }}
+                                                </a>
+                                            </td>
+                                            <td ng-show="i.completed === true && i.locked === false">
+                                                <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.warning}} text-{{app.setting.theme.warning}}" ng-click="vm.unsubmitScoreCard(i)">
+                                                    <i class="fa fa-reorder"></i> Unsubmit
+                                                </a>
+                                            </td>
+                                            <td ng-show="i.completed === false">
+                                                <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.warning}} text-{{app.setting.theme.warning}}" ng-click="vm.deleteScoreCard(i)">
+                                                    <i class="fa fa-edit"></i> Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="vm.gridScorecards.data.length == 0">
+                                            <td colspan="9">
+                                                No Records
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                                <div class="w-full m-b-2 center-container">
+                                    <uib-pagination total-items="vm.gridScorecards.totalItems" ng-model="vm.gridScorecards.currentPage" max-size="vm.gridScorecards.maxSize"
+                                                    class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGridScorecards.pageChanged()" items-per-page="vm.gridScorecards.recordsPerPage">
+                                    </uib-pagination>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="vm.isAllowed('PerformanceManagementViewMyScoreCards')" class="tab-pane animated fadeIn text-muted  {{vm.pscActive}}" id="psc">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <form class="form-inline v-m m-b-1" role="search" novalidate>
+                                        <div class="form-group l-h m-a-0">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control p-x b-a rounded" placeholder="Employee Name, Evaluator Name" ng-model="vm.gridPersonalScorecards.searchFor" ng-change="vm.searchValuePersonalChange()">
+                                                <span class="input-group-btn">
+                                                    <button type="submit" class="btn white b-a rounded no-shadow" ng-click="vm.pageGridPersonalScorecards.search()"><i class="fa fa-search"></i></button>
+                                                </span>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                Locked
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModelPersonal.locked" ng-change="vm.lockedSubmittedPersonalChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            <div ng-hide="true" class="input-group input-group-sm">
+                                                Submitted
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModelPersonal.submitted" ng-change="vm.lockedSubmittedPersonalChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            Review Year
+                                            <select class="form-control" ng-options="year for year in vm.filterOptionsPersonal.years"
+                                                    ng-change="vm.yearChangePersonal(vm.filterModelPersonal.year)" ng-model="vm.filterModelPersonal.year"></select>
+                                            Period
+                                            <select class="form-control" ng-options="p as p.displayVal for p in vm.filterOptionsPersonal.periods" ng-model="vm.filterOptionsPersonal.period"
+                                                    ng-change="vm.periodChangePersonal(vm.filterOptionsPersonal.period)"></select>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('period')">Period</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridPersonalScorecards.sortKeyOrder.key=='period'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridPersonalScorecards.sortKeyOrder.key=='period'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('scorecardname')">Scorecard Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridPersonalScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridPersonalScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('evaluatorname')">Evaluator Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridPersonalScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridPersonalScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('employeename')">Employee Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridPersonalScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridPersonalScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('datecreated')">Date Created</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridPersonalScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridPersonalScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('completed')">Submitted</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridPersonalScorecards.sortKeyOrder.key=='completed'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridPersonalScorecards.sortKeyOrder.key=='completed'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridPersonalScorecards.sort('locked')">Locked</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.pageGridPersonalScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='locked'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.pageGridPersonalScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='locked'}"></i>
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-ng-repeat="i in vm.gridPersonalScorecards.data" st-select-row="row">
+                                            <td>{{i.scorecardPeriod}}</td>
+                                            <td>{{i.scorecardName}}</td>
+                                            <td>{{i.evaluatorName}}</td>
+                                            <td>{{i.employeeName}}</td>
+                                            <td>{{i.dateCreated | date: 'yyyy/MM/dd'}}</td>
+                                            <td ng-style="i.completed === true &&{'color': 'green'} || i.completed === false &&{'color': 'red'}">{{i.completed}}</td>
+                                            <td ng-style="i.locked === true &&{'color': 'green'} || i.locked === false &&{'color': 'red'}">{{i.locked}}</td>
+                                            <td>
+                                                <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.info}} text-{{app.setting.theme.info}}"
+                                                   ui-sref="mainState.scorecard.submitScorecard({id: i.scorecardId, readOnly: i.locked})">
+                                                    <i class="fa fa-reorder"></i> Review
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="vm.gridPersonalScorecards.data.length == 0">
+                                            <td colspan="8">
+                                                No Records
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                                <div class="w-full m-b-2 center-container">
+                                    <uib-pagination total-items="vm.pageGridPersonalScorecards.totalItems" ng-model="vm.pageGridPersonalScorecards.currentPage" max-size="vm.pageGridPersonalScorecards.maxSize"
+                                                    class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGridPersonalScorecards.pageChanged()" items-per-page="vm.pageGridPersonalScorecards.recordsPerPage">
+                                    </uib-pagination>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards')" class="tab-pane animated fadeIn text-muted {{vm.yscActive}}" id="ysc">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <form class="form-inline v-m m-b-1" role="search" novalidate>
+                                        <div class="form-group l-h m-a-0">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control p-x b-a rounded" placeholder="Employee Name, Evaluator Name" ng-model="vm.gridTeamScorecards.searchFor" ng-change="vm.searchValueTeamChange()">
+                                                <span class="input-group-btn">
+                                                    <button type="submit" class="btn white b-a rounded no-shadow" ng-click="vm.pageGridTeamScorecards.search()"><i class="fa fa-search"></i></button>
+                                                </span>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                Locked
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModelTeam.locked" ng-change="vm.lockedSubmittedTeamChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            <div ng-hide="true" class="input-group input-group-sm">
+                                                Submitted
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModelTeam.submitted" ng-change="vm.lockedSubmittedTeamChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            Review Year
+                                            <select class="form-control" ng-options="year for year in vm.filterOptionsTeam.years"
+                                                    ng-change="vm.yearChangeTeam(vm.filterModelTeam.year)" ng-model="vm.filterModelTeam.year"></select>
+                                            Period
+                                            <select class="form-control" ng-options="p as p.displayVal for p in vm.filterOptionsTeam.periods" ng-model="vm.filterOptionsTeam.period"
+                                                    ng-change="vm.periodChangeTeam(vm.filterOptionsTeam.period)"></select>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('employeename')">Employee Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridTeamScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridTeamScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('scorecardname')">Scorecard Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridTeamScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridTeamScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('period')">Period</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridTeamScorecards.sortKeyOrder.key=='period'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridTeamScorecards.sortKeyOrder.key=='period'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('evaluatorname')">Evaluator Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridTeamScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridTeamScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('datecreated')">Date Created</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridTeamScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridTeamScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('completed')">Submitted</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridTeamScorecards.sortKeyOrder.key=='completed'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridTeamScorecards.sortKeyOrder.key=='completed'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridTeamScorecards.sort('locked')">Locked</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.pageGridTeamScorecards.sortKeyOrder.order=='ASC' && vm.gridScorecards.sortKeyOrder.key=='locked'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.pageGridTeamScorecards.sortKeyOrder.order=='DESC' && vm.gridScorecards.sortKeyOrder.key=='locked'}"></i>
+                                            </th>
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-ng-repeat="i in vm.gridTeamScorecards.data" st-select-row="row">
+                                            <td>{{i.employeeName}}</td>
+                                            <td>{{i.scorecardName}}</td>
+                                            <td>{{i.scorecardPeriod}}</td>
+                                            <td>{{i.evaluatorName}}</td>
+                                            <td>{{i.dateCreated | date: 'yyyy/MM/dd'}}</td>
+                                            <td ng-style="i.completed === true &&{'color': 'green'} || i.completed === false &&{'color': 'red'}">{{i.completed}}</td>
+                                            <td ng-style="i.locked === true &&{'color': 'green'} || i.locked === false &&{'color': 'red'}">{{i.locked}}</td>
+                                            <td>
+                                                <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.info}} text-{{app.setting.theme.info}}"
+                                                   ui-sref="mainState.scorecard.submitScorecard({id: i.scorecardPeriodId, readOnly: true})">
+                                                    <i class="fa fa-reorder"></i> Review
+                                                </a>
+                                                <button class="btn btn-xs b-black text-black"
+                                                        ng-click="vm.toggleScoreCardLock(i)" ng-style="i.locked== false &&{'color':'red'}">
+                                                    <i class="fa fa-unlock-alt"></i> {{i.locked == true ? 'Unlock' : 'Lock'}}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="vm.gridTeamScorecards.data.length == 0">
+                                            <td colspan="8">
+                                                No Records
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                                <div class="w-full m-b-2 center-container">
+                                    <uib-pagination total-items="vm.gridTeamScorecards.totalItems" ng-model="vm.gridTeamScorecards.currentPage" max-size="vm.gridTeamScorecards.maxSize"
+                                                    class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGridTeamScorecards.pageChanged()" items-per-page="vm.gridTeamScorecards.recordsPerPage">
+                                    </uib-pagination>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="vm.isAdmin === true" class="tab-pane animated fadeIn text-muted {{vm.ascActive}}" id="asc">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <form class="form-inline v-m m-b-1" role="search" novalidate>
+                                        <div class="form-group l-h m-a-0">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control p-x b-a rounded" placeholder="Employee Name, Evaluator Name" ng-model="vm.gridAdminScorecards.searchFor" ng-change="vm.searchValueAdminChange()">
+                                                <span class="input-group-btn">
+                                                    <button type="submit" class="btn white b-a rounded no-shadow" ng-click="vm.pageGridAdminScorecards.search()"><i class="fa fa-search"></i></button>
+                                                </span>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                Locked
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModelAdmin.locked" ng-change="vm.lockedSubmittedAdminChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                Submitted
+                                                <label class="md-switch">
+                                                    <input type="checkbox" ng-model="vm.filterModelAdmin.submitted" ng-change="vm.lockedSubmittedAdminChange()">
+                                                    <i class="indigo"></i>
+                                                </label>
+                                            </div>
+                                            Review Year
+                                            <select class="form-control" ng-options="year for year in vm.filterOptionsAdmin.years" ng-model="vm.filterModelAdmin.year"
+                                                    ng-change="vm.yearChangeAdmin(vm.filterModelAdmin.year)"></select>
+                                            Period
+                                            <select class="form-control" ng-options="p as p.displayVal for p in vm.filterOptionsAdmin.periods" ng-model="vm.filterOptionsAdmin.period"
+                                                    ng-change="vm.periodChangeAdmin(vm.filterOptionsAdmin.period)"></select>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('employeename')">Employee Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='employeename'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('scorecardname')">Scorecard Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='scorecardname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('period')">Period</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='period'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='period'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('evaluatorname')">Evaluator Name</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='evaluatorname'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('datecreated')">Date Created</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='datecreated'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('completed')">Submitted</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='completed'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='completed'}"></i>
+                                            </th>
+                                            <th>
+                                                <a ng-click="vm.pageGridAdminScorecards.sort('locked')">Locked</a>
+                                                <i ng-class="{'fa fa-angle-double-up':vm.gridAdminScorecards.sortKeyOrder.order=='ASC' && vm.gridAdminScorecards.sortKeyOrder.key=='locked'}"></i>
+                                                <i ng-class="{'fa fa-angle-double-down':vm.gridAdminScorecards.sortKeyOrder.order=='DESC' && vm.gridAdminScorecards.sortKeyOrder.key=='locked'}"></i>
+                                            </th>
+
+                                            <th>Actions</th>
+                                            <th>
+                                                <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newScorecard()">
+                                                    <i class="fa fa-plus"></i> New
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-ng-repeat="i in vm.gridAdminScorecards.data" st-select-row="row">
+                                            <td>{{i.employeeName}}</td>
+                                            <td>{{i.scorecardName}}</td>
+                                            <td>{{i.scorecardPeriod}}</td>
+                                            <td>{{i.evaluatorName}}</td>
+                                            <td>{{i.dateCreated | date: 'yyyy/MM/dd'}}</td>
+                                            <td ng-style="i.completed === true &&{'color': 'green'} || i.completed === false &&{'color': 'red'}">{{i.completed}}</td>
+                                            <td ng-style="i.locked === true &&{'color': 'green'} || i.locked === false &&{'color': 'red'}">{{i.locked}}</td>
+                                            <td>
+                                                <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.info}} text-{{app.setting.theme.info}}"
+                                                   ui-sref="mainState.scorecard.submitScorecard({id: i.scorecardId, readOnly: i.locked})">
+                                                    <i class="fa fa-reorder"></i> {{ i.locked ? 'Review' : 'Score' }}
+                                                </a>
+                                                <a ng-if="i.completed === false && i.locked === false" class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" ng-click="vm.submitScoreCard(i)">
+                                                    <i class="fa fa-reorder"></i> Submit
+                                                </a>
+                                                <a ng-if="i.completed === true && i.locked === false" class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.warning}} text-{{app.setting.theme.warning}}" ng-click="vm.unsubmitScoreCard(i)">
+                                                    <i class="fa fa-reorder"></i> Unsubmit
+                                                </a>
+                                                <button class="btn btn-xs b-black text-black"
+                                                        ng-click="vm.toggleScoreCardLock(i)" ng-style="i.locked== false &&{'color':'red'}">
+                                                    <i class="fa fa-unlock-alt"></i> {{i.locked == true ? 'Unlock' : 'Lock'}}
+                                                </button>
+                                                <a ng-if="vm.isAdmin === true" class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.warn}} text-{{app.setting.theme.warn}}" ng-click="vm.reassignScorecard(i)">
+                                                    <i class="fa fa-road"></i> Reassign
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a ng-if="i.completed === false" class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.warning}} text-{{app.setting.theme.warning}}" ng-click="vm.deleteScoreCard(i)">
+                                                    <i class="fa fa-edit"></i> Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="vm.gridAdminScorecards.data.length == 0">
+                                            <td colspan="9">
+                                                No Records
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                                <div class="w-full m-b-2 center-container">
+                                    <uib-pagination total-items="vm.gridAdminScorecards.totalItems" ng-model="vm.gridAdminScorecards.currentPage" max-size="vm.gridAdminScorecards.maxSize"
+                                                    class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGridAdminScorecards.pageChanged()" items-per-page="vm.gridAdminScorecards.recordsPerPage">
+                                    </uib-pagination>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

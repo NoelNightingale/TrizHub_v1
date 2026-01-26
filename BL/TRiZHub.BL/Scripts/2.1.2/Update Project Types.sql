@@ -1,0 +1,3 @@
+﻿Update [TRiZHub].[dbo].[Project] SET ProjectTypeId = (SELECT Id FROM [TRiZHub].[dbo].[ProjectType] WHERE Name = 'Leave (Other)') where Id = N'0775B5A7-E569-4FE2-88EE-E751558522DF'
+Update [TRiZHub].[dbo].[Project] SET ProjectTypeId = (SELECT Id FROM [TRiZHub].[dbo].[ProjectType] WHERE Name = 'Leave (Other)') where Id = N'A4A38718-6B09-45BE-9585-8FAD3EBA6A1B'
+Update [TRiZHub].[dbo].[Project] SET ProjectTypeId = (SELECT Id FROM [TRiZHub].[dbo].[ProjectType] WHERE Name = 'Leave (Other)') where Id = N'C47F6CDA-C0EA-483F-BD7E-CAA141F51108'

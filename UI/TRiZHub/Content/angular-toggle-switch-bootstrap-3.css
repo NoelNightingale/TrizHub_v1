@@ -1,0 +1,214 @@
+.ats-switch {
+    border: 1px solid;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 8px;
+    min-width: 100px;
+    overflow: hidden;
+    text-align: left;
+}
+
+.ats-switch.disabled {
+    cursor: default !important;
+    filter: alpha(opacity=50);
+    opacity: 0.5;
+}
+
+.ats-switch.disabled .switch-left,
+.ats-switch.disabled .switch-right,
+.ats-switch.disabled .knob { cursor: default !important; }
+
+.ats-switch span {
+    -moz-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-block;
+    float: left;
+    height: 100%;
+    line-height: 20px;
+    padding: 4px;
+    text-align: center;
+    white-space: nowrap;
+    width: 33%;
+}
+
+.ats-switch > div {
+    position: relative;
+    width: 150%;
+}
+
+.ats-switch .knob {
+    background: red;
+    background-color: #f5f5f5;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    width: 34%;
+    z-index: 100;
+}
+
+.ats-switch .switch-on { left: 0%; }
+
+.ats-switch .switch-off { left: -50%; }
+
+.ats-switch .swtich-left,
+.ats-switch .switch-right { z-index: 1; }
+
+.ats-switch .switch-left {
+    background: #005fcc;
+    color: #fff;
+}
+
+.ats-switch .switch-right {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.ats-switch .switch-animate {
+    -moz-transition: left 0.5s;
+    -o-transition: left 0.5s;
+    -webkit-transition: left 0.5s;
+    transition: left 0.5s;
+}
+
+.ats-switch {
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    -webkit-user-select: none;
+    border: 1px solid;
+    border-color: #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 8px;
+    min-width: 100px;
+    overflow: hidden;
+    position: relative;
+    text-align: left;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    user-select: none;
+    vertical-align: middle;
+}
+
+.ats-switch:hover {
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, 0.6);
+    border-color: #66afe9;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, 0.6);
+    outline: 0;
+}
+
+.ats-switch.disabled:hover {
+    -webkit-box-shadow: inset 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0);
+    border-color: #ccc;
+    box-shadow: inset 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.ats-switch .knob {
+    background: #fff;
+    border-left: none;
+    border-right: none;
+    margin-bottom: -1px;
+    margin-top: -1px;
+    text-align: center;
+    z-index: 100;
+}
+
+.ats-switch .knob i {
+    color: #000;
+    line-height: 18px;
+    pointer-events: none;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.ats-switch .switch-left,
+.ats-switch .switch-right,
+.ats-switch .knob { min-height: 28px; }
+
+.ats-switch.switch-mini { min-width: 72px; }
+
+.ats-switch.switch-mini .switch-left,
+.ats-switch.switch-mini .switch-right,
+.ats-switch.switch-mini .knob {
+    font-size: 10px;
+    line-height: 9px;
+    min-height: 18px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+}
+
+.ats-switch.switch-mini i.switch-mini-icons {
+    height: 1.20em;
+    line-height: 9px;
+    margin-bottom: -1px;
+    margin-top: -1px;
+    text-align: center;
+    transform: scale(0.6);
+    vertical-align: text-top;
+}
+
+.ats-switch.switch-small { min-width: 80px; }
+
+.ats-switch.switch-small .switch-left,
+.ats-switch.switch-small .switch-right,
+.ats-switch.switch-small .knob {
+    font-size: 12px;
+    line-height: 18px;
+    min-height: 24px;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
+
+.ats-switch.switch-large { min-width: 120px; }
+
+.ats-switch.switch-large .switch-left,
+.ats-switch.switch-large .switch-right,
+.ats-switch.switch-large .knob {
+    font-size: 16px;
+    line-height: normal;
+    min-height: 34px;
+    padding-bottom: 9px;
+    padding-top: 9px;
+}
+
+.ats-switch span.switch-left {
+    background: #428bca;
+    color: #fff;
+}
+
+.ats-switch span.switch-right {
+    background: #eeeeee;
+    color: #000;
+}
+
+.ats-switch.switch-primary span.switch-left {
+    background: #428bca;
+    color: #fff;
+}
+
+.ats-switch.switch-info span.switch-left {
+    background: #5bc0de;
+    color: #fff;
+}
+
+.ats-switch.switch-success span.switch-left {
+    background: #5cb85c;
+    color: #fff;
+}
+
+.ats-switch.switch-warning span.switch-left {
+    background: #f0ad4e;
+    color: #fff;
+}
+
+.ats-switch.switch-danger span.switch-left {
+    background: #d9534f;
+    color: #fff;
+}
+
+.ats-switch.switch-default span.switch-left {
+    background: #eeeeee;
+    color: #000;
+}

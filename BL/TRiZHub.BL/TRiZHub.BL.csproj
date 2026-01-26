@@ -1,0 +1,568 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B7AFEB3E-A736-43DB-AE04-9C630D1F338A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TRiZHub.BL</RootNamespace>
+    <AssemblyName>TRiZHub.BL</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'UnitTest|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\UnitTest\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Common.Logging.3.3.1\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus, Version=4.0.5.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EPPlus.4.0.5\lib\net20\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.Interfaces, Version=6.1.1.0, Culture=neutral, PublicKeyToken=a694d7f3b0907a61, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EPPlus.Interfaces.6.1.1\lib\net462\EPPlus.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.System.Drawing, Version=6.1.1.0, Culture=neutral, PublicKeyToken=2308d35469c9bac0, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EPPlus.System.Drawing.6.1.1\lib\net462\EPPlus.System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.IO.RecyclableMemoryStream.3.0.0\lib\netstandard2.0\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="Quartz, Version=2.3.3.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Quartz.2.3.3\lib\net40\Quartz.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ComponentModel.Annotations.5.0.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Context\DataContext.cs" />
+    <Compile Include="Entities\ActivityData\Activity.cs" />
+    <Compile Include="Entities\BillingCycleData\BillingCycleEntry.cs" />
+    <Compile Include="Entities\BillingRatesData\BillingRates.cs" />
+    <Compile Include="Entities\ClientEntityData\ClientEntity.cs" />
+    <Compile Include="Entities\ClientReporterData\ClientReporter.cs" />
+    <Compile Include="Entities\ContactData\EmergancyContact.cs" />
+    <Compile Include="Entities\EmployerData\EmployerEntity.cs" />
+    <Compile Include="Entities\OfficeEquipmentData\OfficeEquipment.cs" />
+    <Compile Include="Entities\PersonalInformationData\Personallnformation.cs" />
+    <Compile Include="Entities\ProjectData\ProjectType.cs" />
+    <Compile Include="Entities\TeamJobDesignationData\TeamJobDesignation.cs" />
+    <Compile Include="Entities\TravelInformationData\TravelInformation.cs" />
+    <Compile Include="Entities\EmailData\EmailAttachment.cs" />
+    <Compile Include="Entities\MasterData\ImageData.cs" />
+    <Compile Include="Entities\EmailData\EmailQueue.cs" />
+    <Compile Include="Entities\ProjectData\SubProject.cs" />
+    <Compile Include="Entities\ProjectData\Project.cs" />
+    <Compile Include="Entities\ScorecardData\Scorecard.cs" />
+    <Compile Include="Entities\ScorecardData\ScorecardRecord.cs" />
+    <Compile Include="Entities\ScorecardTemplateData\ScorecardTemplatePeriod.cs" />
+    <Compile Include="Entities\ScorecardTemplateData\ScorecardTemplateItem.cs" />
+    <Compile Include="Entities\ScorecardTemplateData\ScorecardTemplate.cs" />
+    <Compile Include="Entities\SettingsData\SystemParameter.cs" />
+    <Compile Include="Entities\TeamData\Team.cs" />
+    <Compile Include="Entities\TimesheetData\TimesheetEntry.cs" />
+    <Compile Include="Entities\Types\ClientEntityType.cs" />
+    <Compile Include="Entities\Types\PasswordType.cs" />
+    <Compile Include="Entities\Types\EmailStatusType.cs" />
+    <Compile Include="Entities\Logging\SystemLog.cs" />
+    <Compile Include="Entities\SecurityData\UserAccount.cs" />
+    <Compile Include="Entities\SecurityData\AuditLog.cs" />
+    <Compile Include="Entities\SecurityData\Privilege.cs" />
+    <Compile Include="Entities\Types\PrivilegeType.cs" />
+    <Compile Include="Entities\SecurityData\Role.cs" />
+    <Compile Include="Entities\SecurityData\UserIdentity.cs" />
+    <Compile Include="Entities\Types\ScorecardScoring.cs" />
+    <Compile Include="Entities\Types\ScorecardScoreType.cs" />
+    <Compile Include="Entities\Types\StatusType.cs" />
+    <Compile Include="Entities\UserIdentityProjectData\UserIdentiryClient.cs" />
+    <Compile Include="Entities\UserIdentityProjectData\UserIdentityProject.cs" />
+    <Compile Include="Extensions\DateExtensions.cs" />
+    <Compile Include="Migrations\201609151430327_InitialCreate15092016.cs" />
+    <Compile Include="Migrations\201609151430327_InitialCreate15092016.Designer.cs">
+      <DependentUpon>201609151430327_InitialCreate15092016.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201609190714523_addedTableTagToTeamJobDsignation.cs" />
+    <Compile Include="Migrations\201609190714523_addedTableTagToTeamJobDsignation.Designer.cs">
+      <DependentUpon>201609190714523_addedTableTagToTeamJobDsignation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201609220807326_addedIsActivePropertyToRoleEntity.cs" />
+    <Compile Include="Migrations\201609220807326_addedIsActivePropertyToRoleEntity.Designer.cs">
+      <DependentUpon>201609220807326_addedIsActivePropertyToRoleEntity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201609221121413_addedSpouseNameAndChildrenAttributesToPersonalInformationAndAddedSupplierNameToOfficeEquipment.cs" />
+    <Compile Include="Migrations\201609221121413_addedSpouseNameAndChildrenAttributesToPersonalInformationAndAddedSupplierNameToOfficeEquipment.Designer.cs">
+      <DependentUpon>201609221121413_addedSpouseNameAndChildrenAttributesToPersonalInformationAndAddedSupplierNameToOfficeEquipment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201609221131107_changedLandLineAndPhoneExtensionAtrributesToNotRequired.cs" />
+    <Compile Include="Migrations\201609221131107_changedLandLineAndPhoneExtensionAtrributesToNotRequired.Designer.cs">
+      <DependentUpon>201609221131107_changedLandLineAndPhoneExtensionAtrributesToNotRequired.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201609261318257_changedScorecardTemplateCodeAttributeToNotBeRequired.cs" />
+    <Compile Include="Migrations\201609261318257_changedScorecardTemplateCodeAttributeToNotBeRequired.Designer.cs">
+      <DependentUpon>201609261318257_changedScorecardTemplateCodeAttributeToNotBeRequired.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201609270519308_changedScoreCardTemplateItemCodeAttributeToNotRequired.cs" />
+    <Compile Include="Migrations\201609270519308_changedScoreCardTemplateItemCodeAttributeToNotRequired.Designer.cs">
+      <DependentUpon>201609270519308_changedScoreCardTemplateItemCodeAttributeToNotRequired.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610060711377_addedSubProjectNumberAttributeToSubProjectsEntitie.cs" />
+    <Compile Include="Migrations\201610060711377_addedSubProjectNumberAttributeToSubProjectsEntitie.Designer.cs">
+      <DependentUpon>201610060711377_addedSubProjectNumberAttributeToSubProjectsEntitie.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610100945462_ChangeScoreCardSchema.cs" />
+    <Compile Include="Migrations\201610100945462_ChangeScoreCardSchema.Designer.cs">
+      <DependentUpon>201610100945462_ChangeScoreCardSchema.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610110631219_updateChangeScoreCardSchema.cs" />
+    <Compile Include="Migrations\201610110631219_updateChangeScoreCardSchema.Designer.cs">
+      <DependentUpon>201610110631219_updateChangeScoreCardSchema.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610130812107_updateChangeScoreCardSchemaCorrectedWrongForieghnKey.cs" />
+    <Compile Include="Migrations\201610130812107_updateChangeScoreCardSchemaCorrectedWrongForieghnKey.Designer.cs">
+      <DependentUpon>201610130812107_updateChangeScoreCardSchemaCorrectedWrongForieghnKey.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610180804172_madePersonalInfoAndOfficeEquipmentdatesNullable.cs" />
+    <Compile Include="Migrations\201610180804172_madePersonalInfoAndOfficeEquipmentdatesNullable.Designer.cs">
+      <DependentUpon>201610180804172_madePersonalInfoAndOfficeEquipmentdatesNullable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610180904021_FutherTweakDatesAssignedDate.cs" />
+    <Compile Include="Migrations\201610180904021_FutherTweakDatesAssignedDate.Designer.cs">
+      <DependentUpon>201610180904021_FutherTweakDatesAssignedDate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610250912377_changedTeamJobDesignationEndDateFieldValueTypeToNullableDate.cs" />
+    <Compile Include="Migrations\201610250912377_changedTeamJobDesignationEndDateFieldValueTypeToNullableDate.Designer.cs">
+      <DependentUpon>201610250912377_changedTeamJobDesignationEndDateFieldValueTypeToNullableDate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201611040557038_changedTeamJobDesignationLineLeaderIdToTypeNullableAndRemovedRequiredAnnotation.cs" />
+    <Compile Include="Migrations\201611040557038_changedTeamJobDesignationLineLeaderIdToTypeNullableAndRemovedRequiredAnnotation.Designer.cs">
+      <DependentUpon>201611040557038_changedTeamJobDesignationLineLeaderIdToTypeNullableAndRemovedRequiredAnnotation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201611070637201_addedLockedAttributeToScoreCard.cs" />
+    <Compile Include="Migrations\201611070637201_addedLockedAttributeToScoreCard.Designer.cs">
+      <DependentUpon>201611070637201_addedLockedAttributeToScoreCard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201701021238557_AddModelToOfficeEquipment.cs" />
+    <Compile Include="Migrations\201701021238557_AddModelToOfficeEquipment.Designer.cs">
+      <DependentUpon>201701021238557_AddModelToOfficeEquipment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201701100814172_AddNotesAndAccountItem.cs" />
+    <Compile Include="Migrations\201701100814172_AddNotesAndAccountItem.Designer.cs">
+      <DependentUpon>201701100814172_AddNotesAndAccountItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201704241441523_addClientReporter.cs" />
+    <Compile Include="Migrations\201704241441523_addClientReporter.Designer.cs">
+      <DependentUpon>201704241441523_addClientReporter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810081213567_AddedReviewYear.cs" />
+    <Compile Include="Migrations\201810081213567_AddedReviewYear.Designer.cs">
+      <DependentUpon>201810081213567_AddedReviewYear.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810120733064_ScorecardComments.cs" />
+    <Compile Include="Migrations\201810120733064_ScorecardComments.Designer.cs">
+      <DependentUpon>201810120733064_ScorecardComments.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201810161027399_addedDefinitionToScorecardTemplateItem.cs" />
+    <Compile Include="Migrations\201810161027399_addedDefinitionToScorecardTemplateItem.Designer.cs">
+      <DependentUpon>201810161027399_addedDefinitionToScorecardTemplateItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201908220826178_2019-08-22_AddedIsDeletedToProjects.cs" />
+    <Compile Include="Migrations\201908220826178_2019-08-22_AddedIsDeletedToProjects.Designer.cs">
+      <DependentUpon>201908220826178_2019-08-22_AddedIsDeletedToProjects.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201908220943584_2019-08-22_AddedIsDeletedToClients.cs" />
+    <Compile Include="Migrations\201908220943584_2019-08-22_AddedIsDeletedToClients.Designer.cs">
+      <DependentUpon>201908220943584_2019-08-22_AddedIsDeletedToClients.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201908280945437_ProjectTypes.cs" />
+    <Compile Include="Migrations\201908280945437_ProjectTypes.Designer.cs">
+      <DependentUpon>201908280945437_ProjectTypes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201909030949170_VariableScorecardTemplatePeriod.cs" />
+    <Compile Include="Migrations\201909030949170_VariableScorecardTemplatePeriod.Designer.cs">
+      <DependentUpon>201909030949170_VariableScorecardTemplatePeriod.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201909041017240_VariableScorecard.cs" />
+    <Compile Include="Migrations\201909041017240_VariableScorecard.Designer.cs">
+      <DependentUpon>201909041017240_VariableScorecard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201909051231496_AddedReportOrderToPeriods.cs" />
+    <Compile Include="Migrations\201909051231496_AddedReportOrderToPeriods.Designer.cs">
+      <DependentUpon>201909051231496_AddedReportOrderToPeriods.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201909251039220_Added_AllowSubProjectAlternativeType.cs" />
+    <Compile Include="Migrations\201909251039220_Added_AllowSubProjectAlternativeType.Designer.cs">
+      <DependentUpon>201909251039220_Added_AllowSubProjectAlternativeType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201912021842100_20191202_Added_AllowSubProjectBillable.cs" />
+    <Compile Include="Migrations\201912021842100_20191202_Added_AllowSubProjectBillable.Designer.cs">
+      <DependentUpon>201912021842100_20191202_Added_AllowSubProjectBillable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202103281524177_AddedEmployer.cs" />
+    <Compile Include="Migrations\202103281524177_AddedEmployer.Designer.cs">
+      <DependentUpon>202103281524177_AddedEmployer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202103281653058_AddedEmployerToTeamandjobdesigtaion.cs" />
+    <Compile Include="Migrations\202103281653058_AddedEmployerToTeamandjobdesigtaion.Designer.cs">
+      <DependentUpon>202103281653058_AddedEmployerToTeamandjobdesigtaion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202308131106350_UserIdentityProject.cs" />
+    <Compile Include="Migrations\202308131106350_UserIdentityProject.designer.cs">
+      <DependentUpon>202308131106350_UserIdentityProject.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202503060742046_ProjectTimeCaptureAssignment.cs" />
+    <Compile Include="Migrations\202503060742046_ProjectTimeCaptureAssignment.designer.cs">
+      <DependentUpon>202503060742046_ProjectTimeCaptureAssignment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Reports\ProjectAllocationModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Provider\ActivityData\ActivityException.cs" />
+    <Compile Include="Provider\ActivityData\ActivityProvider.cs" />
+    <Compile Include="Provider\ActivityData\IActivityProvider.cs" />
+    <Compile Include="Provider\BillingCycleData\BillingCycleException.cs" />
+    <Compile Include="Provider\BillingCycleData\BillingCycleProvider.cs" />
+    <Compile Include="Provider\BillingCycleData\IBillingCycleProvider.cs" />
+    <Compile Include="Provider\BillingRatesData\BillingRatesException.cs" />
+    <Compile Include="Provider\BillingRatesData\IBillingRatesProvider.cs" />
+    <Compile Include="Provider\BillingRatesData\BillingRatesProvider.cs" />
+    <Compile Include="Provider\EmployerEntityData\EmployerProvider.cs" />
+    <Compile Include="Provider\EmployerEntityData\IEmployerProvider.cs" />
+    <Compile Include="Provider\ClientEntityData\ClientProvider.cs" />
+    <Compile Include="Provider\ClientEntityData\IClientProvider.cs" />
+    <Compile Include="Provider\ClientEntityData\ClientException.cs" />
+    <Compile Include="Provider\ContactData\ContactException.cs" />
+    <Compile Include="Provider\ContactData\IContactProvider.cs" />
+    <Compile Include="Provider\ContactData\ContactProvider.cs" />
+    <Compile Include="Provider\Email\EmailProvider.cs" />
+    <Compile Include="Provider\Email\IEmailProvider.cs" />
+    <Compile Include="Provider\ImageData\IImageDataProvider.cs" />
+    <Compile Include="Provider\ImageData\ImageDataException.cs" />
+    <Compile Include="Provider\ImageData\ImageDataProvider.cs" />
+    <Compile Include="Provider\ChAdminTemplateProvider.cs" />
+    <Compile Include="Provider\IChAdminTemplateProvider.cs" />
+    <Compile Include="Provider\OfficeEquipmentData\IOfficeEquipmentProvider.cs" />
+    <Compile Include="Provider\OfficeEquipmentData\OfficeEquipmentException.cs" />
+    <Compile Include="Provider\OfficeEquipmentData\OfficeEquipmentProvider.cs" />
+    <Compile Include="Provider\PersonalInformationData\IPersonalInformationProvider.cs" />
+    <Compile Include="Provider\PersonalInformationData\PersonalInformationException.cs" />
+    <Compile Include="Provider\PersonalInformationData\PersonalInformationProvider.cs" />
+    <Compile Include="Provider\ProjectData\ProjectException.cs" />
+    <Compile Include="Provider\ProjectData\ProjectProvider.cs" />
+    <Compile Include="Provider\ProjectData\IProjectProvider.cs" />
+    <Compile Include="Provider\ReportData\IReportProvider.cs" />
+    <Compile Include="Provider\ReportData\ReportAttributes\ReportHiddenAttribute.cs" />
+    <Compile Include="Provider\ReportData\ReportDataObject.cs" />
+    <Compile Include="Provider\ReportData\ReportException.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\ProjectAllocationReport\ProjectAllocationModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\ScorecardSummary\ScorecardSummaryEntryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\ActivityTimesheetSummaryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\PivotedTimesheetRow.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\ProjectTimesheetSummaryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\SubProjectTimesheetSummaryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\TeamTimesheetSummaryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\TimesheetSummaryEntryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportModels\TimesheetSummary\UserAccountTimesheetSummaryModel.cs" />
+    <Compile Include="Provider\ReportData\ReportProvider.cs" />
+    <Compile Include="Provider\ScorecardData\IScorecardProvider.cs" />
+    <Compile Include="Provider\ScorecardData\ScorecardException.cs" />
+    <Compile Include="Provider\ScorecardData\ScorecardProvider.cs" />
+    <Compile Include="Provider\ScorecardTemplateData\IScorecardTemplateProvider.cs" />
+    <Compile Include="Provider\ScorecardTemplateData\ScorecardTemplateException.cs" />
+    <Compile Include="Provider\ScorecardTemplateData\ScorecardTemplateProvider.cs" />
+    <Compile Include="Provider\Security\ICurrentUser.cs" />
+    <Compile Include="Provider\Security\ISecurityProvider.cs" />
+    <Compile Include="Provider\Security\LoggedInUser.cs" />
+    <Compile Include="Provider\Security\SecurityProvider.cs" />
+    <Compile Include="Provider\Settings\AppSettings.cs" />
+    <Compile Include="Provider\Settings\IAppSettings.cs" />
+    <Compile Include="Provider\Settings\ISettingsProvider.cs" />
+    <Compile Include="Provider\Settings\SettingsException.cs" />
+    <Compile Include="Provider\Settings\SettingsProvider.cs" />
+    <Compile Include="Provider\TeamData\TeamException.cs" />
+    <Compile Include="Provider\TeamData\TeamProvider.cs" />
+    <Compile Include="Provider\TeamData\ITeamProvider.cs" />
+    <Compile Include="Provider\TeamJobDesignationData\ITeamJobDesignationProvider.cs" />
+    <Compile Include="Provider\TeamJobDesignationData\TeamJobDesignationProvider.cs" />
+    <Compile Include="Provider\TeamJobDesignationData\TeamJobDesignationException.cs" />
+    <Compile Include="Provider\TimesheetData\TimesheetException.cs" />
+    <Compile Include="Provider\TimesheetData\TimesheetProvider.cs" />
+    <Compile Include="Provider\TimesheetData\ITimesheetProvider.cs" />
+    <Compile Include="Provider\TravelInformationData\TravelInfromationException.cs" />
+    <Compile Include="Provider\TravelInformationData\ITravelInformationProvider.cs" />
+    <Compile Include="Provider\TravelInformationData\TravelInformationProvider.cs" />
+    <Compile Include="Resources\ResourceManager.cs" />
+    <Compile Include="Scheduled\EmailQueueJob.cs" />
+    <Compile Include="Scheduled\ScheduleJob.cs" />
+    <EmbeddedResource Include="Migrations\201609151430327_InitialCreate15092016.resx">
+      <DependentUpon>201609151430327_InitialCreate15092016.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609190714523_addedTableTagToTeamJobDsignation.resx">
+      <DependentUpon>201609190714523_addedTableTagToTeamJobDsignation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609220807326_addedIsActivePropertyToRoleEntity.resx">
+      <DependentUpon>201609220807326_addedIsActivePropertyToRoleEntity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609221121413_addedSpouseNameAndChildrenAttributesToPersonalInformationAndAddedSupplierNameToOfficeEquipment.resx">
+      <DependentUpon>201609221121413_addedSpouseNameAndChildrenAttributesToPersonalInformationAndAddedSupplierNameToOfficeEquipment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609221131107_changedLandLineAndPhoneExtensionAtrributesToNotRequired.resx">
+      <DependentUpon>201609221131107_changedLandLineAndPhoneExtensionAtrributesToNotRequired.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609261318257_changedScorecardTemplateCodeAttributeToNotBeRequired.resx">
+      <DependentUpon>201609261318257_changedScorecardTemplateCodeAttributeToNotBeRequired.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609270519308_changedScoreCardTemplateItemCodeAttributeToNotRequired.resx">
+      <DependentUpon>201609270519308_changedScoreCardTemplateItemCodeAttributeToNotRequired.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610060711377_addedSubProjectNumberAttributeToSubProjectsEntitie.resx">
+      <DependentUpon>201610060711377_addedSubProjectNumberAttributeToSubProjectsEntitie.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610100945462_ChangeScoreCardSchema.resx">
+      <DependentUpon>201610100945462_ChangeScoreCardSchema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610110631219_updateChangeScoreCardSchema.resx">
+      <DependentUpon>201610110631219_updateChangeScoreCardSchema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610130812107_updateChangeScoreCardSchemaCorrectedWrongForieghnKey.resx">
+      <DependentUpon>201610130812107_updateChangeScoreCardSchemaCorrectedWrongForieghnKey.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610180804172_madePersonalInfoAndOfficeEquipmentdatesNullable.resx">
+      <DependentUpon>201610180804172_madePersonalInfoAndOfficeEquipmentdatesNullable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610180904021_FutherTweakDatesAssignedDate.resx">
+      <DependentUpon>201610180904021_FutherTweakDatesAssignedDate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610250912377_changedTeamJobDesignationEndDateFieldValueTypeToNullableDate.resx">
+      <DependentUpon>201610250912377_changedTeamJobDesignationEndDateFieldValueTypeToNullableDate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611040557038_changedTeamJobDesignationLineLeaderIdToTypeNullableAndRemovedRequiredAnnotation.resx">
+      <DependentUpon>201611040557038_changedTeamJobDesignationLineLeaderIdToTypeNullableAndRemovedRequiredAnnotation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611070637201_addedLockedAttributeToScoreCard.resx">
+      <DependentUpon>201611070637201_addedLockedAttributeToScoreCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201701021238557_AddModelToOfficeEquipment.resx">
+      <DependentUpon>201701021238557_AddModelToOfficeEquipment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201701100814172_AddNotesAndAccountItem.resx">
+      <DependentUpon>201701100814172_AddNotesAndAccountItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201704241441523_addClientReporter.resx">
+      <DependentUpon>201704241441523_addClientReporter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810081213567_AddedReviewYear.resx">
+      <DependentUpon>201810081213567_AddedReviewYear.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810120733064_ScorecardComments.resx">
+      <DependentUpon>201810120733064_ScorecardComments.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201810161027399_addedDefinitionToScorecardTemplateItem.resx">
+      <DependentUpon>201810161027399_addedDefinitionToScorecardTemplateItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201908220826178_2019-08-22_AddedIsDeletedToProjects.resx">
+      <DependentUpon>201908220826178_2019-08-22_AddedIsDeletedToProjects.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201908220943584_2019-08-22_AddedIsDeletedToClients.resx">
+      <DependentUpon>201908220943584_2019-08-22_AddedIsDeletedToClients.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201908280945437_ProjectTypes.resx">
+      <DependentUpon>201908280945437_ProjectTypes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201909030949170_VariableScorecardTemplatePeriod.resx">
+      <DependentUpon>201909030949170_VariableScorecardTemplatePeriod.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201909041017240_VariableScorecard.resx">
+      <DependentUpon>201909041017240_VariableScorecard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201909051231496_AddedReportOrderToPeriods.resx">
+      <DependentUpon>201909051231496_AddedReportOrderToPeriods.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201909251039220_Added_AllowSubProjectAlternativeType.resx">
+      <DependentUpon>201909251039220_Added_AllowSubProjectAlternativeType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201912021842100_20191202_Added_AllowSubProjectBillable.resx">
+      <DependentUpon>201912021842100_20191202_Added_AllowSubProjectBillable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202103281524177_AddedEmployer.resx">
+      <DependentUpon>202103281524177_AddedEmployer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202103281653058_AddedEmployerToTeamandjobdesigtaion.resx">
+      <DependentUpon>202103281653058_AddedEmployerToTeamandjobdesigtaion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202308131106350_UserIdentityProject.resx">
+      <DependentUpon>202308131106350_UserIdentityProject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202503060742046_ProjectTimeCaptureAssignment.resx">
+      <DependentUpon>202503060742046_ProjectTimeCaptureAssignment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedure.sql" />
+    <Compile Include="Scripts\ScorecardProcedure\ScorecardProcedureModel.cs" />
+    <Compile Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedureModel.cs" />
+    <Compile Include="Util\Cipher.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\PasswordReset.html" />
+    <EmbeddedResource Include="Resources\Email\Template.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="job_scheduling_data_2_0.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\DataSources\TRiZHub.BL.Provider.Report.Data.InvoiceReport.datasource" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lib\TCR.Lib.BL\TCR.Lib.BL.csproj">
+      <Project>{35a9c699-671d-41b7-aa25-3edcf8d234ae}</Project>
+      <Name>TCR.Lib.BL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Lib\TCR.Lib\TCR.Lib.csproj">
+      <Project>{1a3984ce-0ada-4ebd-9041-0bfec35a4ef0}</Project>
+      <Name>TCR.Lib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\BannerImage.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\AdvertImage.png" />
+    <EmbeddedResource Include="Resources\Category.jpg" />
+    <EmbeddedResource Include="Resources\Package.jpg" />
+    <EmbeddedResource Include="Resources\ProfileImage.png" />
+    <EmbeddedResource Include="Resources\Video.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Product.png" />
+    <EmbeddedResource Include="Resources\Seller.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\BidderApproved.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\BidderPending.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\BidderApproved.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\BidderDeclined.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\BidderAuctionApproved.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\BidderAuctionDeclined.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Email\BidderAuctionPending.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Email\RegistrationConfirmed.html" />
+    <Content Include="Scripts\2.1.0\Fix Designations.sql" />
+    <Content Include="Scripts\2.1.0\Project Billing Report.sql" />
+    <Content Include="Scripts\2.1.0\Update lsp_getTimesheetReportDetail.sql" />
+    <Content Include="Scripts\2.1.2\Update Project Types.sql" />
+    <Content Include="Scripts\2.2.1\FixBillinRates.sql" />
+    <Content Include="Scripts\2.3.0\migrateUserProjects.sql" />
+    <Content Include="Scripts\3.0.0\AddPermissionSet.sql" />
+    <Content Include="Scripts\3.0.0\GetProjectAllocationReport.sql" />
+    <Content Include="Scripts\3.0.0\SeedUseridentityProject.sql" />
+    <Content Include="Scripts\ScorecardProcedure\lsp_getScoreCardSummary.sql" />
+    <Content Include="Scripts\StoredProcedures\lsp_getProjectAllocationReport.sql" />
+    <Content Include="Scripts\Updates\ScoreCardTemplatePeriod.sql" />
+    <Content Include="Scripts\StoredProcedures\lsp_getProjectBillableHours.sql" />
+    <Content Include="Scripts\StoredProcedures\lsp_getTimesheetReportData.sql" />
+    <Content Include="Scripts\StoredProcedures\lsp_getTimesheetReportDetail.sql" />
+    <Content Include="Scripts\Updates\UpdateExistingProjectsWithNewProjectTypes.sql" />
+    <Content Include="Scripts\Updates\UpdateExistingPeriodReportOrder.sql" />
+    <Content Include="Scripts\_core\SetupRolesAndPrivliges.sql" />
+    <EmbeddedResource Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedure - Orig.sql" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
+  </Target>
+  <Import Project="..\..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

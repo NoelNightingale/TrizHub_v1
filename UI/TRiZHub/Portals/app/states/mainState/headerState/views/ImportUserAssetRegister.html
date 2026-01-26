@@ -1,0 +1,35 @@
+﻿<div class="modal-header {{app.setting.theme.info}}">
+    <h4 class="modal-title">{{popupimportModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    {{popupimportModel.text}}
+
+
+    <form name="upload" class="form" data-ng-submit="vm.addFile()">
+        <input class="btn btn-outline" type="file" name="file" accept=".xlsx, .xls, .csv"
+               onchange="angular.element(this).scope().vm.uploadedFile(this)" required />
+        <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="submit">Import </button>
+    </form>
+</div>
+
+<div class="container">
+    <div class="pull-left">
+        <div class="alert alert-danger" ng-if="vm.error">
+            <strong>{{vm.errorMessage}}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <div class="pull-left">
+        <div><strong ng-if="vm.exceptionList.length == 2">{{vm.successMessage}}</strong><strong ng-if="vm.exceptionList.length > 2">Import was partly successfull</strong></div>
+        <div ng-if="vm.exceptionList.length > 2"><strong>But the following rows were not imported</strong></div>
+    </div>
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupimportModel.noClick()">Close</button>
+    <!--<button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupimportModel.yesButton}}</button>-->
+</div>
+
+<div class="container">
+    <div ng-repeat="exc in vm.exceptionList">{{exc}}</div>
+</div>

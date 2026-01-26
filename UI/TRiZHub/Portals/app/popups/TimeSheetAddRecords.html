@@ -1,0 +1,69 @@
+﻿<div class="modal-header {{app.setting.theme.info}}">
+    <h4 class="modal-title">{{popupModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    {{popupModel.text}}
+    <form role="form" class="form-horizontal">
+        <fieldset>
+            <div class="form-group" show-errors style="margin-bottom : 4px;">
+                <label for="project">Project</label>
+                <input name="projectGridId{{i.id}}" readonly type="text" data-ng-click="vm.openProjectListModal(popupModel.project)" data-ng-model="popupModel.project.projectDescription" class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
+                <!--<ui-select show-errors title="{{popupModel.project.description}}" name="projectGridId{{i.id}}" ng-required="true" ng-model="popupModel.project" ng-change="vm.projectTemplateSelected(popupModel)">
+                    <ui-select-match placeholder="Choose a Project">{{$select.selected.description}}</ui-select-match>
+                    <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
+                        <div ng-bind-html="project.description | highlight: $select.search" title="{{project.description}}"></div>
+                    </ui-select-choices>
+                </ui-select>-->
+            </div>
+            <div class="form-group row" style="margin-bottom : 4px;">
+                <label for="startDate" class="col-sm-2 form-control-label">Start Date:</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control"
+                           ng-model="popupModel.startDate"
+                           data-icon-left="fa fa-chevron-left"
+                           data-icon-right="fa fa-chevron-right"
+                           name="date" data-date-format="yyyy/MM/dd"
+                           bs-datepicker placeholder="Start Date"
+                            autoclose="true"
+                           ng-required="true" autocomplete="off">
+
+                </div>
+            </div>
+            <div class="form-group row" show-errors style="margin-bottom : 4px;">
+                <label for="endDate" class="col-sm-2 form-control-label">End Date:</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control"
+                           ng-model="popupModel.endDate"
+                           data-icon-left="fa fa-chevron-left"
+                           data-icon-right="fa fa-chevron-right"
+                           name="date" data-date-format="yyyy/MM/dd"
+                           bs-datepicker placeholder="End Date"
+                            autoclose="true"
+                           ng-required="true" autocomplete="off">
+
+                </div>
+            </div>
+            <div class="form-group" show errors>
+                <label for="team">Team</label>
+                <select name="teamIdNew" class="form-control"
+                        ng-options="s.id as s.description for s in vm.filterOptions.teams"
+                        ng-model="popupModel.team" ng-required="true"
+                        ></select>
+
+            </div>
+            <div class="form-group" show errors>
+                <label for="activity">Activity</label>
+                <select name="activityNew" class="form-control"
+                        ng-options="s.id as s.description for s in vm.filterOptions.activities"
+                        ng-model="popupModel.activity" ng-required="true"></select>
+
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
+    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+</div>

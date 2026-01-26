@@ -1,0 +1,167 @@
+﻿<style>
+    #viewProjectAccess ul {
+        padding-inline-start: 12px !important;
+        margin-bottom: 8px !important;
+        margin-top: 8px !important;
+        padding-left: 0px;
+        list-style: none;
+    }
+
+    #viewProjectAccess #tree button {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    #viewProjectAccess #tree li {
+        border: none !important;
+        list-style: none;
+    }
+
+    #viewProjectAccess #tree .fa {
+        color: grey;
+    }
+</style>
+
+<div id="viewProjectAccess" class="padding">
+    <div class="container">
+        <div class="container" ng-if="vm.saveSuccess">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})"> {{vm.user.firstName}} {{vm.user.surname}}</a> / Project Access
+                </h2>
+            </div>
+            <div class="box-body">
+
+                <form class="m-b-2 row">
+                    <div class="col-md-6">
+                        <div class="input-group-sm m-b-1">
+                            <input type="text" class="form-control p-x b-a rounded" ng-model="searchtxt" placeholder="Filter">
+                        </div>
+
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.includeInactive" ng-click="vm.toggleInactiveProjectShow()">
+                            <i class="indigo"></i>
+                            Show Inactive Projects
+                        </label>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="pull-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+<!--
+                <a class="text-success" style="margin-right: 5px" ng-click="vm.setCollapsedValue(vm.treeData, false)">Expand</a>/
+                <a class="text-success" style="margin-left: 5px" ng-click="vm.setCollapsedValue(vm.treeData, true)">Collapse</a>
+-->
+                <ul id="tree">
+                    <li ng-repeat="node in vm.treeData | filter:searchtxt" ng-include="'node.html'"></li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--node.html-->
+<script type="text/ng-template" id="node.html">
+    <div class="box row d-flex m-b-0">
+        <!--        <label class="md-switch">
+                <input type="checkbox" ng-model="node.selected" ng-change="vm.selectChange(node)">
+                <i class="indigo"></i>
+            </label>
+    -->
+        <div class="col-lg-4">
+            <label class="md-switch">
+                <input type="checkbox" ng-model="node.selected">
+                <i class="indigo"></i>
+            </label>
+            {{ node.name }}
+        </div>
+        <div class="col-lg-4" ng-show="node.selected">Entire Client Selected</div>
+        <div class="col-lg-2" ng-show="!node.selected">Projects : {{vm.getClientCounts(node,"Project")}}</div>
+        <div class="col-lg-2" ng-show="!node.selected">Sub-Projects :  {{vm.getClientCounts(node,"SubProject")}}</div>
+        <div class="col-lg-4">
+            <div class=" pull-right">
+                <a class="btn btn-xs btn-fw btn-outline b-success text-success" ng-click="vm.selectAllNone(node,true)">
+                    <i class="fa "></i> All
+                </a>
+                <a class="btn btn-xs btn-fw btn-outline b-danger text-danger" ng-click="vm.selectAllNone(node,false)">
+                    <i class="fa"></i> None
+                </a>
+                <button class="btn btn-link" ng-click="node.collapsed = !node.collapsed">
+                    <span ng-class="{'fa-caret-down': !node.collapsed, 'fa-caret-up': node.collapsed}" class="fa"></span>
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+    <ul ng-if="!node.collapsed && node.listOfProjects">
+        <li ng-repeat="child in node.listOfProjects | filter:searchtxt" ng-include="'child.html'"></li>
+    </ul>
+</script>
+
+<!--child.html-->
+<script type="text/ng-template" id="child.html">
+    <div class=" row d-flex m-b-0">
+        <div class="col-lg-6" ng-if="!node.selected">
+            <label class="md-switch">
+                <input type="checkbox" ng-model="child.selected" ng-change="vm.selectChange(child)">
+                <i class="indigo"></i>
+            </label>
+
+            <span><b>{{ child.code }} {{ child.name }}</b></span>
+        </div>
+
+        <div class="col-lg-6" ng-if="node.selected">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span><b>{{ child.code }} {{ child.name }}</b></span>
+        </div>
+
+
+        <div class="col-lg-4"><div ng-if="!node.selected">{{vm.getProjectCounts(child)}}</div></div>
+        <div class="col-lg-2">
+            <!--            <a class="btn btn-xs btn-fw btn-outline b-success text-success" ng-click="vm.assignProject(vm.selectedProject)">
+                <i class="fa "></i> All
+            </a>
+            <a class="btn btn-xs btn-fw btn-outline b-danger text-danger" ng-click="vm.unassignItem(item)">
+                <i class="fa"></i> None
+            </a> -->
+            <button class="btn btn-link pull-right" ng-click="child.collapsed = !child.collapsed" ng-if="node.listOfProjects.length > 0">
+                <span ng-class="{'fa-caret-down': !child.collapsed, 'fa-caret-up': child.collapsed}" class="fa"></span>
+            </button>
+
+        </div>
+
+
+    </div>
+        <ul class="list-group" ng-if="!child.collapsed && child.listOfProjects">
+            <li ng-repeat="grandchild in child.listOfProjects | filter:searchtxt | orderBy:['code', 'name']" class="m-b-0">
+                <label class="md-switch" ng-if="!node.selected && !child.selected">
+                    <input  type="checkbox" ng-model="grandchild.selected" ng-change="vm.selectChange(grandchild)">
+                    <i class="indigo"></i>
+                </label>
+                <label  class="md-switch" ng-if="node.selected || child.selected">
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                </label>
+                <span>{{ grandchild.code }} {{ grandchild.name }}</span>
+            </li>
+        </ul>
+    </script>

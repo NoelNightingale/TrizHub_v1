@@ -1,0 +1,419 @@
+﻿<style>
+    .form-group {
+        margin-bottom: 0px;
+    }
+
+    .summaryContainer th {
+        color: rgba(0, 0, 0, 0.5) !important;
+        background-color: rgba(0, 0, 0, 0.075) !important;
+    }
+</style>
+
+<div class="padding">
+    <div class="box">
+        <div class="box-header b-b">
+            <h2>
+                Timesheet Capture
+            </h2>
+        </div>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-8">
+                    <form role="form" name="EditForm">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label class="form-control-label">Billing Period</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control" ng-options="s.description for s in vm.filterOptions.billingCycles"
+                                        ng-model="vm.viewModel.billingCycle" ng-change="vm.checkDateDisable()"></select>
+                            </div>
+
+                            <div class="col-sm-2">
+                                <label class="form-control-label">Project</label>
+                            </div>
+                            <div class="col-md-6">
+                                <input name="projectGridId{{i.id}}" readonly type="text" data-ng-click="vm.openProjectListModal(vm.filterModel)" data-ng-model="vm.filterModel.projectDescription" class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
+                                <!--<ui-select ng-model="vm.filterModel.project" ng-change="vm.projectSelected(vm.filterModel.project)">
+                            <ui-select-match placeholder="Choose a Project">{{$select.selected.description}}</ui-select-match>
+                            <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
+                                <div ng-if="!project.isTag" ng-bind-html="project.description | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>-->
+                            </div>
+
+                        </div>
+                        <div class="row m-t-1">
+                            <div class="col-md-2">
+                                <label class="form-control-label">From Date</label>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control"
+                                       ng-model="vm.filterModel.startDate"
+                                       ng-disabled="vm.disableDateSelection"
+                                       data-icon-left="fa fa-chevron-left"
+                                       data-icon-right="fa fa-chevron-right"
+                                       autoclose="true"
+                                       name="date" data-date-format="yyyy/MM/dd"
+                                       bs-datepicker placeholder="Start Date" autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-control-label">Billable</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control" ng-options="s.description for s in vm.filterOptions.billingOptions"
+                                        ng-model="vm.filterModel.billingOption"></select>
+                            </div>
+                        </div>
+
+                        <div class="row m-t-1">
+                            <div class="col-md-2">
+                                <label class="form-control-label">To Date</label>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control"
+                                       ng-model="vm.filterModel.endDate"
+                                       ng-disabled="vm.disableDateSelection"
+                                       data-icon-left="fa fa-chevron-left"
+                                       autoclose="true"
+                                       data-icon-right="fa fa-chevron-right"
+                                       name="date" data-date-format="yyyy/MM/dd"
+                                       bs-datepicker placeholder="End Date" autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-6">
+                                <a class="btn btn-primary b-{{app.setting.theme.primary}}" ng-click="vm.reloadGrid()">
+                                    <i class="fa fa-check-square-o"></i>&nbsp;Apply&nbsp;Filter
+                                </a>
+                                <a class="btn btn-danger b-{{app.setting.theme.danger}}" ng-click="vm.resetFilters()">
+                                    <i class="fa fa-times"></i>&nbsp;Reset&nbsp;Filter
+                                </a>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="row">
+
+                            <div class="col-sm-2">
+                                <label class="form-control-label">User</label>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="user" class="form-control" ng-change="vm.userSelectChange()" ng-options="s.id as s.description for s in vm.filterOptions.users"
+                                        ng-model="vm.filterModel.userId" ng-required="true" placeholder="Account"></select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="box summaryContainer">
+                        <div class="box-header teal">
+                            <div class="row-col">
+                                SUMMARY
+                            </div>
+                        </div>
+                        <div class="light">
+                            <div class="row-body scrollable hover" style="height: 150px;">
+                                <table st-table="rowCollectionBasic" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Date
+                                            </th>
+                                            <th>
+                                                Hours ({{vm.summary.totalHours}})
+                                            </th>
+                                            <th>
+                                                Billable ({{vm.summary.totalBillableHours}})
+                                            </th>
+                                            <th>
+                                                Non-Billable ({{vm.summary.totalHours - vm.summary.totalBillableHours}})
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="i in vm.summary.days | orderBy:'date':true" st-select-row="row">
+                                            <td>{{i.date}}</td>
+                                            <td ng-style="i.hours < 8 && {'color' : 'red'} || i.hours >= 8 && {'color' : 'green'}">{{i.hours}}</td>
+                                            <td>{{i.billhours}}</td>
+                                            <td>{{i.hours-i.billhours}}</td>
+                                        </tr>
+                                        <tr ng-show="vm.summary.days == 0 || !vm.summary.days">
+                                            <td colspan="2">
+                                                No Records
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="alert alert-success m-t-1" ng-if="vm.saveSuccess">
+                        <strong>{{vm.successMessage}}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="row m-b-1">
+                <div class="col-md-6">
+                    <button class="btn btn-xs btn-primary" ng-show="vm.displayOptions.show" ng-click="vm.submitnewRecords()">
+                        <i class="fa fa-plus"></i> Create new records (Template)
+                    </button>
+                </div>
+
+                <div class="col-md-6">
+                    <button class="btn btn-xs btn-primary pull-right" ng-show="vm.displayOptions.show" ng-click="vm.submitForm()" ng-disabled="vm.filterModel.userId == null">
+                        <i class="fa fa-save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-xs btn-primary pull-right m-r-1" ng-show="vm.displayOptions.show" ng-click="vm.submitNewRecord()">
+                        <i class="fa fa-plus"></i> Create New Record
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <form role="form" name="AddForm" novalidate>
+                    <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                        <tr st-select-row="row">
+                            <td style="width:42%">
+                                <div class="form-group">
+                                    <input readonly name="projectId" type="text" data-ng-click="vm.openProjectListModal(vm.addRowRecord)" data-ng-model="vm.addRowRecord.projectDescription" class="readOnlyLight form-control {{vm.addRowRecord.valid['projectId'] == false ? 'form-control-warning':''}}" />
+
+                                    <!--<ui-select title="{{vm.addRowRecord.project.description}}" name="projectId" ng-model="vm.addRowRecord.project" ng-change="vm.projectRowSelected(vm.addRowRecord)" class="{{vm.addRowRecord.valid['projectId'] == false ? 'form-control-warning':''}}">
+                                <ui-select-match placeholder="Choose a Project">{{$select.selected.description}}</ui-select-match>
+                                <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
+                                    <div ng-if="!project.isTag" ng-bind-html="project.description | highlight: $select.search" title="{{project.description}}"></div>
+                                </ui-select-choices>
+                            </ui-select>-->
+                                </div>
+                            </td>
+                            <td style="width:12%">
+                                <div class="form-group {{vm.addRowRecord.valid['dateEntry'] == false ? 'has-warning':''}}">
+                                    <input type="text" class="form-control {{vm.addRowRecord.valid['dateEntry'] == false ? 'form-control-warning':''}}"
+                                           ng-model="vm.addRowRecord.dateEntry"
+                                           data-icon-left="fa fa-chevron-left"
+                                           data-icon-right="fa fa-chevron-right"
+                                           autoclose="true"
+                                           useCurrent="day"
+                                           name="dateEntry" data-date-format="yyyy/MM/dd"
+                                           bs-datepicker autocomplete="off">
+                                    <span class="text-help" ng-show="AddForm['dateEntry'].$error.date">Invalid date</span>
+                                </div>
+                            </td>
+                            <td style="width:12%">
+                                <div class="form-group {{vm.addRowRecord.valid['teamId'] == false ? 'has-warning':''}}">
+                                    <select name="teamId" class="form-control {{vm.addRowRecord.valid['teamId'] == false ? 'form-control-warning':''}}"
+                                            ng-options="s.id as s.description for s in vm.filterOptions.teams"
+                                            ng-model="vm.addRowRecord.teamId"></select>
+                                    <span class="text-help" ng-show="AddForm['teamId'].$invalid">Required</span>
+                                </div>
+                            </td>
+                            <td style="width:14%">
+                                <div class="form-group {{vm.addRowRecord.valid['activityId'] == false ? 'has-warning':''}}" show-errors>
+                                    <select name="activityId" class="form-control {{vm.addRowRecord.valid['activityId'] == false ? 'form-control-warning':''}}"
+                                            ng-options="s.id as s.description for s in vm.filterOptions.activities"
+                                            ng-model="vm.addRowRecord.activityId"></select>
+                                </div>
+                            </td>
+                            <td style="width:12%">
+                                <div class="form-group {{vm.addRowRecord.valid['comments'] == false ? 'has-warning':''}}" show-errors>
+                                    <textarea name="comments{{i.id}}" type="text"
+                                              class="form-control {{vm.addRowRecord.valid['comments'] == false ? 'form-control-warning':''}}"
+                                              placeholder="comments" ng-model="vm.addRowRecord.comments"></textarea>
+                                </div>
+                            </td>
+                            <td style="width:8%">
+                                <div class="form-group {{vm.addRowRecord.valid['hours'] == false ? 'has-warning':''}}" show-errors>
+                                    <input name="hours" type="number"
+                                           class="form-control {{vm.addRowRecord.valid['hours'] == false ? 'form-control-warning':''}}"
+                                           placeholder="hr" ng-model="vm.addRowRecord.hours"
+                                           ng-blur="vm.validateHours('hours',vm.addRowRecord)">
+                                </div>
+                            </td>
+                            <td>
+                                <a class="btn btn-xs-2 btn-xs btn-primary b-{{app.setting.theme.info}}" ng-click="vm.submitAddRow()">
+                                    <i class="fa fa-plus"></i> Add Record
+                                </a>
+                            </td>
+                        </tr>
+
+                    </table>
+                </form>
+            </div>
+            <div class="row">
+                <div class="box">
+                    <div class="table-responsive" ng-show="vm.displayOptions.show">
+                        <form role="form" name="RecordForm" novalidate>
+                            <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:32%">
+                                            <a ng-click="vm.pageGrid.sort('project')">Project</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='project'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='project'}"></i>
+                                        </th>
+                                        <th style="width:8%">
+                                            <a ng-click="vm.pageGrid.sort('client')">Client</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='client'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='client'}"></i>
+                                        </th>
+                                        <th title="Billable">
+                                            <a ng-click="vm.pageGrid.sort('billable')">Bill</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='billable'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='billable'}"></i>
+                                        </th>
+                                        <th style="width:8%">
+                                            <a ng-click="vm.pageGrid.sort('date')">Date</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='date'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='date'}"></i>
+                                        </th>
+                                        <th style="width:12%">
+                                            <a ng-click="vm.pageGrid.sort('team')">Team</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='team'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='team'}"></i>
+                                        </th>
+                                        <th style="width:14%">
+                                            <a ng-click="vm.pageGrid.sort('activity')">Activity</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='activity'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='activity'}"></i>
+                                        </th>
+                                        <th style="width:12%">
+                                            <a ng-click="vm.pageGrid.sort('comments')">Comments</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='comments'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='comments'}"></i>
+                                        </th>
+                                        <th style="width:9%">
+                                            <a ng-click="vm.pageGrid.sort('hours')">Hours</a>
+                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='hours'}"></i>
+                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='hours'}"></i>
+                                        </th>
+                                        <th>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="i in vm.gridModel.data" st-select-row="row">
+                                        <td>
+                                            <div class="form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}" show-errors>
+                                                <input readonly name="projectGridId{{i.id}}" ng-required="true" ng-change="vm.validateOriginal('projectGridId',i)" type="text" title="{{i.projectDescription}}" data-ng-click="vm.openProjectListModal(i)" data-ng-model="i.projectDescription" class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
+                                                <!--<ui-select title="{{i.project.description}}" name="projectGridId{{i.id}}" ng-required="true" ng-model="i.project" ng-change="vm.projectRowSelected(i)" class="form-control" style="padding:0 0 1px 0">
+                                            <ui-select-match placeholder="Choose a Project" class="form-control-warning">{{$select.selected.description}}</ui-select-match>
+                                            <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
+                                                <div ng-bind-html="project.description | highlight: $select.search" title="{{project.description}}"></div>
+                                            </ui-select-choices>
+                                        </ui-select>-->
+                                                <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" ng-class="{'has-warning':RecordForm['projectGridId'+i.id].$dirty}">
+                                                <span>{{i.clientEntityName}}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" ng-class="{'has-warning':RecordForm['projectGridId'+i.id].$dirty}">
+                                                <span>{{i.billable == 1 ? 'Yes' : 'No'}}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group {{i.valid['dateEntry'] == false ? 'has-warning':''}}" show-errors>
+                                                <input type="text" class="form-control {{i.valid['dateEntry'] == false ? 'form-control-warning':''}}"
+                                                       ng-model="i.dateEntry" ng-required="true"
+                                                       style="width: 130px;"
+                                                       data-icon-left="fa fa-chevron-left"
+                                                       data-icon-right="fa fa-chevron-right"
+                                                       autoclose="true"
+                                                       name="dateEntry{{i.id}}" data-date-format="yyyy/MM/dd"
+                                                       ng-change="vm.validateOriginal('dateEntry',i)"
+                                                       bs-datepicker autocomplete="off">
+                                                <span class="text-help" ng-show="RecordForm['dateEntry'+i.id].$invalid">Required</span>
+                                                <span class="text-help" ng-show="RecordForm['dateEntry'+i.id].$error.date">Invalid date</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group {{i.valid['teamId'] == false ? 'has-warning':''}}" show-errors>
+                                                <select name="teamId{{i.id}}" class="form-control {{i.valid['teamId'] == false ? 'form-control-warning':''}}"
+                                                        ng-options="s.id as s.description for s in vm.filterOptions.teams"
+                                                        ng-model="i.teamId" ng-required="true"
+                                                        ng-change="vm.validateOriginal('teamId',i)"></select>
+                                                <span class="text-help" ng-show="RecordForm['teamId'+i.id].$invalid">Required</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group {{i.valid['activityId'] == false ? 'has-warning':''}}" show-errors>
+                                                <select name="activityId{{i.id}}" class="form-control {{i.valid['activityId'] == false ? 'form-control-warning':''}}"
+                                                        ng-options="s.id as s.description for s in vm.filterOptions.activities"
+                                                        ng-model="i.activityId" ng-required="true"
+                                                        ng-change="vm.validateOriginal('activityId',i)"></select>
+                                                <span class="text-help" ng-show="RecordForm['activityId'+i.id].$invalid">Required</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group {{i.valid['comments'] == false ? 'has-warning':''}}" show-errors>
+                                                <textarea ng-required="true" name="comments{{i.id}}" type="text"
+                                                          class="form-control {{i.valid['comments'] == false ? 'form-control-warning':''}}"
+                                                          placeholder="comments" ng-model="i.comments"
+                                                          ng-change="vm.validateOriginal('comments',i)"></textarea>
+                                                <span class="text-help" ng-show="RecordForm['comments'+i.id].$invalid">Required</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group {{i.valid['hours'] == false ? 'has-warning':''}}" show-errors>
+                                                <input ng-required="true" name="hours{{i.id}}" type="number"
+                                                       class="form-control {{i.valid['hours'] == false ? 'form-control-warning':''}}"
+                                                       placeholder="hr" ng-model="i.hours"
+                                                       ng-change="vm.validateOriginal('hours',i)"
+                                                       ng-blur="vm.validateHours('hours',i)">
+                                                <span class="text-help" ng-show="RecordForm['hours'+i.id].$invalid">Required</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
+                                               ng-click="vm.resetRecord(i)" ng-hide="i.new">
+                                                <i class="fa fa-refresh"></i>
+                                            </a>
+                                            <a class="btn btn-xs btn-outline b-{{app.setting.theme.danger}}" ng-click="vm.deleteRecord(i)">
+                                                <i class="fa fa-close"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="vm.gridModel.data.length == 0">
+                                        <td colspan="8">
+                                            No Records
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-xs btn-primary pull-right" ng-show="vm.displayOptions.show" ng-click="vm.submitForm()" ng-disabled="vm.filterModel.userId == null">
+                        <i class="fa fa-save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-xs btn-primary pull-right m-r-1" ng-show="vm.displayOptions.show" ng-click="vm.submitNewRecord()">
+                        <i class="fa fa-plus"></i> Create New Record
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+        <div class="alert alert-success" ng-if="vm.saveSuccess">
+            <strong>{{vm.successMessage}}</strong>
+        </div>
+    </div>
+</div>

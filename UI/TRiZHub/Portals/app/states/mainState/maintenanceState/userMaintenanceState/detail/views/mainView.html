@@ -1,0 +1,119 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.grid">User Maintenance</a> / {{vm.viewModel.firstName}} {{vm.viewModel.surname}}
+                </h2>
+            </div>
+            <div class="box-body">
+
+                <form role="form" name="EditForm" novalidate>
+                    <div class="form-group row" show-errors>
+                        <label for="email" class="col-sm-2 form-control-label">Account:</label>
+                        <div class="col-sm-9">
+                            <input name="account" type="text" ng-model="vm.viewModel.account" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.account.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="firstName" class="col-sm-2 form-control-label">First Name:</label>
+                        <div class="col-sm-9">
+                            <input name="firstName" type="text" ng-model="vm.viewModel.firstName" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.firstName.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="surname" class="col-sm-2 form-control-label">Surname:</label>
+                        <div class="col-sm-9">
+                            <input name="surname" type="text" ng-model="vm.viewModel.surname" class="form-control" required />
+                            <span class="text-help" ng-show="EditForm.surname.$invalid">Required</span>
+                        </div>
+                    </div>
+
+                    <div data-ng-if="vm.isAllowed('RoleMaintenance')" class="form-group row">
+                        <label for="permissions" class="col-sm-2 form-control-label">Roles</label>
+                        <div class="col-sm-9">
+                            <div ng-repeat="roles in vm.viewModel.roleList" class="m-b-1">
+                                <label class="md-switch">
+                                    <input type="checkbox" ng-model="roles.selected">
+                                    <i class="indigo"></i>
+                                    {{roles.roleName}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+
+                    <a class="btn btn-xs btn-fw btn-outline b-warn text-warn" ng-show="vm.isAllowed('UserEmergencyContactMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.emergencyContactGrid({id: vm.viewModel.id})">
+                        <i class="fa fa-medkit"></i> Emergency Contact
+                    </a>
+
+                    <a class="btn btn-xs btn-fw btn-outline b-success text-success" ng-show="vm.isAllowed('UserTravelInformationMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.travelInformtionGrid({id: vm.viewModel.id})">
+                        <i class="fa fa-plane"></i> Travel Information
+                    </a>
+
+                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary" ng-show="vm.isAllowed('UserBillingRatesMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: vm.viewModel.id})">
+                        <i class="fa fa-usd"></i> Billing Rates
+                    </a>
+
+                    <a class="btn btn-xs btn-fw btn-outline b-info text-info" ng-show="vm.isAllowed('UserPersonalInformationMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.personalInformationDetail({id: vm.viewModel.id})">
+                        <i class="fa fa-user"></i> Personal Information
+                    </a>
+                    <a class="btn btn-xs btn-fw btn-outline b-black text-black" ng-show="vm.isAllowed('UserAssetRegisterMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.officeEquipmentGrid({id: vm.viewModel.id})">
+                        <i class="fa fa-briefcase"></i> Asset Register
+                    </a>
+                    <a class="btn btn-xs btn-fw btn-outline b-danger text-danger" ng-show="vm.isAllowed('UserTeamJobDesignationMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.teamJobDesignationGrid({id: vm.viewModel.id})">
+                        <i class="fa fa-briefcase"></i> Team and Job Designation
+                    </a>
+                    <a class="btn btn-xs btn-fw btn-outline b-info text-info" ng-show="vm.isAllowed('UserProjectMaintenance')"
+                       ui-sref="mainState.maintenance.userMaintenance.projectMaintenance({id: vm.viewModel.id})">
+                        <i class="fa fa-bars"></i> Projects
+                    </a> 
+
+                    <a class="btn btn-xs btn-fw btn-outline b-warn text-warn" ng-show="vm.isAllowed('ReportGeneration')"
+                       ng-click="vm.userSummary()">
+                        <i class="fa fa-download"></i> Export User
+                    </a>
+
+
+                    <!--<a class="btn btn-xs btn-outline b-{{app.setting.theme.danger}}" ng-click="vm.userSummary()">
+        <i class="fa fa-download">Export User</i>
+    </a>-->
+                    <hr />
+                    <hr />
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.userMaintenance.grid">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                            </button>
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

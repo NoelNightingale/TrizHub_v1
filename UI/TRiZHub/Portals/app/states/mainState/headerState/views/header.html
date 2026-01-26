@@ -1,0 +1,114 @@
+<div class="navbar">
+    <a data-toggle="collapse" data-target="#navbar1" class="navbar-item pull-right hidden-md-up m-a-0 m-l">
+        <i class="material-icons">&#xe5d2;</i>
+    </a>
+    <div ui-include="'Portals/app/states/mainState/headerState/views/navbar.brand.html'"></div>
+
+    <!-- navbar collapse -->
+    <div class="collapse navbar-toggleable-sm" id="navbar1" data-pjax>
+        <!-- link and dropdown -->
+        <ul class="nav navbar-nav pull-left nav-active-border b-{{app.setting.theme.primary}}">
+            <li class="nav-item dropdown" ng-show="vm.isAllowed('RoleMaintenance') 
+                || vm.isAllowed('UserMaintenance') 
+                || vm.isAllowed('EmployerMaintenance')
+                || vm.isAllowed('ClientMaintenance')                 
+                || vm.isAllowed('ProjectMaintenance') 
+                || vm.isAllowed('ScorecardTemplateMaintenance')
+                || vm.isAllowed('BillingCycleMaintenance')
+                || vm.isAllowed('ActivityMaintenance') 
+                || vm.isAllowed('TeamMaintenance') 
+                || vm.isAllowed('UserAssetRegisterMaintenance') 
+                ">
+
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    <span class="nav-text">Maintenance</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" ng-show="vm.isAllowed('RoleMaintenance')" ui-sref="mainState.maintenance.roleMaintenance.grid">
+                        <span class="nav-text">Role Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('UserMaintenance')" ui-sref="mainState.maintenance.userMaintenance.grid">
+                        <span class="nav-text">User Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('EmployerMaintenance')" ui-sref="mainState.maintenance.employerMaintenance.grid">
+                        <span class="nav-text">Employer Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('ClientMaintenance')" ui-sref="mainState.maintenance.clientMaintenance.grid">
+                        <span class="nav-text">Client Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('ProjectMaintenance')" ui-sref="mainState.maintenance.projectMaintenance.grid">
+                        <span class="nav-text">Project Maintenance</span>
+                    </a>
+
+                    <a class="dropdown-item" ng-show="vm.isAllowed('ScorecardTemplateMaintenance')" ui-sref="mainState.maintenance.scorecardTemplateMaintenance.grid">
+                        <span class="nav-text">Scorecard Template Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('BillingCycleMaintenance')" ui-sref="mainState.maintenance.billingCycleMaintenance.grid">
+                        <span class="nav-text">Billing Cycle Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('ActivityMaintenance')" ui-sref="mainState.maintenance.activityMaintenance.grid">
+                        <span class="nav-text">Activity Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('TeamMaintenance')" ui-sref="mainState.maintenance.teamMaintenance.grid">
+                        <span class="nav-text">Team Maintenance</span>
+                    </a>
+                    <a class="dropdown-item dropdown-toggle" ng-show="vm.isAllowed('UserAssetRegisterMaintenance')">
+                        <span class="nav-text" ng-mouseenter="vm.showImpExp = true">Import/Export</span>
+                    </a>
+                    <a style="padding-left:50px;" ng-show="vm.showImpExp && vm.isAllowed('UserAssetRegisterMaintenance')" data-ng-if="vm.isAllowed('UserAssetRegisterMaintenance')" class="dropdown-item" ng-click="vm.UserAssetRegisterReport(); vm.showImpExp = false;">
+                        <span class="nav-text">Export User Asset Register</span>
+                    </a>
+                    <a style="padding-left:50px;" ng-show="vm.showImpExp && vm.isAllowed('UserAssetRegisterMaintenance')" data-ng-if="vm.isAllowed('UserAssetRegisterMaintenance')" class="dropdown-item" ng-click="vm.userAssetRegisterImport(); vm.showImpExp = false;">
+                        <span class="nav-text">Import User Asset Register </span>
+                    </a>
+                </div>
+            </li>
+            <li class="nav-item" ng-show="vm.isAllowed('TimesheetCapture')">
+                <a class="nav-link" ui-sref="mainState.timesheet">
+                    <span class="nav-text">Timesheet Capture</span>
+                </a>
+            </li>
+            <li class="nav-item" ng-show="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards') || vm.isAllowed('PerformanceManagementCreateScoreCards') || vm.isAllowed('PerformanceManagementViewMyScoreCards') || vm.isAllowed('PerformanceManagementAdmin')">
+                <a class="nav-link" ui-sref="mainState.scorecard.grid">
+                    <span class="nav-text">Performance Management</span>
+                </a>
+            </li>
+
+            <li class="nav-item dropdown" ng-show="vm.isAllowed('ReportGenerationTimesheet') || vm.isAllowed('ReportGenerationUserSummary') || vm.isAllowed('ReportGenerationScoreCard') || vm.isAllowed('ReportGenerationUserProjects') || vm.isAllowed('ReportGenerationUserRoles')">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    <span class="nav-text">Reports</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a data-ng-if="vm.isAllowed('ReportGenerationTimesheet')" class="dropdown-item" ui-sref="mainState.timesheetreport">
+                        <span class="nav-text">Timesheets</span>
+                    </a>
+                    <a data-ng-if="vm.isAllowed('ReportGenerationUserSummary')" class="dropdown-item" ng-click="vm.userSummary()">
+                        <span class="nav-text">User Summary</span>
+                    </a>
+                    <a data-ng-if="vm.isAllowed('ReportGenerationScoreCard')" class="dropdown-item" ui-sref="mainState.scorecard.report">
+                        <span class="nav-text">Score Cards</span>
+                    </a>
+                    <a data-ng-if="vm.isAllowed('ReportGenerationUserProjects')" class="dropdown-item" ui-sref="mainState.userprojects">
+                        <span class="nav-text">Project Allocation</span>
+                    </a>
+                    <a data-ng-if="vm.isAllowed('ReportGenerationUserRoles')" class="dropdown-item" ui-sref="mainState.userroles">
+                        <span class="nav-text">Role Allocation</span>
+                    </a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown" ng-show="vm.isAllowed('CustomerReportAccess')">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    <span class="nav-text">Customer Reports</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a data-ng-if="vm.isAllowed('CustomerReportAccess')" class="dropdown-item" ui-sref="mainState.customertimesheetreport">
+                        <span class="nav-text">Timesheets</span>
+                    </a>
+                </div>
+            </li>
+        </ul>
+        <!-- / link and dropdown -->
+    </div>
+    <!-- / navbar collapse -->
+</div>

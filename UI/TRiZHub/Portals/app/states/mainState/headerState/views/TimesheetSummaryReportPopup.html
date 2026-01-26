@@ -1,0 +1,69 @@
+﻿<div class="modal-header {{app.setting.theme.warn}}">
+    <h4 class="modal-title">{{popupModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    {{popupModel.question}}
+    <hr />
+    <form role="form" class="form-horizontal">
+        <fieldset>
+            <div class="form-group">
+                <div class="m-t-1 row">
+                    <div class="col-sm-4">
+                        Billing Period:
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="user" class="form-control" ng-options="s.id as s.description for s in vm.filterOptions.billingCycles"
+                                ng-model="vm.filterOptions.billingCycleId" placeholder="Billing Cycle" ng-change="vm.updateFilter(popupModel)"></select>
+                    </div>
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-4">
+                        Start:
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="text" ng-disabled="popupModel.disableFilter" class="form-control"
+                               ng-model="popupModel.startDate"
+                               data-icon-left="fa fa-chevron-left"
+                               data-icon-right="fa fa-chevron-right"
+                               name="date" data-date-format="yyyy/MM/dd"
+                               bs-datepicker placeholder="Start Date"
+                               ng-required="true"
+                               autoclose="true">
+                    </div>
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-4">
+                        End:
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="text" ng-disabled="popupModel.disableFilter" class="form-control"
+                               ng-model="popupModel.endDate"
+                               data-icon-left="fa fa-chevron-left"
+                               data-icon-right="fa fa-chevron-right"
+                               name="date" data-date-format="yyyy/MM/dd"
+                               bs-datepicker placeholder="End Date"
+                               ng-required="true"
+                               autoclose="true">
+                    </div>
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-4">
+                        Include Rates:
+                    </div>
+                    <div class="col-sm-8">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="popupModel.showRates">
+                            <i class="indigo"></i>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
+    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+</div>

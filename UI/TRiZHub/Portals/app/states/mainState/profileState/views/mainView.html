@@ -1,0 +1,70 @@
+﻿<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2> My Profile</h2>
+            </div>
+            <div class="box-body">
+                <form role="form" name="EditForm" id="profileEditForm">
+
+                    <h2>Personal Details</h2>
+                    <br/>
+                    <!--<div class="form-group row">
+                        <label for="image" class="col-sm-3 form-control-label">Profile Image:</label>
+                        <div class="col-sm-9">
+                            <img name="image" alt="Profile Image" style="height: 100px;" ng-model="vm.viewModel.profileImage.fileDataBase64"
+                                 src="{{vm.viewModel.profileImage.fileDataBase64 == null? vm.viewModel.profileImageLocation : vm.viewModel.profileImage.fileDataBase64}}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="imageFile" class="col-sm-3 form-control-label">Upload Profile Image:</label>
+                        <div class="col-sm-9">
+                            <input name="imageFile" type="file"
+                                   ng-file-model="vm.viewModel.profileImage"
+                                   accept=".jpg,.jpeg"/>
+                        </div>
+                    </div>-->
+                    <div class="form-group row">
+                        <label for="firstName" class="col-sm-3 form-control-label">First Name:</label>
+                        <div class="col-sm-9">
+                            <input name="firstName" type="text" ng-model="vm.viewModel.firstName" class="form-control" required/>
+
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="surname" class="col-sm-3 form-control-label">Surname:</label>
+                        <div class="col-sm-9">
+                            <input name="surname" type="text" ng-model="vm.viewModel.surname" class="form-control" required/>
+                        </div>
+                    </div>
+
+                    <hr/>
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+
+
+                            <div class="col-md-12 pull-right text-right">
+
+                                <!--<button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelForm()">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                                </button>-->
+
+                                <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+        <div class="alert alert-success" ng-if="vm.saveSuccess">
+            <strong>{{vm.successMessage}}</strong>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "TRiZ Hub";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html ng-app="AngularApp" ng-controller="AppCtrl">
+<head>
+    <meta name="viewport" content="initial-scale=1">
+    <base href="~/">
+    <title>TAP - Version 3.1.1</title>
+
+    <!--Fonts-->
+    @Styles.Render("~/Content/fontAwesome")
+    @Styles.Render("~/Content/materialDesign")
+    @Styles.Render("~/Content/css")
+
+    <meta name="description" content="TRiZHub" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body class="{{app.setting.bg}}" style="background-color:white" ng-class="{'container': app.setting.boxed, 'ie': isIE,'smart': isSmart}">
+    <div class="col-sm-3">
+        <toaster-container toaster-options="{'time-out':7000}"></toaster-container>
+    </div>
+    <div class="app-content box-shadow-z0" role="main">
+        <div ui-view="header">
+        </div>
+        <div ui-view="main" class="app-body body-content" ng-class="{'container': app.setting.container}">
+        </div>
+        <div class="center-block">
+            <div class="footer-container">
+                <div ui-view="footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var baseUrl = '@Url.Content("~/")';
+    </script>
+    @Scripts.Render("~/bundles/AngularApp")
+    @Scripts.Render("~/bundles/lib")
+    @Scripts.Render("~/bundles/Portal")
+</body>
+</html>

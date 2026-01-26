@@ -1,0 +1,322 @@
+﻿<!--<div class="padding">-->
+<div class="container" style="max-width:1600px;">
+    <div class="box">
+        <div class="box-header b-b">
+            <h2>
+                Performance Management Summary Report
+                <div class="pull-right text-right">
+                    <input type="radio" value="ScorecardStatusSummary" ng-model="vm.filterOptions.reportType" ng-change="vm.reportTypeChange()" /> Status Summary&nbsp;&nbsp;
+                    <input type="radio" value="Scorecards" ng-model="vm.filterOptions.reportType" ng-change="vm.reportTypeChange()" /> Detailed Score Cards&nbsp;&nbsp;
+                </div>
+            </h2>
+        </div>
+        <div class="box-body">
+            <form role="form" name="ReportForm" class="form-horizontal" novalidate>
+                <div class="m-t-1 form-group row" show-errors>
+                    <div class="col-sm-2">
+                        Review year:
+                    </div>
+                    <div class="col-md-2">
+                        All
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.searchAllYears" ng-change="vm.allYearChange()">
+                            <i class="indigo"></i>
+                        </label>
+                        <div class="pull-right">OR</div>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="reviewYear" ng-disabled="vm.filterOptions.searchAllYears" class="form-control" style="overflow: auto;"
+                                ng-options="year.displayVal as year.displayVal for year in vm.filterOptions.years"
+                                ng-model="vm.filterOptions.selectedYears"
+                                ng-change="vm.yearChange()"
+                                multiple
+                                ng-required="!vm.filterOptions.searchAllYears"></select>
+                        <span class="text-help" ng-show="ReportForm.reviewYear.$invalid">Please select at least one</span>
+                    </div>
+                </div>
+                <div class="m-t-1 form-group row" show-errors>
+                    <div class="col-sm-2" ng-if="vm.filterOptions.reportType == 'ScorecardStatusSummary'">
+                        Score Card:
+                    </div>
+                    <div class="col-sm-4" ng-if="vm.filterOptions.reportType != 'ScorecardStatusSummary'">
+                        Score Card:
+                    </div>
+                    <div class="col-md-2" ng-if="vm.filterOptions.reportType == 'ScorecardStatusSummary'">
+                        All
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.searchAllScoreCards" ng-change="vm.selectedScorecardChange()">
+                            <i class="indigo"></i>
+                        </label>
+                        <div class="pull-right">OR</div>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="selectedScorecards" size="8" class="form-control" style="overflow: auto;"
+                                ng-disabled="vm.filterOptions.searchAllScoreCards"
+                                ng-if="vm.filterOptions.reportType == 'ScorecardStatusSummary'"
+                                ng-options="card.scorecardName for card in vm.filterOptions.scorecards"
+                                ng-model="vm.filterOptions.selectedScoreCards"
+                                ng-required="!vm.filterOptions.searchAllScoreCards"
+                                ng-change="vm.selectedScorecardChange()"
+                                multiple></select>
+
+                        <select name="selectedScorecard" class="form-control" ng-if="vm.filterOptions.reportType != 'ScorecardStatusSummary'" style="overflow: auto;"
+                                ng-init="vm.filterOptions.selectedScoreCard = vm.filterOptions.scorecards[0]"
+                                ng-options="card.scorecardName for card in vm.filterOptions.scorecards"
+                                ng-model="vm.filterOptions.selectedScoreCard"
+                                ng-required="true"
+                                ng-change="vm.selectedScorecardChange()"></select>
+
+                        <span class="text-help" ng-if="ReportForm.selectedScorecard.$invalid">Please select at least one</span>
+                    </div>
+                </div>
+                <div class="m-t-1 form-group row" show-errors>
+                    <div class="col-sm-2">
+                        Review Period:
+                    </div>
+                    <div class="col-md-2">
+                        All
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.searchAllPeriods">
+                            <i class="indigo"></i>
+                        </label>
+                        <div class="pull-right">OR</div>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="periods" size="8" ng-disabled="vm.filterOptions.searchAllPeriods" class="form-control" style="overflow: auto;"
+                                ng-options="p.id as p.displayVal for p in vm.filterOptions.periods"
+                                ng-model="vm.filterOptions.selectedPeriods"
+                                multiple
+                                ng-required="!vm.filterOptions.searchAllPeriods"></select>
+                        <span class="text-help" ng-if="ReportForm.periods.$invalid">Please select at least one</span>
+                    </div>
+                </div>
+                <div class="m-t-1 row" ng-if="vm.filterOptions.reportType!='ScorecardStatusSummary'">
+                    <div class="col-sm-4">
+                        Detail Level:
+                    </div>
+                    <div class="col-sm-8">
+                        <select class="form-control" style="overflow: auto;" ng-options="item.val as item.displayVal for item in vm.filterOptions.detailLevels" ng-model="vm.filterOptions.detailLevel"></select>
+                    </div>
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-4">
+                        Submitted:
+                    </div>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="vm.filterOptions.submitted">
+                            <option ng-selected="true" value="0">Yes</option>
+                            <option value="1">No</option>
+                            <option value="2">All</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-4">
+                        Locked:
+                    </div>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="vm.filterOptions.locked">
+                            <option ng-selected="true" value="0">Yes</option>
+                            <option value="1">No</option>
+                            <option value="2">All</option>
+                        </select>
+                    </div>
+                </div>
+                <!--<div class="m-t-1 row" ng-if="vm.filterOptions.reportType=='ScorecardStatusSummary'">
+                    <div class="col-sm-4">
+                        Employee has score card:
+                    </div>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="vm.filterOptions.employeeHasScorecard">
+                            <option ng-selected="true" value="0">Yes</option>
+                            <option value="1">No</option>
+                            <option value="2">All</option>
+                        </select>
+                    </div>
+                </div>-->
+                <div class="m-t-1 row">
+                    <div class="col-sm-3 box-header">
+                        <h2>
+                            Employee
+                        </h2>
+                    </div>
+                    <div class="col-sm-3 box-header">
+                        <h2>
+                            Client
+                        </h2>
+                    </div>
+                    <div class="col-sm-3 box-header">
+                        <h2>
+                            Line Manager
+                        </h2>
+                    </div>
+                    <div class="col-sm-3 box-header">
+                        <h2>
+                            Evaluator
+                        </h2>
+                    </div>
+                    <!--<div class="col-sm-3 box-header" ng-if="vm.filterOptions.reportType=='ScorecardStatusSummary'">
+                        <h2>
+                            Score Card
+                        </h2>
+                    </div>-->
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-3">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.employeesUnfiltered" ng-change="vm.employeeSelectionInvalid = false;">
+                            <i class="indigo"></i>
+                        </label>
+                        Unfiltered
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.clientsUnfiltered" ng-change="vm.clientSelectionInvalid = false;">
+                            <i class="indigo"></i>
+                        </label>
+                        Unfiltered
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.lineManagersUnfiltered" ng-change="vm.lineManagerSelectionInvalid = false;">
+                            <i class="indigo"></i>
+                        </label>
+                        Unfiltered
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.evaluatorsUnfiltered" ng-change="vm.evaluatorSelectionInvalid = false;">
+                            <i class="indigo"></i>
+                        </label>
+                        Unfiltered
+                    </div>
+                    <!--<div class="col-sm-3" ng-if="vm.filterOptions.reportType=='ScorecardStatusSummary'">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.scorecardsUnfiltered" ng-change="vm.scorecardSelectionInvalid = false;">
+                            <i class="indigo"></i>
+                        </label>
+                        Unfiltered
+                    </div>-->
+                </div>
+                <div class="m-t-1 row">
+                    <div class="col-sm-3">
+                        <div ng-if="!vm.filterOptions.employeesUnfiltered">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.filterOptions.showInactiveUsers" ng-change="vm.updateActiveEmployees()">
+                                <i class="indigo"></i>
+                            </label>
+                            Show Inactive
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div ng-if="!vm.filterOptions.clientsUnfiltered">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.filterOptions.showInactiveClients" ng-change="vm.updateActiveClients()">
+                                <i class="indigo"></i>
+                            </label>
+                            Show Inactive
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div ng-if="!vm.filterOptions.lineManagersUnfiltered">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.filterOptions.showInactiveLineManagers" ng-change="vm.updateActiveLineManagers()">
+                                <i class="indigo"></i>
+                            </label>
+                            Show Inactive
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div ng-if="!vm.filterOptions.evaluatorsUnfiltered">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.filterOptions.showInactiveEvaluators" ng-change="vm.updateActiveEvaluators()">
+                                <i class="indigo"></i>
+                            </label>
+                            Show Inactive
+                        </div>
+                    </div>
+                    <!--<div class="col-sm-2" ng-if="vm.filterOptions.reportType=='ScorecardStatusSummary' && !vm.filterOptions.scorecardsUnfiltered">
+                        <label class="md-switch">
+                            <input type="checkbox" ng-model="vm.filterOptions.showInactiveScorecards" ng-change="vm.updateActiveScorecards()">
+                            <i class="indigo"></i>
+                        </label>
+                        Show Inactive
+                    </div>-->
+                </div>
+                <div class="m-t-1 row">
+                    <div style="height:400px; overflow-y:scroll;" ng-class="vm.employeeSelectionInvalid ? 'errorBorder col-sm-3' : 'col-sm-3'">
+                        <div ng-repeat="employee in vm.filterOptions.employees" ng-if="!vm.filterOptions.employeesUnfiltered">
+                            <label class="md-check">
+                                <input ng-disabled="vm.filterOptions.employeesUnfiltered" ng-model="employee.selected" type="checkbox">
+                                <i class="indigo"></i>
+                                {{employee.firstname + ' ' + employee.surname}}
+                            </label>
+                        </div>
+                    </div>
+                    <div style="height:400px; overflow-y:scroll;" ng-class="vm.clientSelectionInvalid ? 'errorBorder col-sm-3' : 'col-sm-3'">
+                        <div ng-repeat="client in vm.filterOptions.clients" ng-if="!vm.filterOptions.clientsUnfiltered">
+                            <label class="md-check">
+                                <input ng-disabled="vm.filterOptions.clientsUnfiltered" ng-model="client.selected" type="checkbox">
+                                <i class="indigo"></i>
+                                {{client.entityName}}
+                            </label>
+                        </div>
+                    </div>
+                    <div style="height:400px; overflow-y:scroll;" ng-class="vm.lineManagerSelectionInvalid ? 'errorBorder col-sm-3' : 'col-sm-3'">
+                        <div ng-repeat="lineManager in vm.filterOptions.lineManagers" ng-if="!vm.filterOptions.lineManagersUnfiltered">
+                            <label class="md-check">
+                                <input ng-disabled="vm.filterOptions.lineManagersUnfiltered" ng-model="lineManager.selected" type="checkbox">
+                                <i class="indigo"></i>
+                                {{lineManager.firstname + ' ' + lineManager.surname}}
+                            </label>
+                        </div>
+                    </div>
+                    <div style="height:400px; overflow-y:scroll;" ng-class="vm.evaluatorSelectionInvalid ? 'errorBorder col-sm-3' : 'col-sm-3'">
+                        <div ng-repeat="evaluator in vm.filterOptions.evaluators" ng-if="!vm.filterOptions.evaluatorsUnfiltered">
+                            <label class="md-check">
+                                <input ng-disabled="vm.filterOptions.evaluatorsUnfiltered" ng-model="evaluator.selected" type="checkbox">
+                                <i class="indigo"></i>
+                                {{evaluator.firstname + ' ' + evaluator.surname}}
+                            </label>
+                        </div>
+                    </div>
+                    <!--<div style="height:400px; overflow-y:scroll;" ng-if="vm.filterOptions.reportType=='ScorecardStatusSummary' && !vm.filterOptions.scorecardsUnfiltered" ng-class="vm.scorecardSelectionInvalid ? 'errorBorder col-sm-3' : 'col-sm-3'">
+                        <div ng-repeat="scorecard in vm.filterOptions.scorecards">
+                            <label class="md-check">
+                                <input ng-disabled="vm.filterOptions.scorecardsUnfiltered" ng-model="scorecard.selected" type="checkbox">
+                                <i class="indigo"></i>
+                                {{scorecard.scorecardName}}
+                            </label>
+                        </div>
+                    </div>-->
+                </div>
+                </
+                di
+                <div class="m-t-1 row">
+                    <div class="col-sm-3">
+                        <span ng-if="vm.employeeSelectionInvalid" class="errorText">Please select at least one</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <span ng-if="vm.clientSelectionInvalid" class="errorText">Please select at least one</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <span ng-if="vm.lineManagerSelectionInvalid" class="errorText">Please select at least one</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <span ng-if="vm.evaluatorSelectionInvalid" class="errorText">Please select at least one</span>
+                    </div>
+                    <!--<div class="col-sm-3">
+                        <span ng-if="vm.scorecardSelectionInvalid" class="errorText">Please select at least one</span>
+                    </div>-->
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12 pull-right text-right m-b-1 m-r-1">
+                        <button ng-disabled="false" class="btn btn-fw primary" ng-click="vm.submitForm()">
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

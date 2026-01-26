@@ -1,0 +1,11 @@
+﻿<div class="modal-header {{app.setting.theme.info}}">
+    <h4 class="modal-title">{{popupModel.header}}</h4>
+</div>
+
+<div class="modal-body">
+    <summernote config="popupModel.summernoteOptions" class="summernote" ng-model="popupModel.definition"></summernote>
+</div>
+
+<div class="modal-footer">    
+    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+</div>
