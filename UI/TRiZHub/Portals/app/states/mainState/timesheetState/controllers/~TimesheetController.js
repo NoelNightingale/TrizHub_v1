@@ -43,40 +43,427 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.onDataLoaded = function (event) { _this.onLoadEvent(event); };
         _this.show = String();
         _this.rowId = 1;
-        _this.disableDateSelection = false;
-        _this.checkDateDisable = function () {
-            _this.disableDateSelection = _this.viewModel.billingCycle.id == 0 ? false : true;
-            if (_this.disableDateSelection) {
-                _this.filterModel.startDate = new Date(_this.viewModel.billingCycle.startdate);
-                _this.filterModel.endDate = new Date(_this.viewModel.billingCycle.enddate);
+        /** Week tabs derived from the selected billing period (Mon–Sun, clamped to period). */
+        _this.weeks = [];
+        _this.selectedWeekIndex = 0;
+        _this.selectedWeek = null;
+        _this.dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        _this.monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        /**
+         * Prefer the billing cycle that contains today; otherwise the first cycle in the list
+         * (API returns newest-first by Startdate).
+         */
+        _this.pickDefaultBillingCycle = function (cycles) {
+            var todayKey = _this.dateToKey(_this.stripTime(new Date()));
+            for (var i = 0; i < cycles.length; i++) {
+                var start = _this.readCycleDate(cycles[i], "start");
+                var end = _this.readCycleDate(cycles[i], "end");
+                if (!start || !end) {
+                    continue;
+                }
+                var startKey = _this.dateToKey(start);
+                var endKey = _this.dateToKey(end);
+                if (todayKey >= startKey && todayKey <= endKey) {
+                    return cycles[i];
+                }
             }
+            return cycles[0];
         };
+        _this.getCycleId = function (cycle) {
+            if (!cycle) {
+                return null;
+            }
+            return cycle.id != null ? cycle.id : cycle.Id;
+        };
+        /** Resolve selected period from list by id (same approach as timesheet reports). */
+        _this.getSelectedBillingCycle = function () {
+            var me = _this;
+            var id = me.filterModel.billingCycleId;
+            if (id == null || id === "" || id === 0) {
+                return null;
+            }
+            var cycles = me.filterOptions.billingCycles || [];
+            for (var i = 0; i < cycles.length; i++) {
+                var cid = me.getCycleId(cycles[i]);
+                if (cid === id || String(cid) === String(id)) {
+                    return cycles[i];
+                }
+            }
+            return null;
+        };
+        /**
+         * BillingCycleDropdownModel: Startdate/Enddate → JSON camelCase startdate/enddate.
+         * Same property names used by working report screens.
+         */
+        _this.readCycleDate = function (cycle, which) {
+            if (!cycle) {
+                return null;
+            }
+            // Prefer the proven field names from report controllers, then fallbacks
+            var raw;
+            if (which === "start") {
+                raw = cycle.startdate;
+                if (raw == null)
+                    raw = cycle.startDate;
+                if (raw == null)
+                    raw = cycle.Startdate;
+                if (raw == null)
+                    raw = cycle.StartDate;
+            }
+            else {
+                raw = cycle.enddate;
+                if (raw == null)
+                    raw = cycle.endDate;
+                if (raw == null)
+                    raw = cycle.Enddate;
+                if (raw == null)
+                    raw = cycle.EndDate;
+            }
+            return _this.parseApiDate(raw);
+        };
+        /**
+         * Parse API DateTime as a local calendar day (avoids UTC midnight shifting the day).
+         */
+        _this.parseApiDate = function (raw) {
+            if (raw == null || raw === "") {
+                return null;
+            }
+            if (raw instanceof Date || (raw && typeof raw.getTime === "function" && typeof raw.getFullYear === "function")) {
+                if (isNaN(raw.getTime())) {
+                    return null;
+                }
+                return _this.stripTime(raw);
+            }
+            if (typeof raw === "number" && !isNaN(raw)) {
+                return _this.stripTime(new Date(raw));
+            }
+            var s = String(raw).trim();
+            // Microsoft JSON date: /Date(1723248000000)/ or /Date(1723248000000+0200)/
+            var msMatch = /\/Date\((-?\d+)(?:[+-]\d+)?\)\//.exec(s);
+            if (msMatch) {
+                return _this.stripTime(new Date(parseInt(msMatch[1], 10)));
+            }
+            // yyyy-MM-dd[THH:mm:ss...] — use calendar parts so "Z" does not shift the day backward
+            var iso = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+            if (iso) {
+                return new Date(parseInt(iso[1], 10), parseInt(iso[2], 10) - 1, parseInt(iso[3], 10), 0, 0, 0, 0);
+            }
+            // Same as original timesheet: new Date(startdate)
+            var d = new Date(s);
+            if (isNaN(d.getTime())) {
+                return null;
+            }
+            return _this.stripTime(d);
+        };
+        /**
+         * Bind grid date range and week tabs to the selected billing period's defined StartDate/EndDate.
+         * Called on load (default period), whenever the period dropdown changes, and on Reset.
+         */
+        _this.applyBillingPeriod = function () {
+            var me = _this;
+            var cycle = me.getSelectedBillingCycle();
+            me.viewModel.billingCycle = cycle;
+            if (!cycle) {
+                me.weeks = [];
+                me.selectedWeek = null;
+                me.selectedWeekIndex = 0;
+                me.displayOptions.show = false;
+                me.filterModel.startDate = null;
+                me.filterModel.endDate = null;
+                return;
+            }
+            // Date range is solely the billing period’s configured dates
+            var periodStart = me.readCycleDate(cycle, "start");
+            var periodEnd = me.readCycleDate(cycle, "end");
+            if (!periodStart || !periodEnd) {
+                me.weeks = [];
+                me.selectedWeek = null;
+                me.selectedWeekIndex = 0;
+                me.displayOptions.show = false;
+                me.filterModel.startDate = null;
+                me.filterModel.endDate = null;
+                me.handleError("Billing period \"" + (cycle.description || "") + "\" has no start/end dates on the server.");
+                return;
+            }
+            if (periodEnd.getTime() < periodStart.getTime()) {
+                var tmp = periodStart;
+                periodStart = periodEnd;
+                periodEnd = tmp;
+            }
+            me.filterModel.startDate = periodStart;
+            me.filterModel.endDate = periodEnd;
+            me.buildWeeksFromPeriod(periodStart, periodEnd);
+            if (!me.weeks.length) {
+                me.handleError("Could not build weeks for billing period "
+                    + me.dateToKey(periodStart) + " – " + me.dateToKey(periodEnd) + ".");
+                me.displayOptions.show = true;
+                return;
+            }
+            me.selectWeekContainingToday();
+            me.reloadGrid();
+        };
+        /** Alias for templates still using ng-change name history. */
+        _this.onBillingCycleChange = function () {
+            _this.applyBillingPeriod();
+        };
+        /** Monday-based start of the calendar week containing `date`. */
         _this.startOfWeek = function (date) {
-            // If no date object supplied, use current date
-            // Copy date so don't modify supplied date
             var now = date ? new Date(date) : new Date();
-            // set time to some convenient value
             now.setHours(0, 0, 0, 0);
-            // Get the previous Monday
-            var monday = new Date(now.toDateString());
-            monday.setDate(monday.getDate() - monday.getDay() + 1);
-            //return monday
+            var monday = _this.getMondayOnOrBefore(now);
             return _this.convertToUTCDate(monday);
         };
         _this.endOfWeek = function (date) {
-            // If no date object supplied, use current date
-            // Copy date so don't modify supplied date
             var now = date ? new Date(date) : new Date();
-            // set time to some convenient value
             now.setHours(0, 0, 0, 0);
-            // Get next Sunday
-            var sunday = new Date(now.toDateString());
-            sunday.setDate(sunday.getDate() - sunday.getDay() + 7);
-            //  return sunday
+            var monday = _this.getMondayOnOrBefore(now);
+            var sunday = new Date(monday.getTime());
+            sunday.setDate(monday.getDate() + 6);
             return _this.convertToUTCDate(sunday);
         };
         _this.convertToUTCDate = function (date) {
             return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
+        };
+        _this.stripTime = function (date) {
+            if (!date || typeof date.getTime !== "function" || isNaN(date.getTime())) {
+                return null;
+            }
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+        };
+        _this.getMondayOnOrBefore = function (date) {
+            var d = _this.stripTime(date);
+            var day = d.getDay(); // 0=Sun … 6=Sat
+            var diff = day === 0 ? -6 : 1 - day;
+            d.setDate(d.getDate() + diff);
+            return d;
+        };
+        _this.pad2 = function (n) {
+            return (n < 10 ? "0" : "") + n;
+        };
+        _this.dateToKey = function (date) {
+            if (!date || typeof date.getTime !== "function" || isNaN(date.getTime())) {
+                return "";
+            }
+            return date.getFullYear() + "-" + _this.pad2(date.getMonth() + 1) + "-" + _this.pad2(date.getDate());
+        };
+        /**
+         * Normalize a row's dateEntry (Date or various string forms) to yyyy-MM-dd.
+         */
+        _this.parseDateKey = function (dateEntry) {
+            if (dateEntry == null || dateEntry === "") {
+                return "";
+            }
+            if (dateEntry instanceof Date || (dateEntry && typeof dateEntry.getTime === "function" && typeof dateEntry.getFullYear === "function")) {
+                return _this.dateToKey(dateEntry);
+            }
+            var s = String(dateEntry);
+            // Drop timezone offsets (+02:00 / -0500) and time portions
+            s = s.split("+")[0];
+            if (s.indexOf("-") > 0 && /[+-]\d{2}:?\d{2}$/.test(s) === false) {
+                // already stripped +
+            }
+            // Also strip trailing -HH:MM if timezone used minus (rare after + split)
+            var tIdx = s.indexOf("T");
+            if (tIdx >= 0) {
+                s = s.substring(0, tIdx);
+            }
+            else {
+                var sp = s.indexOf(" ");
+                if (sp >= 0) {
+                    s = s.substring(0, sp);
+                }
+            }
+            var parts = s.split("-");
+            if (parts.length === 3) {
+                return parts[0] + "-" + _this.pad2(parseInt(parts[1], 10)) + "-" + _this.pad2(parseInt(parts[2], 10));
+            }
+            return s;
+        };
+        _this.formatDayLabel = function (date) {
+            return _this.dayNames[date.getDay()] + " " + date.getDate() + " " + _this.monthNames[date.getMonth()];
+        };
+        _this.formatShortDate = function (date) {
+            return date.getDate() + " " + _this.monthNames[date.getMonth()];
+        };
+        /**
+         * Split the billing period into Mon–Sun week tabs; each day is one expandable group.
+         * Days outside the period are omitted (partial first/last weeks).
+         * Uses yyyy-MM-dd keys for range membership so Date object / UTC quirks cannot empty the list.
+         */
+        _this.buildWeeksFromPeriod = function (periodStart, periodEnd) {
+            var me = _this;
+            var start = me.stripTime(periodStart);
+            var end = me.stripTime(periodEnd);
+            if (!start || !end) {
+                me.weeks = [];
+                me.selectedWeekIndex = 0;
+                me.selectedWeek = null;
+                return;
+            }
+            var startKey = me.dateToKey(start);
+            var endKey = me.dateToKey(end);
+            var weeks = [];
+            var cursor = me.getMondayOnOrBefore(start);
+            var weekNum = 0;
+            var guard = 0;
+            while (guard < 60) {
+                guard++;
+                var mondayKey = me.dateToKey(cursor);
+                if (mondayKey > endKey) {
+                    // Entire week is after the period
+                    break;
+                }
+                var days = [];
+                for (var i = 0; i < 7; i++) {
+                    var dayDate = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + i, 0, 0, 0, 0);
+                    var dayKey = me.dateToKey(dayDate);
+                    if (dayKey < startKey || dayKey > endKey) {
+                        continue;
+                    }
+                    days.push({
+                        date: dayDate,
+                        dateKey: dayKey,
+                        label: me.formatDayLabel(dayDate),
+                        hours: 0,
+                        billhours: 0,
+                        expanded: false,
+                        records: []
+                    });
+                }
+                if (days.length) {
+                    weekNum++;
+                    weeks.push({
+                        index: weeks.length,
+                        weekNum: weekNum,
+                        start: days[0].date,
+                        end: days[days.length - 1].date,
+                        label: "Week " + weekNum + " · " + me.formatShortDate(days[0].date) + "–" + me.formatShortDate(days[days.length - 1].date),
+                        totalHours: 0,
+                        days: days
+                    });
+                }
+                // Advance to next Monday
+                cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 7, 0, 0, 0, 0);
+            }
+            me.weeks = weeks;
+            if (me.weeks.length) {
+                me.selectedWeekIndex = 0;
+                me.selectedWeek = me.weeks[0];
+            }
+            else {
+                me.selectedWeekIndex = 0;
+                me.selectedWeek = null;
+            }
+        };
+        _this.selectWeekContainingToday = function () {
+            var me = _this;
+            if (!me.weeks.length) {
+                return;
+            }
+            var todayKey = me.dateToKey(me.stripTime(new Date()));
+            for (var w = 0; w < me.weeks.length; w++) {
+                for (var d = 0; d < me.weeks[w].days.length; d++) {
+                    if (me.weeks[w].days[d].dateKey === todayKey) {
+                        me.selectWeek(w);
+                        return;
+                    }
+                }
+            }
+            me.selectWeek(0);
+        };
+        _this.selectWeek = function (index) {
+            if (index < 0 || index >= _this.weeks.length) {
+                return;
+            }
+            _this.selectedWeekIndex = index;
+            _this.selectedWeek = _this.weeks[index];
+            _this.applyDefaultDayExpand();
+        };
+        /** Switch to the week/day that owns a record (used when save validation fails off-tab). */
+        _this.selectWeekForRecord = function (record) {
+            var me = _this;
+            var key = me.parseDateKey(record.dateEntry);
+            if (!key || !me.weeks) {
+                return;
+            }
+            for (var w = 0; w < me.weeks.length; w++) {
+                for (var d = 0; d < me.weeks[w].days.length; d++) {
+                    if (me.weeks[w].days[d].dateKey === key) {
+                        me.selectWeek(w);
+                        me.weeks[w].days[d].expanded = true;
+                        return;
+                    }
+                }
+            }
+        };
+        _this.toggleDay = function (day) {
+            day.expanded = !day.expanded;
+        };
+        _this.applyDefaultDayExpand = function () {
+            var me = _this;
+            if (!me.selectedWeek) {
+                return;
+            }
+            var todayKey = me.dateToKey(me.stripTime(new Date()));
+            var expandedOne = false;
+            for (var i = 0; i < me.selectedWeek.days.length; i++) {
+                var day = me.selectedWeek.days[i];
+                var isToday = day.dateKey === todayKey;
+                var hasHours = day.hours > 0 || (day.records && day.records.length);
+                day.expanded = isToday || hasHours;
+                if (day.expanded) {
+                    expandedOne = true;
+                }
+            }
+            if (!expandedOne && me.selectedWeek.days.length) {
+                me.selectedWeek.days[0].expanded = true;
+            }
+        };
+        /**
+         * Project flat grid rows onto the week/day structure (same object references for editing).
+         */
+        _this.rebuildWeekRecords = function () {
+            var me = _this;
+            if (!me.weeks || !me.weeks.length) {
+                return;
+            }
+            var byKey = {};
+            if (me.gridModel && me.gridModel.data) {
+                for (var i = 0; i < me.gridModel.data.length; i++) {
+                    var row = me.gridModel.data[i];
+                    var key = me.parseDateKey(row.dateEntry);
+                    if (!key) {
+                        continue;
+                    }
+                    if (!byKey[key]) {
+                        byKey[key] = [];
+                    }
+                    byKey[key].push(row);
+                }
+            }
+            for (var w = 0; w < me.weeks.length; w++) {
+                var weekHours = 0;
+                for (var d = 0; d < me.weeks[w].days.length; d++) {
+                    var day = me.weeks[w].days[d];
+                    day.records = byKey[day.dateKey] || [];
+                    var hours = 0;
+                    var billhours = 0;
+                    for (var r = 0; r < day.records.length; r++) {
+                        var h = day.records[r].hours || 0;
+                        hours += h;
+                        if (day.records[r].billable) {
+                            billhours += h;
+                        }
+                    }
+                    day.hours = hours;
+                    day.billhours = billhours;
+                    weekHours += hours;
+                }
+                me.weeks[w].totalHours = weekHours;
+            }
+            if (me.weeks[me.selectedWeekIndex]) {
+                me.selectedWeek = me.weeks[me.selectedWeekIndex];
+            }
         };
         _this.getProjectId = function (id) {
             return _this.$filter("filter")(_this.filterOptions.projects, { id: id })[0];
@@ -88,87 +475,100 @@ var TimesheetController = /** @class */ (function (_super) {
             return null;
         };
         _this.resetFilters = function () {
-            _this.disableDateSelection = false;
-            _this.viewModel.billingCycle = _this.filterOptions.billingCycles[0];
-            _this.viewModel.billingOption = _this.filterOptions.billingOptions[0];
-            _this.filterModel.startDate = _this.startOfWeek(null);
-            _this.filterModel.endDate = _this.endOfWeek(null);
+            if (_this.filterOptions.billingCycles && _this.filterOptions.billingCycles.length) {
+                var defaultCycle = _this.pickDefaultBillingCycle(_this.filterOptions.billingCycles);
+                _this.filterModel.billingCycleId = _this.getCycleId(defaultCycle);
+                _this.viewModel.billingCycle = defaultCycle;
+            }
+            else {
+                _this.filterModel.billingCycleId = null;
+                _this.viewModel.billingCycle = null;
+            }
+            _this.filterModel.billingOption = _this.filterOptions.billingOptions[0];
             _this.filterModel.projectId = "";
             _this.filterModel.projectDescription = "";
-            _this.reloadGrid();
+            _this.applyBillingPeriod();
         };
+        /**
+         * Validate a row from the model (and form controls when present).
+         * Form controls only exist for the selected week's day rows; other weeks must still validate on save.
+         */
         _this.validateRecordValues = function (record) {
-            //if (!record.id) return null;
             var me = _this;
-            if (me.$scope["RecordForm"]["projectGridId".concat(record.id)].$invalid)
+            var form = me.$scope["RecordForm"];
+            var ctrlInvalid = function (name) {
+                if (!form || !form[name]) {
+                    return false;
+                }
+                return !!form[name].$invalid;
+            };
+            if (ctrlInvalid("projectGridId".concat(record.id)) || !(record.projectGridId || record.projectId)) {
                 return "Project is not valid";
-            if (me.$scope["RecordForm"]["teamId".concat(record.id)].$invalid)
+            }
+            if (ctrlInvalid("teamId".concat(record.id)) || record.teamId == null || record.teamId === "") {
                 return "Team is not valid";
-            if (me.$scope["RecordForm"]["dateEntry".concat(record.id)].$invalid)
+            }
+            if (!me.parseDateKey(record.dateEntry)) {
                 return "Date is not valid";
-            if (me.$scope["RecordForm"]["activityId".concat(record.id)].$invalid)
+            }
+            if (ctrlInvalid("activityId".concat(record.id)) || record.activityId == null || record.activityId === "") {
                 return "Activity is not valid";
-            if (me.$scope["RecordForm"]["comments".concat(record.id)].$invalid)
+            }
+            if (ctrlInvalid("comments".concat(record.id)) || record.comments == null || String(record.comments).trim() === "") {
                 return "Comments is not valid";
-            if (me.$scope["RecordForm"]["hours".concat(record.id)].$invalid)
+            }
+            if (ctrlInvalid("hours".concat(record.id)) || record.hours == null || record.hours === "" || isNaN(record.hours)) {
                 return "Hours is not valid";
+            }
             return null;
         };
         //#endregion
-        _this.validateAddRecord = function () {
-            //if (!record.id) return null;
+        /**
+         * Add an empty capture line under a specific day — date is implied, no picker.
+         */
+        _this.addRowForDay = function (day) {
             var me = _this;
-            if (me.$scope["AddForm"]['projectId'].$invalid)
-                return "Project is not valid";
-            if (me.$scope["AddForm"]['teamId'].$invalid)
-                return "Team is not valid";
-            if (me.$scope["AddForm"]['dateEntry'].$invalid)
-                return "Date is not valid";
-            if (me.$scope["AddForm"]['activityId'].$invalid)
-                return "Activity is not valid";
-            if (me.$scope["AddForm"]['comments'].$invalid)
-                return "Comments is not valid";
-            if (me.$scope["AddForm"]['hours'].$invalid)
-                return "Hours is not valid";
-            return null;
-        };
-        _this.submitAddRow = function () {
-            var me = _this;
-            var validation = me.validateAddRecord();
-            if (validation) {
-                me.$scope.$broadcast("show-errors-check-validity");
-                if (me.$scope["AddForm"].$invalid)
-                    return;
-                me.handleError(validation);
-                return;
-            }
             if (!me.filterModel.userId) {
                 me.handleError("Please select a user in the filter!");
                 return;
             }
+            if (!me.filterModel.billingCycleId) {
+                me.handleError("Please select a billing period.");
+                return;
+            }
+            if (!me.gridModel || !me.gridModel.data) {
+                me.gridModel = { data: [], originalData: [], totalItems: 0 };
+            }
+            var entryDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 0, 0, 0, 0);
             var newRecord = {
                 userAccountId: me.filterModel.userId,
-                projectGridId: me.addRowRecord.projectGridId,
-                clientEntityName: me.addRowRecord.clientEntityName,
-                billable: me.addRowRecord.billable,
-                projectId: me.addRowRecord.projectId,
-                projectDescription: me.addRowRecord.projectDescription,
-                subProjectId: me.addRowRecord.subProjectId,
-                teamId: me.addRowRecord.teamId,
-                activityId: me.addRowRecord.activityId,
-                comments: me.addRowRecord.comments,
-                hours: me.addRowRecord.hours,
-                dateEntry: me.addRowRecord.dateEntry,
+                projectGridId: null,
+                projectId: null,
+                projectDescription: null,
+                clientEntityName: null,
+                billable: null,
+                subProjectId: null,
+                teamId: null,
+                activityId: null,
+                comments: null,
+                hours: null,
+                dateEntry: entryDate,
                 id: new Date().getTime(),
                 new: true,
                 valid: {
-                    'projectGridId': false, 'dateEntry': false, 'teamId': false, 'activityId': false, 'comments': false, 'hours': false
+                    'projectGridId': false, 'dateEntry': true, 'teamId': false, 'activityId': false, 'comments': false, 'hours': false
                 }
             };
             me.gridModel.data.push(newRecord);
+            day.records.push(newRecord);
+            day.expanded = true;
+            me.refreshDayTotals(day);
         };
         _this.submitForm = function () {
             var me = _this;
+            if (!me.gridModel || !me.gridModel.data) {
+                return;
+            }
             if (me.gridModel.data == me.gridModel.originalData) {
                 return;
             }
@@ -176,8 +576,8 @@ var TimesheetController = /** @class */ (function (_super) {
                 var validation = me.validateRecordValues(me.gridModel.data[i]);
                 if (validation) {
                     me.$scope.$broadcast("show-errors-check-validity");
-                    if (me.$scope["RecordForm"].$invalid)
-                        return;
+                    // Jump to the week that holds the failing row so the user can fix it
+                    me.selectWeekForRecord(me.gridModel.data[i]);
                     me.handleError(validation);
                     return;
                 }
@@ -196,9 +596,6 @@ var TimesheetController = /** @class */ (function (_super) {
                     me.gridModel.data[i].id = null;
                 }
             }
-            me.$scope.$broadcast("show-errors-check-validity");
-            if (me.$scope["RecordForm"].$invalid)
-                return;
             me.TimesheetService.timesheetListSave(me.gridModel.data)
                 .then(function (result) {
                 me.saveSuccess = true;
@@ -236,7 +633,11 @@ var TimesheetController = /** @class */ (function (_super) {
                     }
                     else {
                         var index = me.gridModel.data.indexOf(record);
-                        me.gridModel.data.splice(index, 1);
+                        if (index >= 0) {
+                            me.gridModel.data.splice(index, 1);
+                        }
+                        me.rebuildWeekRecords();
+                        me.summaryList();
                     }
             }, function (error) {
                 me.handleError(error);
@@ -261,7 +662,6 @@ var TimesheetController = /** @class */ (function (_super) {
                         me.handleError("Selected End Date must be after Start Date");
                     }
                     else {
-                        //let count = endDate.getDate() - startDate.getDate();
                         endDate.setHours(0, 0, 0, 0);
                         startDate.setHours(0, 0, 0, 0);
                         var count = Math.round(Math.abs((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)));
@@ -273,7 +673,8 @@ var TimesheetController = /** @class */ (function (_super) {
                                 projectDescription: project.projectDescription,
                                 projectGridId: project.projectId,
                                 projectId: project.projectId,
-                                clientEntityName: me.addRowRecord.clientEntityName,
+                                clientEntityName: project.clientName || '',
+                                billable: project.isBillable,
                                 subProjectId: project.subProjectId,
                                 project: {
                                     description: project.projectDescription,
@@ -293,40 +694,20 @@ var TimesheetController = /** @class */ (function (_super) {
                                 valid: {}
                             };
                             me.gridModel.data.push(newRecord);
-                            // Mark row as invalid
-                            newRecord.valid["dateEntry"] = false;
+                            newRecord.valid["dateEntry"] = true;
                             newRecord.valid["teamId"] = false;
                             newRecord.valid["activityId"] = false;
                             newRecord.valid["comments"] = false;
                             newRecord.valid["hours"] = false;
                         }
+                        me.rebuildWeekRecords();
+                        me.applyDefaultDayExpand();
+                        me.summaryList();
                     }
                 }
             }, function (error) {
                 me.handleError(error);
             });
-        };
-        _this.submitNewRecord = function () {
-            var me = _this;
-            if (!me.filterModel.userId) {
-                me.handleError("Please select a user in the filter!");
-                return;
-            }
-            var newRecord = {
-                userAccountId: me.filterModel.userId,
-                projectGridId: null,
-                projectId: null,
-                projectDescription: null,
-                subProjectId: null,
-                teamId: null,
-                activityId: null,
-                comments: null,
-                hours: null,
-                dateEntry: null,
-                id: new Date().getTime(),
-                new: true,
-            };
-            me.gridModel.data.push(newRecord);
         };
         _this.cancelForm = function () {
             _this.$state.transitionTo("mainState.home");
@@ -335,6 +716,28 @@ var TimesheetController = /** @class */ (function (_super) {
             var me = _this;
             if (!me.filterModel.userId) {
                 me.handleError("Please select a user in the filter!");
+                return;
+            }
+            if (!me.filterModel.billingCycleId) {
+                me.handleError("Please select a billing period.");
+                return;
+            }
+            // Ensure date range always matches the selected billing period before loading
+            var cycle = me.getSelectedBillingCycle();
+            if (cycle) {
+                var start = me.readCycleDate(cycle, "start");
+                var end = me.readCycleDate(cycle, "end");
+                if (start && end) {
+                    me.filterModel.startDate = start.getTime() <= end.getTime() ? start : end;
+                    me.filterModel.endDate = start.getTime() <= end.getTime() ? end : start;
+                    if (!me.weeks || !me.weeks.length) {
+                        me.buildWeeksFromPeriod(me.filterModel.startDate, me.filterModel.endDate);
+                        me.selectWeekContainingToday();
+                    }
+                }
+            }
+            if (!me.filterModel.startDate || !me.filterModel.endDate) {
+                me.handleError("Selected billing period has no start/end dates.");
                 return;
             }
             me.displayOptions.show = true;
@@ -362,12 +765,10 @@ var TimesheetController = /** @class */ (function (_super) {
             templateRecord.project.subProjectId = templateRecord.project.subProjectId;
         };
         _this.validateHours = function (propertyName, object) {
-            //if (object.hours > 24) object.hours = 24;
             if (object.hours < 0)
                 object.hours = 0;
             var number = Math.floor(object.hours);
             var fraction = object.hours % 1;
-            var number = Math.floor(object.hours);
             if (fraction < 0.12)
                 object.hours = number;
             if (fraction >= 0.12 && fraction < 0.37)
@@ -378,6 +779,7 @@ var TimesheetController = /** @class */ (function (_super) {
                 object.hours = number + 0.75;
             if (fraction >= 0.87)
                 object.hours = number + 1;
+            _this.refreshTotalsForRecord(object);
         };
         _this.validateOriginal = function (propertyName, object) {
             var me = _this;
@@ -387,13 +789,41 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             if (originalObject != null) {
                 object.valid[propertyName] = originalObject[propertyName] === object[propertyName];
-                return;
             }
             else {
                 object.valid[propertyName] = false;
-                return false;
             }
-            ;
+            if (propertyName === "hours") {
+                me.refreshTotalsForRecord(object);
+            }
+        };
+        _this.refreshTotalsForRecord = function (object) {
+            var me = _this;
+            var key = me.parseDateKey(object.dateEntry);
+            if (me.selectedWeek) {
+                for (var i = 0; i < me.selectedWeek.days.length; i++) {
+                    if (me.selectedWeek.days[i].dateKey === key) {
+                        me.refreshDayTotals(me.selectedWeek.days[i]);
+                        break;
+                    }
+                }
+            }
+            // Keep week tab totals fresh across all weeks
+            me.rebuildWeekRecords();
+            me.summaryList();
+        };
+        _this.refreshDayTotals = function (day) {
+            var hours = 0;
+            var billhours = 0;
+            for (var r = 0; r < day.records.length; r++) {
+                var h = day.records[r].hours || 0;
+                hours += h;
+                if (day.records[r].billable) {
+                    billhours += h;
+                }
+            }
+            day.hours = hours;
+            day.billhours = billhours;
         };
         _this.resetRecord = function (object) {
             var me = _this;
@@ -417,6 +847,9 @@ var TimesheetController = /** @class */ (function (_super) {
                         object.valid["comments"] = true;
                         object.hours = originalObject.hours;
                         object.valid["hours"] = true;
+                        object.clientEntityName = originalObject.clientEntityName;
+                        object.billable = originalObject.billable;
+                        me.refreshTotalsForRecord(object);
                     }
                 }
             }, function (error) {
@@ -431,22 +864,26 @@ var TimesheetController = /** @class */ (function (_super) {
             me.summary.days = [];
             if (me.gridModel && me.gridModel.data) {
                 for (var i = 0; i < me.gridModel.data.length; i++) {
-                    var date = me.gridModel.data[i].dateEntry.split("T")[0];
-                    var existing = me.$filter("filter")(me.summary.days, { date: date })[0];
+                    var date = me.parseDateKey(me.gridModel.data[i].dateEntry);
+                    if (!date) {
+                        continue;
+                    }
+                    var hours = me.gridModel.data[i].hours || 0;
+                    var existing = me.$filter("filter")(me.summary.days, { date: date }, true)[0];
                     if (existing) {
-                        existing["hours"] += me.gridModel.data[i].hours;
+                        existing["hours"] += hours;
                         if (me.gridModel.data[i].billable)
-                            existing["billhours"] += me.gridModel.data[i].hours;
+                            existing["billhours"] += hours;
                     }
                     else {
                         var billhours = 0;
                         if (me.gridModel.data[i].billable)
-                            billhours += me.gridModel.data[i].hours;
-                        me.summary.days.push({ date: date, hours: me.gridModel.data[i].hours, billhours: billhours });
+                            billhours += hours;
+                        me.summary.days.push({ date: date, hours: hours, billhours: billhours });
                     }
-                    me.summary.totalHours += me.gridModel.data[i].hours;
+                    me.summary.totalHours += hours;
                     if (me.gridModel.data[i].billable)
-                        me.summary.totalBillableHours += me.gridModel.data[i].hours;
+                        me.summary.totalBillableHours += hours;
                 }
             }
         };
@@ -488,6 +925,7 @@ var TimesheetController = /** @class */ (function (_super) {
             teams: [],
             activities: [],
             clients: [],
+            billingCycles: [],
             billingOptions: [
                 { val: 0, description: "All" },
                 { val: 1, description: "Yes" },
@@ -495,38 +933,23 @@ var TimesheetController = /** @class */ (function (_super) {
             ],
             userTeams: []
         };
-        me.addRowRecord = {
-            userAccountId: null,
-            projectGridId: null,
-            projectId: null,
-            projectDescription: null,
-            subProjectId: null,
-            teamId: null,
-            activityId: null,
-            comments: null,
-            hours: null,
-            dateEntry: null,
-            id: new Date().getTime(),
-            new: true,
-        };
-        // Set default Billable
+        me.gridModel = { data: [], originalData: [], totalItems: 0 };
+        me.summary = { days: [], totalHours: 0, totalBillableHours: 0 };
+        // Set default Billable — Manual Date is not offered; period always comes from a real billing cycle
         me.filterModel.billingOption = me.filterOptions.billingOptions[0];
-        //        ProjectService.projectAndSubProjectDropdownList()
-        //            .then(
-        //                result => {
-        //                    me.filterOptions.userProjects = result;
-        //                },
-        //               error => {
-        //                    me.handleError(error);
-        //                });
+        me.filterModel.billingCycleId = null;
+        me.filterModel.startDate = null;
+        me.filterModel.endDate = null;
         BillingCycleService.billingCycleDropdownList()
             .then(function (results) {
-            me.filterOptions.billingCycles = results;
-            me.filterOptions.billingCycles.splice(0, 0, {
-                id: 0,
-                description: "Manual Date"
-            });
-            me.viewModel.billingCycle = me.filterOptions.billingCycles[0];
+            // Real cycles only — no "Manual Date" synthetic row
+            me.filterOptions.billingCycles = results || [];
+            if (me.filterOptions.billingCycles.length) {
+                var defaultCycle = me.pickDefaultBillingCycle(me.filterOptions.billingCycles);
+                me.filterModel.billingCycleId = me.getCycleId(defaultCycle);
+                me.viewModel.billingCycle = defaultCycle;
+                me.applyBillingPeriod();
+            }
         }, function (error) {
             me.handleError(error);
         });
@@ -556,21 +979,19 @@ var TimesheetController = /** @class */ (function (_super) {
         });
         me.pageGrid = new TcrGridServiceModule.TcrGridService("date", _this.TimesheetService.timesheetGrid, _this.onDataLoaded, function (model) {
             model.userId = me.filterModel.userId;
-            model.startDate = me.filterModel.startDate;
-            model.endDate = me.filterModel.endDate;
+            // Clone so TimesheetService UTC conversion cannot mutate the period filter dates
+            model.startDate = me.filterModel.startDate
+                ? new Date(me.filterModel.startDate.getFullYear(), me.filterModel.startDate.getMonth(), me.filterModel.startDate.getDate(), 0, 0, 0, 0)
+                : null;
+            model.endDate = me.filterModel.endDate
+                ? new Date(me.filterModel.endDate.getFullYear(), me.filterModel.endDate.getMonth(), me.filterModel.endDate.getDate(), 0, 0, 0, 0)
+                : null;
             model.projectId = me.filterModel.projectId;
             model.billingOption = me.filterModel.billingOption.val;
         }, null, $state);
         me.filterModel.userId = SecurityService.getCurrentUserDetails().id;
-        //if (me.filterModel.userId === null)
-        //this.$state.go("mainState.home");
         // Populate user's projects
         _this.getUserProjects();
-        me.filterModel.startDate = me.startOfWeek(null);
-        me.filterModel.endDate = me.endOfWeek(null);
-        me.filterModel.projectId = me.filterModel.projectId;
-        me.filterModel.projectId = me.filterModel.projectId;
-        me.reloadGrid();
         return _this;
     }
     TimesheetController.prototype.getUserProjects = function () {
@@ -613,6 +1034,8 @@ var TimesheetController = /** @class */ (function (_super) {
             event.data[tmIdx].dateEntry = event.data[tmIdx].dateEntry + timezoneString;
         }
         this.gridModel = event;
+        this.rebuildWeekRecords();
+        this.applyDefaultDayExpand();
         this.summaryList();
         if (this.gridModel.totalItems > 0) {
             this.loadingIsDone = true;

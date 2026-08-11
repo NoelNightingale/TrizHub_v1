@@ -187,6 +187,55 @@
         margin-top: 16px;
     }
 
+    .ts-capture .ts-project-cell {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .ts-capture .ts-project-cell .form-group {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Compact billable flag — replaces a full Yes/No column */
+    .ts-capture .ts-bill-flag {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        margin-top: 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        user-select: none;
+        cursor: default;
+    }
+
+    .ts-capture .ts-bill-flag.is-billable {
+        color: #1b6b45;
+        background: rgba(46, 125, 79, 0.12);
+        border: 1px solid rgba(46, 125, 79, 0.28);
+    }
+
+    .ts-capture .ts-bill-flag.is-nonbillable {
+        color: rgba(0, 0, 0, 0.35);
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-capture tr.ts-row-billable > td:first-child {
+        box-shadow: inset 3px 0 0 #2e7d4f;
+    }
+
+    .ts-capture tr.ts-row-nonbillable > td:first-child {
+        box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.15);
+    }
+
     .ts-capture .readOnlyLight {
         cursor: pointer;
     }
@@ -354,10 +403,9 @@
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th style="width:34%">Project</th>
-                                            <th style="width:10%">Client</th>
-                                            <th title="Billable" style="width:6%">Bill</th>
-                                            <th style="width:12%">Team</th>
+                                            <th style="width:38%">Project</th>
+                                            <th style="width:12%">Client</th>
+                                            <th style="width:14%">Team</th>
                                             <th style="width:14%">Activity</th>
                                             <th style="width:14%">Comments</th>
                                             <th style="width:8%">Hours</th>
@@ -365,26 +413,30 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr ng-repeat="i in day.records">
+                                        <tr ng-repeat="i in day.records"
+                                            ng-class="{'ts-row-billable': i.billable == 1 || i.billable === true, 'ts-row-nonbillable': !(i.billable == 1 || i.billable === true)}">
                                             <td>
-                                                <div class="form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}" show-errors>
-                                                    <input readonly name="projectGridId{{i.id}}" ng-required="true"
-                                                           ng-change="vm.validateOriginal('projectGridId',i)" type="text"
-                                                           title="{{i.projectDescription}}"
-                                                           data-ng-click="vm.openProjectListModal(i)"
-                                                           data-ng-model="i.projectDescription"
-                                                           class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
-                                                    <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
+                                                <div class="ts-project-cell">
+                                                    <div class="form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}" show-errors>
+                                                        <input readonly name="projectGridId{{i.id}}" ng-required="true"
+                                                               ng-change="vm.validateOriginal('projectGridId',i)" type="text"
+                                                               title="{{i.projectDescription}}"
+                                                               data-ng-click="vm.openProjectListModal(i)"
+                                                               data-ng-model="i.projectDescription"
+                                                               class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
+                                                        <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
+                                                    </div>
+                                                    <span class="ts-bill-flag is-billable"
+                                                          ng-if="i.billable == 1 || i.billable === true"
+                                                          title="Billable">B</span>
+                                                    <span class="ts-bill-flag is-nonbillable"
+                                                          ng-if="!(i.billable == 1 || i.billable === true)"
+                                                          title="Non-billable">NB</span>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
                                                     <span>{{i.clientEntityName}}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-group">
-                                                    <span>{{i.billable == 1 || i.billable === true ? 'Yes' : 'No'}}</span>
                                                 </div>
                                             </td>
                                             <td>
