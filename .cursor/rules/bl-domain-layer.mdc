@@ -1,0 +1,43 @@
+---
+description: Entity, provider and EF6 migration conventions for the TRiZHub.BL domain layer
+globs: BL/TRiZHub.BL/**/*.cs
+alwaysApply: false
+---
+
+# Entities
+
+Derive from `TCR.Lib.BL.DbEntity`, which supplies a **client-generated** `Guid Id`
+(`DatabaseGeneratedOption.None`). Use `[Table("Name")]`, explicit `[ForeignKey]` on each relation, and
+`virtual` on every property. Register the new set on `Context/DataContext.cs`.
+
+# Providers
+
+One provider per area, as an `I<X>Provider` interface plus an `<X>Provider : TRiZHubProvider` implementation,
+constructed with `(DataContext context, ICurrentUser currentUser)`. Throw a domain-specific
+`<X>Exception` for business-rule failures — the controller layer maps it to HTTP 400.
+
+Gate every public method on privileges before touching data, using `PrivilegeType` values:
+
+```csharp
+// Single privilege — throws GenericSecurityException if missing
+Authenticate(PrivilegeType.ActivityMaintenance);
+
+// Any-of semantics (OR), built once in the constructor
+AuthenticateList(getTokens);
+```
+
+Persist with `DataContextSaveChanges()`, never `DataContext.SaveChanges()` — the base method routes
+through the audit context so changes are attributed to the logged-in user.
+
+Beware: several existing providers return unfiltered `IQueryable` and rely on the *controller* to scope
+rows to a user. When adding a read method, filter inside the provider instead.
+
+# Migrations
+
+`AutomaticMigrationsEnabled = false`, so every schema change needs an explicit migration in
+`BL/TRiZHub.BL/Migrations`. Generate the scaffold with `Add-Migration <Name>` in the Package Manager
+Console with `TRiZHub.BL` as the default project — do not hand-write the `.Designer.cs` and `.resx`
+pair unless there is no alternative. Always fill in `Down()`.
+
+`Migrations/Configuration.cs` has a hand-written `Seed` using `AddOrUpdate` for reference data such as
+`ProjectType`. Add new reference data there rather than in a migration body.

@@ -1,0 +1,47 @@
+---
+description: Known hazards in the timesheet capture feature — read before changing timesheet behaviour
+globs: BL/TRiZHub.BL/Provider/TimesheetData/**,BL/TRiZHub.BL/Entities/TimesheetData/**,UI/TRiZHub/Controllers/TimesheetController.cs,UI/TRiZHub/Models/TimesheetModels/**,UI/TRiZHub/Models/TimesheetSearchModel.cs,UI/TRiZHub/Portals/app/Services/TimesheetService/**,UI/TRiZHub/Portals/app/states/mainState/timesheetState/**
+alwaysApply: false
+---
+
+# The slice
+
+`TimesheetEntry` → `TimesheetProvider` (4 methods) → `TimesheetController` (`TimesheetGrid`,
+`TimesheetGet`, `TimesheetSave`, `TimesheetListSave`, `TimesheetDelete`) → `~TimesheetService.ts` →
+`~TimesheetController.ts`, an editable grid with a daily-hours summary.
+
+# Hazards
+
+**Date handling is fragile and split across four layers.** The provider zeroes the time with
+`dateEntry.AddHours(dateEntry.Hour * -1)` to undo a UTC offset added by the UI; the Angular service
+converts the grid's start/end to UTC; `TimesheetSave` applies `.ToLocalTime()` but `TimesheetListSave`
+does **not**; and `onLoadEvent` appends a computed timezone suffix to every `dateEntry` string after
+load. Change one layer and verify the round trip end to end — a saved date shifting by a day is the
+expected failure mode.
+
+**The billing-cycle-closed guard is duplicated three times** in `TimesheetProvider` (insert, update,
+delete) and each copy enumerates the whole `BillingCycleEntrySet` client-side. Any new write path must
+repeat the guard or closed periods become editable. Prefer extracting it to one private method.
+
+**Delete is a hard delete.** `DeleteTimesheetEntry` calls `Remove(record)` with the
+`record.IsActive = false` line commented out, even though reads filter on `IsActive`. Confirm intent
+before relying on either behaviour.
+
+**Row-level access is enforced by the caller.** `TimesheetFilterList(startDate, endDate)` returns *all*
+users' entries; only `TimesheetGrid` narrows it with `.Where(a => a.UserAccountId == model.UserId)`. New
+read paths must filter explicitly. The two relevant privileges are `TimesheetCapture` and
+`TimesheetCaptureForOtherAccounts`, and the provider only checks that the user has *either*, including
+for delete.
+
+**`TimesheetGrid` returns every matching row** — its `Skip`/`Take` is commented out and the grid pages
+client-side.
+
+**Hours are quantized to quarter-hours in the browser only** (`validateHours`); the API accepts any
+decimal. Add server-side validation if it matters.
+
+# Cost of a new field
+
+Adding one field to a timesheet entry touches roughly ten places: entity, migration,
+`SaveTimesheetEntry` (already 9 positional parameters — consider a parameter object),
+`ITimesheetProvider`, three separate mapping blocks in the controller, `TimesheetModel`,
+`TimesheetGridModel`, `~Models.ts`, `mainView.html`, and a `case` in the sort switch.

@@ -1,0 +1,38 @@
+---
+description: WebAPI controller conventions for the TRiZHub app
+globs: UI/TRiZHub/Controllers/**/*.cs
+alwaysApply: false
+---
+
+# Shape of a controller
+
+Derive from `TCRControllerBase`, decorate with `[Authorize]` and `[NoCache]`, and provide two
+constructors: a parameterless one for production and a `(IAppSettings, DataContext, ICurrentUser)` one
+for tests. Instantiate providers directly in both — there is no DI container.
+
+Routing is **action-based**, not REST: `api/{controller}/{action}/{id}` from `WebApiConfig`. Reads are
+`[HttpGet]`, everything else is `[HttpPost]` taking a model. JSON is serialized camelCase, so the
+AngularJS side sees `dateEntry`, `userAccountId`, and so on.
+
+Call `CheckModelState()` before persisting, and translate domain exceptions yourself:
+
+```csharp
+catch (TimesheetException e)
+{
+    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+}
+```
+
+# Grid endpoints
+
+A grid action takes a `GridModel` subclass (`IdGridModel`, or a purpose-built search model) and returns
+`GridResultModel<T>`. Call `SetupGridParams(model)` first — it lowercases `SortKey`, defaults `SortOrder`
+to `"ASC"`, defaults `RecordsPerPage` to 60, and turns an empty `Searchfor` into the literal string
+`"null"`, which is why filters are written as `if (model.Searchfor != "null")`.
+
+Sorting is a hand-written `switch` on the lowercased `SortKey`, so **a new sortable column silently
+falls back to the default order until you add its `case`**. Project into the grid model *before*
+sorting so the `switch` can order by the projected property.
+
+Some grids have their `Skip`/`Take` paging commented out and return every row. Do not copy that into a
+new endpoint; page server-side unless the result set is known to be tiny.
