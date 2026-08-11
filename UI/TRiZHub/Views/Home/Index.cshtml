@@ -3,6 +3,18 @@
     Layout = null;
 }
 
+@{ // Prevent proxy servers and browsers from caching the entry file
+    Response.Cache.SetNoStore();
+    Response.Cache.SetCacheability(HttpCacheability.NoCache);
+    Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+    Response.Cache.SetValidUntilExpires(false);
+
+    // Explicitly set headers for modern browsers
+    Response.Headers.Set("Cache-Control", "no-cache, no-store, must-revalidate");
+    Response.Headers.Set("Pragma", "no-cache");
+    Response.Headers.Set("Expires", "-1"); }
+
+
 <!DOCTYPE html>
 <html ng-app="AngularApp" ng-controller="AppCtrl">
 <head>
