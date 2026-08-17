@@ -22,14 +22,63 @@
         display: block;
     }
 
+    .ts-capture .ts-week-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 8px 12px;
+        margin: 16px 0 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
     .ts-capture .ts-week-tabs {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin: 8px 0 16px;
+        margin: 0;
         padding: 0;
         list-style: none;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-week-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        padding-bottom: 8px;
+    }
+
+    .ts-capture .ts-week-actions .btn,
+    .ts-capture .ts-footer-actions .btn {
+        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+    .ts-capture .ts-btn-template {
+        background: #fff;
+        border: 1px solid rgba(26, 95, 122, 0.35);
+        color: #1a5f7a;
+    }
+
+    .ts-capture .ts-btn-template:hover {
+        background: rgba(26, 95, 122, 0.06);
+        border-color: #1a5f7a;
+        color: #1a5f7a;
+    }
+
+    .ts-capture .ts-footer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .ts-capture .ts-week-tabs > li {
@@ -77,10 +126,16 @@
 
     .ts-capture .ts-day-panel {
         border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 8px;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
         margin-bottom: 10px;
         background: #fff;
         overflow: hidden;
+    }
+
+    .ts-capture .ts-day-panel + .ts-day-panel {
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
     }
 
     .ts-capture .ts-day-header {
@@ -112,6 +167,40 @@
         gap: 12px;
         font-size: 13px;
         color: rgba(0, 0, 0, 0.5);
+    }
+
+    .ts-capture .ts-btn-add-line {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.4;
+        color: #1a5f7a;
+        background: #fff;
+        border: 1px solid rgba(26, 95, 122, 0.35);
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-btn-add-line:hover {
+        background: rgba(26, 95, 122, 0.06);
+        border-color: #1a5f7a;
+        color: #1a5f7a;
+    }
+
+    .ts-capture .ts-empty-link {
+        color: #1a5f7a;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(26, 95, 122, 0.5);
+    }
+
+    .ts-capture .ts-empty-link:hover {
+        color: #13485c;
+        border-bottom-style: solid;
     }
 
     .ts-capture .ts-day-header .ts-hours-ok {
@@ -157,19 +246,6 @@
         padding: 10px 4px;
         color: rgba(0, 0, 0, 0.4);
         font-size: 13px;
-    }
-
-    .ts-capture .ts-day-actions {
-        margin-top: 4px;
-    }
-
-    .ts-capture .ts-toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 12px;
     }
 
     .ts-capture .ts-period-hint {
@@ -353,29 +429,22 @@
             </div>
 
             <div ng-if="vm.filterModel.billingCycleId && vm.displayOptions.show">
-                <ul class="ts-week-tabs" ng-if="vm.weeks.length">
-                    <li ng-repeat="week in vm.weeks">
-                        <a class="ts-week-tab"
-                           ng-class="{'active': vm.selectedWeekIndex === week.index}"
-                           ng-click="vm.selectWeek(week.index)">
-                            {{week.label}}
-                            <span class="ts-week-hours">{{week.totalHours || 0}}h</span>
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="ts-no-period" ng-if="!vm.weeks.length">
-                    No weeks could be built for this billing period. Try selecting the period again, or check that it has start and end dates.
-                </div>
-
-                <div class="ts-toolbar" ng-if="vm.weeks.length">
-                    <div>
-                        <button class="btn btn-xs btn-primary" ng-click="vm.submitnewRecords()">
-                            <i class="fa fa-plus"></i> Create new records (Template)
+                <div class="ts-week-bar" ng-if="vm.weeks.length">
+                    <ul class="ts-week-tabs">
+                        <li ng-repeat="week in vm.weeks">
+                            <a class="ts-week-tab"
+                               ng-class="{'active': vm.selectedWeekIndex === week.index}"
+                               ng-click="vm.selectWeek(week.index)">
+                                {{week.label}}
+                                <span class="ts-week-hours">{{week.totalHours || 0}}h</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="ts-week-actions">
+                        <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
+                            <i class="fa fa-th"></i> Bulk Populate
                         </button>
-                    </div>
-                    <div>
-                        <button class="btn btn-xs btn-primary"
+                        <button type="button" class="btn btn-primary"
                                 ng-click="vm.submitForm()"
                                 ng-disabled="vm.filterModel.userId == null">
                             <i class="fa fa-save"></i> Save Changes
@@ -383,9 +452,13 @@
                     </div>
                 </div>
 
+                <div class="ts-no-period" ng-if="!vm.weeks.length">
+                    No weeks could be built for this billing period. Try selecting the period again, or check that it has start and end dates.
+                </div>
+
                 <form role="form" name="RecordForm" novalidate ng-if="vm.selectedWeek && vm.selectedWeek.days.length">
                     <div class="ts-day-panel" ng-repeat="day in vm.selectedWeek.days">
-                        <button type="button" class="ts-day-header" ng-click="vm.toggleDay(day)">
+                        <div class="ts-day-header" ng-click="vm.toggleDay(day)">
                             <span class="ts-day-title">
                                 <i class="fa fa-chevron-right fa-chevron" ng-class="{'open': day.expanded}"></i>
                                 &nbsp;{{day.label}}
@@ -395,8 +468,13 @@
                                     {{day.hours || 0}}h
                                 </span>
                                 <span ng-if="day.records.length">{{day.records.length}} line{{day.records.length === 1 ? '' : 's'}}</span>
+                                <button type="button" class="ts-btn-add-line"
+                                        title="Add a line for this day"
+                                        ng-click="vm.addRowForDay(day); $event.stopPropagation()">
+                                    <i class="fa fa-plus"></i> Add line
+                                </button>
                             </span>
-                        </button>
+                        </div>
 
                         <div class="ts-day-body" ng-show="day.expanded">
                             <div class="table-responsive" ng-if="day.records.length">
@@ -494,25 +572,21 @@
 
                             <div class="ts-day-empty" ng-if="!day.records.length">
                                 No time entered for this day.
-                            </div>
-
-                            <div class="ts-day-actions">
-                                <button type="button" class="btn btn-xs btn-primary" ng-click="vm.addRowForDay(day)">
-                                    <i class="fa fa-plus"></i> Add line
-                                </button>
+                                <a class="ts-empty-link" ng-click="vm.addRowForDay(day)">Add a line</a>
                             </div>
                         </div>
                     </div>
                 </form>
 
-                <div class="row m-t-1">
-                    <div class="col-md-12">
-                        <button class="btn btn-xs btn-primary pull-right"
-                                ng-click="vm.submitForm()"
-                                ng-disabled="vm.filterModel.userId == null">
-                            <i class="fa fa-save"></i> Save Changes
-                        </button>
-                    </div>
+                <div class="ts-footer-actions" ng-if="vm.weeks.length">
+                    <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
+                        <i class="fa fa-th"></i> Bulk Populate
+                    </button>
+                    <button type="button" class="btn btn-primary"
+                            ng-click="vm.submitForm()"
+                            ng-disabled="vm.filterModel.userId == null">
+                        <i class="fa fa-save"></i> Save Changes
+                    </button>
                 </div>
             </div>
         </div>
