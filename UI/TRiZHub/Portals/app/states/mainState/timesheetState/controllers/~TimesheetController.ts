@@ -884,68 +884,87 @@
             return;
         }
 
-        me.Popups.timeSheetRecordDailog(me.$scope,
-            "Add Records")
+        if (!me.weeks || !me.weeks.length) {
+            me.handleError("Please select a billing period with valid weeks first.");
+            return;
+        }
+
+        me.Popups.timeSheetRecordDailog(me.$scope, "Add Records", null, null, me.weeks)
             .then(
                 action => {
-                    if (action) {
+                    if (action && action.result) {
 
                         let project = action.project;
-                        let startDate = new Date(action.startDate);
-                        let endDate = new Date(action.endDate);
                         let team = action.team;
                         let activity = action.activity;
+                        let selectedDates = action.selectedDates || [];
 
-                        if (endDate <= startDate) {
-                            me.handleError("Selected End Date must be after Start Date");
-                        } else {
-
-                            endDate.setHours(0, 0, 0, 0);
-                            startDate.setHours(0, 0, 0, 0);
-                            let count = Math.round(Math.abs((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)));
-                            for (let i = 0; i <= (count); i++) {
-
-                                let date = new Date(startDate.getTime());
-                                date.setDate(date.getDate() + i);
-
-                                var newRecord = {
-                                    userAccountId: me.filterModel.userId,
-                                    projectDescription: project.projectDescription,
-                                    projectGridId: project.projectId,
-                                    projectId: project.projectId,
-                                    clientEntityName: project.clientName || '',
-                                    billable: project.isBillable,
-                                    subProjectId: project.subProjectId,
-                                    project: {
-                                        description: project.projectDescription,
-                                        id: project.projectId,
-                                        projectId: project.projectId,
-                                        projectName: project.projectDescription,
-                                        subProjectId: project.subProjectId,
-                                        subProjectName: ""
-                                    },
-                                    teamId: team,
-                                    activityId: activity,
-                                    comments: null,
-                                    hours: null,
-                                    dateEntry: date,
-                                    id: new Date().getTime() + i,
-                                    new: true,
-                                    valid: {}
-                                };
-
-                                me.gridModel.data.push(newRecord);
-
-                                newRecord.valid["dateEntry"] = true;
-                                newRecord.valid["teamId"] = false;
-                                newRecord.valid["activityId"] = false;
-                                newRecord.valid["comments"] = false;
-                                newRecord.valid["hours"] = false;
-                            }
-                            me.rebuildWeekRecords();
-                            me.applyDefaultDayExpand();
-                            me.summaryList();
+                        if (!project || !project.projectId) {
+                            me.handleError("Please select a project for the template lines.");
+                            return;
                         }
+                        if (team == null || team === "") {
+                            me.handleError("Please select a team for the template lines.");
+                            return;
+                        }
+                        if (activity == null || activity === "") {
+                            me.handleError("Please select an activity for the template lines.");
+                            return;
+                        }
+                        if (!selectedDates.length) {
+                            me.handleError("Please select at least one day.");
+                            return;
+                        }
+
+                        if (!me.gridModel || !me.gridModel.data) {
+                            me.gridModel = { data: [], originalData: [], totalItems: 0 } as any;
+                        }
+
+                        for (let i = 0; i < selectedDates.length; i++) {
+                            let date = selectedDates[i];
+                            if (!(date instanceof Date)) {
+                                date = new Date(date);
+                            }
+                            date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+
+                            var newRecord = {
+                                userAccountId: me.filterModel.userId,
+                                projectDescription: project.projectDescription,
+                                projectGridId: project.projectId,
+                                projectId: project.projectId,
+                                clientEntityName: project.clientEntityName || project.clientName || '',
+                                billable: project.billable != null ? project.billable : project.isBillable,
+                                subProjectId: project.subProjectId,
+                                project: {
+                                    description: project.projectDescription,
+                                    id: project.projectId,
+                                    projectId: project.projectId,
+                                    projectName: project.projectDescription,
+                                    subProjectId: project.subProjectId,
+                                    subProjectName: ""
+                                },
+                                teamId: team,
+                                activityId: activity,
+                                comments: null,
+                                hours: null,
+                                dateEntry: date,
+                                id: new Date().getTime() + i,
+                                new: true,
+                                valid: {}
+                            };
+
+                            me.gridModel.data.push(newRecord);
+
+                            newRecord.valid["dateEntry"] = true;
+                            newRecord.valid["teamId"] = true;
+                            newRecord.valid["activityId"] = true;
+                            newRecord.valid["projectGridId"] = true;
+                            newRecord.valid["comments"] = false;
+                            newRecord.valid["hours"] = false;
+                        }
+                        me.rebuildWeekRecords();
+                        me.applyDefaultDayExpand();
+                        me.summaryList();
                     }
                 },
                 error => {

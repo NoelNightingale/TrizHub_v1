@@ -1,69 +1,255 @@
-﻿<div class="modal-header {{app.setting.theme.info}}">
+﻿<style>
+    .ts-day-picker {
+        margin-top: 8px;
+        margin-bottom: 12px;
+    }
+
+    .ts-day-picker .ts-day-picker-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+
+    .ts-day-picker .ts-day-picker-hint {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    .ts-day-picker .ts-day-picker-count {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1a5f7a;
+    }
+
+    .ts-day-picker table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-bottom: 0;
+        background: #fff;
+    }
+
+    .ts-day-picker th,
+    .ts-day-picker td {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        text-align: center;
+        vertical-align: middle;
+        padding: 0;
+    }
+
+    .ts-day-picker th {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.04);
+        padding: 8px 4px;
+    }
+
+    .ts-day-picker th.ts-week-col {
+        width: 28%;
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    .ts-day-picker th.ts-day-col {
+        width: 9%;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .ts-day-picker th.ts-day-col:hover,
+    .ts-day-picker th.ts-corner:hover {
+        background: rgba(26, 95, 122, 0.1);
+        color: #1a5f7a;
+    }
+
+    .ts-day-picker th.ts-corner {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .ts-day-picker td.ts-week-label {
+        text-align: left;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.02);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .ts-day-picker td.ts-week-label:hover {
+        background: rgba(26, 95, 122, 0.08);
+    }
+
+    .ts-day-picker td.ts-week-label .ts-week-sub {
+        display: block;
+        font-size: 11px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.4);
+    }
+
+    .ts-day-picker td.ts-day-cell {
+        height: 36px;
+    }
+
+    .ts-day-picker td.ts-day-cell.in-period {
+        cursor: pointer;
+        background: #fff;
+        transition: background 0.12s ease;
+    }
+
+    .ts-day-picker td.ts-day-cell.in-period:hover {
+        background: rgba(26, 95, 122, 0.06);
+    }
+
+    .ts-day-picker td.ts-day-cell.in-period.selected {
+        background: rgba(26, 95, 122, 0.16);
+    }
+
+    .ts-day-picker td.ts-day-cell.out-of-period {
+        background: repeating-linear-gradient(
+            -45deg,
+            rgba(0, 0, 0, 0.03),
+            rgba(0, 0, 0, 0.03) 4px,
+            rgba(0, 0, 0, 0.06) 4px,
+            rgba(0, 0, 0, 0.06) 8px
+        );
+        cursor: default;
+    }
+
+    .ts-day-picker .ts-day-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        min-height: 36px;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-day-picker td.ts-day-cell.selected .ts-day-check {
+        color: #1a5f7a;
+        font-weight: 700;
+    }
+
+    .ts-day-picker .ts-day-num {
+        font-size: 11px;
+        display: block;
+        line-height: 1.1;
+    }
+
+    .ts-day-picker .ts-day-mark {
+        font-size: 12px;
+        line-height: 1.1;
+    }
+</style>
+
+<div class="modal-header {{app.setting.theme.info}}">
     <h4 class="modal-title">{{popupModel.header}}</h4>
 </div>
 
 <div class="modal-body">
-    {{popupModel.text}}
     <form role="form" class="form-horizontal">
         <fieldset>
-            <div class="form-group" show-errors style="margin-bottom : 4px;">
+            <div class="form-group" show-errors style="margin-bottom: 8px;">
                 <label for="project">Project</label>
-                <input name="projectGridId{{i.id}}" readonly type="text" data-ng-click="vm.openProjectListModal(popupModel.project)" data-ng-model="popupModel.project.projectDescription" class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
-                <!--<ui-select show-errors title="{{popupModel.project.description}}" name="projectGridId{{i.id}}" ng-required="true" ng-model="popupModel.project" ng-change="vm.projectTemplateSelected(popupModel)">
-                    <ui-select-match placeholder="Choose a Project">{{$select.selected.description}}</ui-select-match>
-                    <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
-                        <div ng-bind-html="project.description | highlight: $select.search" title="{{project.description}}"></div>
-                    </ui-select-choices>
-                </ui-select>-->
+                <input name="templateProject" readonly type="text"
+                       data-ng-click="vm.openProjectListModal(popupModel.project)"
+                       data-ng-model="popupModel.project.projectDescription"
+                       class="readOnlyLight form-control"
+                       placeholder="Choose a project" />
             </div>
-            <div class="form-group row" style="margin-bottom : 4px;">
-                <label for="startDate" class="col-sm-2 form-control-label">Start Date:</label>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control"
-                           ng-model="popupModel.startDate"
-                           data-icon-left="fa fa-chevron-left"
-                           data-icon-right="fa fa-chevron-right"
-                           name="date" data-date-format="yyyy/MM/dd"
-                           bs-datepicker placeholder="Start Date"
-                            autoclose="true"
-                           ng-required="true" autocomplete="off">
 
-                </div>
-            </div>
-            <div class="form-group row" show-errors style="margin-bottom : 4px;">
-                <label for="endDate" class="col-sm-2 form-control-label">End Date:</label>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control"
-                           ng-model="popupModel.endDate"
-                           data-icon-left="fa fa-chevron-left"
-                           data-icon-right="fa fa-chevron-right"
-                           name="date" data-date-format="yyyy/MM/dd"
-                           bs-datepicker placeholder="End Date"
-                            autoclose="true"
-                           ng-required="true" autocomplete="off">
-
-                </div>
-            </div>
-            <div class="form-group" show errors>
+            <div class="form-group" style="margin-bottom: 8px;">
                 <label for="team">Team</label>
                 <select name="teamIdNew" class="form-control"
                         ng-options="s.id as s.description for s in vm.filterOptions.teams"
-                        ng-model="popupModel.team" ng-required="true"
-                        ></select>
-
+                        ng-model="popupModel.team"
+                        ng-required="true"></select>
             </div>
-            <div class="form-group" show errors>
+
+            <div class="form-group" style="margin-bottom: 8px;">
                 <label for="activity">Activity</label>
                 <select name="activityNew" class="form-control"
                         ng-options="s.id as s.description for s in vm.filterOptions.activities"
-                        ng-model="popupModel.activity" ng-required="true"></select>
+                        ng-model="popupModel.activity"
+                        ng-required="true"></select>
+            </div>
 
+            <div class="ts-day-picker">
+                <div class="ts-day-picker-toolbar">
+                    <div class="ts-day-picker-hint">
+                        Select days in the billing period for template lines.
+                        Click a week label or day header to toggle a full row/column.
+                    </div>
+                    <div class="ts-day-picker-count">
+                        {{popupModel.selectedCount()}} day{{popupModel.selectedCount() === 1 ? '' : 's'}} selected
+                    </div>
+                </div>
+
+                <div class="table-responsive" ng-if="popupModel.dayMatrix.weeks.length">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="ts-week-col ts-corner"
+                                    title="Select / clear all days in the period"
+                                    ng-click="popupModel.toggleAll()">
+                                    Week
+                                    <span ng-if="popupModel.isAllSelected()"><i class="fa fa-check"></i></span>
+                                </th>
+                                <th class="ts-day-col"
+                                    ng-repeat="h in popupModel.dayMatrix.dayHeaders track by $index"
+                                    title="Toggle all {{h.full}}s in the period"
+                                    ng-click="popupModel.toggleColumn($index)">
+                                    {{h.short}}
+                                    <span ng-if="popupModel.isColumnFullySelected($index)"><i class="fa fa-check"></i></span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="week in popupModel.dayMatrix.weeks">
+                                <td class="ts-week-label"
+                                    title="Toggle all days in this week"
+                                    ng-click="popupModel.toggleWeek(week)">
+                                    Week {{week.weekNum}}
+                                    <span class="ts-week-sub">{{week.rangeLabel}}</span>
+                                </td>
+                                <td ng-repeat="cell in week.cells track by $index"
+                                    class="ts-day-cell"
+                                    ng-class="{'in-period': cell.inPeriod, 'out-of-period': !cell.inPeriod, 'selected': cell.selected}"
+                                    ng-click="cell.inPeriod && popupModel.toggleDay(cell)"
+                                    title="{{cell.inPeriod ? cell.label : 'Outside billing period'}}">
+                                    <span class="ts-day-check" ng-if="cell.inPeriod">
+                                        <span class="ts-day-num">{{cell.dayOfMonth}}</span>
+                                        <span class="ts-day-mark" ng-if="cell.selected"><i class="fa fa-check"></i></span>
+                                        <span class="ts-day-mark" ng-if="!cell.selected">&nbsp;</span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-muted" ng-if="!popupModel.dayMatrix.weeks.length" style="padding: 12px 0;">
+                    No days available for the selected billing period.
+                </div>
             </div>
         </fieldset>
     </form>
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}" type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
-    <button class="btn {{app.setting.theme.primary}}" type="button" ng-click="popupModel.yesClick()">{{popupModel.yesButton}}</button>
+    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+            type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
+    <button class="btn {{app.setting.theme.primary}}" type="button"
+            ng-click="popupModel.yesClick()"
+            ng-disabled="popupModel.selectedCount() === 0">{{popupModel.yesButton}}</button>
 </div>

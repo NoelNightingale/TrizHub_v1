@@ -302,23 +302,83 @@
                 //#endregion
 
                 //#region Time Sheet Records Template Dialog
-                const _timeSheetRecordDailog = function ($scope, header, yesButton, noButton, project, startDate, endDate, team, activity) {
+                /**
+                 * Template lines for selected days in the billing period.
+                 * @param weeks Controller week structure (Mon–Sun groups with days in period)
+                 */
+                const _timeSheetRecordDailog = function ($scope, header, yesButton, noButton, weeks) {
                     if (!header)
                         header = "Add Records";
                     if (!yesButton)
                         yesButton = "Add";
                     if (!noButton)
                         noButton = "Cancel";
-                    if (!project)
-                        project = "";
-                    if (!startDate)
-                        startDate = Date.now();
-                    if (!endDate)
-                        endDate = Date.now();
-                    if (!team)
-                        team = "";
-                    if (!activity)
-                        activity = "";
+
+                    const dayHeaders = [
+                        { short: "M", full: "Monday" },
+                        { short: "T", full: "Tuesday" },
+                        { short: "W", full: "Wednesday" },
+                        { short: "T", full: "Thursday" },
+                        { short: "F", full: "Friday" },
+                        { short: "S", full: "Saturday" },
+                        { short: "S", full: "Sunday" }
+                    ];
+
+                    const buildDayMatrix = function (periodWeeks) {
+                        const matrixWeeks = [];
+                        const source = periodWeeks || [];
+                        for (let w = 0; w < source.length; w++) {
+                            const src = source[w];
+                            const cells = [];
+                            for (let c = 0; c < 7; c++) {
+                                cells.push({ inPeriod: false, selected: false });
+                            }
+                            const days = src.days || [];
+                            for (let d = 0; d < days.length; d++) {
+                                const day = days[d];
+                                if (!day || !day.date) {
+                                    continue;
+                                }
+                                const date = day.date instanceof Date
+                                    ? day.date
+                                    : new Date(day.date);
+                                // Column: Mon=0 … Sun=6
+                                const col = (date.getDay() + 6) % 7;
+                                cells[col] = {
+                                    inPeriod: true,
+                                    selected: false,
+                                    date: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0),
+                                    dateKey: day.dateKey,
+                                    label: day.label,
+                                    dayOfMonth: date.getDate()
+                                };
+                            }
+                            let firstLabel = "";
+                            let lastLabel = "";
+                            for (let c = 0; c < 7; c++) {
+                                if (cells[c].inPeriod) {
+                                    if (!firstLabel) {
+                                        firstLabel = cells[c].dayOfMonth;
+                                    }
+                                    lastLabel = cells[c].dayOfMonth;
+                                }
+                            }
+                            matrixWeeks.push({
+                                weekNum: src.weekNum != null ? src.weekNum : (w + 1),
+                                label: src.label,
+                                rangeLabel: firstLabel && lastLabel
+                                    ? (firstLabel === lastLabel ? String(firstLabel) : firstLabel + "–" + lastLabel)
+                                    : "",
+                                cells: cells
+                            });
+                        }
+                        return {
+                            dayHeaders: dayHeaders,
+                            weeks: matrixWeeks
+                        };
+                    };
+
+                    const dayMatrix = buildDayMatrix(weeks);
 
                     var deferred = $q.defer();
                     $scope.popupModel = {
@@ -328,14 +388,145 @@
                         project: {},
                         team: null,
                         activity: null,
-                        startDate: new Date(),
-                        endDate: null,
+                        dayMatrix: dayMatrix,
+
+                        selectedCount: function () {
+                            let n = 0;
+                            const wks = this.dayMatrix.weeks;
+                            for (let w = 0; w < wks.length; w++) {
+                                for (let c = 0; c < wks[w].cells.length; c++) {
+                                    if (wks[w].cells[c].inPeriod && wks[w].cells[c].selected) {
+                                        n++;
+                                    }
+                                }
+                            }
+                            return n;
+                        },
+
+                        getSelectedDates: function () {
+                            const dates = [];
+                            const wks = this.dayMatrix.weeks;
+                            for (let w = 0; w < wks.length; w++) {
+                                for (let c = 0; c < wks[w].cells.length; c++) {
+                                    const cell = wks[w].cells[c];
+                                    if (cell.inPeriod && cell.selected) {
+                                        dates.push(cell.date);
+                                    }
+                                }
+                            }
+                            // Chronological order
+                            dates.sort(function (a, b) {
+                                return a.getTime() - b.getTime();
+                            });
+                            return dates;
+                        },
+
+                        toggleDay: function (cell) {
+                            if (!cell || !cell.inPeriod) {
+                                return;
+                            }
+                            cell.selected = !cell.selected;
+                        },
+
+                        toggleWeek: function (week) {
+                            if (!week) {
+                                return;
+                            }
+                            let allOn = true;
+                            let any = false;
+                            for (let c = 0; c < week.cells.length; c++) {
+                                if (week.cells[c].inPeriod) {
+                                    any = true;
+                                    if (!week.cells[c].selected) {
+                                        allOn = false;
+                                    }
+                                }
+                            }
+                            if (!any) {
+                                return;
+                            }
+                            const next = !allOn;
+                            for (let c = 0; c < week.cells.length; c++) {
+                                if (week.cells[c].inPeriod) {
+                                    week.cells[c].selected = next;
+                                }
+                            }
+                        },
+
+                        toggleColumn: function (colIndex) {
+                            const wks = this.dayMatrix.weeks;
+                            let allOn = true;
+                            let any = false;
+                            for (let w = 0; w < wks.length; w++) {
+                                const cell = wks[w].cells[colIndex];
+                                if (cell && cell.inPeriod) {
+                                    any = true;
+                                    if (!cell.selected) {
+                                        allOn = false;
+                                    }
+                                }
+                            }
+                            if (!any) {
+                                return;
+                            }
+                            const next = !allOn;
+                            for (let w = 0; w < wks.length; w++) {
+                                const cell = wks[w].cells[colIndex];
+                                if (cell && cell.inPeriod) {
+                                    cell.selected = next;
+                                }
+                            }
+                        },
+
+                        toggleAll: function () {
+                            const next = !this.isAllSelected();
+                            const wks = this.dayMatrix.weeks;
+                            for (let w = 0; w < wks.length; w++) {
+                                for (let c = 0; c < wks[w].cells.length; c++) {
+                                    if (wks[w].cells[c].inPeriod) {
+                                        wks[w].cells[c].selected = next;
+                                    }
+                                }
+                            }
+                        },
+
+                        isAllSelected: function () {
+                            const wks = this.dayMatrix.weeks;
+                            let any = false;
+                            for (let w = 0; w < wks.length; w++) {
+                                for (let c = 0; c < wks[w].cells.length; c++) {
+                                    if (wks[w].cells[c].inPeriod) {
+                                        any = true;
+                                        if (!wks[w].cells[c].selected) {
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                            return any;
+                        },
+
+                        isColumnFullySelected: function (colIndex) {
+                            const wks = this.dayMatrix.weeks;
+                            let any = false;
+                            for (let w = 0; w < wks.length; w++) {
+                                const cell = wks[w].cells[colIndex];
+                                if (cell && cell.inPeriod) {
+                                    any = true;
+                                    if (!cell.selected) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return any;
+                        },
+
                         modalInstance:
                             $uibModal.open({
                                 animation: false,
                                 templateUrl: _root + "TimeSheetAddRecords.html",
                                 scope: $scope,
-                                size: "m"
+                                size: "lg"
                             }),
                         noClick: function () {
                             const me = this;
@@ -348,15 +539,17 @@
 
                         yesClick: function () {
                             const me = this;
+                            const selectedDates = me.getSelectedDates();
+                            if (!selectedDates.length) {
+                                return;
+                            }
                             me.modalInstance.close(true);
                             const result = {
                                 result: true,
                                 project: me.project,
-                                startDate: me.startDate,
-                                endDate: me.endDate,
+                                selectedDates: selectedDates,
                                 team: me.team,
-                                activity: me.activity,
-                                disableFilter: me.disableFilter
+                                activity: me.activity
                             };
                             deferred.resolve(result);
                         }
