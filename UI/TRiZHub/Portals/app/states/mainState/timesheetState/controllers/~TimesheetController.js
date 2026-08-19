@@ -49,6 +49,88 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.selectedWeek = null;
         _this.dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         _this.monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        _this.weekDayHeaders = [
+            { index: 0, short: "M", full: "Monday" },
+            { index: 1, short: "T", full: "Tuesday" },
+            { index: 2, short: "W", full: "Wednesday" },
+            { index: 3, short: "T", full: "Thursday" },
+            { index: 4, short: "F", full: "Friday" },
+            { index: 5, short: "S", full: "Saturday" },
+            { index: 6, short: "S", full: "Sunday" }
+        ];
+        _this.userSelectChange = function () {
+            _this.getUserProjects();
+            _this.reloadGrid();
+        };
+        /** Day for heatmap column 0=Mon … 6=Sun, or null if that weekday is outside the period. */
+        _this.dayAt = function (week, col) {
+            if (!week) {
+                return null;
+            }
+            if (week.daysByCol && week.daysByCol.length === 7) {
+                return week.daysByCol[col] || null;
+            }
+            var days = week.days || [];
+            for (var i = 0; i < days.length; i++) {
+                if (_this.weekdayIndexOf(days[i]) === col) {
+                    return days[i];
+                }
+            }
+            return null;
+        };
+        _this.heatDateNum = function (week, col) {
+            var day = _this.dayAt(week, col);
+            if (!day) {
+                return "";
+            }
+            if (day.dayOfMonth != null && day.dayOfMonth !== "") {
+                return day.dayOfMonth;
+            }
+            return _this.dayOfMonthOf(day) || "";
+        };
+        _this.heatHours = function (week, col) {
+            var day = _this.dayAt(week, col);
+            if (!day) {
+                return "";
+            }
+            var hours = Number(day.hours);
+            return isNaN(hours) ? 0 : hours;
+        };
+        _this.heatClassFor = function (week, col) {
+            var day = _this.dayAt(week, col);
+            if (!day) {
+                return "out-of-period";
+            }
+            var hours = Number(day.hours);
+            var h = isNaN(hours) ? 0 : hours;
+            var weekend = col >= 5;
+            if (h <= 0) {
+                return weekend ? "in-period is-weekend hrs-empty" : "in-period hrs-gap";
+            }
+            if (h < 8) {
+                return weekend ? "in-period is-weekend hrs-low" : "in-period hrs-low";
+            }
+            return weekend ? "in-period is-weekend hrs-ok" : "in-period hrs-ok";
+        };
+        /** Heatmap cell click: switch week tab and open that day. */
+        _this.jumpToCol = function (week, col) {
+            var day = _this.dayAt(week, col);
+            if (!week || !day) {
+                return;
+            }
+            _this.selectWeek(week.index);
+            day.expanded = true;
+        };
+        _this.clearProjectFilter = function ($event) {
+            if ($event) {
+                $event.stopPropagation();
+                $event.preventDefault();
+            }
+            _this.filterModel.projectId = "";
+            _this.filterModel.projectDescription = "";
+            _this.filterModel.subProjectId = null;
+            _this.reloadGrid();
+        };
         /**
          * Prefer the billing cycle that contains today; otherwise the first cycle in the list
          * (API returns newest-first by Startdate).
@@ -154,6 +236,22 @@ var TimesheetController = /** @class */ (function (_super) {
                 return null;
             }
             return _this.stripTime(d);
+        };
+        _this.decorateBillingCycleOptions = function (cycles) {
+            var list = cycles || [];
+            for (var i = 0; i < list.length; i++) {
+                list[i].optionLabel = _this.billingCycleOptionLabel(list[i]);
+            }
+            return list;
+        };
+        _this.billingCycleOptionLabel = function (cycle) {
+            var desc = (cycle && cycle.description) ? String(cycle.description) : "";
+            var start = _this.readCycleDate(cycle, "start");
+            var end = _this.readCycleDate(cycle, "end");
+            if (!start || !end) {
+                return desc;
+            }
+            return desc + "  (" + _this.dateToKey(start).replace(/-/g, "/") + " – " + _this.dateToKey(end).replace(/-/g, "/") + ")";
         };
         /**
          * Bind grid date range and week tabs to the selected billing period's defined StartDate/EndDate.
@@ -279,6 +377,60 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             return s;
         };
+        _this.weekdayIndexOf = function (day) {
+            if (!day) {
+                return -1;
+            }
+            if (typeof day.weekdayIndex === "number" && day.weekdayIndex >= 0 && day.weekdayIndex <= 6) {
+                return day.weekdayIndex;
+            }
+            if (day.date && typeof day.date.getDay === "function" && !isNaN(day.date.getTime())) {
+                return (day.date.getDay() + 6) % 7;
+            }
+            if (day.dateKey) {
+                var parts = String(day.dateKey).split("-");
+                if (parts.length === 3) {
+                    var dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 0, 0, 0, 0);
+                    if (!isNaN(dt.getTime())) {
+                        return (dt.getDay() + 6) % 7;
+                    }
+                }
+            }
+            return -1;
+        };
+        _this.dayOfMonthOf = function (day) {
+            if (!day) {
+                return 0;
+            }
+            if (day.date && typeof day.date.getDate === "function" && !isNaN(day.date.getTime())) {
+                return day.date.getDate();
+            }
+            if (day.dateKey) {
+                var parts = String(day.dateKey).split("-");
+                if (parts.length === 3) {
+                    return parseInt(parts[2], 10) || 0;
+                }
+            }
+            return 0;
+        };
+        _this.indexDaysByCol = function (week) {
+            var slots = [null, null, null, null, null, null, null];
+            if (!week) {
+                return;
+            }
+            var days = week.days || [];
+            for (var i = 0; i < days.length; i++) {
+                var day = days[i];
+                var col = _this.weekdayIndexOf(day);
+                if (col < 0) {
+                    continue;
+                }
+                day.weekdayIndex = col;
+                day.dayOfMonth = _this.dayOfMonthOf(day);
+                slots[col] = day;
+            }
+            week.daysByCol = slots;
+        };
         _this.formatDayLabel = function (date) {
             return _this.dayNames[date.getDay()] + " " + date.getDate() + " " + _this.monthNames[date.getMonth()];
         };
@@ -324,6 +476,8 @@ var TimesheetController = /** @class */ (function (_super) {
                         date: dayDate,
                         dateKey: dayKey,
                         label: me.formatDayLabel(dayDate),
+                        weekdayIndex: (dayDate.getDay() + 6) % 7,
+                        dayOfMonth: dayDate.getDate(),
                         hours: 0,
                         billhours: 0,
                         expanded: false,
@@ -332,15 +486,18 @@ var TimesheetController = /** @class */ (function (_super) {
                 }
                 if (days.length) {
                     weekNum++;
-                    weeks.push({
+                    var week = {
                         index: weeks.length,
                         weekNum: weekNum,
                         start: days[0].date,
                         end: days[days.length - 1].date,
                         label: "Week " + weekNum + " · " + me.formatShortDate(days[0].date) + "–" + me.formatShortDate(days[days.length - 1].date),
                         totalHours: 0,
-                        days: days
-                    });
+                        days: days,
+                        daysByCol: null
+                    };
+                    me.indexDaysByCol(week);
+                    weeks.push(week);
                 }
                 // Advance to next Monday
                 cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 7, 0, 0, 0, 0);
@@ -460,6 +617,7 @@ var TimesheetController = /** @class */ (function (_super) {
                     weekHours += hours;
                 }
                 me.weeks[w].totalHours = weekHours;
+                me.indexDaysByCol(me.weeks[w]);
             }
             if (me.weeks[me.selectedWeekIndex]) {
                 me.selectedWeek = me.weeks[me.selectedWeekIndex];
@@ -929,7 +1087,12 @@ var TimesheetController = /** @class */ (function (_super) {
                     item.clientEntityName = project.clientName;
                     item.billable = project.isBillable;
                 }
-                me.validateOriginal('projectGridId', item);
+                if (item === me.filterModel) {
+                    me.reloadGrid();
+                }
+                else {
+                    me.validateOriginal('projectGridId', item);
+                }
             });
         };
         var me = _this;
@@ -961,7 +1124,7 @@ var TimesheetController = /** @class */ (function (_super) {
         BillingCycleService.billingCycleDropdownList()
             .then(function (results) {
             // Real cycles only — no "Manual Date" synthetic row
-            me.filterOptions.billingCycles = results || [];
+            me.filterOptions.billingCycles = me.decorateBillingCycleOptions(results || []);
             if (me.filterOptions.billingCycles.length) {
                 var defaultCycle = me.pickDefaultBillingCycle(me.filterOptions.billingCycles);
                 me.filterModel.billingCycleId = me.getCycleId(defaultCycle);
@@ -1020,10 +1183,6 @@ var TimesheetController = /** @class */ (function (_super) {
         }, function (error) {
             _this.handleError(error);
         });
-    };
-    TimesheetController.prototype.userSelectChange = function () {
-        this.reloadGrid();
-        this.getUserProjects();
     };
     TimesheetController.prototype.onLoadEvent = function (event) {
         // Get local timezone

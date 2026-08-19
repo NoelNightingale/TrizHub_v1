@@ -28,6 +28,15 @@
 
     private dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     private monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    weekDayHeaders = [
+        { index: 0, short: "M", full: "Monday" },
+        { index: 1, short: "T", full: "Tuesday" },
+        { index: 2, short: "W", full: "Wednesday" },
+        { index: 3, short: "T", full: "Thursday" },
+        { index: 4, short: "F", full: "Friday" },
+        { index: 5, short: "S", full: "Saturday" },
+        { index: 6, short: "S", full: "Sunday" }
+    ];
 
     //#endregion
 
@@ -84,7 +93,7 @@
             .then(
                 results => {
                     // Real cycles only — no "Manual Date" synthetic row
-                    me.filterOptions.billingCycles = results || [];
+                    me.filterOptions.billingCycles = me.decorateBillingCycleOptions(results || []);
                     if (me.filterOptions.billingCycles.length) {
                         const defaultCycle = me.pickDefaultBillingCycle(me.filterOptions.billingCycles);
                         me.filterModel.billingCycleId = me.getCycleId(defaultCycle);
@@ -165,10 +174,85 @@
                 });
     }
 
-    userSelectChange() {
-        this.reloadGrid();
+    userSelectChange = (): void => {
         this.getUserProjects();
-    }
+        this.reloadGrid();
+    };
+
+    /** Day for heatmap column 0=Mon … 6=Sun, or null if that weekday is outside the period. */
+    dayAt = (week: any, col: number): any => {
+        if (!week) {
+            return null;
+        }
+        if (week.daysByCol && week.daysByCol.length === 7) {
+            return week.daysByCol[col] || null;
+        }
+        const days = week.days || [];
+        for (let i = 0; i < days.length; i++) {
+            if (this.weekdayIndexOf(days[i]) === col) {
+                return days[i];
+            }
+        }
+        return null;
+    };
+
+    heatDateNum = (week: any, col: number): any => {
+        const day = this.dayAt(week, col);
+        if (!day) {
+            return "";
+        }
+        if (day.dayOfMonth != null && day.dayOfMonth !== "") {
+            return day.dayOfMonth;
+        }
+        return this.dayOfMonthOf(day) || "";
+    };
+
+    heatHours = (week: any, col: number): any => {
+        const day = this.dayAt(week, col);
+        if (!day) {
+            return "";
+        }
+        const hours = Number(day.hours);
+        return isNaN(hours) ? 0 : hours;
+    };
+
+    heatClassFor = (week: any, col: number): string => {
+        const day = this.dayAt(week, col);
+        if (!day) {
+            return "out-of-period";
+        }
+        const hours = Number(day.hours);
+        const h = isNaN(hours) ? 0 : hours;
+        const weekend = col >= 5;
+        if (h <= 0) {
+            return weekend ? "in-period is-weekend hrs-empty" : "in-period hrs-gap";
+        }
+        if (h < 8) {
+            return weekend ? "in-period is-weekend hrs-low" : "in-period hrs-low";
+        }
+        return weekend ? "in-period is-weekend hrs-ok" : "in-period hrs-ok";
+    };
+
+    /** Heatmap cell click: switch week tab and open that day. */
+    jumpToCol = (week: any, col: number): void => {
+        const day = this.dayAt(week, col);
+        if (!week || !day) {
+            return;
+        }
+        this.selectWeek(week.index);
+        day.expanded = true;
+    };
+
+    clearProjectFilter = ($event?: any): void => {
+        if ($event) {
+            $event.stopPropagation();
+            $event.preventDefault();
+        }
+        this.filterModel.projectId = "";
+        this.filterModel.projectDescription = "";
+        this.filterModel.subProjectId = null;
+        this.reloadGrid();
+    };
 
     /**
      * Prefer the billing cycle that contains today; otherwise the first cycle in the list
@@ -272,6 +356,24 @@
             return null;
         }
         return this.stripTime(d);
+    };
+
+    decorateBillingCycleOptions = (cycles: any[]): any[] => {
+        const list = cycles || [];
+        for (let i = 0; i < list.length; i++) {
+            list[i].optionLabel = this.billingCycleOptionLabel(list[i]);
+        }
+        return list;
+    };
+
+    billingCycleOptionLabel = (cycle: any): string => {
+        const desc = (cycle && cycle.description) ? String(cycle.description) : "";
+        const start = this.readCycleDate(cycle, "start");
+        const end = this.readCycleDate(cycle, "end");
+        if (!start || !end) {
+            return desc;
+        }
+        return desc + "  (" + this.dateToKey(start).replace(/-/g, "/") + " – " + this.dateToKey(end).replace(/-/g, "/") + ")";
     };
 
     /**
@@ -420,6 +522,63 @@
         return s;
     };
 
+    weekdayIndexOf = (day: any): number => {
+        if (!day) {
+            return -1;
+        }
+        if (typeof day.weekdayIndex === "number" && day.weekdayIndex >= 0 && day.weekdayIndex <= 6) {
+            return day.weekdayIndex;
+        }
+        if (day.date && typeof day.date.getDay === "function" && !isNaN(day.date.getTime())) {
+            return (day.date.getDay() + 6) % 7;
+        }
+        if (day.dateKey) {
+            const parts = String(day.dateKey).split("-");
+            if (parts.length === 3) {
+                const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 0, 0, 0, 0);
+                if (!isNaN(dt.getTime())) {
+                    return (dt.getDay() + 6) % 7;
+                }
+            }
+        }
+        return -1;
+    };
+
+    dayOfMonthOf = (day: any): number => {
+        if (!day) {
+            return 0;
+        }
+        if (day.date && typeof day.date.getDate === "function" && !isNaN(day.date.getTime())) {
+            return day.date.getDate();
+        }
+        if (day.dateKey) {
+            const parts = String(day.dateKey).split("-");
+            if (parts.length === 3) {
+                return parseInt(parts[2], 10) || 0;
+            }
+        }
+        return 0;
+    };
+
+    indexDaysByCol = (week: any): void => {
+        const slots = [null, null, null, null, null, null, null];
+        if (!week) {
+            return;
+        }
+        const days = week.days || [];
+        for (let i = 0; i < days.length; i++) {
+            const day = days[i];
+            const col = this.weekdayIndexOf(day);
+            if (col < 0) {
+                continue;
+            }
+            day.weekdayIndex = col;
+            day.dayOfMonth = this.dayOfMonthOf(day);
+            slots[col] = day;
+        }
+        week.daysByCol = slots;
+    };
+
     formatDayLabel = (date: Date): string => {
         return this.dayNames[date.getDay()] + " " + date.getDate() + " " + this.monthNames[date.getMonth()];
     };
@@ -470,6 +629,8 @@
                     date: dayDate,
                     dateKey: dayKey,
                     label: me.formatDayLabel(dayDate),
+                    weekdayIndex: (dayDate.getDay() + 6) % 7,
+                    dayOfMonth: dayDate.getDate(),
                     hours: 0,
                     billhours: 0,
                     expanded: false,
@@ -479,15 +640,18 @@
 
             if (days.length) {
                 weekNum++;
-                weeks.push({
+                const week = {
                     index: weeks.length,
                     weekNum: weekNum,
                     start: days[0].date,
                     end: days[days.length - 1].date,
                     label: "Week " + weekNum + " · " + me.formatShortDate(days[0].date) + "–" + me.formatShortDate(days[days.length - 1].date),
                     totalHours: 0,
-                    days: days
-                });
+                    days: days,
+                    daysByCol: null
+                };
+                me.indexDaysByCol(week);
+                weeks.push(week);
             }
 
             // Advance to next Monday
@@ -616,6 +780,7 @@
                 weekHours += hours;
             }
             me.weeks[w].totalHours = weekHours;
+            me.indexDaysByCol(me.weeks[w]);
         }
 
         if (me.weeks[me.selectedWeekIndex]) {
@@ -1195,7 +1360,11 @@
                     item.clientEntityName = project.clientName;
                     item.billable = project.isBillable;
                 }
-                me.validateOriginal('projectGridId', item)
+                if (item === me.filterModel) {
+                    me.reloadGrid();
+                } else {
+                    me.validateOriginal('projectGridId', item);
+                }
             });
 
     };

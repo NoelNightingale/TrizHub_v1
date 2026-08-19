@@ -3,13 +3,8 @@
         margin-bottom: 0;
     }
 
-    .ts-capture .summaryContainer th {
-        color: rgba(0, 0, 0, 0.55) !important;
-        background-color: rgba(0, 0, 0, 0.06) !important;
-    }
-
     .ts-capture .ts-filter-bar {
-        padding: 12px 0 4px;
+        padding: 4px 0 0;
     }
 
     .ts-capture .ts-filter-bar label {
@@ -20,6 +15,284 @@
         color: rgba(0, 0, 0, 0.45);
         margin-bottom: 4px;
         display: block;
+    }
+
+    .ts-capture .ts-top {
+        margin-bottom: 4px;
+    }
+
+    .ts-capture .ts-toolbar-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 12px 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .ts-capture .ts-field {
+        flex: 1 1 140px;
+        min-width: 140px;
+        max-width: 260px;
+    }
+
+    .ts-capture .ts-field-wide {
+        flex: 1 1 220px;
+        max-width: 380px;
+    }
+
+    .ts-capture .ts-filter-project {
+        position: relative;
+    }
+
+    .ts-capture .ts-filter-project input {
+        padding-right: 28px;
+        cursor: pointer;
+        background: #fff;
+    }
+
+    .ts-capture .ts-filter-clear {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        padding: 2px 4px;
+    }
+
+    .ts-capture .ts-filter-clear:hover {
+        color: #c62828;
+    }
+
+    .ts-capture .ts-totals {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+        margin-left: auto;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-total {
+        min-width: 72px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.04);
+        text-align: center;
+    }
+
+    .ts-capture .ts-total .n {
+        display: block;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: rgba(0, 0, 0, 0.75);
+    }
+
+    .ts-capture .ts-total .l {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: rgba(0, 0, 0, 0.4);
+    }
+
+    .ts-capture .ts-total.is-bill .n {
+        color: #1b6b45;
+    }
+
+    .ts-capture .ts-heat {
+        margin-top: 12px;
+        overflow-x: auto;
+    }
+
+    .ts-capture .ts-heat-caption {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.45);
+        margin: 0 0 6px;
+    }
+
+    .ts-capture table.ts-heat-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        margin: 0;
+        background: #fff;
+    }
+
+    .ts-capture table.ts-heat-table th,
+    .ts-capture table.ts-heat-table td {
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        padding: 6px 4px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .ts-capture table.ts-heat-table thead th {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+    .ts-capture table.ts-heat-table th.ts-heat-week {
+        width: 18%;
+        text-align: left;
+        padding-left: 10px;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.02);
+        font-size: 12px;
+        text-transform: none;
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    .ts-capture table.ts-heat-table th.ts-heat-week.is-active,
+    .ts-capture table.ts-heat-table th.ts-heat-week:hover {
+        background: rgba(26, 95, 122, 0.08);
+        color: #1a5f7a;
+    }
+
+    .ts-capture table.ts-heat-table th.ts-heat-week .sub {
+        display: block;
+        font-size: 10px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.4);
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell {
+        cursor: pointer;
+        color: #111;
+        text-align: left;
+        vertical-align: top;
+        padding: 5px 6px 6px;
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell:hover {
+        box-shadow: inset 0 0 0 2px rgba(26, 95, 122, 0.35);
+    }
+
+    .ts-capture .ts-heat-date {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.4);
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .ts-capture .ts-heat-body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-heat-hours {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-heat-chips {
+        display: flex;
+        gap: 3px;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-heat-chip {
+        min-width: 26px;
+        padding: 3px 5px;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .ts-capture .ts-heat-chip.is-bill {
+        color: #1b5e20;
+        background: rgba(46, 125, 79, 0.16);
+        box-shadow: 0 0 0 1px rgba(46, 125, 79, 0.22);
+    }
+
+    .ts-capture .ts-heat-chip.is-nonbill {
+        color: #616161;
+        background: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-gap,
+    .ts-capture table.ts-heat-table td.hrs-low {
+        background: #f8d7da;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-gap .ts-heat-hours,
+    .ts-capture table.ts-heat-table td.hrs-low .ts-heat-hours {
+        color: #b71c1c;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-ok {
+        background: #d4edda;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-ok .ts-heat-hours {
+        color: #1b5e20;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-empty {
+        background: #f7f7f7;
+    }
+
+    .ts-capture .ts-heat-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 6px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-heat-legend span:before {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        border-radius: 2px;
+        vertical-align: -1px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-capture .ts-heat-legend .lg-gap:before {
+        background: #f8d7da;
+    }
+
+    .ts-capture .ts-heat-legend .lg-low:before {
+        background: #f8d7da;
+    }
+
+    .ts-capture .ts-heat-legend .lg-ok:before {
+        background: #d4edda;
+    }
+
+    .ts-capture .ts-heat-legend .lg-bill:before {
+        background: rgba(46, 125, 79, 0.28);
+        border-color: rgba(46, 125, 79, 0.4);
+    }
+
+    .ts-capture .ts-heat-legend .lg-nonbill:before {
+        background: #e0e0e0;
+        border-color: #9e9e9e;
     }
 
     .ts-capture .ts-week-bar {
@@ -248,12 +521,6 @@
         font-size: 13px;
     }
 
-    .ts-capture .ts-period-hint {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.45);
-        margin-top: 4px;
-    }
-
     .ts-capture .ts-no-period {
         padding: 32px 16px;
         text-align: center;
@@ -264,32 +531,94 @@
     }
 
     .ts-capture .ts-project-cell {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .ts-capture .ts-project-cell .form-group {
-        flex: 1;
         min-width: 0;
     }
 
-    /* Compact billable flag — replaces a full Yes/No column */
+    .ts-capture .ts-project-pick {
+        display: block;
+        width: 100%;
+        padding: 4px 8px 5px 8px;
+        margin: 0;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .ts-capture .ts-project-pick:hover {
+        background: rgba(26, 95, 122, 0.05);
+        border-color: rgba(26, 95, 122, 0.22);
+    }
+
+    .ts-capture .ts-project-pick:hover .ts-project-name,
+    .ts-capture .ts-project-pick:hover .ts-project-placeholder {
+        text-decoration: underline;
+        text-decoration-color: rgba(26, 95, 122, 0.45);
+    }
+
+    .ts-capture .ts-project-pick.has-warning {
+        background: rgba(240, 173, 78, 0.08);
+        border-color: rgba(240, 173, 78, 0.55);
+    }
+
+    .ts-capture .ts-project-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        margin-bottom: 2px;
+    }
+
+    .ts-capture .ts-client-name {
+        flex: 1;
+        min-width: 0;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.45);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ts-capture .ts-project-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.82);
+        line-height: 1.3;
+        padding-right: 16px;
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20h9'/><path d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/></svg>") no-repeat right 2px;
+        background-size: 11px 11px;
+    }
+
+    .ts-capture .ts-project-placeholder {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(26, 95, 122, 0.75);
+        font-style: italic;
+        line-height: 1.3;
+    }
+
+    /* Compact billable flag on the client line */
     .ts-capture .ts-bill-flag {
         flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 22px;
-        height: 22px;
-        margin-top: 6px;
-        border-radius: 4px;
-        font-size: 10px;
+        min-width: 22px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 3px;
+        font-size: 9px;
         font-weight: 700;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.03em;
         line-height: 1;
         user-select: none;
-        cursor: default;
     }
 
     .ts-capture .ts-bill-flag.is-billable {
@@ -325,93 +654,105 @@
             </h2>
         </div>
         <div class="box-body">
-            <div class="row">
-                <div class="col-sm-8">
-                    <form role="form" name="EditForm" class="ts-filter-bar">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label>Billing Period</label>
-                                <!-- Model is cycle id so range always re-resolves from list startdate/enddate (report pattern) -->
-                                <select class="form-control"
-                                        ng-options="s.id as s.description for s in vm.filterOptions.billingCycles"
-                                        ng-model="vm.filterModel.billingCycleId"
-                                        ng-change="vm.applyBillingPeriod()"></select>
-                                <div class="ts-period-hint" ng-if="vm.filterModel.startDate && vm.filterModel.endDate">
-                                    {{vm.filterModel.startDate | date:'yyyy/MM/dd'}} – {{vm.filterModel.endDate | date:'yyyy/MM/dd'}}
-                                    <span ng-if="vm.weeks.length"> · {{vm.weeks.length}} week{{vm.weeks.length === 1 ? '' : 's'}}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label>Project</label>
-                                <input name="projectFilter" readonly type="text"
-                                       data-ng-click="vm.openProjectListModal(vm.filterModel)"
-                                       data-ng-model="vm.filterModel.projectDescription"
-                                       class="readOnlyLight form-control"
-                                       placeholder="All projects" />
-                            </div>
-                            <div class="col-md-2">
-                                <label>Billable</label>
-                                <select class="form-control"
-                                        ng-options="s.description for s in vm.filterOptions.billingOptions"
-                                        ng-model="vm.filterModel.billingOption"></select>
-                            </div>
-                            <div class="col-md-3">
-                                <label>User</label>
-                                <select name="user" class="form-control"
-                                        ng-change="vm.userSelectChange()"
-                                        ng-options="s.id as s.description for s in vm.filterOptions.users"
-                                        ng-model="vm.filterModel.userId"
-                                        ng-required="true"
-                                        placeholder="Account"></select>
-                            </div>
+            <div class="ts-top">
+                <form role="form" name="EditForm" class="ts-filter-bar ts-toolbar-filters">
+                    <div class="ts-field ts-field-wide">
+                        <label>Billing Period</label>
+                        <select class="form-control"
+                                ng-options="s.id as s.optionLabel for s in vm.filterOptions.billingCycles"
+                                ng-model="vm.filterModel.billingCycleId"
+                                ng-change="vm.applyBillingPeriod()"></select>
+                    </div>
+                    <div class="ts-field">
+                        <label>User</label>
+                        <select name="user" class="form-control"
+                                ng-change="vm.userSelectChange()"
+                                ng-options="s.id as s.description for s in vm.filterOptions.users"
+                                ng-model="vm.filterModel.userId"
+                                ng-required="true"></select>
+                    </div>
+                    <div class="ts-field ts-field-wide">
+                        <label>Project</label>
+                        <div class="ts-filter-project">
+                            <input name="projectFilter" readonly type="text"
+                                   data-ng-click="vm.openProjectListModal(vm.filterModel)"
+                                   data-ng-model="vm.filterModel.projectDescription"
+                                   class="readOnlyLight form-control"
+                                   placeholder="All projects" />
+                            <a class="ts-filter-clear" ng-if="vm.filterModel.projectDescription"
+                               title="Clear project filter"
+                               ng-click="vm.clearProjectFilter($event)">×</a>
                         </div>
-                        <div class="row m-t-1">
-                            <div class="col-md-12">
-                                <a class="btn btn-primary b-{{app.setting.theme.primary}}" ng-click="vm.reloadGrid()">
-                                    <i class="fa fa-check-square-o"></i>&nbsp;Apply&nbsp;Filter
-                                </a>
-                                <a class="btn btn-danger b-{{app.setting.theme.danger}}" ng-click="vm.resetFilters()">
-                                    <i class="fa fa-times"></i>&nbsp;Reset&nbsp;Filter
-                                </a>
-                            </div>
+                    </div>
+                    <div class="ts-field">
+                        <label>Billable</label>
+                        <select class="form-control"
+                                ng-options="s.description for s in vm.filterOptions.billingOptions"
+                                ng-model="vm.filterModel.billingOption"
+                                ng-change="vm.reloadGrid()"></select>
+                    </div>
+                    <div class="ts-totals">
+                        <div class="ts-total">
+                            <span class="n">{{vm.summary.totalHours || 0}}</span>
+                            <span class="l">Hours</span>
                         </div>
-                    </form>
-                </div>
+                        <div class="ts-total is-bill">
+                            <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
+                            <span class="l">Billable</span>
+                        </div>
+                        <div class="ts-total">
+                            <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
+                            <span class="l">Non-bill</span>
+                        </div>
+                    </div>
+                </form>
 
-                <div class="col-sm-4">
-                    <div class="box summaryContainer">
-                        <div class="box-header teal">
-                            <div class="row-col">
-                                PERIOD SUMMARY
-                            </div>
-                        </div>
-                        <div class="light">
-                            <div class="row-body scrollable hover" style="height: 150px;">
-                                <table st-table="rowCollectionBasic" class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Hours ({{vm.summary.totalHours || 0}})</th>
-                                            <th>Billable ({{vm.summary.totalBillableHours || 0}})</th>
-                                            <th>Non-Billable ({{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}})</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="i in vm.summary.days | orderBy:'date':true" st-select-row="row">
-                                            <td>{{i.date}}</td>
-                                            <td ng-style="i.hours < 8 && {'color' : 'red'} || i.hours >= 8 && {'color' : 'green'}">{{i.hours}}</td>
-                                            <td>{{i.billhours}}</td>
-                                            <td>{{i.hours - i.billhours}}</td>
-                                        </tr>
-                                        <tr ng-show="!vm.summary.days || vm.summary.days.length == 0">
-                                            <td colspan="4">
-                                                No Records
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                <div class="ts-heat" ng-if="vm.weeks.length">
+                    <div class="ts-heat-caption">Period summary</div>
+                    <table class="ts-heat-table">
+                        <thead>
+                            <tr>
+                                <th class="ts-heat-week">Week</th>
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wed</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                                <th>Sat</th>
+                                <th>Sun</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="week in vm.weeks">
+                                <th class="ts-heat-week"
+                                    ng-class="{'is-active': vm.selectedWeekIndex === week.index}"
+                                    ng-click="vm.selectWeek(week.index)">
+                                    Week {{week.weekNum}}
+                                    <span class="sub">{{week.label.split('·')[1]}}</span>
+                                </th>
+                                <td ng-repeat="day in week.days"
+                                    class="ts-heat-cell"
+                                    ng-class="{'hrs-ok': day.hours >= 8, 'hrs-low': day.hours > 0 && day.hours < 8, 'hrs-gap': !day.hours}"
+                                    ng-click="vm.selectWeek(week.index); day.expanded = true"
+                                    title="{{day.date | date:'d MMM'}} — {{day.hours || 0}}h total, {{day.billhours || 0}} billable, {{(day.hours || 0) - (day.billhours || 0)}} non-billable">
+                                    <span class="ts-heat-date">{{day.date | date:'d'}}</span>
+                                    <span class="ts-heat-body">
+                                        <span class="ts-heat-hours">{{day.hours || 0}}</span>
+                                        <span class="ts-heat-chips">
+                                            <span class="ts-heat-chip is-bill" title="Billable">{{day.billhours || 0}}</span>
+                                            <span class="ts-heat-chip is-nonbill" title="Non-billable">{{(day.hours || 0) - (day.billhours || 0)}}</span>
+                                        </span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="ts-heat-legend">
+                        <span class="lg-gap">No time (weekdays)</span>
+                        <span class="lg-low">Under 8h</span>
+                        <span class="lg-ok">8h or more</span>
+                        <span class="lg-bill">Billable</span>
+                        <span class="lg-nonbill">Non-billable</span>
                     </div>
                 </div>
             </div>
@@ -481,40 +822,38 @@
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th style="width:38%">Project</th>
-                                            <th style="width:12%">Client</th>
-                                            <th style="width:14%">Team</th>
-                                            <th style="width:14%">Activity</th>
-                                            <th style="width:14%">Comments</th>
-                                            <th style="width:8%">Hours</th>
-                                            <th style="width:6%"></th>
+                                            <th style="width:34%">Project</th>
+                                            <th style="width:18%">Team</th>
+                                            <th style="width:18%">Activity</th>
+                                            <th style="width:20%">Comments</th>
+                                            <th style="width:6%">Hours</th>
+                                            <th style="width:8%"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr ng-repeat="i in day.records"
                                             ng-class="{'ts-row-billable': i.billable == 1 || i.billable === true, 'ts-row-nonbillable': !(i.billable == 1 || i.billable === true)}">
                                             <td>
-                                                <div class="ts-project-cell">
-                                                    <div class="form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}" show-errors>
-                                                        <input readonly name="projectGridId{{i.id}}" ng-required="true"
-                                                               ng-change="vm.validateOriginal('projectGridId',i)" type="text"
-                                                               title="{{i.projectDescription}}"
-                                                               data-ng-click="vm.openProjectListModal(i)"
-                                                               data-ng-model="i.projectDescription"
-                                                               class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
-                                                        <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
-                                                    </div>
-                                                    <span class="ts-bill-flag is-billable"
-                                                          ng-if="i.billable == 1 || i.billable === true"
-                                                          title="Billable">B</span>
-                                                    <span class="ts-bill-flag is-nonbillable"
-                                                          ng-if="!(i.billable == 1 || i.billable === true)"
-                                                          title="Non-billable">NB</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-group">
-                                                    <span>{{i.clientEntityName}}</span>
+                                                <div class="ts-project-cell form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}">
+                                                    <input type="hidden" name="projectGridId{{i.id}}"
+                                                           ng-model="i.projectGridId" ng-required="true" />
+                                                    <button type="button" class="ts-project-pick"
+                                                            ng-class="{'has-warning': i.valid['projectGridId'] == false}"
+                                                            title="{{i.projectDescription ? (i.clientEntityName ? i.clientEntityName + ' — ' : '') + i.projectDescription : 'Choose a project'}}"
+                                                            ng-click="vm.openProjectListModal(i)">
+                                                        <span class="ts-project-meta" ng-if="i.projectDescription || i.clientEntityName">
+                                                            <span class="ts-client-name">{{i.clientEntityName || '—'}}</span>
+                                                            <span class="ts-bill-flag is-billable"
+                                                                  ng-if="i.billable == 1 || i.billable === true"
+                                                                  title="Billable">B</span>
+                                                            <span class="ts-bill-flag is-nonbillable"
+                                                                  ng-if="!(i.billable == 1 || i.billable === true)"
+                                                                  title="Non-billable">NB</span>
+                                                        </span>
+                                                        <span class="ts-project-name" ng-if="i.projectDescription">{{i.projectDescription}}</span>
+                                                        <span class="ts-project-placeholder" ng-if="!i.projectDescription">Choose a project</span>
+                                                    </button>
+                                                    <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
                                                 </div>
                                             </td>
                                             <td>
