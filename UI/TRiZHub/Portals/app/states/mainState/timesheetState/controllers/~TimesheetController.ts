@@ -161,6 +161,9 @@
 
         // Populate user's projects
         this.getUserProjects();
+
+        // Load clipboard from localStorage
+        this.loadClipboard();
     }
 
     getUserProjects() {
@@ -1370,6 +1373,276 @@
             });
 
     };
+
+    //#region Clipboard
+
+    private static CLIPBOARD_KEY = "trizhub_ts_clipboard";
+    private static CLIPBOARD_MAX = 20;
+
+    clipboard: any[] = [];
+    clipboardPasteTarget: any = null;
+    clipboardPasteItem: any = null;
+
+    loadClipboard = (): void => {
+        try {
+            const raw = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
+            this.clipboard = raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            this.clipboard = [];
+        }
+    };
+
+    saveClipboard = (): void => {
+        try {
+            localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(this.clipboard));
+        } catch (e) { }
+    };
+
+    copyDayToClipboard = (day: any): void => {
+        if (!day || !day.records || !day.records.length) {
+            this.Popups.showError(this.$scope, "This day has no records to copy.");
+            return;
+        }
+        const rows = [];
+        for (let i = 0; i < day.records.length; i++) {
+            const r = day.records[i];
+            rows.push({
+                dayOffset: 0,
+                projectGridId: r.projectGridId || r.projectId,
+                projectDescription: r.projectDescription,
+                clientEntityName: r.clientEntityName,
+                billable: r.billable,
+                subProjectId: r.subProjectId,
+                teamId: r.teamId,
+                activityId: r.activityId,
+                hours: r.hours,
+                comments: r.comments
+            });
+        }
+        const item = {
+            type: "day",
+            label: day.label || this.formatDayLabel(day.date),
+            copiedAt: new Date().toISOString(),
+            rowCount: rows.length,
+            rows: rows
+        };
+        this.clipboard.unshift(item);
+        if (this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
+            this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+        }
+        this.saveClipboard();
+    };
+
+    copyWeekToClipboard = (): void => {
+        const me = this;
+        const week = me.selectedWeek;
+        if (!week || !week.days || !week.days.length) {
+            me.Popups.showError(me.$scope, "No week selected to copy.");
+            return;
+        }
+        const rows = [];
+        for (let d = 0; d < week.days.length; d++) {
+            const day = week.days[d];
+            const offset = day.weekdayIndex != null ? day.weekdayIndex : d;
+            const records = day.records || [];
+            for (let i = 0; i < records.length; i++) {
+                const r = records[i];
+                rows.push({
+                    dayOffset: offset,
+                    projectGridId: r.projectGridId || r.projectId,
+                    projectDescription: r.projectDescription,
+                    clientEntityName: r.clientEntityName,
+                    billable: r.billable,
+                    subProjectId: r.subProjectId,
+                    teamId: r.teamId,
+                    activityId: r.activityId,
+                    hours: r.hours,
+                    comments: r.comments
+                });
+            }
+        }
+        if (!rows.length) {
+            me.Popups.showError(me.$scope, "Selected week has no records to copy.");
+            return;
+        }
+        const item = {
+            type: "week",
+            label: week.label || ("Week " + week.weekNum),
+            copiedAt: new Date().toISOString(),
+            rowCount: rows.length,
+            rows: rows
+        };
+        this.clipboard.unshift(item);
+        if (this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
+            this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+        }
+        this.saveClipboard();
+    };
+
+    /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
+    beginPaste = (item: any): void => {
+        this.clipboardPasteItem = item;
+        if (item.type === "week") {
+            this.clipboardPasteTarget = null;
+        } else {
+            this.clipboardPasteTarget = null;
+        }
+    };
+
+    cancelPaste = (): void => {
+        this.clipboardPasteItem = null;
+        this.clipboardPasteTarget = null;
+    };
+
+    confirmPaste = (mode: string, targetDay?: any): void => {
+        const me = this;
+        const item = me.clipboardPasteItem;
+        if (!item) {
+            return;
+        }
+
+        if (!me.filterModel.userId) {
+            me.handleError("Please select a user in the filter!");
+            return;
+        }
+        if (!me.selectedWeek) {
+            me.handleError("Please select a week first.");
+            return;
+        }
+        if (!me.gridModel || !me.gridModel.data) {
+            me.gridModel = { data: [], originalData: [], totalItems: 0 } as any;
+        }
+
+        if (item.type === "day") {
+            const day = targetDay || me.clipboardPasteTarget;
+            if (!day) {
+                me.handleError("Please select a target day.");
+                return;
+            }
+            me.pasteDayItem(item, day, mode);
+        } else {
+            me.pasteWeekItem(item, mode);
+        }
+
+        me.clipboardPasteItem = null;
+        me.clipboardPasteTarget = null;
+        me.rebuildWeekRecords();
+        me.applyDefaultDayExpand();
+        me.summaryList();
+    };
+
+    private pasteDayItem(item: any, day: any, mode: string): void {
+        const me = this;
+        if (mode === "replace") {
+            me.removeNewRecordsForDay(day);
+        }
+        const entryDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 0, 0, 0, 0);
+        for (let i = 0; i < item.rows.length; i++) {
+            me.createRecordFromClipboardRow(item.rows[i], entryDate, i);
+        }
+    }
+
+    private pasteWeekItem(item: any, mode: string): void {
+        const me = this;
+        const week = me.selectedWeek;
+        if (mode === "replace") {
+            for (let d = 0; d < week.days.length; d++) {
+                me.removeNewRecordsForDay(week.days[d]);
+            }
+        }
+        for (let i = 0; i < item.rows.length; i++) {
+            const row = item.rows[i];
+            const targetDay = me.findDayByOffset(week, row.dayOffset);
+            if (!targetDay) {
+                continue;
+            }
+            const entryDate = new Date(targetDay.date.getFullYear(), targetDay.date.getMonth(), targetDay.date.getDate(), 0, 0, 0, 0);
+            me.createRecordFromClipboardRow(row, entryDate, i);
+        }
+    }
+
+    private findDayByOffset(week: any, offset: number): any {
+        if (!week || !week.days) {
+            return null;
+        }
+        for (let d = 0; d < week.days.length; d++) {
+            if (week.days[d].weekdayIndex === offset) {
+                return week.days[d];
+            }
+        }
+        return null;
+    }
+
+    private removeNewRecordsForDay(day: any): void {
+        const me = this;
+        const key = day.dateKey;
+        if (!me.gridModel || !me.gridModel.data) {
+            return;
+        }
+        for (let i = me.gridModel.data.length - 1; i >= 0; i--) {
+            if (me.gridModel.data[i].new && me.parseDateKey(me.gridModel.data[i].dateEntry) === key) {
+                me.gridModel.data.splice(i, 1);
+            }
+        }
+    }
+
+    private createRecordFromClipboardRow(row: any, entryDate: Date, offset: number): void {
+        const me = this;
+        const newRecord = {
+            userAccountId: me.filterModel.userId,
+            projectGridId: row.projectGridId,
+            projectId: row.projectGridId,
+            projectDescription: row.projectDescription,
+            clientEntityName: row.clientEntityName,
+            billable: row.billable,
+            subProjectId: row.subProjectId,
+            teamId: row.teamId,
+            activityId: row.activityId,
+            comments: row.comments,
+            hours: row.hours,
+            dateEntry: entryDate,
+            id: new Date().getTime() + offset,
+            new: true,
+            valid: {
+                'projectGridId': false,
+                'dateEntry': true,
+                'teamId': false,
+                'activityId': false,
+                'comments': false,
+                'hours': false
+            }
+        };
+        me.gridModel.data.push(newRecord);
+    }
+
+    removeClipboardItem = (item: any): void => {
+        const idx = this.clipboard.indexOf(item);
+        if (idx >= 0) {
+            this.clipboard.splice(idx, 1);
+            this.saveClipboard();
+        }
+    };
+
+    clearClipboard = (): void => {
+        this.clipboard = [];
+        this.saveClipboard();
+    };
+
+    clipboardRelativeTime = (isoStr: string): string => {
+        if (!isoStr) {
+            return "";
+        }
+        const diff = Date.now() - new Date(isoStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return "just now";
+        if (mins < 60) return mins + "m ago";
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return hrs + "h ago";
+        const days = Math.floor(hrs / 24);
+        return days + "d ago";
+    };
+
+    //#endregion
 }
 
 angular.module("AngularApp")

@@ -28,13 +28,173 @@
     }
 
     .ts-capture .ts-top-left {
-        flex: 1 1 0;
+        flex: 0 0 30%;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-top-middle {
+        flex: 0 0 25%;
         min-width: 0;
     }
 
     .ts-capture .ts-top-right {
-        flex: 0 0 50%;
+        flex: 0 0 42%;
         min-width: 0;
+    }
+
+    .ts-capture .ts-clipboard {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background: #fafbfc;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .ts-capture .ts-clipboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: rgba(0,0,0,0.45);
+    }
+
+    .ts-capture .ts-clipboard-list {
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    .ts-capture .ts-clip-card {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 6px;
+        border: 1px solid #e8e8e8;
+        border-radius: 3px;
+        margin-bottom: 4px;
+        background: #fff;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-icon {
+        color: #666;
+        font-size: 13px;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-info {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-label {
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-meta {
+        color: #999;
+        font-size: 10px;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 4px;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions button {
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 2px 5px;
+        font-size: 11px;
+        border-radius: 3px;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-paste {
+        background: #337ab7;
+        color: #fff;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-remove {
+        color: #999;
+    }
+
+    .ts-capture .ts-clipboard-empty {
+        color: #aaa;
+        font-style: italic;
+        padding: 8px 0;
+        text-align: center;
+    }
+
+    .ts-capture .ts-paste-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ts-capture .ts-paste-dialog {
+        background: #fff;
+        border-radius: 6px;
+        padding: 20px;
+        min-width: 320px;
+        max-width: 420px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .ts-capture .ts-paste-dialog h4 {
+        margin: 0 0 12px;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-days {
+        margin-bottom: 12px;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-days button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        margin-bottom: 4px;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-days button:hover {
+        background: #f0f7ff;
+        border-color: #337ab7;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes button {
+        flex: 1;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes .btn-primary {
+        background: #337ab7;
+        color: #fff;
+        border-color: #337ab7;
     }
 
     .ts-capture .ts-toolbar-filters {
@@ -717,6 +877,73 @@
                         </form>
                     </div>
 
+                    <div class="ts-top-middle">
+                        <div class="ts-clipboard">
+                            <div class="ts-clipboard-header">
+                                <span><i class="fa fa-clipboard"></i> Clipboard</span>
+                                <button type="button" ng-if="vm.clipboard.length"
+                                        ng-click="vm.clearClipboard()"
+                                        title="Clear all" style="border:none;background:none;color:#999;cursor:pointer;font-size:11px;">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="ts-clipboard-list" ng-if="vm.clipboard.length">
+                                <div class="ts-clip-card" ng-repeat="clip in vm.clipboard">
+                                    <span class="ts-clip-icon">
+                                        <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : 'fa fa-calendar-o'"></i>
+                                    </span>
+                                    <div class="ts-clip-info">
+                                        <div class="ts-clip-label" title="{{clip.label}}">{{clip.label}}</div>
+                                        <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
+                                    </div>
+                                    <div class="ts-clip-actions">
+                                        <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip)" title="Paste">
+                                            <i class="fa fa-paste"></i>
+                                        </button>
+                                        <button type="button" class="ts-clip-remove" ng-click="vm.removeClipboardItem(clip)" title="Remove">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ts-clipboard-empty" ng-if="!vm.clipboard.length">
+                                Copy a day or week to start
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paste dialog overlay -->
+                    <div class="ts-paste-overlay" ng-if="vm.clipboardPasteItem">
+                        <div class="ts-paste-dialog">
+                            <h4>Paste "{{vm.clipboardPasteItem.label}}"</h4>
+
+                            <div ng-if="vm.clipboardPasteItem.type === 'day' && !vm.clipboardPasteTarget">
+                                <p>Select target day:</p>
+                                <div class="ts-paste-days">
+                                    <button type="button" ng-repeat="day in vm.selectedWeek.days"
+                                            ng-click="vm.clipboardPasteTarget = day">
+                                        {{day.label}}
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-default btn-sm" ng-click="vm.cancelPaste()">Cancel</button>
+                            </div>
+
+                            <div ng-if="vm.clipboardPasteItem.type === 'week' || vm.clipboardPasteTarget">
+                                <p ng-if="vm.clipboardPasteTarget">Into: <strong>{{vm.clipboardPasteTarget.label}}</strong></p>
+                                <p ng-if="vm.clipboardPasteItem.type === 'week'">Into: <strong>{{vm.selectedWeek.label}}</strong></p>
+                                <div class="ts-paste-modes">
+                                    <button type="button" class="btn btn-primary" ng-click="vm.confirmPaste('append', vm.clipboardPasteTarget)">
+                                        <i class="fa fa-plus"></i> Append
+                                    </button>
+                                    <button type="button" class="btn btn-default" ng-click="vm.confirmPaste('replace', vm.clipboardPasteTarget)">
+                                        <i class="fa fa-refresh"></i> Replace
+                                    </button>
+                                    <button type="button" class="btn btn-default" ng-click="vm.cancelPaste()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="ts-top-right" ng-if="vm.weeks.length">
                         <div class="ts-heat">
                             <div class="ts-heat-caption">Period summary</div>
@@ -795,6 +1022,11 @@
                         </li>
                     </ul>
                     <div class="ts-week-actions">
+                        <button type="button" class="btn ts-btn-template"
+                                ng-click="vm.copyWeekToClipboard()"
+                                title="Copy this week to clipboard">
+                            <i class="fa fa-copy"></i> Copy Week
+                        </button>
                         <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
                             <i class="fa fa-th"></i> Bulk Populate
                         </button>
@@ -826,6 +1058,12 @@
                                         title="Add a line for this day"
                                         ng-click="vm.addRowForDay(day); $event.stopPropagation()">
                                     <i class="fa fa-plus"></i> Add line
+                                </button>
+                                <button type="button" class="ts-btn-add-line"
+                                        title="Copy this day to clipboard"
+                                        ng-if="day.records.length"
+                                        ng-click="vm.copyDayToClipboard(day); $event.stopPropagation()">
+                                    <i class="fa fa-copy"></i> Copy
                                 </button>
                             </span>
                         </div>

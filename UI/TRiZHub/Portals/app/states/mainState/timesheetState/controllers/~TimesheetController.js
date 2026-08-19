@@ -1097,6 +1097,178 @@ var TimesheetController = /** @class */ (function (_super) {
                 }
             });
         };
+        _this.clipboard = [];
+        _this.clipboardPasteTarget = null;
+        _this.clipboardPasteItem = null;
+        _this.loadClipboard = function () {
+            try {
+                var raw = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
+                _this.clipboard = raw ? JSON.parse(raw) : [];
+            }
+            catch (e) {
+                _this.clipboard = [];
+            }
+        };
+        _this.saveClipboard = function () {
+            try {
+                localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(_this.clipboard));
+            }
+            catch (e) { }
+        };
+        _this.copyDayToClipboard = function (day) {
+            if (!day || !day.records || !day.records.length) {
+                _this.handleError("This day has no records to copy.");
+                return;
+            }
+            var rows = [];
+            for (var i = 0; i < day.records.length; i++) {
+                var r = day.records[i];
+                rows.push({
+                    dayOffset: 0,
+                    projectGridId: r.projectGridId || r.projectId,
+                    projectDescription: r.projectDescription,
+                    clientEntityName: r.clientEntityName,
+                    billable: r.billable,
+                    subProjectId: r.subProjectId,
+                    teamId: r.teamId,
+                    activityId: r.activityId,
+                    hours: r.hours,
+                    comments: r.comments
+                });
+            }
+            var item = {
+                type: "day",
+                label: day.label || _this.formatDayLabel(day.date),
+                copiedAt: new Date().toISOString(),
+                rowCount: rows.length,
+                rows: rows
+            };
+            _this.clipboard.unshift(item);
+            if (_this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
+                _this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+            }
+            _this.saveClipboard();
+        };
+        _this.copyWeekToClipboard = function () {
+            var me = _this;
+            var week = me.selectedWeek;
+            if (!week || !week.days || !week.days.length) {
+                me.Popups.showError(me.$scope, "No week selected to copy.");
+                return;
+            }
+            var rows = [];
+            for (var d = 0; d < week.days.length; d++) {
+                var day = week.days[d];
+                var offset = day.weekdayIndex != null ? day.weekdayIndex : d;
+                var records = day.records || [];
+                for (var i = 0; i < records.length; i++) {
+                    var r = records[i];
+                    rows.push({
+                        dayOffset: offset,
+                        projectGridId: r.projectGridId || r.projectId,
+                        projectDescription: r.projectDescription,
+                        clientEntityName: r.clientEntityName,
+                        billable: r.billable,
+                        subProjectId: r.subProjectId,
+                        teamId: r.teamId,
+                        activityId: r.activityId,
+                        hours: r.hours,
+                        comments: r.comments
+                    });
+                }
+            }
+            if (!rows.length) {
+                me.Popups.showError(me.$scope, "Selected week has no records to copy.");
+                return;
+            }
+            var item = {
+                type: "week",
+                label: week.label || ("Week " + week.weekNum),
+                copiedAt: new Date().toISOString(),
+                rowCount: rows.length,
+                rows: rows
+            };
+            _this.clipboard.unshift(item);
+            if (_this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
+                _this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+            }
+            _this.saveClipboard();
+        };
+        /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
+        _this.beginPaste = function (item) {
+            _this.clipboardPasteItem = item;
+            if (item.type === "week") {
+                _this.clipboardPasteTarget = null;
+            }
+            else {
+                _this.clipboardPasteTarget = null;
+            }
+        };
+        _this.cancelPaste = function () {
+            _this.clipboardPasteItem = null;
+            _this.clipboardPasteTarget = null;
+        };
+        _this.confirmPaste = function (mode, targetDay) {
+            var me = _this;
+            var item = me.clipboardPasteItem;
+            if (!item) {
+                return;
+            }
+            if (!me.filterModel.userId) {
+                me.handleError("Please select a user in the filter!");
+                return;
+            }
+            if (!me.selectedWeek) {
+                me.handleError("Please select a week first.");
+                return;
+            }
+            if (!me.gridModel || !me.gridModel.data) {
+                me.gridModel = { data: [], originalData: [], totalItems: 0 };
+            }
+            if (item.type === "day") {
+                var day = targetDay || me.clipboardPasteTarget;
+                if (!day) {
+                    me.handleError("Please select a target day.");
+                    return;
+                }
+                me.pasteDayItem(item, day, mode);
+            }
+            else {
+                me.pasteWeekItem(item, mode);
+            }
+            me.clipboardPasteItem = null;
+            me.clipboardPasteTarget = null;
+            me.rebuildWeekRecords();
+            me.applyDefaultDayExpand();
+            me.summaryList();
+        };
+        _this.removeClipboardItem = function (item) {
+            var idx = _this.clipboard.indexOf(item);
+            if (idx >= 0) {
+                _this.clipboard.splice(idx, 1);
+                _this.saveClipboard();
+            }
+        };
+        _this.clearClipboard = function () {
+            _this.clipboard = [];
+            _this.saveClipboard();
+        };
+        _this.clipboardRelativeTime = function (isoStr) {
+            if (!isoStr) {
+                return "";
+            }
+            var diff = Date.now() - new Date(isoStr).getTime();
+            var mins = Math.floor(diff / 60000);
+            if (mins < 1)
+                return "just now";
+            if (mins < 60)
+                return mins + "m ago";
+            var hrs = Math.floor(mins / 60);
+            if (hrs < 24)
+                return hrs + "h ago";
+            var days = Math.floor(hrs / 24);
+            return days + "d ago";
+        };
         var me = _this;
         me.displayOptions = { show: false };
         me.viewModel = {};
@@ -1175,6 +1347,8 @@ var TimesheetController = /** @class */ (function (_super) {
         me.filterModel.userId = SecurityService.getCurrentUserDetails().id;
         // Populate user's projects
         _this.getUserProjects();
+        // Load clipboard from localStorage
+        _this.loadClipboard();
         return _this;
     }
     TimesheetController.prototype.getUserProjects = function () {
@@ -1220,6 +1394,88 @@ var TimesheetController = /** @class */ (function (_super) {
             this.loadingIsDone = true;
         }
     };
+    TimesheetController.prototype.pasteDayItem = function (item, day, mode) {
+        var me = this;
+        if (mode === "replace") {
+            me.removeNewRecordsForDay(day);
+        }
+        var entryDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 0, 0, 0, 0);
+        for (var i = 0; i < item.rows.length; i++) {
+            me.createRecordFromClipboardRow(item.rows[i], entryDate, i);
+        }
+    };
+    TimesheetController.prototype.pasteWeekItem = function (item, mode) {
+        var me = this;
+        var week = me.selectedWeek;
+        if (mode === "replace") {
+            for (var d = 0; d < week.days.length; d++) {
+                me.removeNewRecordsForDay(week.days[d]);
+            }
+        }
+        for (var i = 0; i < item.rows.length; i++) {
+            var row = item.rows[i];
+            var targetDay = me.findDayByOffset(week, row.dayOffset);
+            if (!targetDay) {
+                continue;
+            }
+            var entryDate = new Date(targetDay.date.getFullYear(), targetDay.date.getMonth(), targetDay.date.getDate(), 0, 0, 0, 0);
+            me.createRecordFromClipboardRow(row, entryDate, i);
+        }
+    };
+    TimesheetController.prototype.findDayByOffset = function (week, offset) {
+        if (!week || !week.days) {
+            return null;
+        }
+        for (var d = 0; d < week.days.length; d++) {
+            if (week.days[d].weekdayIndex === offset) {
+                return week.days[d];
+            }
+        }
+        return null;
+    };
+    TimesheetController.prototype.removeNewRecordsForDay = function (day) {
+        var me = this;
+        var key = day.dateKey;
+        if (!me.gridModel || !me.gridModel.data) {
+            return;
+        }
+        for (var i = me.gridModel.data.length - 1; i >= 0; i--) {
+            if (me.gridModel.data[i].new && me.parseDateKey(me.gridModel.data[i].dateEntry) === key) {
+                me.gridModel.data.splice(i, 1);
+            }
+        }
+    };
+    TimesheetController.prototype.createRecordFromClipboardRow = function (row, entryDate, offset) {
+        var me = this;
+        var newRecord = {
+            userAccountId: me.filterModel.userId,
+            projectGridId: row.projectGridId,
+            projectId: row.projectGridId,
+            projectDescription: row.projectDescription,
+            clientEntityName: row.clientEntityName,
+            billable: row.billable,
+            subProjectId: row.subProjectId,
+            teamId: row.teamId,
+            activityId: row.activityId,
+            comments: row.comments,
+            hours: row.hours,
+            dateEntry: entryDate,
+            id: new Date().getTime() + offset,
+            new: true,
+            valid: {
+                'projectGridId': false,
+                'dateEntry': true,
+                'teamId': false,
+                'activityId': false,
+                'comments': false,
+                'hours': false
+            }
+        };
+        me.gridModel.data.push(newRecord);
+    };
+    //#region Clipboard
+    TimesheetController.CLIPBOARD_KEY = "trizhub_ts_clipboard";
+    TimesheetController.CLIPBOARD_MAX = 20;
     return TimesheetController;
 }(CHControllerBase));
 angular.module("AngularApp")
