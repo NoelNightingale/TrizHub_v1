@@ -1062,6 +1062,8 @@
                         let project = action.project;
                         let team = action.team;
                         let activity = action.activity;
+                        let bulkHours = action.hours != null ? action.hours : null;
+                        let bulkComments = action.comments || null;
                         let selectedDates = action.selectedDates || [];
 
                         if (!project || !project.projectId) {
@@ -1110,8 +1112,8 @@
                                 },
                                 teamId: team,
                                 activityId: activity,
-                                comments: null,
-                                hours: null,
+                                comments: bulkComments,
+                                hours: bulkHours,
                                 dateEntry: date,
                                 id: new Date().getTime() + i,
                                 new: true,
@@ -1121,9 +1123,9 @@
                             me.gridModel.data.push(newRecord);
 
                             newRecord.valid["dateEntry"] = true;
-                            newRecord.valid["teamId"] = true;
-                            newRecord.valid["activityId"] = true;
-                            newRecord.valid["projectGridId"] = true;
+                            newRecord.valid["teamId"] = false;
+                            newRecord.valid["activityId"] = false;
+                            newRecord.valid["projectGridId"] = false;
                             newRecord.valid["comments"] = false;
                             newRecord.valid["hours"] = false;
                         }

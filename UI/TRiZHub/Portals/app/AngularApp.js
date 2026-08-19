@@ -1,4 +1,6 @@
-﻿angular.module("AngularApp",
+﻿var APP_CACHE_VER = "v=2026081902";
+
+angular.module("AngularApp",
     [
         "ngRoute",
         "ui.bootstrap",
@@ -35,7 +37,7 @@
                             abstract: true,
                             views: {
                                 'main': {
-                                    templateUrl: "Portals/app/states/rootState/stateView.html"
+                                    templateUrl: "Portals/app/states/rootState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                             // Remove for reason that it causes blank screen onsite - was ment to solve refresh redirect
@@ -55,7 +57,7 @@
                             url: "/login",
                             views: {
                                 'login': {
-                                    templateUrl: "Portals/app/states/rootState/login/views/mainView.html",
+                                    templateUrl: "Portals/app/states/rootState/login/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "LoginController as vm"
                                 }
                             },
@@ -63,7 +65,7 @@
                                 loadCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/rootState/login/controllers/~LoginController.js");
+                                            .load("Portals/app/states/rootState/login/controllers/~LoginController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -74,28 +76,28 @@
                             abstract: true,
                             views: {
                                 'header': {
-                                    templateUrl: "Portals/app/states/mainState/headerState/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/headerState/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "AdminHeaderController as vm"
                                 },
                                 'footer': {
-                                    templateUrl: "Portals/app/states/mainState/footerState/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/footerState/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "AdminFooterController as vm"
                                 },
                                 'main': {
-                                    templateUrl: "Portals/app/states/mainState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/stateView.html?" + APP_CACHE_VER
                                 }
                             },
                             resolve: {
                                 loadHeader: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/headerState/controllers/~AdminHeaderController.js");
+                                            .load("Portals/app/states/mainState/headerState/controllers/~AdminHeaderController.js?" + APP_CACHE_VER);
                                     }
                                 ],
                                 loadFooter: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/footerState/controllers/~AdminFooterController.js");
+                                            .load("Portals/app/states/mainState/footerState/controllers/~AdminFooterController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -106,7 +108,7 @@
                             url: "/home",
                             views: {
                                 'home': {
-                                    templateUrl: "Portals/app/states/mainState/homeState/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/homeState/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "HomeController as vm"
                                 }
                             },
@@ -114,7 +116,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/homeState/controllers/~HomeController.js");
+                                            .load("Portals/app/states/mainState/homeState/controllers/~HomeController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -125,7 +127,7 @@
                             url: "/profile",
                             views: {
                                 'profile': {
-                                    templateUrl: "Portals/app/states/mainState/profileState/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/profileState/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ProfileController as vm"
                                 }
                             },
@@ -133,7 +135,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/profileState/controllers/~ProfileController.js");
+                                            .load("Portals/app/states/mainState/profileState/controllers/~ProfileController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -144,7 +146,7 @@
                             url: "/timesheet",
                             views: {
                                 'timesheet': {
-                                    templateUrl: "Portals/app/states/mainState/timesheetState/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/timesheetState/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TimesheetController as vm"
                                 }
                             },
@@ -152,7 +154,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/timesheetState/controllers/~TimesheetController.js");
+                                            .load("Portals/app/states/mainState/timesheetState/controllers/~TimesheetController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -163,7 +165,7 @@
                             url: "/report",
                             views: {
                                 'timesheet': {
-                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/timesheetSummary.html",
+                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/timesheetSummary.html?" + APP_CACHE_VER,
                                     controller: "TimeSheetReportController as vm"
                                 }
                             },
@@ -171,7 +173,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/reportState/controllers/~TimeSheetReportController.js");
+                                            .load("Portals/app/states/mainState/reportState/controllers/~TimeSheetReportController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -183,7 +185,7 @@
                             url: "/customertimereport",
                             views: {
                                 'timesheet': {
-                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/clientTimesheetSummary.html",
+                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/clientTimesheetSummary.html?" + APP_CACHE_VER,
                                     controller: "ClientTimeSheetReportController as vm"
                                 }
                             },
@@ -191,7 +193,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/reportState/controllers/~ClientTimeSheetReportController.js");
+                                            .load("Portals/app/states/mainState/reportState/controllers/~ClientTimeSheetReportController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -202,7 +204,7 @@
                             url: "/userprojects",
                             views: {
                                 'timesheet': {
-                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/userProjectSummary.html",
+                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/userProjectSummary.html?" + APP_CACHE_VER,
                                     controller: "UserProjectSummaryController as vm"
                                 }
                             },
@@ -210,7 +212,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/reportState/controllers/~UserProjectSummaryController.js");
+                                            .load("Portals/app/states/mainState/reportState/controllers/~UserProjectSummaryController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -221,7 +223,7 @@
                             url: "/userroles",
                             views: {
                                 'timesheet': {
-                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/userRoleSummary.html",
+                                    templateUrl: "Portals/app/states/mainState/reportState/timereports/userRoleSummary.html?" + APP_CACHE_VER,
                                     controller: "UserRoleSummaryController as vm"
                                 }
                             },
@@ -229,7 +231,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/reportState/controllers/~UserRoleSummaryController.js");
+                                            .load("Portals/app/states/mainState/reportState/controllers/~UserRoleSummaryController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -241,7 +243,7 @@
                             abstract: true,
                             views: {
                                 'maintenance': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -252,8 +254,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/activityMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/activityMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -263,8 +264,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/activityMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/activityMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ActivityMaintenanceGridController as vm"
                                 }
                             },
@@ -272,7 +272,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/activityMaintenanceState/grid/controllers/~ActivityMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/activityMaintenanceState/grid/controllers/~ActivityMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -283,8 +283,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/activityMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/activityMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ActivityMaintenanceDetailController as vm"
                                 }
                             },
@@ -292,7 +291,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/activityMaintenanceState/detail/controllers/~ActivityMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/activityMaintenanceState/detail/controllers/~ActivityMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -305,8 +304,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/teamMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/teamMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -316,8 +314,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/teamMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/teamMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TeamMaintenanceGridController as vm"
                                 }
                             },
@@ -325,7 +322,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/teamMaintenanceState/grid/controllers/~TeamMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/teamMaintenanceState/grid/controllers/~TeamMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -336,8 +333,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/teamMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/teamMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TeamMaintenanceDetailController as vm"
                                 }
                             },
@@ -345,7 +341,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/teamMaintenanceState/detail/controllers/~TeamMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/teamMaintenanceState/detail/controllers/~TeamMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -357,8 +353,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/roleMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/roleMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -368,8 +363,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/roleMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/roleMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "RoleMaintenanceGridController as vm"
                                 }
                             },
@@ -377,7 +371,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/roleMaintenanceState/grid/controllers/~RoleMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/roleMaintenanceState/grid/controllers/~RoleMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -388,8 +382,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/roleMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/roleMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "RoleMaintenanceDetailController as vm"
                                 }
                             },
@@ -397,7 +390,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/roleMaintenanceState/detail/controllers/~RoleMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/roleMaintenanceState/detail/controllers/~RoleMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -409,8 +402,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/employerMaintenance/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/employerMaintenance/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -419,8 +411,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/employerMaintenance/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/employerMaintenance/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "EmployerMaintenanceGridController as vm"
                                 }
                             },
@@ -428,7 +419,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/employerMaintenance/grid/controllers/~EmployerMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/employerMaintenance/grid/controllers/~EmployerMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -439,8 +430,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/employerMaintenance/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/employerMaintenance/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "EmployerMaintenanceDetailController as vm"
                                 }
                             },
@@ -448,7 +438,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/employerMaintenance/detail/controllers/~EmployerMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/employerMaintenance/detail/controllers/~EmployerMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -461,8 +451,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -472,8 +461,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "UserMaintenanceGridController as vm"
                                 }
                             },
@@ -481,7 +469,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/grid/controllers/~UserMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/grid/controllers/~UserMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -492,8 +480,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "UserMaintenanceDetailController as vm"
                                 }
                             },
@@ -501,7 +488,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/detail/controllers/~UserMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/detail/controllers/~UserMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -512,8 +499,7 @@
                             url: "/emergencyContactGrid/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "EmergencyContactGridController as vm"
                                 }
                             },
@@ -521,7 +507,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/grid/controllers/~EmergencyContactGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/grid/controllers/~EmergencyContactGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -532,8 +518,7 @@
                             url: "/emergencyContactDetail/:userid/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "EmergencyContactDetailController as vm"
                                 }
                             },
@@ -541,7 +526,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/detail/controllers/~EmergencyContactDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/emergancy/detail/controllers/~EmergencyContactDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -552,8 +537,7 @@
                             url: "/billingRatesGrid/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "BillingRatesGridController as vm"
                                 }
                             },
@@ -561,7 +545,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/grid/controllers/~BillingRatesGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/grid/controllers/~BillingRatesGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -572,8 +556,7 @@
                             url: "/billingRatesDetail/:userid/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "BillingRatesDetailController as vm"
                                 }
                             },
@@ -581,7 +564,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/detail/controllers/~BillingRatesDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/detail/controllers/~BillingRatesDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -592,8 +575,7 @@
                             url: "/travelInformationGrid/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TravelInformationGridController as vm"
                                 }
                             },
@@ -601,7 +583,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/grid/controllers/~TravelInformationGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/grid/controllers/~TravelInformationGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -612,8 +594,7 @@
                             url: "/travelInformationDetail/:userid/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TravelInformationDetailController as vm"
                                 }
                             },
@@ -621,7 +602,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/detail/controllers/~TravelInformationDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/travelInformation/detail/controllers/~TravelInformationDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -632,8 +613,7 @@
                             url: "/officeEquipmentGrid/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "OfficeEquipmentGridController as vm"
                                 }
                             },
@@ -641,7 +621,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/grid/controllers/~OfficeEquipmentGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/grid/controllers/~OfficeEquipmentGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -652,8 +632,7 @@
                             url: "/officeEquipmentDetail/:userid/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "OfficeEquipmentDetailController as vm"
                                 }
                             },
@@ -661,7 +640,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/detail/controllers/~OfficeEquipmentDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/officeEquipment/detail/controllers/~OfficeEquipmentDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -672,8 +651,7 @@
                             url: "/teamJobDesignationGrid/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TeamJobDesignationGridController as vm"
                                 }
                             },
@@ -681,7 +659,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/grid/controllers/~TeamJobDesignationGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/grid/controllers/~TeamJobDesignationGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -692,8 +670,7 @@
                             url: "/teamJobDesignationDetail/:userid/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "TeamJobDesignationDetailController as vm"
                                 }
                             },
@@ -701,7 +678,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/detail/controllers/~TeamJobDesignationDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/teamJobDesignation/detail/controllers/~TeamJobDesignationDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -711,8 +688,7 @@
                             url: "/projectMaintenance/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/projects/tree/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/projects/tree/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "UserProjectsController as vm"
                                 }
                             },
@@ -720,7 +696,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/projects/tree/controllers/~UserProjectsController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/projects/tree/controllers/~UserProjectsController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -731,8 +707,7 @@
                             url: "/personalInformationDetail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/userMaintenanceState/personalInformation/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/personalInformation/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "PersonalInformationController as vm"
                                 }
                             },
@@ -740,7 +715,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/personalInformation/controllers/~PersonalInformationController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/userMaintenanceState/personalInformation/controllers/~PersonalInformationController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -751,8 +726,7 @@
                             url: "/settings",
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/settingsMaintenanceState/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/settingsMaintenanceState/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "AdminMaintenanceSettingsController as vm"
                                 }
                             },
@@ -760,7 +734,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/settingsMaintenanceState/controllers/~AdminMaintenanceSettingsController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/settingsMaintenanceState/controllers/~AdminMaintenanceSettingsController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -772,8 +746,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -783,8 +756,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ClientMaintenanceGridController as vm"
                                 }
                             },
@@ -792,7 +764,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/grid/controllers/~ClientMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/grid/controllers/~ClientMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -803,8 +775,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ClientMaintenanceDetailController as vm"
                                 }
                             },
@@ -812,7 +783,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/detail/controllers/~ClientMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/detail/controllers/~ClientMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -824,8 +795,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -835,8 +805,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ProjectMaintenanceGridController as vm"
                                 }
                             },
@@ -844,7 +813,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/grid/controllers/~ProjectMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/grid/controllers/~ProjectMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -855,8 +824,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ProjectMaintenanceDetailController as vm"
                                 }
                             },
@@ -864,7 +832,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/detail/controllers/~ProjectMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/detail/controllers/~ProjectMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -874,8 +842,7 @@
                             url: "/subProjectGrid/:id",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/views/gridView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/views/gridView.html?" + APP_CACHE_VER,
                                     controller: "SubProjectGridController as vm"
                                 }
                             },
@@ -883,7 +850,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/controllers/~SubProjectGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/controllers/~SubProjectGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -894,8 +861,7 @@
                             url: "/detail/:id/subProject/:subProjectId",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "SubProjectMaintenanceDetailController as vm"
                                 }
                             },
@@ -903,7 +869,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/controllers/~SubProjectMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/controllers/~SubProjectMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -915,8 +881,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -926,8 +891,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardTemplateMaintenanceGridController as vm"
                                 }
                             },
@@ -935,7 +899,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/grid/controllers/~ScorecardTemplateMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/grid/controllers/~ScorecardTemplateMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -946,8 +910,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardTemplateMaintenanceDetailController as vm"
                                 }
                             },
@@ -955,7 +918,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/detail/controllers/~ScorecardTemplateMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/detail/controllers/~ScorecardTemplateMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -967,8 +930,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -978,8 +940,7 @@
                             url: "/scorecardTemplate/:scorecardTemplateId/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardTemplateItemMaintenanceGridController as vm"
                                 }
                             },
@@ -987,7 +948,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/grid/controllers/~ScorecardTemplateItemMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/grid/controllers/~ScorecardTemplateItemMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -998,8 +959,7 @@
                             url: "/scorecardTemplateItem/:scorecardTemplateId/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardTemplateItemMaintenanceDetailController as vm"
                                 }
                             },
@@ -1007,7 +967,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/detail/controllers/~ScorecardTemplateItemMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplateItemMaintenanceState/detail/controllers/~ScorecardTemplateItemMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1019,8 +979,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -1030,8 +989,7 @@
                             url: "/scorecardTemplate/:scorecardTemplateId/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardTemplatePeriodMaintenanceGridController as vm"
                                 }
                             },
@@ -1039,7 +997,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/grid/controllers/~ScorecardTemplatePeriodMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/grid/controllers/~ScorecardTemplatePeriodMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1050,8 +1008,7 @@
                             url: "/scorecardTemplatePeriod/:scorecardTemplateId/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardTemplatePeriodMaintenanceDetailController as vm"
                                 }
                             },
@@ -1059,7 +1016,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/detail/controllers/~ScorecardTemplatePeriodMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/scorecardTemplatePeriodMaintenanceState/detail/controllers/~ScorecardTemplatePeriodMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1071,7 +1028,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl: "Portals/app/states/mainState/scorecardState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/scorecardState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -1081,7 +1038,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl: "Portals/app/states/mainState/scorecardState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/scorecardState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardGridController as vm"
                                 }
                             },
@@ -1089,7 +1046,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/scorecardState/grid/controllers/~ScorecardGridController.js");
+                                            .load("Portals/app/states/mainState/scorecardState/grid/controllers/~ScorecardGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1100,7 +1057,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl: "Portals/app/states/mainState/scorecardState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/scorecardState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardDetailController as vm"
                                 }
                             },
@@ -1108,7 +1065,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/scorecardState/detail/controllers/~ScorecardDetailController.js");
+                                            .load("Portals/app/states/mainState/scorecardState/detail/controllers/~ScorecardDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1119,7 +1076,7 @@
                             url: "/report",
                             views: {
                                 'detail': {
-                                    templateUrl: "Portals/app/states/mainState/scorecardState/report/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/scorecardState/report/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardReportController as vm"
                                 }
                             },
@@ -1127,7 +1084,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/scorecardState/report/controllers/~ScorecardReportController.js");
+                                            .load("Portals/app/states/mainState/scorecardState/report/controllers/~ScorecardReportController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1138,8 +1095,7 @@
                             url: "/submitScorecard/:id/:readOnly",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/scorecardState/submitScorecard/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/scorecardState/submitScorecard/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "ScorecardSubmitScorecardController as vm"
                                 }
                             },
@@ -1147,7 +1103,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/scorecardState/submitScorecard/controllers/~ScorecardSubmitScorecardController.js");
+                                            .load("Portals/app/states/mainState/scorecardState/submitScorecard/controllers/~ScorecardSubmitScorecardController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1159,8 +1115,7 @@
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/stateView.html"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
@@ -1171,8 +1126,7 @@
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/grid/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "BillingCycleMaintenanceGridController as vm"
                                 }
                             },
@@ -1180,7 +1134,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/grid/controllers/~BillingCycleMaintenanceGridController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/grid/controllers/~BillingCycleMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -1191,8 +1145,7 @@
                             url: "/detail/:id",
                             views: {
                                 'detail': {
-                                    templateUrl:
-                                        "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/detail/views/mainView.html",
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
                                     controller: "BillingCycleMaintenanceDetailController as vm"
                                 }
                             },
@@ -1200,7 +1153,7 @@
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/detail/controllers/~BillingCycleMaintenanceDetailController.js");
+                                            .load("Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/detail/controllers/~BillingCycleMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }

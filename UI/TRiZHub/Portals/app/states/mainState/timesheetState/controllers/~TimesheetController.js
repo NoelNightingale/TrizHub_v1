@@ -818,6 +818,8 @@ var TimesheetController = /** @class */ (function (_super) {
                     var project = action.project;
                     var team = action.team;
                     var activity = action.activity;
+                    var bulkHours = action.hours != null ? action.hours : null;
+                    var bulkComments = action.comments || null;
                     var selectedDates = action.selectedDates || [];
                     if (!project || !project.projectId) {
                         me.handleError("Please select a project for the template lines.");
@@ -862,8 +864,8 @@ var TimesheetController = /** @class */ (function (_super) {
                             },
                             teamId: team,
                             activityId: activity,
-                            comments: null,
-                            hours: null,
+                            comments: bulkComments,
+                            hours: bulkHours,
                             dateEntry: date,
                             id: new Date().getTime() + i,
                             new: true,
@@ -871,9 +873,9 @@ var TimesheetController = /** @class */ (function (_super) {
                         };
                         me.gridModel.data.push(newRecord);
                         newRecord.valid["dateEntry"] = true;
-                        newRecord.valid["teamId"] = true;
-                        newRecord.valid["activityId"] = true;
-                        newRecord.valid["projectGridId"] = true;
+                        newRecord.valid["teamId"] = false;
+                        newRecord.valid["activityId"] = false;
+                        newRecord.valid["projectGridId"] = false;
                         newRecord.valid["comments"] = false;
                         newRecord.valid["hours"] = false;
                     }

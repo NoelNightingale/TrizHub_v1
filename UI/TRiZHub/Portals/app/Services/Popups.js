@@ -388,6 +388,8 @@
                         project: {},
                         team: null,
                         activity: null,
+                        hours: null,
+                        comments: null,
                         dayMatrix: dayMatrix,
 
                         selectedCount: function () {
@@ -524,7 +526,7 @@
                         modalInstance:
                             $uibModal.open({
                                 animation: false,
-                                templateUrl: _root + "TimeSheetAddRecords.html",
+                                templateUrl: _root + "TimeSheetAddRecords.html?" + (typeof APP_CACHE_VER !== "undefined" ? APP_CACHE_VER : "v=1"),
                                 scope: $scope,
                                 size: "lg"
                             }),
@@ -538,18 +540,20 @@
                         },
 
                         yesClick: function () {
-                            const me = this;
-                            const selectedDates = me.getSelectedDates();
+                            var pm = $scope.popupModel;
+                            const selectedDates = pm.getSelectedDates();
                             if (!selectedDates.length) {
                                 return;
                             }
-                            me.modalInstance.close(true);
+                            pm.modalInstance.close(true);
                             const result = {
                                 result: true,
-                                project: me.project,
+                                project: pm.project,
                                 selectedDates: selectedDates,
-                                team: me.team,
-                                activity: me.activity
+                                team: pm.team,
+                                activity: pm.activity,
+                                hours: pm.hours,
+                                comments: pm.comments
                             };
                             deferred.resolve(result);
                         }
