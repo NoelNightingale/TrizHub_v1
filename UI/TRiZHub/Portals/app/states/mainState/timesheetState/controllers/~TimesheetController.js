@@ -1003,33 +1003,106 @@ var TimesheetController = /** @class */ (function (_super) {
             day.hours = hours;
             day.billhours = billhours;
         };
+        _this.applyOriginalValues = function (object) {
+            var me = _this;
+            var originalObject = me.getOriginalRecord(object);
+            if (!originalObject) {
+                return;
+            }
+            if (!object.valid) {
+                object.valid = {};
+            }
+            object.projectGridId = originalObject.projectGridId;
+            object.projectId = originalObject.projectId;
+            object.projectDescription = originalObject.projectDescription;
+            object.subProjectId = originalObject.subProjectId;
+            object.valid["projectGridId"] = true;
+            object.teamId = originalObject.teamId;
+            object.valid["teamId"] = true;
+            object.dateEntry = originalObject.dateEntry;
+            object.valid["dateEntry"] = true;
+            object.activityId = originalObject.activityId;
+            object.valid["activityId"] = true;
+            object.comments = originalObject.comments;
+            object.valid["comments"] = true;
+            object.hours = originalObject.hours;
+            object.valid["hours"] = true;
+            object.clientEntityName = originalObject.clientEntityName;
+            object.billable = originalObject.billable;
+        };
         _this.resetRecord = function (object) {
             var me = _this;
             me.Popups.confirmationDialog(me.$scope, "Load original values?", "You are about to reset the values back to the orignal...")
                 .then(function (action) {
                 if (action) {
-                    var originalObject = me.getOriginalRecord(object);
-                    if (originalObject != null) {
-                        object.projectGridId = originalObject.projectGridId;
-                        object.projectId = originalObject.projectId;
-                        object.projectDescription = originalObject.projectDescription;
-                        object.subProjectId = originalObject.subProjectId;
-                        object.valid["projectGridId"] = true;
-                        object.teamId = originalObject.teamId;
-                        object.valid["teamId"] = true;
-                        object.dateEntry = originalObject.dateEntry;
-                        object.valid["dateEntry"] = true;
-                        object.activityId = originalObject.activityId;
-                        object.valid["activityId"] = true;
-                        object.comments = originalObject.comments;
-                        object.valid["comments"] = true;
-                        object.hours = originalObject.hours;
-                        object.valid["hours"] = true;
-                        object.clientEntityName = originalObject.clientEntityName;
-                        object.billable = originalObject.billable;
-                        me.refreshTotalsForRecord(object);
+                    me.applyOriginalValues(object);
+                    me.refreshTotalsForRecord(object);
+                }
+            }, function (error) {
+                me.handleError(error);
+            });
+        };
+        _this.revertSelectedWeek = function () {
+            var me = _this;
+            if (!me.selectedWeek || !me.selectedWeek.days || !me.selectedWeek.days.length) {
+                me.handleError("Please select a week first.");
+                return;
+            }
+            // ES5 target: avoid Set / other ES2015 built-ins
+            var dayKeyMap = {};
+            for (var d = 0; d < me.selectedWeek.days.length; d++) {
+                dayKeyMap[me.selectedWeek.days[d].dateKey] = true;
+            }
+            me.Popups.confirmationDialog(me.$scope, "Revert Week changes?", "This will discard all unsaved changes in the selected week (edited rows will be restored and new rows will be removed).").then(function (action) {
+                if (!action) {
+                    return;
+                }
+                if (!me.gridModel || !me.gridModel.data) {
+                    return;
+                }
+                for (var i = me.gridModel.data.length - 1; i >= 0; i--) {
+                    var record = me.gridModel.data[i];
+                    var key = me.parseDateKey(record.dateEntry);
+                    if (!key || !dayKeyMap[key]) {
+                        continue;
+                    }
+                    if (record.new) {
+                        me.gridModel.data.splice(i, 1);
+                    }
+                    else {
+                        me.applyOriginalValues(record);
                     }
                 }
+                me.saveSuccess = false;
+                me.rebuildWeekRecords();
+                me.applyDefaultDayExpand();
+                me.summaryList();
+            }, function (error) {
+                me.handleError(error);
+            });
+        };
+        _this.revertAllWeeks = function () {
+            var me = _this;
+            if (!me.gridModel || !me.gridModel.data) {
+                return;
+            }
+            me.Popups.confirmationDialog(me.$scope, "Revert All changes?", "This will discard all unsaved changes across all loaded weeks in the current billing period.").then(function (action) {
+                if (!action) {
+                    return;
+                }
+                for (var i = me.gridModel.data.length - 1; i >= 0; i--) {
+                    var record = me.gridModel.data[i];
+                    if (record.new) {
+                        me.gridModel.data.splice(i, 1);
+                    }
+                    else {
+                        me.applyOriginalValues(record);
+                    }
+                }
+                me.saveSuccess = false;
+                me.rebuildWeekRecords();
+                me.applyDefaultDayExpand();
+                me.summaryList();
             }, function (error) {
                 me.handleError(error);
             });
@@ -1117,7 +1190,7 @@ var TimesheetController = /** @class */ (function (_super) {
         };
         _this.copyDayToClipboard = function (day) {
             if (!day || !day.records || !day.records.length) {
-                _this.handleError("This day has no records to copy.");
+                _this.Popups.showError(_this.$scope, "This day has no records to copy.");
                 return;
             }
             var rows = [];

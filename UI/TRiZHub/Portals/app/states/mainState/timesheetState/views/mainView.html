@@ -1030,6 +1030,16 @@
                         <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
                             <i class="fa fa-th"></i> Bulk Populate
                         </button>
+                        <button type="button" class="btn ts-btn-template"
+                                ng-click="vm.revertSelectedWeek()"
+                                title="Discard unsaved changes for the selected week">
+                            <i class="fa fa-undo"></i> Revert Week
+                        </button>
+                        <button type="button" class="btn ts-btn-template"
+                                ng-click="vm.revertAllWeeks()"
+                                title="Discard unsaved changes across all loaded weeks in this billing period">
+                            <i class="fa fa-undo"></i> Revert All
+                        </button>
                         <button type="button" class="btn btn-primary"
                                 ng-click="vm.submitForm()"
                                 ng-disabled="vm.filterModel.userId == null">

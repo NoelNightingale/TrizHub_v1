@@ -1269,6 +1269,42 @@
         day.billhours = billhours;
     };
 
+    private applyOriginalValues = (object: any): void => {
+        const me = this;
+        const originalObject = me.getOriginalRecord(object);
+        if (!originalObject) {
+            return;
+        }
+
+        if (!object.valid) {
+            object.valid = {};
+        }
+
+        object.projectGridId = originalObject.projectGridId;
+        object.projectId = originalObject.projectId;
+        object.projectDescription = originalObject.projectDescription;
+        object.subProjectId = originalObject.subProjectId;
+        object.valid["projectGridId"] = true;
+
+        object.teamId = originalObject.teamId;
+        object.valid["teamId"] = true;
+
+        object.dateEntry = originalObject.dateEntry;
+        object.valid["dateEntry"] = true;
+
+        object.activityId = originalObject.activityId;
+        object.valid["activityId"] = true;
+
+        object.comments = originalObject.comments;
+        object.valid["comments"] = true;
+
+        object.hours = originalObject.hours;
+        object.valid["hours"] = true;
+
+        object.clientEntityName = originalObject.clientEntityName;
+        object.billable = originalObject.billable;
+    }
+
     resetRecord = (object) => {
         const me = this;
         me.Popups.confirmationDialog(me.$scope,
@@ -1277,32 +1313,101 @@
             .then(
                 action => {
                     if (action) {
-                        const originalObject = me.getOriginalRecord(object);
-                        if (originalObject != null) {
-                            object.projectGridId = originalObject.projectGridId;
-                            object.projectId = originalObject.projectId;
-                            object.projectDescription = originalObject.projectDescription;
-                            object.subProjectId = originalObject.subProjectId;
-                            object.valid["projectGridId"] = true;
-                            object.teamId = originalObject.teamId;
-                            object.valid["teamId"] = true;
-                            object.dateEntry = originalObject.dateEntry;
-                            object.valid["dateEntry"] = true;
-                            object.activityId = originalObject.activityId;
-                            object.valid["activityId"] = true;
-                            object.comments = originalObject.comments;
-                            object.valid["comments"] = true;
-                            object.hours = originalObject.hours;
-                            object.valid["hours"] = true;
-                            object.clientEntityName = originalObject.clientEntityName;
-                            object.billable = originalObject.billable;
-                            me.refreshTotalsForRecord(object);
-                        }
+                        me.applyOriginalValues(object);
+                        me.refreshTotalsForRecord(object);
                     }
                 },
                 error => {
                     me.handleError(error);
                 });
+    };
+
+    revertSelectedWeek = (): void => {
+        const me = this;
+        if (!me.selectedWeek || !me.selectedWeek.days || !me.selectedWeek.days.length) {
+            me.handleError("Please select a week first.");
+            return;
+        }
+
+        // ES5 target: avoid Set / other ES2015 built-ins
+        const dayKeyMap: any = {};
+        for (let d = 0; d < me.selectedWeek.days.length; d++) {
+            dayKeyMap[me.selectedWeek.days[d].dateKey] = true;
+        }
+
+        me.Popups.confirmationDialog(
+            me.$scope,
+            "Revert Week changes?",
+            "This will discard all unsaved changes in the selected week (edited rows will be restored and new rows will be removed)."
+        ).then(
+            action => {
+                if (!action) {
+                    return;
+                }
+
+                if (!me.gridModel || !me.gridModel.data) {
+                    return;
+                }
+
+                for (let i = me.gridModel.data.length - 1; i >= 0; i--) {
+                    const record = me.gridModel.data[i];
+                    const key = me.parseDateKey(record.dateEntry);
+                    if (!key || !dayKeyMap[key]) {
+                        continue;
+                    }
+
+                    if (record.new) {
+                        me.gridModel.data.splice(i, 1);
+                    } else {
+                        me.applyOriginalValues(record);
+                    }
+                }
+
+                me.saveSuccess = false;
+                me.rebuildWeekRecords();
+                me.applyDefaultDayExpand();
+                me.summaryList();
+            },
+            error => {
+                me.handleError(error);
+            }
+        );
+    };
+
+    revertAllWeeks = (): void => {
+        const me = this;
+        if (!me.gridModel || !me.gridModel.data) {
+            return;
+        }
+
+        me.Popups.confirmationDialog(
+            me.$scope,
+            "Revert All changes?",
+            "This will discard all unsaved changes across all loaded weeks in the current billing period."
+        ).then(
+            action => {
+                if (!action) {
+                    return;
+                }
+
+                for (let i = me.gridModel.data.length - 1; i >= 0; i--) {
+                    const record = me.gridModel.data[i];
+                    if (record.new) {
+                        me.gridModel.data.splice(i, 1);
+                    } else {
+                        me.applyOriginalValues(record);
+                    }
+                }
+
+                me.saveSuccess = false;
+                me.rebuildWeekRecords();
+                me.applyDefaultDayExpand();
+                me.summaryList();
+            },
+            error => {
+                me.handleError(error);
+            }
+        );
     };
 
     summaryList = () => {
