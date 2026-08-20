@@ -17,7 +17,7 @@ var TimesheetController = /** @class */ (function (_super) {
     __extends(TimesheetController, _super);
     //#endregion
     //#region Ctor
-    function TimesheetController($stateParams, $timeout, $window, $state, $scope, $uibModal, $log, $filter, ActivityService, TeamService, UserService, ProjectService, BillingCycleService, ClientService, TimesheetService, SecurityService, Popups) {
+    function TimesheetController($stateParams, $timeout, $window, $state, $scope, $uibModal, $log, $filter, ActivityService, TeamService, UserService, ProjectService, BillingCycleService, ClientService, TimesheetService, TimesheetTemplateService, SecurityService, Popups) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$stateParams = $stateParams;
         _this.$timeout = $timeout;
@@ -34,6 +34,7 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.BillingCycleService = BillingCycleService;
         _this.ClientService = ClientService;
         _this.TimesheetService = TimesheetService;
+        _this.TimesheetTemplateService = TimesheetTemplateService;
         _this.SecurityService = SecurityService;
         _this.Popups = Popups;
         //#region Members
@@ -60,6 +61,7 @@ var TimesheetController = /** @class */ (function (_super) {
         ];
         _this.userSelectChange = function () {
             _this.getUserProjects();
+            _this.loadSavedTemplates();
             _this.reloadGrid();
         };
         /** Day for heatmap column 0=Mon … 6=Sun, or null if that weekday is outside the period. */
@@ -1170,23 +1172,85 @@ var TimesheetController = /** @class */ (function (_super) {
                 }
             });
         };
+        /** Display list (saved templates + local clips). */
         _this.clipboard = [];
+        /** Ephemeral clips in localStorage only. */
+        _this.localClips = [];
+        /** Persisted templates for the filter user. */
+        _this.savedTemplates = [];
         _this.clipboardPasteTarget = null;
         _this.clipboardPasteItem = null;
+        _this.clipboardEditingLabel = null;
         _this.loadClipboard = function () {
             try {
                 var raw = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
-                _this.clipboard = raw ? JSON.parse(raw) : [];
+                _this.localClips = raw ? JSON.parse(raw) : [];
             }
             catch (e) {
-                _this.clipboard = [];
+                _this.localClips = [];
             }
+            _this.rebuildClipboardView();
         };
         _this.saveClipboard = function () {
             try {
-                localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(_this.clipboard));
+                localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(_this.localClips));
             }
             catch (e) { }
+            _this.rebuildClipboardView();
+        };
+        _this.rebuildClipboardView = function () {
+            var view = [];
+            var savedIds = {};
+            for (var i = 0; i < _this.savedTemplates.length; i++) {
+                var t = _this.savedTemplates[i];
+                var id = t.templateId || t.id;
+                if (id) {
+                    savedIds[id] = true;
+                }
+                view.push(t);
+            }
+            for (var j = 0; j < _this.localClips.length; j++) {
+                var clip = _this.localClips[j];
+                if (clip.templateId && savedIds[clip.templateId]) {
+                    continue;
+                }
+                view.push(clip);
+            }
+            _this.clipboard = view;
+        };
+        _this.loadSavedTemplates = function () {
+            var me = _this;
+            if (!me.filterModel.userId) {
+                me.savedTemplates = [];
+                me.rebuildClipboardView();
+                return;
+            }
+            me.TimesheetTemplateService.list(me.filterModel.userId)
+                .then(function (results) {
+                var list = results || [];
+                me.savedTemplates = [];
+                for (var i = 0; i < list.length; i++) {
+                    me.savedTemplates.push(me.mapTemplateToClip(list[i]));
+                }
+                me.rebuildClipboardView();
+            }, function (error) {
+                // Tables may not exist yet — keep local clipboard usable
+                me.savedTemplates = [];
+                me.rebuildClipboardView();
+                me.$log.warn("Timesheet templates unavailable: " + error);
+            });
+        };
+        _this.mapTemplateToClip = function (t) {
+            return {
+                templateId: t.id,
+                id: t.id,
+                isSaved: true,
+                type: t.type,
+                label: t.label,
+                copiedAt: t.copiedAt,
+                rowCount: t.rowCount || (t.rows ? t.rows.length : 0),
+                rows: t.rows || []
+            };
         };
         _this.copyDayToClipboard = function (day) {
             if (!day || !day.records || !day.records.length) {
@@ -1214,11 +1278,12 @@ var TimesheetController = /** @class */ (function (_super) {
                 label: day.label || _this.formatDayLabel(day.date),
                 copiedAt: new Date().toISOString(),
                 rowCount: rows.length,
-                rows: rows
+                rows: rows,
+                isSaved: false
             };
-            _this.clipboard.unshift(item);
-            if (_this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
-                _this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+            _this.localClips.unshift(item);
+            if (_this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
+                _this.localClips.length = TimesheetController.CLIPBOARD_MAX;
             }
             _this.saveClipboard();
         };
@@ -1259,13 +1324,14 @@ var TimesheetController = /** @class */ (function (_super) {
                 label: week.label || ("Week " + week.weekNum),
                 copiedAt: new Date().toISOString(),
                 rowCount: rows.length,
-                rows: rows
+                rows: rows,
+                isSaved: false
             };
-            _this.clipboard.unshift(item);
-            if (_this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
-                _this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+            me.localClips.unshift(item);
+            if (me.localClips.length > TimesheetController.CLIPBOARD_MAX) {
+                me.localClips.length = TimesheetController.CLIPBOARD_MAX;
             }
-            _this.saveClipboard();
+            me.saveClipboard();
         };
         /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
         _this.beginPaste = function (item) {
@@ -1316,15 +1382,138 @@ var TimesheetController = /** @class */ (function (_super) {
             me.summaryList();
         };
         _this.removeClipboardItem = function (item) {
-            var idx = _this.clipboard.indexOf(item);
+            if (item && item.isSaved) {
+                _this.unpinClipboardItem(item);
+                return;
+            }
+            var idx = _this.localClips.indexOf(item);
             if (idx >= 0) {
-                _this.clipboard.splice(idx, 1);
+                _this.localClips.splice(idx, 1);
                 _this.saveClipboard();
+            }
+            else {
+                // Item may be a display alias — match by reference fields
+                for (var i = 0; i < _this.localClips.length; i++) {
+                    if (_this.localClips[i] === item ||
+                        (_this.localClips[i].copiedAt === item.copiedAt && _this.localClips[i].label === item.label)) {
+                        _this.localClips.splice(i, 1);
+                        _this.saveClipboard();
+                        return;
+                    }
+                }
             }
         };
         _this.clearClipboard = function () {
-            _this.clipboard = [];
+            _this.localClips = [];
             _this.saveClipboard();
+        };
+        _this.startRenameClipboardItem = function (item, $event) {
+            if ($event) {
+                $event.stopPropagation();
+            }
+            _this.clipboardEditingLabel = item;
+            item._editLabel = item.label || "";
+        };
+        _this.cancelRenameClipboardItem = function ($event) {
+            if ($event) {
+                $event.stopPropagation();
+            }
+            _this.clipboardEditingLabel = null;
+        };
+        _this.commitRenameClipboardItem = function (item, $event) {
+            var me = _this;
+            if ($event) {
+                $event.stopPropagation();
+            }
+            if (me.clipboardEditingLabel !== item) {
+                return;
+            }
+            var newLabel = (item._editLabel || "").trim();
+            if (!newLabel) {
+                me.Popups.showError(me.$scope, "Name cannot be empty.");
+                return;
+            }
+            item.label = newLabel;
+            me.clipboardEditingLabel = null;
+            if (item.isSaved && item.templateId) {
+                me.TimesheetTemplateService.rename(item.templateId, newLabel)
+                    .then(function (saved) {
+                    item.label = saved.label || newLabel;
+                    for (var i = 0; i < me.savedTemplates.length; i++) {
+                        if (me.savedTemplates[i].templateId === item.templateId) {
+                            me.savedTemplates[i].label = item.label;
+                        }
+                    }
+                }, function (error) { me.handleError(error); });
+                return;
+            }
+            // Persist rename on the matching local clip
+            for (var i = 0; i < me.localClips.length; i++) {
+                if (me.localClips[i] === item ||
+                    (me.localClips[i].copiedAt === item.copiedAt && me.localClips[i].rows === item.rows)) {
+                    me.localClips[i].label = newLabel;
+                }
+            }
+            me.saveClipboard();
+        };
+        _this.saveClipboardItemAsTemplate = function (item, $event) {
+            var me = _this;
+            if ($event) {
+                $event.stopPropagation();
+            }
+            if (!item || item.isSaved) {
+                return;
+            }
+            if (!me.filterModel.userId) {
+                me.handleError("Please select a user in the filter!");
+                return;
+            }
+            if (!item.rows || !item.rows.length) {
+                me.Popups.showError(me.$scope, "Nothing to save.");
+                return;
+            }
+            var payload = {
+                userAccountId: me.filterModel.userId,
+                label: item.label || "Template",
+                type: item.type,
+                rows: item.rows
+            };
+            me.TimesheetTemplateService.save(payload)
+                .then(function (saved) {
+                var clip = me.mapTemplateToClip(saved);
+                me.savedTemplates.unshift(clip);
+                // Drop the local copy so it does not duplicate in the panel
+                for (var i = me.localClips.length - 1; i >= 0; i--) {
+                    if (me.localClips[i] === item ||
+                        (me.localClips[i].copiedAt === item.copiedAt && me.localClips[i].label === item.label)) {
+                        me.localClips.splice(i, 1);
+                    }
+                }
+                me.saveClipboard();
+            }, function (error) { me.handleError(error); });
+        };
+        _this.unpinClipboardItem = function (item, $event) {
+            var me = _this;
+            if ($event) {
+                $event.stopPropagation();
+            }
+            if (!item || !item.templateId) {
+                return;
+            }
+            me.Popups.confirmationDialog(me.$scope, "Remove saved template?", "Remove saved template \"" + (item.label || "") + "\" from the database? Local clipboard items are not affected.").then(function (action) {
+                if (!action) {
+                    return;
+                }
+                me.TimesheetTemplateService.deleteTemplate(item.templateId)
+                    .then(function () {
+                    for (var i = me.savedTemplates.length - 1; i >= 0; i--) {
+                        if (me.savedTemplates[i].templateId === item.templateId) {
+                            me.savedTemplates.splice(i, 1);
+                        }
+                    }
+                    me.rebuildClipboardView();
+                }, function (error) { me.handleError(error); });
+            });
         };
         _this.clipboardRelativeTime = function (isoStr) {
             if (!isoStr) {
@@ -1420,8 +1609,9 @@ var TimesheetController = /** @class */ (function (_super) {
         me.filterModel.userId = SecurityService.getCurrentUserDetails().id;
         // Populate user's projects
         _this.getUserProjects();
-        // Load clipboard from localStorage
+        // Load clipboard from localStorage + saved templates for this user
         _this.loadClipboard();
+        _this.loadSavedTemplates();
         return _this;
     }
     TimesheetController.prototype.getUserProjects = function () {
@@ -1568,6 +1758,7 @@ angular.module("AngularApp")
     "BillingCycleService",
     "ClientService",
     "TimesheetService",
+    "TimesheetTemplateService",
     "SecurityService",
     "Popups",
     TimesheetController

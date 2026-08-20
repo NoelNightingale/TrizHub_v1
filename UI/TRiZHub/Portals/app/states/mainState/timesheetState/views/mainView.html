@@ -122,6 +122,40 @@
         color: #fff;
     }
 
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-pin {
+        color: #337ab7;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-unpin {
+        color: #c9302c;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-rename {
+        color: #666;
+    }
+
+    .ts-capture .ts-clip-card.is-saved {
+        border-color: #b8d4ea;
+        background: #f7fbfe;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-badge {
+        display: inline-block;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #337ab7;
+        margin-left: 4px;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-label-edit {
+        width: 100%;
+        font-size: 12px;
+        padding: 1px 4px;
+        border: 1px solid #ccc;
+        border-radius: 2px;
+    }
+
     .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-remove {
         color: #999;
     }
@@ -881,26 +915,59 @@
                         <div class="ts-clipboard">
                             <div class="ts-clipboard-header">
                                 <span><i class="fa fa-clipboard"></i> Clipboard</span>
-                                <button type="button" ng-if="vm.clipboard.length"
+                                <button type="button" ng-if="vm.localClips.length"
                                         ng-click="vm.clearClipboard()"
-                                        title="Clear all" style="border:none;background:none;color:#999;cursor:pointer;font-size:11px;">
+                                        title="Clear local clipboard items"
+                                        style="border:none;background:none;color:#999;cursor:pointer;font-size:11px;">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </div>
                             <div class="ts-clipboard-list" ng-if="vm.clipboard.length">
-                                <div class="ts-clip-card" ng-repeat="clip in vm.clipboard">
+                                <div class="ts-clip-card" ng-repeat="clip in vm.clipboard"
+                                     ng-class="{'is-saved': clip.isSaved}">
                                     <span class="ts-clip-icon">
                                         <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : 'fa fa-calendar-o'"></i>
                                     </span>
                                     <div class="ts-clip-info">
-                                        <div class="ts-clip-label" title="{{clip.label}}">{{clip.label}}</div>
+                                        <div class="ts-clip-label" title="{{clip.label}}"
+                                             ng-if="vm.clipboardEditingLabel !== clip">
+                                            {{clip.label}}
+                                            <span class="ts-clip-badge" ng-if="clip.isSaved">saved</span>
+                                        </div>
+                                        <div ng-if="vm.clipboardEditingLabel === clip">
+                                            <input type="text" class="ts-clip-label-edit"
+                                                   ng-model="clip._editLabel"
+                                                   ng-keydown="$event.keyCode === 13 && vm.commitRenameClipboardItem(clip, $event); $event.keyCode === 27 && vm.cancelRenameClipboardItem($event)"
+                                                   ng-blur="vm.commitRenameClipboardItem(clip)" />
+                                        </div>
                                         <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
                                     </div>
                                     <div class="ts-clip-actions">
                                         <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip)" title="Paste">
                                             <i class="fa fa-paste"></i>
                                         </button>
-                                        <button type="button" class="ts-clip-remove" ng-click="vm.removeClipboardItem(clip)" title="Remove">
+                                        <button type="button" class="ts-clip-rename"
+                                                ng-if="vm.clipboardEditingLabel !== clip"
+                                                ng-click="vm.startRenameClipboardItem(clip, $event)"
+                                                title="Rename">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button type="button" class="ts-clip-pin"
+                                                ng-if="!clip.isSaved"
+                                                ng-click="vm.saveClipboardItemAsTemplate(clip, $event)"
+                                                title="Save as template">
+                                            <i class="fa fa-thumb-tack"></i>
+                                        </button>
+                                        <button type="button" class="ts-clip-unpin"
+                                                ng-if="clip.isSaved"
+                                                ng-click="vm.unpinClipboardItem(clip, $event)"
+                                                title="Remove saved template">
+                                            <i class="fa fa-thumb-tack"></i>
+                                        </button>
+                                        <button type="button" class="ts-clip-remove"
+                                                ng-if="!clip.isSaved"
+                                                ng-click="vm.removeClipboardItem(clip)"
+                                                title="Remove">
                                             <i class="fa fa-times"></i>
                                         </button>
                                     </div>

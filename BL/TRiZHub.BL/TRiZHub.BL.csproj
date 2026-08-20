@@ -129,6 +129,8 @@
     <Compile Include="Entities\SettingsData\SystemParameter.cs" />
     <Compile Include="Entities\TeamData\Team.cs" />
     <Compile Include="Entities\TimesheetData\TimesheetEntry.cs" />
+    <Compile Include="Entities\TimesheetData\TimesheetTemplate.cs" />
+    <Compile Include="Entities\TimesheetData\TimesheetTemplateItem.cs" />
     <Compile Include="Entities\Types\ClientEntityType.cs" />
     <Compile Include="Entities\Types\PasswordType.cs" />
     <Compile Include="Entities\Types\EmailStatusType.cs" />
@@ -355,6 +357,9 @@
     <Compile Include="Provider\TimesheetData\TimesheetException.cs" />
     <Compile Include="Provider\TimesheetData\TimesheetProvider.cs" />
     <Compile Include="Provider\TimesheetData\ITimesheetProvider.cs" />
+    <Compile Include="Provider\TimesheetData\TimesheetTemplateException.cs" />
+    <Compile Include="Provider\TimesheetData\TimesheetTemplateProvider.cs" />
+    <Compile Include="Provider\TimesheetData\ITimesheetTemplateProvider.cs" />
     <Compile Include="Provider\TravelInformationData\TravelInfromationException.cs" />
     <Compile Include="Provider\TravelInformationData\ITravelInformationProvider.cs" />
     <Compile Include="Provider\TravelInformationData\TravelInformationProvider.cs" />
@@ -537,6 +542,9 @@
     <Content Include="Scripts\3.0.0\AddPermissionSet.sql" />
     <Content Include="Scripts\3.0.0\GetProjectAllocationReport.sql" />
     <Content Include="Scripts\3.0.0\SeedUseridentityProject.sql" />
+    <Content Include="Scripts\CheckEF6MigrationStatus.sql" />
+    <Content Include="Scripts\EF6_DiagnosticCommands.txt" />
+    <Content Include="Scripts\FixMigrationHistoryTable.sql" />
     <Content Include="Scripts\ScorecardProcedure\lsp_getScoreCardSummary.sql" />
     <Content Include="Scripts\StoredProcedures\lsp_getProjectAllocationReport.sql" />
     <Content Include="Scripts\Updates\ScoreCardTemplatePeriod.sql" />

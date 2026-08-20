@@ -57,6 +57,7 @@
         private BillingCycleService: BillingCycleServiceModule.BillingCycleService,
         private ClientService: ClientServiceModule.ClientService,
         private TimesheetService: TimesheetServiceModule.TimesheetService,
+        private TimesheetTemplateService: TimesheetTemplateServiceModule.TimesheetTemplateService,
         private SecurityService: SecurityServiceModule.SecurityService,
         private Popups: any) {
         super($scope, Popups, $state);
@@ -162,8 +163,9 @@
         // Populate user's projects
         this.getUserProjects();
 
-        // Load clipboard from localStorage
+        // Load clipboard from localStorage + saved templates for this user
         this.loadClipboard();
+        this.loadSavedTemplates();
     }
 
     getUserProjects() {
@@ -179,6 +181,7 @@
 
     userSelectChange = (): void => {
         this.getUserProjects();
+        this.loadSavedTemplates();
         this.reloadGrid();
     };
 
@@ -1484,23 +1487,90 @@
     private static CLIPBOARD_KEY = "trizhub_ts_clipboard";
     private static CLIPBOARD_MAX = 20;
 
+    /** Display list (saved templates + local clips). */
     clipboard: any[] = [];
+    /** Ephemeral clips in localStorage only. */
+    localClips: any[] = [];
+    /** Persisted templates for the filter user. */
+    savedTemplates: any[] = [];
     clipboardPasteTarget: any = null;
     clipboardPasteItem: any = null;
+    clipboardEditingLabel: any = null;
 
     loadClipboard = (): void => {
         try {
             const raw = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
-            this.clipboard = raw ? JSON.parse(raw) : [];
+            this.localClips = raw ? JSON.parse(raw) : [];
         } catch (e) {
-            this.clipboard = [];
+            this.localClips = [];
         }
+        this.rebuildClipboardView();
     };
 
     saveClipboard = (): void => {
         try {
-            localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(this.clipboard));
+            localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(this.localClips));
         } catch (e) { }
+        this.rebuildClipboardView();
+    };
+
+    private rebuildClipboardView = (): void => {
+        const view = [];
+        const savedIds: any = {};
+        for (let i = 0; i < this.savedTemplates.length; i++) {
+            const t = this.savedTemplates[i];
+            const id = t.templateId || t.id;
+            if (id) {
+                savedIds[id] = true;
+            }
+            view.push(t);
+        }
+        for (let j = 0; j < this.localClips.length; j++) {
+            const clip = this.localClips[j];
+            if (clip.templateId && savedIds[clip.templateId]) {
+                continue;
+            }
+            view.push(clip);
+        }
+        this.clipboard = view;
+    };
+
+    loadSavedTemplates = (): void => {
+        const me = this;
+        if (!me.filterModel.userId) {
+            me.savedTemplates = [];
+            me.rebuildClipboardView();
+            return;
+        }
+        me.TimesheetTemplateService.list(me.filterModel.userId)
+            .then(
+                (results: any) => {
+                    const list = results || [];
+                    me.savedTemplates = [];
+                    for (let i = 0; i < list.length; i++) {
+                        me.savedTemplates.push(me.mapTemplateToClip(list[i]));
+                    }
+                    me.rebuildClipboardView();
+                },
+                (error) => {
+                    // Tables may not exist yet — keep local clipboard usable
+                    me.savedTemplates = [];
+                    me.rebuildClipboardView();
+                    me.$log.warn("Timesheet templates unavailable: " + error);
+                });
+    };
+
+    private mapTemplateToClip = (t: any): any => {
+        return {
+            templateId: t.id,
+            id: t.id,
+            isSaved: true,
+            type: t.type,
+            label: t.label,
+            copiedAt: t.copiedAt,
+            rowCount: t.rowCount || (t.rows ? t.rows.length : 0),
+            rows: t.rows || []
+        };
     };
 
     copyDayToClipboard = (day: any): void => {
@@ -1529,11 +1599,12 @@
             label: day.label || this.formatDayLabel(day.date),
             copiedAt: new Date().toISOString(),
             rowCount: rows.length,
-            rows: rows
+            rows: rows,
+            isSaved: false
         };
-        this.clipboard.unshift(item);
-        if (this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
-            this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+        this.localClips.unshift(item);
+        if (this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
+            this.localClips.length = TimesheetController.CLIPBOARD_MAX;
         }
         this.saveClipboard();
     };
@@ -1575,13 +1646,14 @@
             label: week.label || ("Week " + week.weekNum),
             copiedAt: new Date().toISOString(),
             rowCount: rows.length,
-            rows: rows
+            rows: rows,
+            isSaved: false
         };
-        this.clipboard.unshift(item);
-        if (this.clipboard.length > TimesheetController.CLIPBOARD_MAX) {
-            this.clipboard.length = TimesheetController.CLIPBOARD_MAX;
+        me.localClips.unshift(item);
+        if (me.localClips.length > TimesheetController.CLIPBOARD_MAX) {
+            me.localClips.length = TimesheetController.CLIPBOARD_MAX;
         }
-        this.saveClipboard();
+        me.saveClipboard();
     };
 
     /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
@@ -1721,16 +1793,157 @@
     }
 
     removeClipboardItem = (item: any): void => {
-        const idx = this.clipboard.indexOf(item);
+        if (item && item.isSaved) {
+            this.unpinClipboardItem(item);
+            return;
+        }
+        const idx = this.localClips.indexOf(item);
         if (idx >= 0) {
-            this.clipboard.splice(idx, 1);
+            this.localClips.splice(idx, 1);
             this.saveClipboard();
+        } else {
+            // Item may be a display alias — match by reference fields
+            for (let i = 0; i < this.localClips.length; i++) {
+                if (this.localClips[i] === item ||
+                    (this.localClips[i].copiedAt === item.copiedAt && this.localClips[i].label === item.label)) {
+                    this.localClips.splice(i, 1);
+                    this.saveClipboard();
+                    return;
+                }
+            }
         }
     };
 
     clearClipboard = (): void => {
-        this.clipboard = [];
+        this.localClips = [];
         this.saveClipboard();
+    };
+
+    startRenameClipboardItem = (item: any, $event?: any): void => {
+        if ($event) {
+            $event.stopPropagation();
+        }
+        this.clipboardEditingLabel = item;
+        item._editLabel = item.label || "";
+    };
+
+    cancelRenameClipboardItem = ($event?: any): void => {
+        if ($event) {
+            $event.stopPropagation();
+        }
+        this.clipboardEditingLabel = null;
+    };
+
+    commitRenameClipboardItem = (item: any, $event?: any): void => {
+        const me = this;
+        if ($event) {
+            $event.stopPropagation();
+        }
+        if (me.clipboardEditingLabel !== item) {
+            return;
+        }
+        const newLabel = (item._editLabel || "").trim();
+        if (!newLabel) {
+            me.Popups.showError(me.$scope, "Name cannot be empty.");
+            return;
+        }
+        item.label = newLabel;
+        me.clipboardEditingLabel = null;
+
+        if (item.isSaved && item.templateId) {
+            me.TimesheetTemplateService.rename(item.templateId, newLabel)
+                .then(
+                    (saved: any) => {
+                        item.label = saved.label || newLabel;
+                        for (let i = 0; i < me.savedTemplates.length; i++) {
+                            if (me.savedTemplates[i].templateId === item.templateId) {
+                                me.savedTemplates[i].label = item.label;
+                            }
+                        }
+                    },
+                    (error) => { me.handleError(error); });
+            return;
+        }
+
+        // Persist rename on the matching local clip
+        for (let i = 0; i < me.localClips.length; i++) {
+            if (me.localClips[i] === item ||
+                (me.localClips[i].copiedAt === item.copiedAt && me.localClips[i].rows === item.rows)) {
+                me.localClips[i].label = newLabel;
+            }
+        }
+        me.saveClipboard();
+    };
+
+    saveClipboardItemAsTemplate = (item: any, $event?: any): void => {
+        const me = this;
+        if ($event) {
+            $event.stopPropagation();
+        }
+        if (!item || item.isSaved) {
+            return;
+        }
+        if (!me.filterModel.userId) {
+            me.handleError("Please select a user in the filter!");
+            return;
+        }
+        if (!item.rows || !item.rows.length) {
+            me.Popups.showError(me.$scope, "Nothing to save.");
+            return;
+        }
+
+        const payload = {
+            userAccountId: me.filterModel.userId,
+            label: item.label || "Template",
+            type: item.type,
+            rows: item.rows
+        };
+        me.TimesheetTemplateService.save(payload)
+            .then(
+                (saved: any) => {
+                    const clip = me.mapTemplateToClip(saved);
+                    me.savedTemplates.unshift(clip);
+                    // Drop the local copy so it does not duplicate in the panel
+                    for (let i = me.localClips.length - 1; i >= 0; i--) {
+                        if (me.localClips[i] === item ||
+                            (me.localClips[i].copiedAt === item.copiedAt && me.localClips[i].label === item.label)) {
+                            me.localClips.splice(i, 1);
+                        }
+                    }
+                    me.saveClipboard();
+                },
+                (error) => { me.handleError(error); });
+    };
+
+    unpinClipboardItem = (item: any, $event?: any): void => {
+        const me = this;
+        if ($event) {
+            $event.stopPropagation();
+        }
+        if (!item || !item.templateId) {
+            return;
+        }
+        me.Popups.confirmationDialog(
+            me.$scope,
+            "Remove saved template?",
+            "Remove saved template \"" + (item.label || "") + "\" from the database? Local clipboard items are not affected."
+        ).then(
+            (action) => {
+                if (!action) {
+                    return;
+                }
+                me.TimesheetTemplateService.deleteTemplate(item.templateId)
+                    .then(
+                        () => {
+                            for (let i = me.savedTemplates.length - 1; i >= 0; i--) {
+                                if (me.savedTemplates[i].templateId === item.templateId) {
+                                    me.savedTemplates.splice(i, 1);
+                                }
+                            }
+                            me.rebuildClipboardView();
+                        },
+                        (error) => { me.handleError(error); });
+            });
     };
 
     clipboardRelativeTime = (isoStr: string): string => {
@@ -1768,6 +1981,7 @@ angular.module("AngularApp")
             "BillingCycleService",
             "ClientService",
             "TimesheetService",
+            "TimesheetTemplateService",
             "SecurityService",
             "Popups",
             TimesheetController

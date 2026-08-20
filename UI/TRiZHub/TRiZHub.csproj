@@ -242,6 +242,7 @@
     <Compile Include="Controllers\TCRRepControllerBase.cs" />
     <Compile Include="Controllers\TeamController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
+    <Compile Include="Controllers\TimesheetTemplateController.cs" />
     <Compile Include="Controllers\ProjectController.cs" />
     <Compile Include="Controllers\ClientController.cs" />
     <Compile Include="Controllers\MasterDataController.cs" />
@@ -341,6 +342,7 @@
     <Compile Include="Models\Settings\SettingsModel.cs" />
     <Compile Include="Models\NumericModel.cs" />
     <Compile Include="Models\ActivityModels\ActivityDropdownModel.cs" />
+    <Compile Include="Models\TimesheetTemplateModels\TimesheetTemplateModel.cs" />
     <Compile Include="Models\TeamJobDesignationModels\TeamJobDesignationEditModel.cs" />
     <Compile Include="Models\TeamJobDesignationModels\TeamJobDesignationGridModel.cs" />
     <Compile Include="Models\TeamModels\TeamDropdownModel.cs" />
@@ -1794,6 +1796,8 @@
     <TypeScriptCompile Include="Portals\app\services\ReportService\~ReportService.ts" />
     <TypeScriptCompile Include="Portals\app\services\TimesheetService\~Models.ts" />
     <TypeScriptCompile Include="Portals\app\services\TimesheetService\~TimesheetService.ts" />
+    <TypeScriptCompile Include="Portals\app\services\TimesheetTemplateService\~Models.ts" />
+    <TypeScriptCompile Include="Portals\app\services\TimesheetTemplateService\~TimesheetTemplateService.ts" />
     <TypeScriptCompile Include="Portals\app\services\ProjectService\~ProjectService.ts" />
     <TypeScriptCompile Include="Portals\app\services\ProjectService\~Models.ts" />
     <TypeScriptCompile Include="Portals\app\services\EnumService\~Models.ts" />

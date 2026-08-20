@@ -1,0 +1,29 @@
+# Entity Framework 6 Diagnostic Commands
+# Run these in Visual Studio Package Manager Console (Tools > NuGet Package Manager > Package Manager Console)
+# Make sure to set the Default project to: TRiZHub.BL
+
+# 1. See what EF thinks the current database version is:
+Get-Migrations
+
+# 2. See which migrations are applied vs pending:
+Update-Database -Verbose -Script
+
+# 3. Get detailed information about migration status:
+# This will show you what SQL would be executed without actually running it
+Update-Database -Script -SourceMigration:$InitialDatabase
+
+# 4. Force update to the latest migration (if safe to do so):
+Update-Database -Verbose
+
+# 5. Target a specific migration:
+# Update-Database -TargetMigration:"MigrationName" -Verbose
+
+# 6. See the SQL for a specific migration without applying it:
+# Update-Database -Script -SourceMigration:"PreviousMigration" -TargetMigration:"TargetMigration"
+
+# Additional diagnostic SQL queries to run in SSMS:
+# Check what's recorded in your migration history table:
+# SELECT * FROM [dbo].[__MigrationsHistory] ORDER BY MigrationId
+
+# Check if the table exists:
+# SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationsHistory'

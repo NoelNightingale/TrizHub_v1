@@ -103,6 +103,8 @@ namespace TRiZHub.BL.Context
 
         // Timesheet
         public DbSet<TimesheetEntry> TimesheetEntrySet { get; set; }
+        public DbSet<TimesheetTemplate> TimesheetTemplateSet { get; set; }
+        public DbSet<TimesheetTemplateItem> TimesheetTemplateItemSet { get; set; }
 
         // Score Card Template
         public DbSet<ScorecardTemplate> ScorecardTemplateSet { get; set; }
