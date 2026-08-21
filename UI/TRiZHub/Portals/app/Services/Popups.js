@@ -705,7 +705,8 @@
                                 animation: false,
                                 templateUrl: _root + "FilteredDropDownModal.html",
                                 scope: $scope,
-                                size: "lg"
+                                size: "lg",
+                                windowClass: "ts-project-select-modal"
                             }),
                         itemChoosen: function (project) {
                             this.modalInstance.close(true);                            
