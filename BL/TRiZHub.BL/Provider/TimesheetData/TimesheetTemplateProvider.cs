@@ -87,7 +87,9 @@ namespace TRiZHub.BL.Provider.TimesheetData
                     DayOffset = src.DayOffset,
                     SortOrder = i,
                     ProjectId = src.ProjectId,
-                    SubProjectId = src.SubProjectId,
+                    SubProjectId = src.SubProjectId.HasValue && src.SubProjectId.Value != Guid.Empty
+                        ? src.SubProjectId
+                        : null,
                     TeamId = src.TeamId,
                     ActivityId = src.ActivityId,
                     Hours = src.Hours,

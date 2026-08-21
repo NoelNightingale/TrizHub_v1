@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.TimesheetData;
+using TRiZHub.BL.Provider.ProjectData;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.Settings;
 using TRiZHub.BL.Provider.TimesheetData;
@@ -26,6 +27,7 @@ namespace TRiZHub.Controllers
         {
             AppSettings = new AppSettings(Context);
             TimesheetTemplateProvider = new TimesheetTemplateProvider(Context, CurrentUser);
+            ProjectProvider = new ProjectProvider(Context, CurrentUser);
         }
 
         public TimesheetTemplateController(IAppSettings settings, DataContext context, ICurrentUser currentUser)
@@ -33,10 +35,12 @@ namespace TRiZHub.Controllers
         {
             AppSettings = settings;
             TimesheetTemplateProvider = new TimesheetTemplateProvider(Context, CurrentUser);
+            ProjectProvider = new ProjectProvider(Context, CurrentUser);
         }
 
         private IAppSettings AppSettings { get; }
         private ITimesheetTemplateProvider TimesheetTemplateProvider { get; }
+        private IProjectProvider ProjectProvider { get; }
 
         [HttpPost]
         public List<TimesheetTemplateModel> List(TimesheetTemplateListRequest model)
@@ -61,19 +65,7 @@ namespace TRiZHub.Controllers
             {
                 CheckModelState();
                 var items = (model.Rows ?? new List<TimesheetTemplateItemModel>())
-                    .Select(r => new TimesheetTemplateItem
-                    {
-                        DayOffset = r.DayOffset,
-                        ProjectId = r.ProjectGridId,
-                        ProjectDescription = r.ProjectDescription,
-                        ClientEntityName = r.ClientEntityName,
-                        Billable = r.Billable,
-                        SubProjectId = r.SubProjectId,
-                        TeamId = r.TeamId,
-                        ActivityId = r.ActivityId,
-                        Hours = r.Hours,
-                        Comments = r.Comments ?? string.Empty
-                    })
+                    .Select(ResolveItem)
                     .ToList();
 
                 var saved = TimesheetTemplateProvider.SaveFromClipboard(
@@ -118,6 +110,50 @@ namespace TRiZHub.Controllers
             }
         }
 
+        /// <summary>
+        /// Same resolution as TimesheetListSave: ProjectGridId may be a Project Id or a SubProject Id.
+        /// </summary>
+        private TimesheetTemplateItem ResolveItem(TimesheetTemplateItemModel r)
+        {
+            var gridId = r.ProjectGridId;
+            var project = ProjectProvider.GetProject(gridId);
+            var subProject = ProjectProvider.GetSubProject(gridId);
+
+            Guid projectId;
+            Guid? subProjectId = r.SubProjectId.HasValue && r.SubProjectId.Value != Guid.Empty
+                ? r.SubProjectId
+                : null;
+
+            if (subProject != null)
+            {
+                projectId = subProject.ProjectId;
+                subProjectId = subProject.Id;
+            }
+            else if (project != null)
+            {
+                projectId = project.Id;
+            }
+            else
+            {
+                throw new TimesheetTemplateException(
+                    "Could not resolve project for template row (invalid projectGridId).");
+            }
+
+            return new TimesheetTemplateItem
+            {
+                DayOffset = r.DayOffset,
+                ProjectId = projectId,
+                ProjectDescription = r.ProjectDescription,
+                ClientEntityName = r.ClientEntityName,
+                Billable = r.Billable,
+                SubProjectId = subProjectId,
+                TeamId = r.TeamId,
+                ActivityId = r.ActivityId,
+                Hours = r.Hours,
+                Comments = r.Comments ?? string.Empty
+            };
+        }
+
         private static TimesheetTemplateModel MapToModel(TimesheetTemplate t)
         {
             var rows = (t.Items ?? Enumerable.Empty<TimesheetTemplateItem>())
@@ -125,7 +161,8 @@ namespace TRiZHub.Controllers
                 .Select(i => new TimesheetTemplateItemModel
                 {
                     DayOffset = i.DayOffset,
-                    ProjectGridId = i.ProjectId,
+                    // Match timesheet grid: ProjectGridId is SubProject Id when present, else Project Id
+                    ProjectGridId = i.SubProjectId ?? i.ProjectId,
                     ProjectDescription = i.ProjectDescription,
                     ClientEntityName = i.ClientEntityName,
                     Billable = i.Billable,

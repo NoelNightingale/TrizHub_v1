@@ -1,4 +1,4 @@
-﻿class TimesheetController extends CHControllerBase {
+class TimesheetController extends CHControllerBase {
 
     //#region Members
 

@@ -791,6 +791,11 @@
             Delete Timesheet entry
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.TimesheetTemplateController.ResolveItem(TRiZHub.Models.TimesheetTemplateModels.TimesheetTemplateItemModel)">
+            <summary>
+            Same resolution as TimesheetListSave: ProjectGridId may be a Project Id or a SubProject Id.
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.ProjectController.ProjectsGrid(TRiZHub.Models.GridModel)">
             <summary>
             Retrieve list of Projects based on filter and sort input values

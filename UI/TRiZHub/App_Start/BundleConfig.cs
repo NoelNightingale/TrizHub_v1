@@ -1,4 +1,4 @@
-﻿#region Usings
+#region Usings
 
 using System.Web.Optimization;
 

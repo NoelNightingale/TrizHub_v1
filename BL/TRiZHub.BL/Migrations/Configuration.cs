@@ -12,8 +12,6 @@ namespace TRiZHub.BL.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
-//            SetHistoryContextFactory("System.Data.SqlClient", (connection, defaultSchema) => 
-//                new System.Data.Entity.Migrations.History.HistoryContext(connection, defaultSchema));
         }
 
         protected override void Seed(TRiZHub.BL.Context.DataContext context)
