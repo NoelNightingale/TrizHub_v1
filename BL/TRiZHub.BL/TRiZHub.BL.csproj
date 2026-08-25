@@ -303,6 +303,7 @@
     <Compile Include="Provider\BillingRatesData\BillingRatesException.cs" />
     <Compile Include="Provider\BillingRatesData\IBillingRatesProvider.cs" />
     <Compile Include="Provider\BillingRatesData\BillingRatesProvider.cs" />
+    <Compile Include="Provider\BillingRatesData\BillingRatesTeamModels.cs" />
     <Compile Include="Provider\EmployerEntityData\EmployerProvider.cs" />
     <Compile Include="Provider\EmployerEntityData\IEmployerProvider.cs" />
     <Compile Include="Provider\ClientEntityData\ClientProvider.cs" />

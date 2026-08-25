@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.BillingRatesData;
@@ -145,6 +146,191 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             DataContextSaveChanges();
 
             return record;
+        }
+
+        public ProjectTeamRatesResult GetProjectTeamRates(Guid projectId, DateTime asOfDate)
+        {
+            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
+
+            var project = DataContext.ProjectSet.FirstOrDefault(p => p.Id == projectId);
+            if (project == null)
+                throw new BillingRatesException("Selected Project was not found!");
+
+            var asOf = asOfDate.Date;
+            var clientId = project.ClientId;
+            var clientName = project.Client != null
+                ? project.Client.EntityName
+                : DataContext.ClientEntitySet.Where(c => c.Id == clientId).Select(c => c.EntityName).FirstOrDefault();
+
+            var projectUserIds = DataContext.UserIdentityProjectSet
+                .Where(a => a.ProjectId == projectId)
+                .Select(a => a.UserAccountId);
+
+            var clientUserIds = DataContext.UserIdentityClientSet
+                .Where(a => a.ClientId == clientId)
+                .Select(a => a.UserAccountId);
+
+            var teamUserIds = projectUserIds.Union(clientUserIds).Distinct().ToList();
+
+            var users = DataContext.UserAccountSet
+                .Where(u => teamUserIds.Contains(u.Id))
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.Surname,
+                    u.AccountName
+                })
+                .OrderBy(u => u.Surname)
+                .ThenBy(u => u.FirstName)
+                .ToList();
+
+            var userIds = users.Select(u => u.Id).ToList();
+
+            var rates = DataContext.BillingRatesSet
+                .Where(r => userIds.Contains(r.UserAccountId)
+                            && r.StartDate <= asOf
+                            && r.EndDate >= asOf
+                            && (
+                                (r.ProjectId == projectId && r.ClientId == null)
+                                || (r.ClientId == clientId && r.ProjectId == null)
+                                || (r.ClientId == null && r.ProjectId == null)
+                            ))
+                .ToList();
+
+            var team = new List<ProjectTeamRateRow>();
+            foreach (var user in users)
+            {
+                var projectRate = FindRateForDate(rates, user.Id, asOf, null, projectId);
+                var clientRate = FindRateForDate(rates, user.Id, asOf, clientId, null);
+                var defaultRate = FindRateForDate(rates, user.Id, asOf, null, null);
+
+                decimal? effectiveRate = null;
+                string effectiveScope = null;
+                if (projectRate.HasValue)
+                {
+                    effectiveRate = projectRate;
+                    effectiveScope = "Project";
+                }
+                else if (clientRate.HasValue)
+                {
+                    effectiveRate = clientRate;
+                    effectiveScope = "Client";
+                }
+                else if (defaultRate.HasValue)
+                {
+                    effectiveRate = defaultRate;
+                    effectiveScope = "Default";
+                }
+
+                team.Add(new ProjectTeamRateRow
+                {
+                    UserAccountId = user.Id,
+                    FirstName = user.FirstName,
+                    Surname = user.Surname,
+                    AccountName = user.AccountName,
+                    ProjectRate = projectRate,
+                    ClientRate = clientRate,
+                    DefaultRate = defaultRate,
+                    EffectiveRate = effectiveRate,
+                    EffectiveScope = effectiveScope
+                });
+            }
+
+            return new ProjectTeamRatesResult
+            {
+                ProjectId = project.Id,
+                ProjectName = project.ProjectName,
+                ClientId = clientId,
+                ClientName = clientName,
+                AsOfDate = asOf,
+                Team = team
+            };
+        }
+
+        public UserRatesForProjectContextResult GetUserRatesForProjectContext(Guid userAccountId, Guid projectId)
+        {
+            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
+
+            var project = DataContext.ProjectSet.FirstOrDefault(p => p.Id == projectId);
+            if (project == null)
+                throw new BillingRatesException("Selected Project was not found!");
+
+            var user = DataContext.UserAccountSet.FirstOrDefault(u => u.Id == userAccountId);
+            if (user == null)
+                throw new BillingRatesException("Selected User was not found!");
+
+            var clientId = project.ClientId;
+            var clientName = project.Client != null
+                ? project.Client.EntityName
+                : DataContext.ClientEntitySet.Where(c => c.Id == clientId).Select(c => c.EntityName).FirstOrDefault();
+
+            var projectRates = DataContext.BillingRatesSet
+                .Where(r => r.UserAccountId == userAccountId && r.ProjectId == projectId && r.ClientId == null)
+                .OrderBy(r => r.StartDate)
+                .ToList();
+
+            var clientRates = DataContext.BillingRatesSet
+                .Where(r => r.UserAccountId == userAccountId && r.ClientId == clientId && r.ProjectId == null)
+                .OrderBy(r => r.StartDate)
+                .ToList();
+
+            var defaultRates = DataContext.BillingRatesSet
+                .Where(r => r.UserAccountId == userAccountId && r.ClientId == null && r.ProjectId == null)
+                .OrderBy(r => r.StartDate)
+                .ToList();
+
+            return new UserRatesForProjectContextResult
+            {
+                UserAccountId = user.Id,
+                UserName = (user.FirstName + " " + user.Surname).Trim(),
+                ProjectId = project.Id,
+                ProjectName = project.ProjectName,
+                ClientId = clientId,
+                ClientName = clientName,
+                ProjectRates = projectRates,
+                ClientRates = clientRates,
+                DefaultRates = defaultRates
+            };
+        }
+
+        /// <summary>
+        /// Finds the rate for a user on a date within a specific scope bucket.
+        /// Pass clientId for client scope, projectId for project scope, or neither for default.
+        /// </summary>
+        private static decimal? FindRateForDate(IEnumerable<BillingRates> rates, Guid userAccountId, DateTime asOf,
+            Guid? clientId, Guid? projectId)
+        {
+            BillingRates match;
+            if (projectId.HasValue)
+            {
+                match = rates.FirstOrDefault(r =>
+                    r.UserAccountId == userAccountId
+                    && r.ProjectId == projectId
+                    && r.ClientId == null
+                    && r.StartDate.Date <= asOf
+                    && r.EndDate.Date >= asOf);
+            }
+            else if (clientId.HasValue)
+            {
+                match = rates.FirstOrDefault(r =>
+                    r.UserAccountId == userAccountId
+                    && r.ClientId == clientId
+                    && r.ProjectId == null
+                    && r.StartDate.Date <= asOf
+                    && r.EndDate.Date >= asOf);
+            }
+            else
+            {
+                match = rates.FirstOrDefault(r =>
+                    r.UserAccountId == userAccountId
+                    && r.ClientId == null
+                    && r.ProjectId == null
+                    && r.StartDate.Date <= asOf
+                    && r.EndDate.Date >= asOf);
+            }
+
+            return match != null ? match.Rate : (decimal?)null;
         }
 
         #endregion

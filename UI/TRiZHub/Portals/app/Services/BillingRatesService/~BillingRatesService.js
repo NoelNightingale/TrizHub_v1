@@ -64,6 +64,26 @@ var BillingRatesServiceModule;
                 });
                 return deferred.promise;
             };
+            _this.projectTeamRates = function (projectId, asOfDate) {
+                var deferred = _this.$q.defer();
+                _this.$http.post(_this.urlRoot + "ProjectTeamRates", { projectId: projectId, asOfDate: asOfDate })
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
+            _this.userRatesForProjectContext = function (userId, projectId) {
+                var deferred = _this.$q.defer();
+                _this.$http.get(_this.urlRoot + "UserRatesForProjectContext?userId=" + userId + "&projectId=" + projectId)
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
             return _this;
         }
         return BillingRatesService;

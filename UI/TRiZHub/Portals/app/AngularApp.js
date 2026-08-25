@@ -912,40 +912,40 @@ angular.module("AngularApp",
                                 ]
                             }
                         })
-                    // Project Maintenance Billing Rates Grid
-                    .state("mainState.maintenance.projectMaintenance.billingRatesGrid",
+                    // Project Maintenance Team Rates Roster
+                    .state("mainState.maintenance.projectMaintenance.teamRates",
                         {
-                            url: "/billingRatesGrid/:id",
+                            url: "/teamRates/:id",
                             views: {
                                 'grid': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/grid/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "ProjectBillingRatesGridController as vm"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/teamRates/roster/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ProjectTeamRatesRosterController as vm"
                                 }
                             },
                             resolve: {
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/grid/controllers/~ProjectBillingRatesGridController.js?" + APP_CACHE_VER);
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/teamRates/roster/controllers/~ProjectTeamRatesRosterController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
                         })
-                    // Project Maintenance Billing Rates Detail
-                    .state("mainState.maintenance.projectMaintenance.billingRatesDetail",
+                    // Project Maintenance Team Rates Edit
+                    .state("mainState.maintenance.projectMaintenance.teamRatesEdit",
                         {
-                            url: "/billingRatesDetail/:projectId/:id",
+                            url: "/teamRatesEdit/:projectId/:userId",
                             views: {
                                 'detail': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/detail/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "ProjectBillingRatesDetailController as vm"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/teamRates/edit/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ProjectTeamRatesEditController as vm"
                                 }
                             },
                             resolve: {
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/detail/controllers/~ProjectBillingRatesDetailController.js?" + APP_CACHE_VER);
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/teamRates/edit/controllers/~ProjectTeamRatesEditController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }

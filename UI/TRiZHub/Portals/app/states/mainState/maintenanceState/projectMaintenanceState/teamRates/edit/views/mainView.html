@@ -1,0 +1,205 @@
+<div class="padding">
+    <div class="container-fluid">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" href="" ng-click="vm.backToRoster()">Team Rates</a>
+                    / {{vm.context.userName}}
+                </h2>
+                <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;">
+                    Project: {{vm.context.projectName}} &nbsp;·&nbsp; Client: {{vm.context.clientName}}
+                </p>
+            </div>
+            <div class="box-body">
+
+                <!-- Project rates -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Project rates</strong>
+                        <span class="text-muted" style="font-size: 12px; margin-left: 8px;">Effective for this project when set</span>
+                        <a class="btn btn-xs btn-primary pull-right" ng-click="vm.startAdd('Project')" ng-show="vm.editingScope !== 'Project'">
+                            <i class="fa fa-plus"></i> Add period
+                        </a>
+                    </div>
+                    <div class="panel-body" ng-show="vm.editingScope === 'Project'">
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Rate:</label>
+                            <div class="col-sm-3">
+                                <input type="number" class="form-control" ng-model="vm.editModel.rate" />
+                            </div>
+                            <label class="col-sm-2 form-control-label">Start:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.startDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">End:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.endDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                            <div class="col-sm-5 text-right">
+                                <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelEdit()">Cancel</button>
+                                <button class="btn primary" ng-click="vm.savePeriod()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped m-b-0">
+                        <thead>
+                        <tr>
+                            <th>Rate</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="row in vm.context.projectRates">
+                            <td>{{row.rate}}</td>
+                            <td>{{row.startDate | date: 'yyyy/MM/dd'}}</td>
+                            <td>{{row.endDate | date: 'yyyy/MM/dd'}}</td>
+                            <td class="text-right">
+                                <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.startEdit('Project', row)">Edit</a>
+                                <a class="btn btn-xs btn-outline b-danger text-danger" ng-click="vm.deletePeriod(row)">Delete</a>
+                            </td>
+                        </tr>
+                        <tr ng-show="!vm.context.projectRates || vm.context.projectRates.length == 0">
+                            <td colspan="4" class="text-muted">No project-specific periods</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Client rates -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Client rates ({{vm.context.clientName}})</strong>
+                        <span class="text-muted" style="font-size: 12px; margin-left: 8px;">Applies to all this client's projects unless overridden</span>
+                        <a class="btn btn-xs btn-primary pull-right" ng-click="vm.startAdd('Client')" ng-show="vm.editingScope !== 'Client'">
+                            <i class="fa fa-plus"></i> Add period
+                        </a>
+                    </div>
+                    <div class="panel-body" ng-show="vm.editingScope === 'Client'">
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Rate:</label>
+                            <div class="col-sm-3">
+                                <input type="number" class="form-control" ng-model="vm.editModel.rate" />
+                            </div>
+                            <label class="col-sm-2 form-control-label">Start:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.startDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">End:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.endDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                            <div class="col-sm-5 text-right">
+                                <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelEdit()">Cancel</button>
+                                <button class="btn primary" ng-click="vm.savePeriod()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped m-b-0">
+                        <thead>
+                        <tr>
+                            <th>Rate</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="row in vm.context.clientRates">
+                            <td>{{row.rate}}</td>
+                            <td>{{row.startDate | date: 'yyyy/MM/dd'}}</td>
+                            <td>{{row.endDate | date: 'yyyy/MM/dd'}}</td>
+                            <td class="text-right">
+                                <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.startEdit('Client', row)">Edit</a>
+                                <a class="btn btn-xs btn-outline b-danger text-danger" ng-click="vm.deletePeriod(row)">Delete</a>
+                            </td>
+                        </tr>
+                        <tr ng-show="!vm.context.clientRates || vm.context.clientRates.length == 0">
+                            <td colspan="4" class="text-muted">No client-specific periods</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Default rates -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Default rates</strong>
+                        <span class="text-muted" style="font-size: 12px; margin-left: 8px;">Fallback for any client/project</span>
+                        <a class="btn btn-xs btn-primary pull-right" ng-click="vm.startAdd('Default')" ng-show="vm.editingScope !== 'Default'">
+                            <i class="fa fa-plus"></i> Add period
+                        </a>
+                    </div>
+                    <div class="panel-body" ng-show="vm.editingScope === 'Default'">
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Rate:</label>
+                            <div class="col-sm-3">
+                                <input type="number" class="form-control" ng-model="vm.editModel.rate" />
+                            </div>
+                            <label class="col-sm-2 form-control-label">Start:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.startDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">End:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.endDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                            <div class="col-sm-5 text-right">
+                                <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelEdit()">Cancel</button>
+                                <button class="btn primary" ng-click="vm.savePeriod()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped m-b-0">
+                        <thead>
+                        <tr>
+                            <th>Rate</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="row in vm.context.defaultRates">
+                            <td>{{row.rate}}</td>
+                            <td>{{row.startDate | date: 'yyyy/MM/dd'}}</td>
+                            <td>{{row.endDate | date: 'yyyy/MM/dd'}}</td>
+                            <td class="text-right">
+                                <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.startEdit('Default', row)">Edit</a>
+                                <a class="btn btn-xs btn-outline b-danger text-danger" ng-click="vm.deletePeriod(row)">Delete</a>
+                            </td>
+                        </tr>
+                        <tr ng-show="!vm.context.defaultRates || vm.context.defaultRates.length == 0">
+                            <td colspan="4" class="text-muted">No default periods</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <button class="btn btn-outline b-primary text-primary" ng-click="vm.backToRoster()">
+                            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Back to Team Rates
+                        </button>
+                    </div>
+                </div>
+
+                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                <div class="alert alert-success" ng-if="vm.saveSuccess"><strong>Saved</strong></div>
+            </div>
+        </div>
+    </div>
+</div>

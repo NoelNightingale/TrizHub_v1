@@ -6,6 +6,8 @@
         billingRatesGrid: (req: GridModel) => ng.IPromise<GridResultModel<BillingRatesGridModel>>;
         billingRatesGet: (id: string) => ng.IPromise<BillingRatesEditModel>;
         billingRatesDelete: (viewModel: BillingRatesEditModel) => ng.IPromise<BillingRatesEditModel>;
+        projectTeamRates: (projectId: string, asOfDate: any) => ng.IPromise<any>;
+        userRatesForProjectContext: (userId: string, projectId: string) => ng.IPromise<any>;
 
     }
 
@@ -65,6 +67,34 @@
         billingRatesDelete = (viewModel: BillingRatesEditModel): ng.IPromise<BillingRatesEditModel> => {
             const deferred = this.$q.defer();
             this.$http.post(this.urlRoot + "BillingRatesDelete", viewModel)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        projectTeamRates = (projectId: string, asOfDate: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "ProjectTeamRates", { projectId: projectId, asOfDate: asOfDate })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        userRatesForProjectContext = (userId: string, projectId: string): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "UserRatesForProjectContext?userId=" + userId + "&projectId=" + projectId)
                 .then(
                     result => {
                         deferred.resolve(result.data);

@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Entities.BillingRatesData;
 
@@ -18,5 +19,9 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         BillingRates GetBillingRates(Guid id);
 
         void DeleteBillingRatesEntry(Guid id);
+
+        ProjectTeamRatesResult GetProjectTeamRates(Guid projectId, DateTime asOfDate);
+
+        UserRatesForProjectContextResult GetUserRatesForProjectContext(Guid userAccountId, Guid projectId);
     }
 }

@@ -164,6 +164,98 @@ namespace TRiZHub.Controllers
             }
         }
 
+        /// <summary>
+        /// Team roster with Project / Client / Default rates as of a date for a project.
+        /// </summary>
+        [HttpPost]
+        public ProjectTeamRatesModel ProjectTeamRates(ProjectTeamRatesRequest model)
+        {
+            try
+            {
+                if (model == null || model.ProjectId == Guid.Empty)
+                    throw new BillingRatesException("Project is required!");
+
+                var asOf = model.AsOfDate == default(DateTime) ? DateTime.Today : model.AsOfDate.ToLocalTime().Date;
+                var result = BillingRatesProvider.GetProjectTeamRates(model.ProjectId, asOf);
+
+                return new ProjectTeamRatesModel
+                {
+                    ProjectId = result.ProjectId,
+                    ProjectName = result.ProjectName,
+                    ClientId = result.ClientId,
+                    ClientName = result.ClientName,
+                    AsOfDate = result.AsOfDate,
+                    Team = result.Team.Select(r => new ProjectTeamRateRowModel
+                    {
+                        UserAccountId = r.UserAccountId,
+                        FirstName = r.FirstName,
+                        Surname = r.Surname,
+                        AccountName = r.AccountName,
+                        UserName = ((r.FirstName ?? "") + " " + (r.Surname ?? "")).Trim(),
+                        ProjectRate = r.ProjectRate,
+                        ClientRate = r.ClientRate,
+                        DefaultRate = r.DefaultRate,
+                        EffectiveRate = r.EffectiveRate,
+                        EffectiveScope = r.EffectiveScope
+                    }).ToList()
+                };
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
+        /// <summary>
+        /// All rate periods for a user in project context (project, client, and default scopes).
+        /// </summary>
+        [HttpGet]
+        public UserRatesForProjectContextModel UserRatesForProjectContext(Guid userId, Guid projectId)
+        {
+            try
+            {
+                var result = BillingRatesProvider.GetUserRatesForProjectContext(userId, projectId);
+
+                Func<TRiZHub.BL.Entities.BillingRatesData.BillingRates, BillingRatesGridModel> map = a =>
+                    new BillingRatesGridModel
+                    {
+                        Id = a.Id,
+                        UserAccountId = a.UserAccountId,
+                        ClientId = a.ClientId,
+                        ProjectId = a.ProjectId,
+                        Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
+                        Rate = a.Rate,
+                        StartDate = a.StartDate,
+                        EndDate = a.EndDate
+                    };
+
+                return new UserRatesForProjectContextModel
+                {
+                    UserAccountId = result.UserAccountId,
+                    UserName = result.UserName,
+                    ProjectId = result.ProjectId,
+                    ProjectName = result.ProjectName,
+                    ClientId = result.ClientId,
+                    ClientName = result.ClientName,
+                    ProjectRates = result.ProjectRates.Select(map).ToList(),
+                    ClientRates = result.ClientRates.Select(map).ToList(),
+                    DefaultRates = result.DefaultRates.Select(map).ToList()
+                };
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
         #endregion
     }
 }

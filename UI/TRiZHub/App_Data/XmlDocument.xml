@@ -552,6 +552,16 @@
             Delete Billing Rate based on id
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.ProjectTeamRates(TRiZHub.Models.BillingRatesModels.ProjectTeamRatesRequest)">
+            <summary>
+            Team roster with Project / Client / Default rates as of a date for a project.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.UserRatesForProjectContext(System.Guid,System.Guid)">
+            <summary>
+            All rate periods for a user in project context (project, client, and default scopes).
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.EmployerController.EmployerGrid(TRiZHub.Models.GridModel)">
             <summary>
             Retrieve list of Clients filtered and sorted based on input values
