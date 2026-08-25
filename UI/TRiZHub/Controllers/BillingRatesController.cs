@@ -59,16 +59,16 @@ namespace TRiZHub.Controllers
                         model.Id = billingRates.Id;
                 }
 
-               
-
                 var record = BillingRatesProvider.SaveBillingRates(model.Id,
                     model.UserAccountId, model.Rate, model.StartDate.ToLocalTime(),
-                    model.EndDate.ToLocalTime());
+                    model.EndDate.ToLocalTime(), model.ClientId, model.ProjectId);
 
                 var billingRatesReturn = new BillingRatesEditModel
                 {
                     Id = record.Id,
                     UserAccountId = record.UserAccountId,
+                    ClientId = record.ClientId,
+                    ProjectId = record.ProjectId,
                     Rate = record.Rate,
                     StartDate = record.StartDate,
                     EndDate = record.EndDate,
@@ -96,10 +96,11 @@ namespace TRiZHub.Controllers
                 {
                     Id = billingRates.Id,
                     UserAccountId = billingRates.UserAccountId,
+                    ClientId = billingRates.ClientId,
+                    ProjectId = billingRates.ProjectId,
                     Rate = billingRates.Rate,
                     StartDate = billingRates.StartDate,
                     EndDate = billingRates.EndDate,
-                   
                 };
                 return model;
             }
@@ -110,24 +111,33 @@ namespace TRiZHub.Controllers
         }
 
         /// <summary>
-        /// Retrieve list of Billing rates sorted by Startdate
+        /// Retrieve list of Billing rates sorted by Startdate.
+        /// Filter by UserAccountId and/or ClientId and/or ProjectId.
         /// </summary>
         [HttpPost]
-        public GridResultModel<BillingRatesGridModel> BillingRatesGrid(IdGridModel model)
+        public GridResultModel<BillingRatesGridModel> BillingRatesGrid(BillingRatesSearchModel model)
         {
             var begin = SetupGridParams(model);
 
-            var filteredQuery = BillingRatesProvider.BillingRatesFilterList(model.Id ?? Guid.Empty)
+            var filteredQuery = BillingRatesProvider.BillingRatesFilterList(
+                    model.UserAccountId, model.ClientId, model.ProjectId)
                 .Select(a => new BillingRatesGridModel
                 {
                     Id = a.Id,
                     UserAccountId = a.UserAccountId,
+                    Account = a.UserAccount.AccountName,
+                    FirstName = a.UserAccount.FirstName,
+                    Surname = a.UserAccount.Surname,
+                    UserName = a.UserAccount.FirstName + " " + a.UserAccount.Surname,
+                    ClientId = a.ClientId,
+                    ClientName = a.Client != null ? a.Client.EntityName : null,
+                    ProjectId = a.ProjectId,
+                    ProjectName = a.Project != null ? a.Project.ProjectName : null,
+                    Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
                     Rate = a.Rate,
                     StartDate = a.StartDate,
                     EndDate = a.EndDate,
-                   
                 });
-
 
             var totalNumberOfRecords = filteredQuery.Count();
 

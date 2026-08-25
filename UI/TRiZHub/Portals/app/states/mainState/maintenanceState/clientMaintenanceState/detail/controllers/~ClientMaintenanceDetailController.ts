@@ -23,6 +23,7 @@
         private ClientService: ClientServiceModule.ClientService,
         private UserService: UserServiceModule.UserService,
         private EnumService: EnumServiceModule.EnumService,
+        private SecurityService: SecurityServiceModule.SecurityService,
         private Popups: any) {
         super($scope, Popups, $state);
         const self = this;
@@ -125,6 +126,10 @@
                     });
 
     };
+
+    isAllowed = (privilegeType: string): boolean => {
+        return this.SecurityService.isAllowed(privilegeType);
+    };
 }
 
 angular.module("AngularApp")
@@ -138,6 +143,7 @@ angular.module("AngularApp")
         "ClientService",
         "UserService",
         "EnumService",
+        "SecurityService",
         "Popups",
         ClientMaintenanceDetailController
     ]);

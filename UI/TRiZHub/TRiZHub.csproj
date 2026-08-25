@@ -279,6 +279,7 @@
     <Compile Include="Models\BillingCycleModels\BillingCycleModel.cs" />
     <Compile Include="Models\BillingRatesModels\BillingRatesGridModel.cs" />
     <Compile Include="Models\BillingRatesModels\BillingRatesEditModel.cs" />
+    <Compile Include="Models\BillingRatesModels\BillingRatesSearchModel.cs" />
     <Compile Include="Models\ClientModels\ClientDropdownModel.cs" />
     <Compile Include="Models\ClientModels\ClientModel.cs" />
     <Compile Include="Models\ClientModels\ClientGridModel.cs" />
@@ -546,6 +547,10 @@
     <Content Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\stateView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\grid\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\billingRates\detail\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\billingRates\grid\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\billingRates\detail\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\billingRates\grid\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\emergancy\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\emergancy\grid\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\emergancy\stateView.html" />
@@ -1844,6 +1849,10 @@
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\grid\controllers\~TeamMaintenanceGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\detail\controllers\~BillingRatesDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\grid\controllers\~BillingRatesGridController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\billingRates\detail\controllers\~ClientBillingRatesDetailController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\billingRates\grid\controllers\~ClientBillingRatesGridController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\billingRates\detail\controllers\~ProjectBillingRatesDetailController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\billingRates\grid\controllers\~ProjectBillingRatesGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\detail\controllers\~UserMaintenanceDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\emergancy\detail\controllers\~EmergencyContactDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\emergancy\grid\controllers\~EmergencyContactGridController.ts" />

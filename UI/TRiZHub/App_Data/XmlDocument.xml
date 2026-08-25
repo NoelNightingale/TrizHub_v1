@@ -541,9 +541,10 @@
             Retrieve single Billing rate based on id
             </summary>
         </member>
-        <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesGrid(TRiZHub.Models.IdGridModel)">
+        <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesGrid(TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel)">
             <summary>
-            Retrieve list of Billing rates sorted by Startdate
+            Retrieve list of Billing rates sorted by Startdate.
+            Filter by UserAccountId and/or ClientId and/or ProjectId.
             </summary>
         </member>
         <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesDelete(TRiZHub.Models.BillingRatesModels.BillingRatesEditModel)">

@@ -1,41 +1,21 @@
-﻿<div class="padding">
+<div class="padding">
     <div class="container">
         <div class="box">
             <div class="box-header b-b">
                 <h2>
-                    <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: vm.viewModel.userAccountId})">Billing Rates</a>
+                    <a class="text-success" ui-sref="mainState.maintenance.projectMaintenance.billingRatesGrid({id: vm.projectId})">Billing Rates</a>
                 </h2>
             </div>
             <div class="box-body">
                 <form role="form" name="EditForm" novalidate>
                     <div class="form-group row" show-errors>
-                        <label for="scope" class="col-sm-2 form-control-label">Scope:</label>
+                        <label for="user" class="col-sm-2 form-control-label">User:</label>
                         <div class="col-sm-9">
-                            <select name="scope" class="form-control" ng-model="vm.scopeType" ng-change="vm.onScopeChanged()" required>
-                                <option value="Default">Default</option>
-                                <option value="Client">Client</option>
-                                <option value="Project">Project</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row" show-errors ng-show="vm.scopeType === 'Client'">
-                        <label for="client" class="col-sm-2 form-control-label">Client:</label>
-                        <div class="col-sm-9">
-                            <select name="client" class="form-control"
-                                    ng-options="s.id as s.entityName for s in vm.clientDropdown"
-                                    ng-model="vm.viewModel.clientId"
-                                    ng-required="vm.scopeType === 'Client'"></select>
-                            <span class="text-help" ng-show="EditForm.client.$invalid">Required</span>
-                        </div>
-                    </div>
-                    <div class="form-group row" show-errors ng-show="vm.scopeType === 'Project'">
-                        <label for="project" class="col-sm-2 form-control-label">Project:</label>
-                        <div class="col-sm-9">
-                            <select name="project" class="form-control"
-                                    ng-options="s.id as s.description for s in vm.projectDropdown"
-                                    ng-model="vm.viewModel.projectId"
-                                    ng-required="vm.scopeType === 'Project'"></select>
-                            <span class="text-help" ng-show="EditForm.project.$invalid">Required</span>
+                            <select name="user" class="form-control"
+                                    ng-options="s.id as s.description for s in vm.userDropdown"
+                                    ng-model="vm.viewModel.userAccountId"
+                                    required></select>
+                            <span class="text-help" ng-show="EditForm.user.$invalid">Required</span>
                         </div>
                     </div>
                     <div class="form-group row" show-errors>
@@ -74,7 +54,7 @@
                     <hr />
                     <div class="form-group row">
                         <div class="col-md-12 pull-right text-right">
-                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: vm.viewModel.userAccountId})">
+                            <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelForm()">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
                             </button>
                             <button class="btn btn-fw primary" ng-click="vm.submitForm()">
@@ -82,7 +62,6 @@
                             </button>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>
@@ -93,7 +72,6 @@
                 <div class="alert alert-success" ng-if="vm.saveSuccess">
                     <strong>Success!</strong>
                 </div>
-
             </div>
         </div>
     </div>

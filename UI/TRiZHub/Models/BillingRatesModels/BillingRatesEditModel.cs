@@ -13,6 +13,10 @@ namespace TRiZHub.Models.BillingRatesModels
 
         public Guid UserAccountId { get; set; }
 
+        public Guid? ClientId { get; set; }
+
+        public Guid? ProjectId { get; set; }
+
         [Required]
         public decimal Rate { get; set; }
 

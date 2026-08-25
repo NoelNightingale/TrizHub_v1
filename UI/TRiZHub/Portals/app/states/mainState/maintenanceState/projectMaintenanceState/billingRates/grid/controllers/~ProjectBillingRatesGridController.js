@@ -13,17 +13,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var BillingRatesGridController = /** @class */ (function (_super) {
-    __extends(BillingRatesGridController, _super);
+var ProjectBillingRatesGridController = /** @class */ (function (_super) {
+    __extends(ProjectBillingRatesGridController, _super);
     //#endregion
     //#region Ctor
-    function BillingRatesGridController($scope, $state, $stateParams, BillingRatesService, UserService, Popups, tcrGrid) {
+    function ProjectBillingRatesGridController($scope, $state, $stateParams, BillingRatesService, ProjectService, Popups, tcrGrid) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$scope = $scope;
         _this.$state = $state;
         _this.$stateParams = $stateParams;
         _this.BillingRatesService = BillingRatesService;
-        _this.UserService = UserService;
+        _this.ProjectService = ProjectService;
         _this.Popups = Popups;
         _this.tcrGrid = tcrGrid;
         //#region Members
@@ -32,66 +32,43 @@ var BillingRatesGridController = /** @class */ (function (_super) {
         _this.loadingIsDone = false;
         _this.onDataLoaded = function (event) { _this.onLoadEvent(event); };
         _this.newRecord = function () {
-            _this.$state.transitionTo("mainState.maintenance.userMaintenance.billingRatesDetail", { userid: _this.viewModel.id, "id": "new" });
-        };
-        _this.deleteRecord = function (record) {
-            var me = _this;
-            me.Popups.confirmationDialog(me.$scope, "Are you sure you want to delete?", "You are about to delete this record...")
-                .then(function (action) {
-                if (action)
-                    if (!record.new) {
-                        me.BillingRatesService.billingRatesDelete(record)
-                            .then(function (result) {
-                            me.saveSuccess = true;
-                            me.reloadGrid();
-                        }, function (error) {
-                            me.handleError(error);
-                        });
-                    }
-                    else {
-                        var index = me.gridModel.data.indexOf(record);
-                        me.gridModel.data.splice(index, 1);
-                    }
-            }, function (error) {
-                me.handleError(error);
-            });
+            _this.$state.transitionTo("mainState.maintenance.projectMaintenance.billingRatesDetail", { projectId: _this.viewModel.id, id: "new" });
         };
         _this.reloadGrid = function () {
-            var me = _this;
-            me.pageGrid.loadGrid();
+            _this.pageGrid.loadGrid();
         };
         var self = _this;
         _this.viewModel = {};
         _this.viewModel.id = _this.$stateParams["id"];
-        UserService.userGet(_this.viewModel.id)
+        ProjectService.projectGet(_this.viewModel.id)
             .then(function (result) {
-            self.user = result;
+            self.project = result;
         }, function (error) {
             self.handleError(error);
         });
         _this.pageGrid = new TcrGridServiceModule.TcrGridService("startDate", _this.BillingRatesService.billingRatesGrid, _this.onDataLoaded, function (model) {
-            model.userAccountId = self.viewModel.id;
+            model.projectId = self.viewModel.id;
         }, null, _this.$state);
         _this.pageGrid.loadGrid();
         return _this;
     }
     //#endregion
-    BillingRatesGridController.prototype.onLoadEvent = function (event) {
+    ProjectBillingRatesGridController.prototype.onLoadEvent = function (event) {
         this.gridModel = event;
         if (this.gridModel.totalItems > 0) {
             this.loadingIsDone = true;
         }
     };
-    return BillingRatesGridController;
+    return ProjectBillingRatesGridController;
 }(CHControllerBase));
 angular.module("AngularApp")
-    .controller("BillingRatesGridController", [
+    .controller("ProjectBillingRatesGridController", [
     "$scope",
     "$state",
     "$stateParams",
     "BillingRatesService",
-    "UserService",
+    "ProjectService",
     "Popups",
-    BillingRatesGridController
+    ProjectBillingRatesGridController
 ]);
-//# sourceMappingURL=~BillingRatesGridController.js.map
+//# sourceMappingURL=~ProjectBillingRatesGridController.js.map

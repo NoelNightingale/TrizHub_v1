@@ -1,13 +1,12 @@
-﻿class BillingRatesDetailController extends CHControllerBase {
+class ClientBillingRatesDetailController extends CHControllerBase {
 
     //#region members
 
     successMessage = "Saved Successfully";
     saveSuccess = false;
     viewModel: any;
-    scopeType = "Default";
-    clientDropdown: any;
-    projectDropdown: any;
+    userDropdown: any;
+    clientId: any;
 
     //#endregion
 
@@ -17,31 +16,22 @@
         private $scope: ng.IScope,
         private $stateParams: ng.ui.IStateParamsService,
         private $timeout: ng.ITimeoutService,
-        private $window: ng.IWindowService,
         private $state: ng.ui.IStateService,
         private BillingRatesService: BillingRatesServiceModule.BillingRatesService,
-        private ClientService: ClientServiceModule.ClientService,
-        private ProjectService: ProjectServiceModule.ProjectService,
+        private UserService: UserServiceModule.UserService,
         private Popups: any) {
         super($scope, Popups, $state);
         const self = this;
         this.viewModel = {};
-        this.viewModel.userAccountId = this.$stateParams["userid"];
+        this.clientId = this.$stateParams["clientId"];
+        this.viewModel.clientId = this.clientId;
+        this.viewModel.projectId = null;
         this.viewModel.id = this.$stateParams["id"];
 
-        ClientService.clientDropdownList()
+        UserService.userDropdownList()
             .then(
                 result => {
-                    self.clientDropdown = result;
-                },
-                error => {
-                    self.handleError(error);
-                });
-
-        ProjectService.projectDropdownList()
-            .then(
-                result => {
-                    self.projectDropdown = result;
+                    self.userDropdown = result;
                 },
                 error => {
                     self.handleError(error);
@@ -52,37 +42,17 @@
                 .then(
                     result => {
                         self.viewModel = result;
-                        self.scopeType = self.resolveScopeType(result);
+                        self.clientId = result.clientId;
                     },
                     error => {
                         self.handleError(error);
                     });
         } else {
             this.viewModel.id = null;
-            this.scopeType = "Default";
         }
     }
 
-   //#endregion
-
-    resolveScopeType = (model: any): string => {
-        if (model.projectId)
-            return "Project";
-        if (model.clientId)
-            return "Client";
-        return "Default";
-    };
-
-    onScopeChanged = () => {
-        if (this.scopeType === "Default") {
-            this.viewModel.clientId = null;
-            this.viewModel.projectId = null;
-        } else if (this.scopeType === "Client") {
-            this.viewModel.projectId = null;
-        } else if (this.scopeType === "Project") {
-            this.viewModel.clientId = null;
-        }
-    };
+    //#endregion
 
     submitForm = () => {
         const self = this;
@@ -90,15 +60,16 @@
         if (this.$scope["EditForm"].$invalid)
             return;
 
-        this.onScopeChanged();
+        this.viewModel.clientId = this.clientId;
+        this.viewModel.projectId = null;
 
         this.BillingRatesService.billingRatesSave(this.viewModel)
             .then(
                 result => {
                     self.saveSuccess = true;
-                    self.$timeout(function() {
-                            self.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid",
-                            { "id": result.userAccountId });
+                    self.$timeout(function () {
+                            self.$state.go("mainState.maintenance.clientMaintenance.billingRatesGrid",
+                                { "id": self.clientId });
                         },
                         1000);
                 },
@@ -107,19 +78,21 @@
                 });
     };
 
+    cancelForm = () => {
+        this.$state.go("mainState.maintenance.clientMaintenance.billingRatesGrid",
+            { "id": this.clientId });
+    };
 }
 
 angular.module("AngularApp")
-    .controller("BillingRatesDetailController",
+    .controller("ClientBillingRatesDetailController",
     [
         "$scope",
         "$stateParams",
         "$timeout",
-        "$window",
         "$state",
         "BillingRatesService",
-        "ClientService",
-        "ProjectService",
+        "UserService",
         "Popups",
-        BillingRatesDetailController
+        ClientBillingRatesDetailController
     ]);

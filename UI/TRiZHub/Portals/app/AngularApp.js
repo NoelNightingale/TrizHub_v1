@@ -788,6 +788,44 @@ angular.module("AngularApp",
                                 ]
                             }
                         })
+                    // Client Maintenance Billing Rates Grid
+                    .state("mainState.maintenance.clientMaintenance.billingRatesGrid",
+                        {
+                            url: "/billingRatesGrid/:id",
+                            views: {
+                                'grid': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/grid/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ClientBillingRatesGridController as vm"
+                                }
+                            },
+                            resolve: {
+                                loadMainCtrl: [
+                                    "$ocLazyLoad", function ($ocLazyLoad) {
+                                        return $ocLazyLoad
+                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/grid/controllers/~ClientBillingRatesGridController.js?" + APP_CACHE_VER);
+                                    }
+                                ]
+                            }
+                        })
+                    // Client Maintenance Billing Rates Detail
+                    .state("mainState.maintenance.clientMaintenance.billingRatesDetail",
+                        {
+                            url: "/billingRatesDetail/:clientId/:id",
+                            views: {
+                                'detail': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/detail/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ClientBillingRatesDetailController as vm"
+                                }
+                            },
+                            resolve: {
+                                loadMainCtrl: [
+                                    "$ocLazyLoad", function ($ocLazyLoad) {
+                                        return $ocLazyLoad
+                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/detail/controllers/~ClientBillingRatesDetailController.js?" + APP_CACHE_VER);
+                                    }
+                                ]
+                            }
+                        })
                     // Project Maintenance
                     .state("mainState.maintenance.projectMaintenance",
                         {
@@ -870,6 +908,44 @@ angular.module("AngularApp",
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
                                             .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/subProjectDetail/controllers/~SubProjectMaintenanceDetailController.js?" + APP_CACHE_VER);
+                                    }
+                                ]
+                            }
+                        })
+                    // Project Maintenance Billing Rates Grid
+                    .state("mainState.maintenance.projectMaintenance.billingRatesGrid",
+                        {
+                            url: "/billingRatesGrid/:id",
+                            views: {
+                                'grid': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/grid/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ProjectBillingRatesGridController as vm"
+                                }
+                            },
+                            resolve: {
+                                loadMainCtrl: [
+                                    "$ocLazyLoad", function ($ocLazyLoad) {
+                                        return $ocLazyLoad
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/grid/controllers/~ProjectBillingRatesGridController.js?" + APP_CACHE_VER);
+                                    }
+                                ]
+                            }
+                        })
+                    // Project Maintenance Billing Rates Detail
+                    .state("mainState.maintenance.projectMaintenance.billingRatesDetail",
+                        {
+                            url: "/billingRatesDetail/:projectId/:id",
+                            views: {
+                                'detail': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/detail/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ProjectBillingRatesDetailController as vm"
+                                }
+                            },
+                            resolve: {
+                                loadMainCtrl: [
+                                    "$ocLazyLoad", function ($ocLazyLoad) {
+                                        return $ocLazyLoad
+                                            .load("Portals/app/states/mainState/maintenanceState/projectMaintenanceState/billingRates/detail/controllers/~ProjectBillingRatesDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }

@@ -13,74 +13,52 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var BillingRatesDetailController = /** @class */ (function (_super) {
-    __extends(BillingRatesDetailController, _super);
+var ProjectBillingRatesDetailController = /** @class */ (function (_super) {
+    __extends(ProjectBillingRatesDetailController, _super);
     //#endregion
     //#region Ctor
-    function BillingRatesDetailController($scope, $stateParams, $timeout, $window, $state, BillingRatesService, ClientService, ProjectService, Popups) {
+    function ProjectBillingRatesDetailController($scope, $stateParams, $timeout, $state, BillingRatesService, UserService, Popups) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$scope = $scope;
         _this.$stateParams = $stateParams;
         _this.$timeout = $timeout;
-        _this.$window = $window;
         _this.$state = $state;
         _this.BillingRatesService = BillingRatesService;
-        _this.ClientService = ClientService;
-        _this.ProjectService = ProjectService;
+        _this.UserService = UserService;
         _this.Popups = Popups;
         //#region members
         _this.successMessage = "Saved Successfully";
         _this.saveSuccess = false;
-        _this.scopeType = "Default";
         //#endregion
-        _this.resolveScopeType = function (model) {
-            if (model.projectId)
-                return "Project";
-            if (model.clientId)
-                return "Client";
-            return "Default";
-        };
-        _this.onScopeChanged = function () {
-            if (_this.scopeType === "Default") {
-                _this.viewModel.clientId = null;
-                _this.viewModel.projectId = null;
-            }
-            else if (_this.scopeType === "Client") {
-                _this.viewModel.projectId = null;
-            }
-            else if (_this.scopeType === "Project") {
-                _this.viewModel.clientId = null;
-            }
-        };
         _this.submitForm = function () {
             var self = _this;
             _this.$scope.$broadcast("show-errors-check-validity");
             if (_this.$scope["EditForm"].$invalid)
                 return;
-            _this.onScopeChanged();
+            _this.viewModel.projectId = _this.projectId;
+            _this.viewModel.clientId = null;
             _this.BillingRatesService.billingRatesSave(_this.viewModel)
                 .then(function (result) {
                 self.saveSuccess = true;
                 self.$timeout(function () {
-                    self.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid", { "id": result.userAccountId });
+                    self.$state.go("mainState.maintenance.projectMaintenance.billingRatesGrid", { "id": self.projectId });
                 }, 1000);
             }, function (error) {
                 self.handleError(error);
             });
         };
+        _this.cancelForm = function () {
+            _this.$state.go("mainState.maintenance.projectMaintenance.billingRatesGrid", { "id": _this.projectId });
+        };
         var self = _this;
         _this.viewModel = {};
-        _this.viewModel.userAccountId = _this.$stateParams["userid"];
+        _this.projectId = _this.$stateParams["projectId"];
+        _this.viewModel.projectId = _this.projectId;
+        _this.viewModel.clientId = null;
         _this.viewModel.id = _this.$stateParams["id"];
-        ClientService.clientDropdownList()
+        UserService.userDropdownList()
             .then(function (result) {
-            self.clientDropdown = result;
-        }, function (error) {
-            self.handleError(error);
-        });
-        ProjectService.projectDropdownList()
-            .then(function (result) {
-            self.projectDropdown = result;
+            self.userDropdown = result;
         }, function (error) {
             self.handleError(error);
         });
@@ -88,30 +66,27 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
             _this.BillingRatesService.billingRatesGet(_this.viewModel.id)
                 .then(function (result) {
                 self.viewModel = result;
-                self.scopeType = self.resolveScopeType(result);
+                self.projectId = result.projectId;
             }, function (error) {
                 self.handleError(error);
             });
         }
         else {
             _this.viewModel.id = null;
-            _this.scopeType = "Default";
         }
         return _this;
     }
-    return BillingRatesDetailController;
+    return ProjectBillingRatesDetailController;
 }(CHControllerBase));
 angular.module("AngularApp")
-    .controller("BillingRatesDetailController", [
+    .controller("ProjectBillingRatesDetailController", [
     "$scope",
     "$stateParams",
     "$timeout",
-    "$window",
     "$state",
     "BillingRatesService",
-    "ClientService",
-    "ProjectService",
+    "UserService",
     "Popups",
-    BillingRatesDetailController
+    ProjectBillingRatesDetailController
 ]);
-//# sourceMappingURL=~BillingRatesDetailController.js.map
+//# sourceMappingURL=~ProjectBillingRatesDetailController.js.map

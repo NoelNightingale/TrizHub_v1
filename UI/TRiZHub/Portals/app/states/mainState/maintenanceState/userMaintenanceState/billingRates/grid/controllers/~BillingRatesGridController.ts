@@ -43,7 +43,7 @@
             this.BillingRatesService.billingRatesGrid,
             this.onDataLoaded,
             model => {
-                model.Id = self.viewModel.id;
+                model.userAccountId = self.viewModel.id;
             },
             null,
             this.$state);
@@ -83,7 +83,6 @@
                                         me.handleError(error);
                                     });
                         } else {
-                            //me.gridModel
                             const index = me.gridModel.data.indexOf(record);
                             me.gridModel.data.splice(index, 1);
                         }

@@ -287,6 +287,10 @@
     <Compile Include="Migrations\202608201458084_AddTimesheetTemplateUpdates.Designer.cs">
       <DependentUpon>202608201458084_AddTimesheetTemplateUpdates.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202608211357048_BillingRatesClientProjectScope.cs" />
+    <Compile Include="Migrations\202608211357048_BillingRatesClientProjectScope.Designer.cs">
+      <DependentUpon>202608211357048_BillingRatesClientProjectScope.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Reports\ProjectAllocationModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -474,6 +478,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202608201458084_AddTimesheetTemplateUpdates.resx">
       <DependentUpon>202608201458084_AddTimesheetTemplateUpdates.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202608211357048_BillingRatesClientProjectScope.resx">
+      <DependentUpon>202608211357048_BillingRatesClientProjectScope.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedure.sql" />
     <Compile Include="Scripts\ScorecardProcedure\ScorecardProcedureModel.cs" />

@@ -17,7 +17,7 @@ var ClientMaintenanceDetailController = /** @class */ (function (_super) {
     __extends(ClientMaintenanceDetailController, _super);
     //#endregion
     //#region Ctor
-    function ClientMaintenanceDetailController($stateParams, $scope, $state, $timeout, $window, ClientService, UserService, EnumService, Popups) {
+    function ClientMaintenanceDetailController($stateParams, $scope, $state, $timeout, $window, ClientService, UserService, EnumService, SecurityService, Popups) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$stateParams = $stateParams;
         _this.$scope = $scope;
@@ -27,6 +27,7 @@ var ClientMaintenanceDetailController = /** @class */ (function (_super) {
         _this.ClientService = ClientService;
         _this.UserService = UserService;
         _this.EnumService = EnumService;
+        _this.SecurityService = SecurityService;
         _this.Popups = Popups;
         //#region members
         _this.successMessage = "Saved Successfully";
@@ -77,6 +78,9 @@ var ClientMaintenanceDetailController = /** @class */ (function (_super) {
                 self.handleError(error);
             });
         };
+        _this.isAllowed = function (privilegeType) {
+            return _this.SecurityService.isAllowed(privilegeType);
+        };
         var self = _this;
         self.clientId = self.$stateParams["id"];
         self.viewModel = {};
@@ -118,6 +122,7 @@ angular.module("AngularApp")
     "ClientService",
     "UserService",
     "EnumService",
+    "SecurityService",
     "Popups",
     ClientMaintenanceDetailController
 ]);
