@@ -7,75 +7,10 @@
                     / {{vm.context.userName}}
                 </h2>
                 <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;">
-                    Project: {{vm.context.projectName}} &nbsp;·&nbsp; Client: {{vm.context.clientName}}
+                    Client: {{vm.context.clientName}}
                 </p>
             </div>
             <div class="box-body">
-
-                <!-- Project rates -->
-                <div class="panel panel-default" style="margin-bottom: 28px;">
-                    <div class="panel-heading clearfix" style="padding: 12px 15px;">
-                        <div class="pull-right">
-                            <a class="btn btn-xs btn-primary" ng-click="vm.startAdd('Project')" ng-show="vm.editingScope !== 'Project'">
-                                <i class="fa fa-plus"></i> Add period
-                            </a>
-                        </div>
-                        <div>
-                            <strong style="font-size: 15px;">Project rates</strong>
-                            <div class="text-muted" style="font-size: 12px; margin-top: 2px;">Effective for this project when set</div>
-                        </div>
-                    </div>
-                    <div class="panel-body" ng-show="vm.editingScope === 'Project'" style="border-bottom: 1px solid #eee;">
-                        <div class="form-group row">
-                            <label class="col-sm-2 form-control-label">Rate:</label>
-                            <div class="col-sm-3">
-                                <input type="number" class="form-control" ng-model="vm.editModel.rate" />
-                            </div>
-                            <label class="col-sm-2 form-control-label">Start:</label>
-                            <div class="col-sm-3">
-                                <input type="text" class="form-control" ng-model="vm.editModel.startDate"
-                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
-                            </div>
-                        </div>
-                        <div class="form-group row m-b-0">
-                            <label class="col-sm-2 form-control-label">End:</label>
-                            <div class="col-sm-3">
-                                <input type="text" class="form-control" ng-model="vm.editModel.endDate"
-                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
-                            </div>
-                            <div class="col-sm-5 text-right">
-                                <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelEdit()">Cancel</button>
-                                <button class="btn primary" style="margin-left: 8px;" ng-click="vm.savePeriod()">Save</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped m-b-0">
-                            <thead>
-                            <tr>
-                                <th>Rate</th>
-                                <th>Start</th>
-                                <th>End</th>
-                                <th style="width: 160px;"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="row in vm.context.projectRates">
-                                <td>{{row.rate}}</td>
-                                <td>{{row.startDate | date: 'yyyy/MM/dd'}}</td>
-                                <td>{{row.endDate | date: 'yyyy/MM/dd'}}</td>
-                                <td class="text-right" style="white-space: nowrap;">
-                                    <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.startEdit('Project', row)">Edit</a>
-                                    <a class="btn btn-xs btn-outline b-danger text-danger" style="margin-left: 6px;" ng-click="vm.deletePeriod(row)">Delete</a>
-                                </td>
-                            </tr>
-                            <tr ng-show="!vm.context.projectRates || vm.context.projectRates.length == 0">
-                                <td colspan="4" class="text-muted">No project-specific periods</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
                 <!-- Client rates -->
                 <div class="panel panel-default" style="margin-bottom: 28px;">
@@ -86,7 +21,7 @@
                             </a>
                         </div>
                         <div>
-                            <strong style="font-size: 15px;">Client rates ({{vm.context.clientName}})</strong>
+                            <strong style="font-size: 15px;">Client rates</strong>
                             <div class="text-muted" style="font-size: 12px; margin-top: 2px;">Applies to all this client's projects unless overridden</div>
                         </div>
                     </div>
@@ -204,6 +139,97 @@
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Project-specific rates -->
+                <div class="panel panel-default" style="margin-bottom: 28px;">
+                    <div class="panel-heading clearfix" style="padding: 12px 15px;">
+                        <div class="pull-right">
+                            <a class="btn btn-xs btn-primary"
+                               ng-click="vm.startAdd('Project')"
+                               ng-show="vm.editingScope !== 'Project'">
+                                <i class="fa fa-plus"></i> Add period
+                            </a>
+                        </div>
+                        <div>
+                            <strong style="font-size: 15px;">Project-specific rates</strong>
+                            <div class="text-muted" style="font-size: 12px; margin-top: 2px;">Overrides for individual projects under this client</div>
+                        </div>
+                    </div>
+
+                    <div class="panel-body" ng-show="vm.editingScope === 'Project'" style="border-bottom: 1px solid #eee;">
+                        <div class="form-group row" ng-show="!vm.editModel.id">
+                            <label class="col-sm-2 form-control-label">Project:</label>
+                            <div class="col-sm-6">
+                                <select class="form-control"
+                                        ng-model="vm.editModel.projectId"
+                                        ng-options="p.projectId as p.projectName for p in vm.context.clientProjects">
+                                    <option value="">Select project...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-show="vm.editModel.id">
+                            <label class="col-sm-2 form-control-label">Project:</label>
+                            <div class="col-sm-6 form-control-static">
+                                <span ng-repeat="p in vm.context.clientProjects" ng-if="p.projectId === vm.editModel.projectId">{{p.projectName}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 form-control-label">Rate:</label>
+                            <div class="col-sm-3">
+                                <input type="number" class="form-control" ng-model="vm.editModel.rate" />
+                            </div>
+                            <label class="col-sm-2 form-control-label">Start:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.startDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-group row m-b-0">
+                            <label class="col-sm-2 form-control-label">End:</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" ng-model="vm.editModel.endDate"
+                                       data-date-format="yyyy/MM/dd" autoclose="true" bs-datepicker autocomplete="off">
+                            </div>
+                            <div class="col-sm-5 text-right">
+                                <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelEdit()">Cancel</button>
+                                <button class="btn primary" style="margin-left: 8px;" ng-click="vm.savePeriod()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-repeat="group in vm.context.projectRateGroups" style="padding: 12px 15px 0 15px;">
+                        <div style="padding: 8px 0 6px 0; border-bottom: 1px solid #eee; margin-bottom: 0;">
+                            <strong>{{group.projectName}}</strong>
+                        </div>
+                        <div class="table-responsive" style="margin-bottom: 16px;">
+                            <table class="table table-striped m-b-0">
+                                <thead>
+                                <tr>
+                                    <th>Rate</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th style="width: 160px;"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="row in group.rates">
+                                    <td>{{row.rate}}</td>
+                                    <td>{{row.startDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{row.endDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td class="text-right" style="white-space: nowrap;">
+                                        <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.startEdit('Project', row, group.projectId)">Edit</a>
+                                        <a class="btn btn-xs btn-outline b-danger text-danger" style="margin-left: 6px;" ng-click="vm.deletePeriod(row)">Delete</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel-body text-muted" ng-show="!vm.context.projectRateGroups || vm.context.projectRateGroups.length == 0">
+                        No project-specific periods for this user under this client.
                     </div>
                 </div>
 

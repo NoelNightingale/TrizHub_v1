@@ -8,6 +8,9 @@
         billingRatesDelete: (viewModel: BillingRatesEditModel) => ng.IPromise<BillingRatesEditModel>;
         projectTeamRates: (projectId: string, asOfDate: any) => ng.IPromise<any>;
         userRatesForProjectContext: (userId: string, projectId: string) => ng.IPromise<any>;
+        clientTeamRates: (clientId: string, asOfDate: any) => ng.IPromise<any>;
+        userRatesForClientContext: (userId: string, clientId: string) => ng.IPromise<any>;
+        userRatesAsOf: (userAccountId: string, asOfDate: any) => ng.IPromise<any>;
 
     }
 
@@ -95,6 +98,48 @@
         userRatesForProjectContext = (userId: string, projectId: string): ng.IPromise<any> => {
             const deferred = this.$q.defer();
             this.$http.get(this.urlRoot + "UserRatesForProjectContext?userId=" + userId + "&projectId=" + projectId)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        clientTeamRates = (clientId: string, asOfDate: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "ClientTeamRates", { clientId: clientId, asOfDate: asOfDate })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        userRatesForClientContext = (userId: string, clientId: string): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "UserRatesForClientContext?userId=" + userId + "&clientId=" + clientId)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        userRatesAsOf = (userAccountId: string, asOfDate: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "UserRatesAsOf", { userAccountId: userAccountId, asOfDate: asOfDate })
                 .then(
                     result => {
                         deferred.resolve(result.data);

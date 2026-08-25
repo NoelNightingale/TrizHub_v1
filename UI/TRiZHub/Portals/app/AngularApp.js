@@ -553,7 +553,12 @@ angular.module("AngularApp",
                     // User Maintenance Billing Rates Detail
                     .state("mainState.maintenance.userMaintenance.billingRatesDetail",
                         {
-                            url: "/billingRatesDetail/:userid/:id",
+                            url: "/billingRatesDetail/:userid/:id?scope&clientId&projectId",
+                            params: {
+                                scope: { value: null, squash: true },
+                                clientId: { value: null, squash: true },
+                                projectId: { value: null, squash: true }
+                            },
                             views: {
                                 'detail': {
                                     templateUrl: "Portals/app/states/mainState/maintenanceState/userMaintenanceState/billingRates/detail/views/mainView.html?" + APP_CACHE_VER,
@@ -788,40 +793,40 @@ angular.module("AngularApp",
                                 ]
                             }
                         })
-                    // Client Maintenance Billing Rates Grid
-                    .state("mainState.maintenance.clientMaintenance.billingRatesGrid",
+                    // Client Maintenance Team Rates Roster
+                    .state("mainState.maintenance.clientMaintenance.teamRates",
                         {
-                            url: "/billingRatesGrid/:id",
+                            url: "/teamRates/:id",
                             views: {
                                 'grid': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/grid/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "ClientBillingRatesGridController as vm"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/teamRates/roster/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ClientTeamRatesRosterController as vm"
                                 }
                             },
                             resolve: {
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/grid/controllers/~ClientBillingRatesGridController.js?" + APP_CACHE_VER);
+                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/teamRates/roster/controllers/~ClientTeamRatesRosterController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
                         })
-                    // Client Maintenance Billing Rates Detail
-                    .state("mainState.maintenance.clientMaintenance.billingRatesDetail",
+                    // Client Maintenance Team Rates Edit
+                    .state("mainState.maintenance.clientMaintenance.teamRatesEdit",
                         {
-                            url: "/billingRatesDetail/:clientId/:id",
+                            url: "/teamRatesEdit/:clientId/:userId",
                             views: {
                                 'detail': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/detail/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "ClientBillingRatesDetailController as vm"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/clientMaintenanceState/teamRates/edit/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "ClientTeamRatesEditController as vm"
                                 }
                             },
                             resolve: {
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/billingRates/detail/controllers/~ClientBillingRatesDetailController.js?" + APP_CACHE_VER);
+                                            .load("Portals/app/states/mainState/maintenanceState/clientMaintenanceState/teamRates/edit/controllers/~ClientTeamRatesEditController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }

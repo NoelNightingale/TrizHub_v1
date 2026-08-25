@@ -562,6 +562,21 @@
             All rate periods for a user in project context (project, client, and default scopes).
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.ClientTeamRates(TRiZHub.Models.BillingRatesModels.ClientTeamRatesRequest)">
+            <summary>
+            Team roster with Client / Default rates as of a date for a client, plus project override counts.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.UserRatesForClientContext(System.Guid,System.Guid)">
+            <summary>
+            Rate periods for a user in client context (client, default, and project overrides under the client).
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.UserRatesAsOf(TRiZHub.Models.BillingRatesModels.UserRatesAsOfRequest)">
+            <summary>
+            User billing rates as-of hierarchy (default, clients, nested projects).
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.EmployerController.EmployerGrid(TRiZHub.Models.GridModel)">
             <summary>
             Retrieve list of Clients filtered and sorted based on input values

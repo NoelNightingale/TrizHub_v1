@@ -256,6 +256,150 @@ namespace TRiZHub.Controllers
             }
         }
 
+        /// <summary>
+        /// Team roster with Client / Default rates as of a date for a client, plus project override counts.
+        /// </summary>
+        [HttpPost]
+        public ClientTeamRatesModel ClientTeamRates(ClientTeamRatesRequest model)
+        {
+            try
+            {
+                if (model == null || model.ClientId == Guid.Empty)
+                    throw new BillingRatesException("Client is required!");
+
+                var asOf = model.AsOfDate == default(DateTime) ? DateTime.Today : model.AsOfDate.ToLocalTime().Date;
+                var result = BillingRatesProvider.GetClientTeamRates(model.ClientId, asOf);
+
+                return new ClientTeamRatesModel
+                {
+                    ClientId = result.ClientId,
+                    ClientName = result.ClientName,
+                    AsOfDate = result.AsOfDate,
+                    Team = result.Team.Select(r => new ClientTeamRateRowModel
+                    {
+                        UserAccountId = r.UserAccountId,
+                        FirstName = r.FirstName,
+                        Surname = r.Surname,
+                        AccountName = r.AccountName,
+                        UserName = ((r.FirstName ?? "") + " " + (r.Surname ?? "")).Trim(),
+                        ClientRate = r.ClientRate,
+                        DefaultRate = r.DefaultRate,
+                        EffectiveRate = r.EffectiveRate,
+                        EffectiveScope = r.EffectiveScope,
+                        ProjectOverrideCount = r.ProjectOverrideCount
+                    }).ToList()
+                };
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
+        /// <summary>
+        /// Rate periods for a user in client context (client, default, and project overrides under the client).
+        /// </summary>
+        [HttpGet]
+        public UserRatesForClientContextModel UserRatesForClientContext(Guid userId, Guid clientId)
+        {
+            try
+            {
+                var result = BillingRatesProvider.GetUserRatesForClientContext(userId, clientId);
+
+                Func<TRiZHub.BL.Entities.BillingRatesData.BillingRates, BillingRatesGridModel> map = a =>
+                    new BillingRatesGridModel
+                    {
+                        Id = a.Id,
+                        UserAccountId = a.UserAccountId,
+                        ClientId = a.ClientId,
+                        ProjectId = a.ProjectId,
+                        Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
+                        Rate = a.Rate,
+                        StartDate = a.StartDate,
+                        EndDate = a.EndDate
+                    };
+
+                return new UserRatesForClientContextModel
+                {
+                    UserAccountId = result.UserAccountId,
+                    UserName = result.UserName,
+                    ClientId = result.ClientId,
+                    ClientName = result.ClientName,
+                    ClientRates = result.ClientRates.Select(map).ToList(),
+                    DefaultRates = result.DefaultRates.Select(map).ToList(),
+                    ProjectRateGroups = result.ProjectRateGroups.Select(g => new ClientProjectRateGroupModel
+                    {
+                        ProjectId = g.ProjectId,
+                        ProjectName = g.ProjectName,
+                        Rates = g.Rates.Select(map).ToList()
+                    }).ToList(),
+                    ClientProjects = result.ClientProjects.Select(p => new ClientProjectOptionModel
+                    {
+                        ProjectId = p.ProjectId,
+                        ProjectName = p.ProjectName
+                    }).ToList()
+                };
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
+        /// <summary>
+        /// User billing rates as-of hierarchy (default, clients, nested projects).
+        /// </summary>
+        [HttpPost]
+        public UserRatesAsOfModel UserRatesAsOf(UserRatesAsOfRequest request)
+        {
+            try
+            {
+                var result = BillingRatesProvider.GetUserRatesAsOf(request.UserAccountId, request.AsOfDate);
+                return new UserRatesAsOfModel
+                {
+                    UserAccountId = result.UserAccountId,
+                    UserName = result.UserName,
+                    AsOfDate = result.AsOfDate,
+                    DefaultRate = result.DefaultRate,
+                    DefaultRateId = result.DefaultRateId,
+                    Clients = result.Clients.Select(c => new UserRatesAsOfClientRowModel
+                    {
+                        ClientId = c.ClientId,
+                        ClientName = c.ClientName,
+                        ClientRate = c.ClientRate,
+                        ClientRateId = c.ClientRateId,
+                        EffectiveRate = c.EffectiveRate,
+                        EffectiveScope = c.EffectiveScope,
+                        Projects = c.Projects.Select(p => new UserRatesAsOfProjectRowModel
+                        {
+                            ProjectId = p.ProjectId,
+                            ProjectName = p.ProjectName,
+                            ProjectRate = p.ProjectRate,
+                            ProjectRateId = p.ProjectRateId,
+                            EffectiveRate = p.EffectiveRate,
+                            EffectiveScope = p.EffectiveScope
+                        }).ToList()
+                    }).ToList()
+                };
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
         #endregion
     }
 }

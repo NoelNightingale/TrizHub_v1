@@ -68,6 +68,26 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 self.handleError(error);
             });
         };
+        _this.applyNewPrefill = function () {
+            var scope = _this.$stateParams["scope"];
+            var clientId = _this.$stateParams["clientId"];
+            var projectId = _this.$stateParams["projectId"];
+            if (scope === "Client" || (clientId && !projectId)) {
+                _this.scopeType = "Client";
+                _this.viewModel.clientId = clientId || null;
+                _this.viewModel.projectId = null;
+            }
+            else if (scope === "Project" || projectId) {
+                _this.scopeType = "Project";
+                _this.viewModel.projectId = projectId || null;
+                _this.viewModel.clientId = null;
+            }
+            else {
+                _this.scopeType = "Default";
+                _this.viewModel.clientId = null;
+                _this.viewModel.projectId = null;
+            }
+        };
         var self = _this;
         _this.viewModel = {};
         _this.viewModel.userAccountId = _this.$stateParams["userid"];
@@ -95,7 +115,7 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         }
         else {
             _this.viewModel.id = null;
-            _this.scopeType = "Default";
+            _this.applyNewPrefill();
         }
         return _this;
     }

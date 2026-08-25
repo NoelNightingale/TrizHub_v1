@@ -59,9 +59,29 @@
                     });
         } else {
             this.viewModel.id = null;
-            this.scopeType = "Default";
+            this.applyNewPrefill();
         }
     }
+
+    applyNewPrefill = () => {
+        const scope = this.$stateParams["scope"];
+        const clientId = this.$stateParams["clientId"];
+        const projectId = this.$stateParams["projectId"];
+
+        if (scope === "Client" || (clientId && !projectId)) {
+            this.scopeType = "Client";
+            this.viewModel.clientId = clientId || null;
+            this.viewModel.projectId = null;
+        } else if (scope === "Project" || projectId) {
+            this.scopeType = "Project";
+            this.viewModel.projectId = projectId || null;
+            this.viewModel.clientId = null;
+        } else {
+            this.scopeType = "Default";
+            this.viewModel.clientId = null;
+            this.viewModel.projectId = null;
+        }
+    };
 
    //#endregion
 

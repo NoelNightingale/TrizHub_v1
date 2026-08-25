@@ -23,5 +23,11 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         ProjectTeamRatesResult GetProjectTeamRates(Guid projectId, DateTime asOfDate);
 
         UserRatesForProjectContextResult GetUserRatesForProjectContext(Guid userAccountId, Guid projectId);
+
+        ClientTeamRatesResult GetClientTeamRates(Guid clientId, DateTime asOfDate);
+
+        UserRatesForClientContextResult GetUserRatesForClientContext(Guid userAccountId, Guid clientId);
+
+        UserRatesAsOfResult GetUserRatesAsOf(Guid userAccountId, DateTime asOfDate);
     }
 }

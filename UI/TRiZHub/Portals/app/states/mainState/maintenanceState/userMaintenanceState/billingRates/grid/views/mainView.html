@@ -6,9 +6,43 @@
                     <h2>
                         <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})">{{vm.user.firstName}} {{vm.user.surName}}</a>/ Billing Rates
                     </h2>
+                    <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;" ng-if="vm.viewMode === 'asOf'">
+                        Effective = Project, else Client, else Default. Clients and projects include assignments and rate history.
+                    </p>
                 </div>
                 <div class="box-body">
-                    <div class="table-responsive">
+                    <div class="form-group row" style="margin-bottom: 16px;">
+                        <div class="col-sm-6">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm"
+                                        ng-class="vm.viewMode === 'all' ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.setViewMode('all')">All periods</button>
+                                <button type="button" class="btn btn-sm"
+                                        ng-class="vm.viewMode === 'asOf' ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.setViewMode('asOf')">As of</button>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" ng-if="vm.viewMode === 'asOf'">
+                            <div class="form-inline pull-right">
+                                <label style="margin-right: 8px;">As of:</label>
+                                <input type="text" class="form-control input-sm"
+                                       style="width: 140px; display: inline-block;"
+                                       ng-model="vm.asOfDate"
+                                       data-icon-left="fa fa-chevron-left"
+                                       data-icon-right="fa fa-chevron-right"
+                                       autoclose="true"
+                                       name="asOfDate" data-date-format="yyyy/MM/dd"
+                                       bs-datepicker placeholder="As of" autocomplete="off"
+                                       ng-change="vm.loadAsOf()">
+                                <button class="btn btn-sm btn-default" style="margin-left: 6px;" ng-click="vm.loadAsOf()">
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- All periods -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'all'">
                         <form role="form" name="RecordForm" novalidate>
 
                             <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
@@ -62,7 +96,7 @@
                                 </tr>
                                 <tr ng-show="vm.gridModel.data.length == 0">
                                     <td colspan="7">
-                                        No Records
+                                        No rates for this user
                                     </td>
                                 </tr>
                                 </tbody>
@@ -71,10 +105,116 @@
                             </table>
 
                         </form>
-                        <div class="row">
-                        </div>
-
                     </div>
+
+                    <!-- As of hierarchy -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'asOf'">
+                        <div class="alert alert-danger" ng-if="vm.asOfError">{{vm.asOfError}}</div>
+                        <p class="text-muted" ng-if="vm.asOfLoading">Loading…</p>
+
+                        <table class="table table-bordered" ng-if="!vm.asOfLoading && vm.asOfModel">
+                            <thead>
+                            <tr>
+                                <th>Scope</th>
+                                <th>Rate</th>
+                                <th>Effective</th>
+                                <th style="width: 220px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Default -->
+                            <tr>
+                                <td><strong>Default</strong></td>
+                                <td>
+                                    <span ng-if="vm.asOfModel.defaultRate != null">{{vm.asOfModel.defaultRate}}</span>
+                                    <span class="text-muted" ng-if="vm.asOfModel.defaultRate == null">Not set</span>
+                                </td>
+                                <td>
+                                    <span ng-if="vm.asOfModel.defaultRate != null">
+                                        {{vm.asOfModel.defaultRate}}
+                                        <span class="label label-default" style="margin-left: 6px;">Default</span>
+                                    </span>
+                                    <span class="text-muted" ng-if="vm.asOfModel.defaultRate == null">—</span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                       ng-if="vm.asOfModel.defaultRateId"
+                                       ng-click="vm.editRecord(vm.asOfModel.defaultRateId)">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </a>
+                                    <a class="btn btn-xs btn-fw btn-primary"
+                                       ng-if="!vm.asOfModel.defaultRateId"
+                                       ng-click="vm.newRecord('Default')">
+                                        <i class="fa fa-plus"></i> Add
+                                    </a>
+                                    <a class="btn btn-xs btn-link" ng-click="vm.setViewMode('all')">Manage all periods</a>
+                                </td>
+                            </tr>
+
+                            </tbody>
+
+                            <!-- Clients + nested projects (one tbody per client) -->
+                            <tbody ng-repeat="client in vm.asOfModel.clients">
+                            <tr style="background: #f7f7f7;">
+                                <td>
+                                    <strong>Client:</strong> {{client.clientName}}
+                                </td>
+                                <td>
+                                    <span ng-if="client.clientRate != null">{{client.clientRate}}</span>
+                                    <span class="text-muted" ng-if="client.clientRate == null">—</span>
+                                </td>
+                                <td>
+                                    <span ng-if="client.effectiveRate != null">
+                                        {{client.effectiveRate}}
+                                        <span class="label label-default" style="margin-left: 6px;">{{client.effectiveScope}}</span>
+                                    </span>
+                                    <span class="text-muted" ng-if="client.effectiveRate == null">Not set</span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                       ng-if="client.clientRateId"
+                                       ng-click="vm.editRecord(client.clientRateId)">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </a>
+                                    <a class="btn btn-xs btn-fw btn-primary"
+                                       ng-if="!client.clientRateId"
+                                       ng-click="vm.newRecord('Client', client.clientId)">
+                                        <i class="fa fa-plus"></i> Add client rate
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr ng-repeat="project in client.projects">
+                                <td style="padding-left: 28px;">
+                                    <span class="text-muted">└</span> {{project.projectName}}
+                                </td>
+                                <td>
+                                    <span ng-if="project.projectRate != null">{{project.projectRate}}</span>
+                                    <span class="text-muted" ng-if="project.projectRate == null">—</span>
+                                </td>
+                                <td>
+                                    <span ng-if="project.effectiveRate != null">
+                                        {{project.effectiveRate}}
+                                        <span class="label label-default" style="margin-left: 6px;">{{project.effectiveScope}}</span>
+                                    </span>
+                                    <span class="text-muted" ng-if="project.effectiveRate == null">Not set</span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                       ng-if="project.projectRateId"
+                                       ng-click="vm.editRecord(project.projectRateId)">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </a>
+                                    <a class="btn btn-xs btn-fw btn-primary"
+                                       ng-if="!project.projectRateId"
+                                       ng-click="vm.newRecord('Project', null, project.projectId)">
+                                        <i class="fa fa-plus"></i> Add project rate
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>

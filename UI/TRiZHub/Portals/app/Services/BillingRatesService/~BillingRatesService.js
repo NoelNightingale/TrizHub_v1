@@ -84,6 +84,36 @@ var BillingRatesServiceModule;
                 });
                 return deferred.promise;
             };
+            _this.clientTeamRates = function (clientId, asOfDate) {
+                var deferred = _this.$q.defer();
+                _this.$http.post(_this.urlRoot + "ClientTeamRates", { clientId: clientId, asOfDate: asOfDate })
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
+            _this.userRatesForClientContext = function (userId, clientId) {
+                var deferred = _this.$q.defer();
+                _this.$http.get(_this.urlRoot + "UserRatesForClientContext?userId=" + userId + "&clientId=" + clientId)
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
+            _this.userRatesAsOf = function (userAccountId, asOfDate) {
+                var deferred = _this.$q.defer();
+                _this.$http.post(_this.urlRoot + "UserRatesAsOf", { userAccountId: userAccountId, asOfDate: asOfDate })
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
             return _this;
         }
         return BillingRatesService;

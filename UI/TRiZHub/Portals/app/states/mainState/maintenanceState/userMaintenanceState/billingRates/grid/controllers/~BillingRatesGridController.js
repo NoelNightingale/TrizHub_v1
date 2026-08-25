@@ -31,8 +31,51 @@ var BillingRatesGridController = /** @class */ (function (_super) {
         _this.saveSuccess = false;
         _this.loadingIsDone = false;
         _this.onDataLoaded = function (event) { _this.onLoadEvent(event); };
-        _this.newRecord = function () {
-            _this.$state.transitionTo("mainState.maintenance.userMaintenance.billingRatesDetail", { userid: _this.viewModel.id, "id": "new" });
+        _this.viewMode = "all"; // "all" | "asOf"
+        _this.asOfLoading = false;
+        _this.asOfError = null;
+        _this.setViewMode = function (mode) {
+            _this.viewMode = mode;
+            _this.asOfError = null;
+            if (mode === "asOf") {
+                _this.loadAsOf();
+            }
+            else {
+                _this.reloadGrid();
+            }
+        };
+        _this.loadAsOf = function () {
+            var self = _this;
+            self.asOfLoading = true;
+            self.asOfError = null;
+            self.BillingRatesService.userRatesAsOf(self.viewModel.id, self.asOfDate)
+                .then(function (result) {
+                self.asOfModel = result;
+                self.asOfLoading = false;
+            }, function (error) {
+                self.asOfLoading = false;
+                self.asOfError = error;
+                self.handleError(error);
+            });
+        };
+        _this.newRecord = function (scope, clientId, projectId) {
+            var params = { userid: _this.viewModel.id, id: "new" };
+            if (scope) {
+                params.scope = scope;
+            }
+            if (clientId) {
+                params.clientId = clientId;
+            }
+            if (projectId) {
+                params.projectId = projectId;
+            }
+            _this.$state.transitionTo("mainState.maintenance.userMaintenance.billingRatesDetail", params);
+        };
+        _this.editRecord = function (rateId) {
+            if (!rateId) {
+                return;
+            }
+            _this.$state.transitionTo("mainState.maintenance.userMaintenance.billingRatesDetail", { userid: _this.viewModel.id, id: rateId });
         };
         _this.deleteRecord = function (record) {
             var me = _this;
@@ -63,6 +106,7 @@ var BillingRatesGridController = /** @class */ (function (_super) {
         var self = _this;
         _this.viewModel = {};
         _this.viewModel.id = _this.$stateParams["id"];
+        _this.asOfDate = new Date();
         UserService.userGet(_this.viewModel.id)
             .then(function (result) {
             self.user = result;

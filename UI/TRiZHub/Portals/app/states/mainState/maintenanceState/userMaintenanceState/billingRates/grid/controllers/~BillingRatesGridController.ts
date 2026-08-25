@@ -13,6 +13,12 @@
     viewModel: any;
     user: any;
 
+    viewMode: string = "all"; // "all" | "asOf"
+    asOfDate: any;
+    asOfModel: any;
+    asOfLoading = false;
+    asOfError: string = null;
+
     //#endregion
 
     //#region Ctor
@@ -29,6 +35,8 @@
         const self = this;
         this.viewModel = {};
         this.viewModel.id = this.$stateParams["id"];
+        this.asOfDate = new Date();
+
         UserService.userGet(this.viewModel.id)
             .then(
                 result => {
@@ -59,9 +67,53 @@
         }
     }
 
-    newRecord = () => {
+    setViewMode = (mode: string) => {
+        this.viewMode = mode;
+        this.asOfError = null;
+        if (mode === "asOf") {
+            this.loadAsOf();
+        } else {
+            this.reloadGrid();
+        }
+    };
+
+    loadAsOf = () => {
+        const self = this;
+        self.asOfLoading = true;
+        self.asOfError = null;
+        self.BillingRatesService.userRatesAsOf(self.viewModel.id, self.asOfDate)
+            .then(
+                result => {
+                    self.asOfModel = result;
+                    self.asOfLoading = false;
+                },
+                error => {
+                    self.asOfLoading = false;
+                    self.asOfError = error;
+                    self.handleError(error);
+                });
+    };
+
+    newRecord = (scope?: string, clientId?: string, projectId?: string) => {
+        const params: any = { userid: this.viewModel.id, id: "new" };
+        if (scope) {
+            params.scope = scope;
+        }
+        if (clientId) {
+            params.clientId = clientId;
+        }
+        if (projectId) {
+            params.projectId = projectId;
+        }
+        this.$state.transitionTo("mainState.maintenance.userMaintenance.billingRatesDetail", params);
+    };
+
+    editRecord = (rateId: string) => {
+        if (!rateId) {
+            return;
+        }
         this.$state.transitionTo("mainState.maintenance.userMaintenance.billingRatesDetail",
-        { userid: this.viewModel.id, "id": "new" });
+            { userid: this.viewModel.id, id: rateId });
     };
 
     deleteRecord = (record) => {
@@ -96,7 +148,6 @@
     reloadGrid = () => {
         const me = this;
         me.pageGrid.loadGrid();
-
     };
 }
 
