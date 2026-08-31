@@ -26,22 +26,479 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         #region Billing Rates
 
-        public IQueryable<BillingRates> BillingRatesFilterList(Guid? userAccountId, Guid? clientId, Guid? projectId)
+        public IQueryable<BillingRates> BillingRatesFilterList(Guid? userAccountId, Guid? clientId, Guid? projectId,
+            string scope = null, DateTime? activeOn = null,
+            IList<Guid> userAccountIds = null, IList<Guid> clientIds = null, IList<Guid> projectIds = null)
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
 
             var query = DataContext.BillingRatesSet.AsQueryable();
 
-            if (userAccountId.HasValue && userAccountId.Value != Guid.Empty)
+            var userIdList = NormalizeIds(userAccountIds);
+            if (userIdList.Count > 0)
+                query = query.Where(a => userIdList.Contains(a.UserAccountId));
+            else if (userAccountId.HasValue && userAccountId.Value != Guid.Empty)
                 query = query.Where(a => a.UserAccountId == userAccountId.Value);
 
-            if (clientId.HasValue && clientId.Value != Guid.Empty)
-                query = query.Where(a => a.ClientId == clientId.Value && a.ProjectId == null);
+            var scopeKey = (scope ?? string.Empty).Trim();
+            if (string.Equals(scopeKey, "Default", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.ClientId == null && a.ProjectId == null);
+            else if (string.Equals(scopeKey, "Client", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.ClientId != null && a.ProjectId == null);
+            else if (string.Equals(scopeKey, "Project", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.ProjectId != null);
 
-            if (projectId.HasValue && projectId.Value != Guid.Empty)
+            var clientIdList = NormalizeIds(clientIds);
+            if (clientIdList.Count > 0)
+            {
+                if (string.Equals(scopeKey, "Client", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(a => a.ClientId != null && clientIdList.Contains(a.ClientId.Value) && a.ProjectId == null);
+                }
+                else
+                {
+                    query = query.Where(a =>
+                        (a.ClientId != null && clientIdList.Contains(a.ClientId.Value) && a.ProjectId == null)
+                        || (a.ProjectId != null && clientIdList.Contains(a.Project.ClientId)));
+                }
+            }
+            else if (clientId.HasValue && clientId.Value != Guid.Empty)
+            {
+                var cid = clientId.Value;
+                if (string.Equals(scopeKey, "Client", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(a => a.ClientId == cid && a.ProjectId == null);
+                }
+                else
+                {
+                    query = query.Where(a =>
+                        (a.ClientId == cid && a.ProjectId == null)
+                        || (a.ProjectId != null && a.Project.ClientId == cid));
+                }
+            }
+
+            var projectIdList = NormalizeIds(projectIds);
+            if (projectIdList.Count > 0)
+                query = query.Where(a => a.ProjectId != null && projectIdList.Contains(a.ProjectId.Value) && a.ClientId == null);
+            else if (projectId.HasValue && projectId.Value != Guid.Empty)
                 query = query.Where(a => a.ProjectId == projectId.Value && a.ClientId == null);
 
+            if (activeOn.HasValue)
+            {
+                var onDate = activeOn.Value.Date;
+                query = query.Where(a => a.StartDate <= onDate && a.EndDate >= onDate);
+            }
+
             return query;
+        }
+
+        public BillingRatesFilterOptionsResult GetFilterOptions(IList<Guid> userAccountIds, IList<Guid> clientIds,
+            IList<Guid> projectIds)
+        {
+            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
+
+            var selectedUsers = NormalizeIds(userAccountIds);
+            var selectedClients = NormalizeIds(clientIds);
+            var selectedProjects = NormalizeIds(projectIds);
+
+            HashSet<Guid> allowedUsers = null;
+            HashSet<Guid> allowedClients = null;
+            HashSet<Guid> allowedProjects = null;
+
+            if (selectedUsers.Count > 0)
+            {
+                var clientFromAssign = DataContext.UserIdentityClientSet
+                    .Where(a => selectedUsers.Contains(a.UserAccountId) && a.ClientId != null)
+                    .Select(a => a.ClientId.Value)
+                    .Distinct()
+                    .ToList();
+
+                var projectFromAssign = DataContext.UserIdentityProjectSet
+                    .Where(a => selectedUsers.Contains(a.UserAccountId) && a.ProjectId != null)
+                    .Select(a => a.ProjectId.Value)
+                    .Distinct()
+                    .ToList();
+
+                var clientsFromProjects = DataContext.ProjectSet
+                    .Where(p => projectFromAssign.Contains(p.Id) && !p.IsDeleted)
+                    .Select(p => p.ClientId)
+                    .Distinct()
+                    .ToList();
+
+                var projectsFromClientAssign = DataContext.ProjectSet
+                    .Where(p => clientFromAssign.Contains(p.ClientId) && !p.IsDeleted && p.IsActive)
+                    .Select(p => p.Id)
+                    .Distinct()
+                    .ToList();
+
+                IntersectIds(ref allowedClients, clientFromAssign.Union(clientsFromProjects));
+                IntersectIds(ref allowedProjects, projectFromAssign.Union(projectsFromClientAssign));
+            }
+
+            if (selectedClients.Count > 0)
+            {
+                var clientProjectIds = DataContext.ProjectSet
+                    .Where(p => selectedClients.Contains(p.ClientId) && !p.IsDeleted && p.IsActive)
+                    .Select(p => p.Id)
+                    .Distinct()
+                    .ToList();
+
+                var usersFromClient = DataContext.UserIdentityClientSet
+                    .Where(a => a.ClientId != null && selectedClients.Contains(a.ClientId.Value))
+                    .Select(a => a.UserAccountId);
+
+                var usersFromProjects = DataContext.UserIdentityProjectSet
+                    .Where(a => a.ProjectId != null && clientProjectIds.Contains(a.ProjectId.Value))
+                    .Select(a => a.UserAccountId);
+
+                IntersectIds(ref allowedUsers, usersFromClient.Union(usersFromProjects));
+                IntersectIds(ref allowedProjects, clientProjectIds);
+            }
+
+            if (selectedProjects.Count > 0)
+            {
+                var owningClientIds = DataContext.ProjectSet
+                    .Where(p => selectedProjects.Contains(p.Id))
+                    .Select(p => p.ClientId)
+                    .Distinct()
+                    .ToList();
+
+                var usersFromProject = DataContext.UserIdentityProjectSet
+                    .Where(a => a.ProjectId != null && selectedProjects.Contains(a.ProjectId.Value))
+                    .Select(a => a.UserAccountId);
+
+                var usersFromOwningClient = DataContext.UserIdentityClientSet
+                    .Where(a => a.ClientId != null && owningClientIds.Contains(a.ClientId.Value))
+                    .Select(a => a.UserAccountId);
+
+                IntersectIds(ref allowedUsers, usersFromProject.Union(usersFromOwningClient));
+                IntersectIds(ref allowedClients, owningClientIds);
+            }
+
+            var usersQuery = DataContext.UserAccountSet
+                .Where(u => u.Active && u.FirstName != "Importer");
+            if (allowedUsers != null)
+                usersQuery = usersQuery.Where(u => allowedUsers.Contains(u.Id));
+
+            var clientsQuery = DataContext.ClientEntitySet
+                .Where(c => !c.IsDeleted);
+            if (allowedClients != null)
+                clientsQuery = clientsQuery.Where(c => allowedClients.Contains(c.Id));
+
+            var projectsQuery = DataContext.ProjectSet
+                .Where(p => !p.IsDeleted && p.IsActive);
+            if (allowedProjects != null)
+                projectsQuery = projectsQuery.Where(p => allowedProjects.Contains(p.Id));
+
+            return new BillingRatesFilterOptionsResult
+            {
+                Users = usersQuery
+                    .OrderBy(u => u.FirstName)
+                    .ThenBy(u => u.Surname)
+                    .Select(u => new BillingRatesFilterOption
+                    {
+                        Id = u.Id,
+                        Name = (u.FirstName + " " + u.Surname).Trim()
+                    })
+                    .ToList(),
+                Clients = clientsQuery
+                    .OrderBy(c => c.EntityName)
+                    .Select(c => new BillingRatesFilterOption
+                    {
+                        Id = c.Id,
+                        Name = c.EntityName
+                    })
+                    .ToList(),
+                Projects = projectsQuery
+                    .OrderBy(p => p.ProjectName)
+                    .Select(p => new BillingRatesFilterOption
+                    {
+                        Id = p.Id,
+                        Name = (p.ProjectNumber == null || p.ProjectNumber == "")
+                            ? p.ProjectName
+                            : ("[" + p.ProjectNumber + "] " + p.ProjectName)
+                    })
+                    .ToList()
+            };
+        }
+
+        public List<BillingRatesEffectiveRow> GetEffectiveRates(IList<Guid> userAccountIds, IList<Guid> clientIds,
+            IList<Guid> projectIds, DateTime asOf)
+        {
+            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
+
+            asOf = asOf.Date;
+            var selectedUsers = NormalizeIds(userAccountIds);
+            var selectedClients = NormalizeIds(clientIds);
+            var selectedProjects = NormalizeIds(projectIds);
+
+            var contexts = new List<EffectiveContext>();
+
+            if (selectedProjects.Count > 0)
+            {
+                var projects = DataContext.ProjectSet
+                    .Where(p => selectedProjects.Contains(p.Id) && !p.IsDeleted)
+                    .Select(p => new
+                    {
+                        p.Id,
+                        p.ProjectName,
+                        p.ProjectNumber,
+                        p.ClientId,
+                        ClientName = p.Client.EntityName
+                    })
+                    .OrderBy(p => p.ProjectName)
+                    .ToList();
+
+                foreach (var p in projects)
+                {
+                    contexts.Add(new EffectiveContext
+                    {
+                        ClientId = p.ClientId,
+                        ClientName = p.ClientName,
+                        ProjectId = p.Id,
+                        ProjectName = string.IsNullOrEmpty(p.ProjectNumber)
+                            ? p.ProjectName
+                            : ("[" + p.ProjectNumber + "] " + p.ProjectName)
+                    });
+                }
+            }
+            else if (selectedClients.Count > 0)
+            {
+                var clients = DataContext.ClientEntitySet
+                    .Where(c => selectedClients.Contains(c.Id) && !c.IsDeleted)
+                    .Select(c => new { c.Id, c.EntityName })
+                    .OrderBy(c => c.EntityName)
+                    .ToList();
+
+                foreach (var c in clients)
+                {
+                    contexts.Add(new EffectiveContext
+                    {
+                        ClientId = c.Id,
+                        ClientName = c.EntityName
+                    });
+                }
+            }
+            else
+            {
+                // No client/project filter: one default-scope context per user.
+                contexts.Add(new EffectiveContext());
+            }
+
+            List<Guid> userIds;
+            if (selectedUsers.Count > 0)
+            {
+                userIds = selectedUsers;
+            }
+            else if (selectedProjects.Count > 0)
+            {
+                var owningClientIds = contexts
+                    .Where(c => c.ClientId.HasValue)
+                    .Select(c => c.ClientId.Value)
+                    .Distinct()
+                    .ToList();
+
+                var fromProject = DataContext.UserIdentityProjectSet
+                    .Where(a => a.ProjectId != null && selectedProjects.Contains(a.ProjectId.Value))
+                    .Select(a => a.UserAccountId);
+
+                var fromClient = DataContext.UserIdentityClientSet
+                    .Where(a => a.ClientId != null && owningClientIds.Contains(a.ClientId.Value))
+                    .Select(a => a.UserAccountId);
+
+                userIds = fromProject.Union(fromClient).Distinct().ToList();
+            }
+            else if (selectedClients.Count > 0)
+            {
+                var clientProjectIds = DataContext.ProjectSet
+                    .Where(p => selectedClients.Contains(p.ClientId) && !p.IsDeleted && p.IsActive)
+                    .Select(p => p.Id)
+                    .Distinct()
+                    .ToList();
+
+                var fromClient = DataContext.UserIdentityClientSet
+                    .Where(a => a.ClientId != null && selectedClients.Contains(a.ClientId.Value))
+                    .Select(a => a.UserAccountId);
+
+                var fromProjects = DataContext.UserIdentityProjectSet
+                    .Where(a => a.ProjectId != null && clientProjectIds.Contains(a.ProjectId.Value))
+                    .Select(a => a.UserAccountId);
+
+                userIds = fromClient.Union(fromProjects).Distinct().ToList();
+            }
+            else
+            {
+                userIds = DataContext.UserAccountSet
+                    .Where(u => u.Active && u.FirstName != "Importer")
+                    .Select(u => u.Id)
+                    .ToList();
+            }
+
+            if (userIds.Count == 0 || contexts.Count == 0)
+                return new List<BillingRatesEffectiveRow>();
+
+            var users = DataContext.UserAccountSet
+                .Where(u => userIds.Contains(u.Id) && u.Active && u.FirstName != "Importer")
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.Surname,
+                    u.AccountName
+                })
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.Surname)
+                .ToList();
+
+            userIds = users.Select(u => u.Id).ToList();
+            if (userIds.Count == 0)
+                return new List<BillingRatesEffectiveRow>();
+
+            var neededClientIds = contexts
+                .Where(c => c.ClientId.HasValue)
+                .Select(c => c.ClientId.Value)
+                .Distinct()
+                .ToList();
+            var neededProjectIds = contexts
+                .Where(c => c.ProjectId.HasValue)
+                .Select(c => c.ProjectId.Value)
+                .Distinct()
+                .ToList();
+
+            List<BillingRates> rates;
+            if (neededProjectIds.Count > 0)
+            {
+                rates = DataContext.BillingRatesSet
+                    .Where(r => userIds.Contains(r.UserAccountId)
+                                && r.StartDate <= asOf
+                                && r.EndDate >= asOf
+                                && (
+                                    (r.ClientId == null && r.ProjectId == null)
+                                    || (r.ClientId != null && r.ProjectId == null &&
+                                        neededClientIds.Contains(r.ClientId.Value))
+                                    || (r.ProjectId != null && r.ClientId == null &&
+                                        neededProjectIds.Contains(r.ProjectId.Value))
+                                ))
+                    .ToList();
+            }
+            else if (neededClientIds.Count > 0)
+            {
+                rates = DataContext.BillingRatesSet
+                    .Where(r => userIds.Contains(r.UserAccountId)
+                                && r.StartDate <= asOf
+                                && r.EndDate >= asOf
+                                && (
+                                    (r.ClientId == null && r.ProjectId == null)
+                                    || (r.ClientId != null && r.ProjectId == null &&
+                                        neededClientIds.Contains(r.ClientId.Value))
+                                ))
+                    .ToList();
+            }
+            else
+            {
+                rates = DataContext.BillingRatesSet
+                    .Where(r => userIds.Contains(r.UserAccountId)
+                                && r.StartDate <= asOf
+                                && r.EndDate >= asOf
+                                && r.ClientId == null
+                                && r.ProjectId == null)
+                    .ToList();
+            }
+
+            var rows = new List<BillingRatesEffectiveRow>();
+            foreach (var user in users)
+            {
+                foreach (var ctx in contexts)
+                {
+                    BillingRates winning = null;
+                    string scope = null;
+
+                    if (ctx.ProjectId.HasValue)
+                    {
+                        winning = FindRateRecordForDate(rates, user.Id, asOf, null, ctx.ProjectId);
+                        if (winning != null)
+                        {
+                            scope = "Project";
+                        }
+                        else
+                        {
+                            winning = FindRateRecordForDate(rates, user.Id, asOf, ctx.ClientId, null);
+                            if (winning != null)
+                            {
+                                scope = "Client";
+                            }
+                            else
+                            {
+                                winning = FindRateRecordForDate(rates, user.Id, asOf, null, null);
+                                if (winning != null)
+                                    scope = "Default";
+                            }
+                        }
+                    }
+                    else if (ctx.ClientId.HasValue)
+                    {
+                        winning = FindRateRecordForDate(rates, user.Id, asOf, ctx.ClientId, null);
+                        if (winning != null)
+                        {
+                            scope = "Client";
+                        }
+                        else
+                        {
+                            winning = FindRateRecordForDate(rates, user.Id, asOf, null, null);
+                            if (winning != null)
+                                scope = "Default";
+                        }
+                    }
+                    else
+                    {
+                        winning = FindRateRecordForDate(rates, user.Id, asOf, null, null);
+                        if (winning != null)
+                            scope = "Default";
+                    }
+
+                    rows.Add(new BillingRatesEffectiveRow
+                    {
+                        UserAccountId = user.Id,
+                        FirstName = user.FirstName,
+                        Surname = user.Surname,
+                        AccountName = user.AccountName,
+                        UserName = (user.FirstName + " " + user.Surname).Trim(),
+                        ClientId = ctx.ClientId,
+                        ClientName = ctx.ClientName,
+                        ProjectId = ctx.ProjectId,
+                        ProjectName = ctx.ProjectName,
+                        EffectiveRate = winning != null ? winning.Rate : (decimal?)null,
+                        EffectiveScope = scope,
+                        RateId = winning != null ? winning.Id : (Guid?)null
+                    });
+                }
+            }
+
+            return rows;
+        }
+
+        private class EffectiveContext
+        {
+            public Guid? ClientId { get; set; }
+            public string ClientName { get; set; }
+            public Guid? ProjectId { get; set; }
+            public string ProjectName { get; set; }
+        }
+
+        private static List<Guid> NormalizeIds(IList<Guid> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return new List<Guid>();
+            return ids.Where(id => id != Guid.Empty).Distinct().ToList();
+        }
+
+        private static void IntersectIds(ref HashSet<Guid> allowed, IEnumerable<Guid> candidates)
+        {
+            var next = new HashSet<Guid>(candidates);
+            if (allowed == null)
+                allowed = next;
+            else
+                allowed.IntersectWith(next);
         }
 
         public void DeleteBillingRatesEntry(Guid id)

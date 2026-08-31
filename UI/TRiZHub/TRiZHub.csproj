@@ -548,6 +548,9 @@
     <Content Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\stateView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\grid\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\stateView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\grid\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\teamRates\roster\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\teamRates\edit\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\teamRates\roster\views\mainView.html" />
@@ -1850,6 +1853,8 @@
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\grid\controllers\~TeamMaintenanceGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\detail\controllers\~BillingRatesDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\grid\controllers\~BillingRatesGridController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\grid\controllers\~BillingRatesMaintenanceGridController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\detail\controllers\~BillingRatesMaintenanceDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\teamRates\roster\controllers\~ClientTeamRatesRosterController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\clientMaintenanceState\teamRates\edit\controllers\~ClientTeamRatesEditController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\teamRates\roster\controllers\~ProjectTeamRatesRosterController.ts" />

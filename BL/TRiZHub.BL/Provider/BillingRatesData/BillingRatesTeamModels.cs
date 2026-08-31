@@ -119,4 +119,36 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         public Guid? DefaultRateId { get; set; }
         public List<UserRatesAsOfClientRow> Clients { get; set; }
     }
+
+    public class BillingRatesFilterOption
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class BillingRatesFilterOptionsResult
+    {
+        public List<BillingRatesFilterOption> Users { get; set; }
+        public List<BillingRatesFilterOption> Clients { get; set; }
+        public List<BillingRatesFilterOption> Projects { get; set; }
+    }
+
+    /// <summary>
+    /// One effective-rate row for the standalone Billing Rates workbench (as of Active On).
+    /// </summary>
+    public class BillingRatesEffectiveRow
+    {
+        public Guid UserAccountId { get; set; }
+        public string FirstName { get; set; }
+        public string Surname { get; set; }
+        public string AccountName { get; set; }
+        public string UserName { get; set; }
+        public Guid? ClientId { get; set; }
+        public string ClientName { get; set; }
+        public Guid? ProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public decimal? EffectiveRate { get; set; }
+        public string EffectiveScope { get; set; }
+        public Guid? RateId { get; set; }
+    }
 }

@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -112,15 +113,20 @@ namespace TRiZHub.Controllers
 
         /// <summary>
         /// Retrieve list of Billing rates sorted by Startdate.
-        /// Filter by UserAccountId and/or ClientId and/or ProjectId.
+        /// Filter by UserAccountId and/or ClientId and/or ProjectId, Scope, and ActiveOn.
         /// </summary>
         [HttpPost]
         public GridResultModel<BillingRatesGridModel> BillingRatesGrid(BillingRatesSearchModel model)
         {
             var begin = SetupGridParams(model);
 
+            DateTime? activeOn = null;
+            if (model.ActiveOn.HasValue)
+                activeOn = model.ActiveOn.Value.ToLocalTime().Date;
+
             var filteredQuery = BillingRatesProvider.BillingRatesFilterList(
-                    model.UserAccountId, model.ClientId, model.ProjectId)
+                    model.UserAccountId, model.ClientId, model.ProjectId, model.Scope, activeOn,
+                    model.UserAccountIds, model.ClientIds, model.ProjectIds)
                 .Select(a => new BillingRatesGridModel
                 {
                     Id = a.Id,
@@ -141,11 +147,205 @@ namespace TRiZHub.Controllers
 
             var totalNumberOfRecords = filteredQuery.Count();
 
-            filteredQuery = filteredQuery.OrderBy(a => a.StartDate);
+            if (string.IsNullOrWhiteSpace(model.SortKey))
+                model.SortKey = "startdate";
+            else
+                model.SortKey = model.SortKey.ToLower();
+
+            switch (model.SortKey)
+            {
+                case "username":
+                case "user":
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.UserName)
+                        : filteredQuery.OrderByDescending(r => r.UserName);
+                    break;
+                case "scope":
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.Scope)
+                        : filteredQuery.OrderByDescending(r => r.Scope);
+                    break;
+                case "clientname":
+                case "client":
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.ClientName)
+                        : filteredQuery.OrderByDescending(r => r.ClientName);
+                    break;
+                case "projectname":
+                case "project":
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.ProjectName)
+                        : filteredQuery.OrderByDescending(r => r.ProjectName);
+                    break;
+                case "rate":
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.Rate)
+                        : filteredQuery.OrderByDescending(r => r.Rate);
+                    break;
+                case "enddate":
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.EndDate)
+                        : filteredQuery.OrderByDescending(r => r.EndDate);
+                    break;
+                case "startdate":
+                default:
+                    filteredQuery = model.SortOrder == "ASC"
+                        ? filteredQuery.OrderBy(r => r.StartDate)
+                        : filteredQuery.OrderByDescending(r => r.StartDate);
+                    break;
+            }
+
+            // Preserve legacy behavior for the existing User → Billing Rates screen:
+            // it expects "All periods" for one user without paging.
+            var hasMultiFilters =
+                (model.UserAccountIds != null && model.UserAccountIds.Count > 0)
+                || (model.ClientIds != null && model.ClientIds.Count > 0)
+                || (model.ProjectIds != null && model.ProjectIds.Count > 0);
+
+            var returnAllForSingleUser =
+                !hasMultiFilters &&
+                model.UserAccountId.HasValue &&
+                (!model.ClientId.HasValue || model.ClientId.Value == Guid.Empty) &&
+                (!model.ProjectId.HasValue || model.ProjectId.Value == Guid.Empty) &&
+                string.IsNullOrWhiteSpace(model.Scope) &&
+                !model.ActiveOn.HasValue;
+
+            if (!returnAllForSingleUser)
+                filteredQuery = filteredQuery.Skip(begin).Take(model.RecordsPerPage.Value);
 
             var returnList = filteredQuery.ToList();
 
             return new GridResultModel<BillingRatesGridModel>(returnList, totalNumberOfRecords);
+        }
+
+        /// <summary>
+        /// Effective rates as of ActiveOn for the selected filter set (Project → Client → Default).
+        /// </summary>
+        [HttpPost]
+        public GridResultModel<BillingRatesEffectiveGridModel> EffectiveRatesGrid(BillingRatesSearchModel model)
+        {
+            try
+            {
+                if (model == null || !model.ActiveOn.HasValue)
+                    throw new BillingRatesException("Active On date is required for Effective view.");
+
+                var begin = SetupGridParams(model);
+                var asOf = model.ActiveOn.Value.ToLocalTime().Date;
+
+                var rows = BillingRatesProvider.GetEffectiveRates(
+                    model.UserAccountIds, model.ClientIds, model.ProjectIds, asOf);
+
+                IEnumerable<BillingRatesEffectiveRow> sorted = rows;
+                var sortKey = string.IsNullOrWhiteSpace(model.SortKey)
+                    ? "username"
+                    : model.SortKey.ToLower();
+                var asc = model.SortOrder == "ASC";
+
+                switch (sortKey)
+                {
+                    case "clientname":
+                    case "client":
+                        sorted = asc
+                            ? sorted.OrderBy(r => r.ClientName)
+                            : sorted.OrderByDescending(r => r.ClientName);
+                        break;
+                    case "projectname":
+                    case "project":
+                        sorted = asc
+                            ? sorted.OrderBy(r => r.ProjectName)
+                            : sorted.OrderByDescending(r => r.ProjectName);
+                        break;
+                    case "effectiverate":
+                    case "rate":
+                        sorted = asc
+                            ? sorted.OrderBy(r => r.EffectiveRate)
+                            : sorted.OrderByDescending(r => r.EffectiveRate);
+                        break;
+                    case "effectivescope":
+                    case "scope":
+                        sorted = asc
+                            ? sorted.OrderBy(r => r.EffectiveScope)
+                            : sorted.OrderByDescending(r => r.EffectiveScope);
+                        break;
+                    case "username":
+                    case "user":
+                    default:
+                        sorted = asc
+                            ? sorted.OrderBy(r => r.UserName)
+                            : sorted.OrderByDescending(r => r.UserName);
+                        break;
+                }
+
+                var materialised = sorted.ToList();
+                var total = materialised.Count;
+                var page = materialised
+                    .Skip(begin)
+                    .Take(model.RecordsPerPage ?? 60)
+                    .Select(r => new BillingRatesEffectiveGridModel
+                    {
+                        Id = r.RateId,
+                        UserAccountId = r.UserAccountId,
+                        Account = r.AccountName,
+                        FirstName = r.FirstName,
+                        Surname = r.Surname,
+                        UserName = r.UserName,
+                        ClientId = r.ClientId,
+                        ClientName = r.ClientName,
+                        ProjectId = r.ProjectId,
+                        ProjectName = r.ProjectName,
+                        EffectiveRate = r.EffectiveRate,
+                        EffectiveScope = r.EffectiveScope
+                    })
+                    .ToList();
+
+                return new GridResultModel<BillingRatesEffectiveGridModel>(page, total);
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
+        /// <summary>
+        /// Cascading User / Client / Project option lists for the standalone Billing Rates filter workbench.
+        /// </summary>
+        [HttpPost]
+        public BillingRatesFilterOptionsModel FilterOptions(BillingRatesFilterOptionsRequest model)
+        {
+            try
+            {
+                var result = BillingRatesProvider.GetFilterOptions(
+                    model != null ? model.UserAccountIds : null,
+                    model != null ? model.ClientIds : null,
+                    model != null ? model.ProjectIds : null);
+
+                return new BillingRatesFilterOptionsModel
+                {
+                    Users = result.Users.Select(u => new BillingRatesFilterOptionModel
+                    {
+                        Id = u.Id,
+                        Name = u.Name
+                    }).ToList(),
+                    Clients = result.Clients.Select(c => new BillingRatesFilterOptionModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name
+                    }).ToList(),
+                    Projects = result.Projects.Select(p => new BillingRatesFilterOptionModel
+                    {
+                        Id = p.Id,
+                        Name = p.Name
+                    }).ToList()
+                };
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
         }
 
         /// <summary>

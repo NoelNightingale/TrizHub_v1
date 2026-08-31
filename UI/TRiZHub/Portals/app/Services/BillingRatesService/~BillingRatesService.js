@@ -34,6 +34,16 @@ var BillingRatesServiceModule;
                 });
                 return deferred.promise;
             };
+            _this.effectiveRatesGrid = function (req) {
+                var deferred = _this.$q.defer();
+                _this.$http.post(_this.urlRoot + "EffectiveRatesGrid", req)
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
             _this.billingRatesSave = function (viewModel) {
                 var deferred = _this.$q.defer();
                 _this.$http.post(_this.urlRoot + "SaveBillingRates", viewModel)
@@ -107,6 +117,16 @@ var BillingRatesServiceModule;
             _this.userRatesAsOf = function (userAccountId, asOfDate) {
                 var deferred = _this.$q.defer();
                 _this.$http.post(_this.urlRoot + "UserRatesAsOf", { userAccountId: userAccountId, asOfDate: asOfDate })
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
+            _this.filterOptions = function (req) {
+                var deferred = _this.$q.defer();
+                _this.$http.post(_this.urlRoot + "FilterOptions", req || {})
                     .then(function (result) {
                     deferred.resolve(result.data);
                 }, function (error) {

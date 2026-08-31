@@ -13,11 +13,11 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var BillingRatesDetailController = /** @class */ (function (_super) {
-    __extends(BillingRatesDetailController, _super);
+var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
+    __extends(BillingRatesMaintenanceDetailController, _super);
     //#endregion
     //#region Ctor
-    function BillingRatesDetailController($scope, $stateParams, $timeout, $window, $state, BillingRatesService, ClientService, ProjectService, Popups) {
+    function BillingRatesMaintenanceDetailController($scope, $stateParams, $timeout, $window, $state, BillingRatesService, ClientService, ProjectService, UserService, Popups) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$scope = $scope;
         _this.$stateParams = $stateParams;
@@ -27,11 +27,14 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         _this.BillingRatesService = BillingRatesService;
         _this.ClientService = ClientService;
         _this.ProjectService = ProjectService;
+        _this.UserService = UserService;
         _this.Popups = Popups;
         //#region members
         _this.successMessage = "Saved Successfully";
         _this.saveSuccess = false;
         _this.scopeType = "Default";
+        _this.isNew = false;
+        _this.userLocked = false;
         _this.applyNewPrefill = function () {
             var scope = _this.$stateParams["scope"];
             var clientId = _this.$stateParams["clientId"];
@@ -52,7 +55,6 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 _this.viewModel.projectId = null;
             }
         };
-        //#endregion
         _this.resolveScopeType = function (model) {
             if (model.projectId)
                 return "Project";
@@ -72,6 +74,9 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 _this.viewModel.clientId = null;
             }
         };
+        _this.cancel = function () {
+            _this.$state.go("mainState.maintenance.billingRatesMaintenance.grid");
+        };
         _this.submitForm = function () {
             var self = _this;
             _this.$scope.$broadcast("show-errors-check-validity");
@@ -82,16 +87,49 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 .then(function (result) {
                 self.saveSuccess = true;
                 self.$timeout(function () {
-                    self.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid", { "id": result.userAccountId });
+                    self.$state.go("mainState.maintenance.billingRatesMaintenance.grid");
                 }, 1000);
+            }, function (error) {
+                self.handleError(error);
+            });
+        };
+        _this.deleteRecord = function () {
+            var _a;
+            var self = _this;
+            if (self.isNew || !((_a = self.viewModel) === null || _a === void 0 ? void 0 : _a.id)) {
+                return;
+            }
+            self.Popups.confirmationDialog(self.$scope, "Are you sure you want to delete?", "You are about to delete this record...")
+                .then(function (action) {
+                if (!action) {
+                    return;
+                }
+                self.BillingRatesService.billingRatesDelete(self.viewModel)
+                    .then(function (result) {
+                    self.saveSuccess = false;
+                    self.$state.go("mainState.maintenance.billingRatesMaintenance.grid");
+                }, function (error) {
+                    self.handleError(error);
+                });
             }, function (error) {
                 self.handleError(error);
             });
         };
         var self = _this;
         _this.viewModel = {};
-        _this.viewModel.userAccountId = _this.$stateParams["userid"];
         _this.viewModel.id = _this.$stateParams["id"];
+        _this.viewModel.userAccountId = _this.$stateParams["userId"] || null;
+        _this.isNew = _this.viewModel.id === "new";
+        _this.userLocked = !_this.isNew && !!_this.viewModel.userAccountId;
+        UserService.userDropdownList()
+            .then(function (result) {
+            self.userDropdown = result;
+            if (self.userLocked) {
+                // Dropdown will still render the selected value even if it's not in list.
+            }
+        }, function (error) {
+            self.handleError(error);
+        });
         ClientService.clientDropdownList()
             .then(function (result) {
             self.clientDropdown = result;
@@ -104,11 +142,12 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         }, function (error) {
             self.handleError(error);
         });
-        if (_this.viewModel.id !== "new") {
+        if (!_this.isNew) {
             _this.BillingRatesService.billingRatesGet(_this.viewModel.id)
                 .then(function (result) {
                 self.viewModel = result;
                 self.scopeType = self.resolveScopeType(result);
+                self.userLocked = true;
             }, function (error) {
                 self.handleError(error);
             });
@@ -119,10 +158,10 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         }
         return _this;
     }
-    return BillingRatesDetailController;
+    return BillingRatesMaintenanceDetailController;
 }(CHControllerBase));
 angular.module("AngularApp")
-    .controller("BillingRatesDetailController", [
+    .controller("BillingRatesMaintenanceDetailController", [
     "$scope",
     "$stateParams",
     "$timeout",
@@ -131,7 +170,8 @@ angular.module("AngularApp")
     "BillingRatesService",
     "ClientService",
     "ProjectService",
+    "UserService",
     "Popups",
-    BillingRatesDetailController
+    BillingRatesMaintenanceDetailController
 ]);
-//# sourceMappingURL=~BillingRatesDetailController.js.map
+//# sourceMappingURL=~BillingRatesMaintenanceDetailController.js.map

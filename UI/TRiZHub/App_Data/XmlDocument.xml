@@ -4,6 +4,36 @@
         <name>TRiZHub</name>
     </assembly>
     <members>
+        <member name="T:TRiZHub.Models.BillingRatesModels.BillingRatesEffectiveGridModel">
+            <summary>
+            Effective rate row for the Billing Rates workbench (Active On date).
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.UserAccountIds">
+            <summary>
+            Optional multi-select (standalone maintenance). When non-empty, takes precedence over singular UserAccountId.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ClientIds">
+            <summary>
+            Optional multi-select (standalone maintenance). When non-empty, takes precedence over singular ClientId.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ProjectIds">
+            <summary>
+            Optional multi-select (standalone maintenance). When non-empty, takes precedence over singular ProjectId.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.Scope">
+            <summary>
+            Optional scope filter: null/empty = all, or "Default" / "Client" / "Project".
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ActiveOn">
+            <summary>
+            When set, only rates whose period covers this date (StartDate ≤ ActiveOn ≤ EndDate).
+            </summary>
+        </member>
         <member name="M:TRiZHub.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
             <summary>
             Generates an URI-friendly ID for the <see cref="T:System.Web.Http.Description.ApiDescription"/>. E.g. "Get-Values-id_name" instead of "GetValues/{id}?name={name}"
@@ -544,7 +574,17 @@
         <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesGrid(TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel)">
             <summary>
             Retrieve list of Billing rates sorted by Startdate.
-            Filter by UserAccountId and/or ClientId and/or ProjectId.
+            Filter by UserAccountId and/or ClientId and/or ProjectId, Scope, and ActiveOn.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.EffectiveRatesGrid(TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel)">
+            <summary>
+            Effective rates as of ActiveOn for the selected filter set (Project → Client → Default).
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.FilterOptions(TRiZHub.Models.BillingRatesModels.BillingRatesFilterOptionsRequest)">
+            <summary>
+            Cascading User / Client / Project option lists for the standalone Billing Rates filter workbench.
             </summary>
         </member>
         <member name="M:TRiZHub.Controllers.BillingRatesController.BillingRatesDelete(TRiZHub.Models.BillingRatesModels.BillingRatesEditModel)">
