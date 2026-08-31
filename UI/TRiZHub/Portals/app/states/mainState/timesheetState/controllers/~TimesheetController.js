@@ -59,6 +59,34 @@ var TimesheetController = /** @class */ (function (_super) {
             { index: 5, short: "S", full: "Saturday" },
             { index: 6, short: "S", full: "Sunday" }
         ];
+        /** True once the first successful bootstrap grid load has been kicked off. */
+        _this.initialTimesheetLoadDone = false;
+        /**
+         * Set filter user from the logged-in account after the users dropdown is populated,
+         * so AngularJS does not clear ng-model against an empty ng-options list.
+         */
+        _this.ensureDefaultFilterUser = function () {
+            var me = _this;
+            var users = me.filterOptions.users || [];
+            var selectedStillValid = me.filterModel.userId &&
+                users.some(function (u) { return u.id === me.filterModel.userId; });
+            if (selectedStillValid) {
+                return;
+            }
+            me.filterModel.userId = me.SecurityService.getCurrentUserDetails().id;
+        };
+        /** Run applyBillingPeriod only when both user and billing period are ready. */
+        _this.tryInitialTimesheetLoad = function () {
+            var me = _this;
+            if (me.initialTimesheetLoadDone) {
+                return;
+            }
+            if (!me.filterModel.userId || !me.filterModel.billingCycleId) {
+                return;
+            }
+            me.initialTimesheetLoadDone = true;
+            me.applyBillingPeriod();
+        };
         _this.userSelectChange = function () {
             _this.cancelPaste();
             _this.closeClipboardDetails();
@@ -1190,6 +1218,9 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.clipboardDetailItem = null;
         /** Left clipboard drawer open state. */
         _this.clipboardDrawerOpen = false;
+        /** Brief “copied” toast next to the clipboard rail. */
+        _this.clipboardToast = null;
+        _this.clipboardToastTimer = null;
         /** localStorage key for the currently selected user's local clips. */
         _this.clipboardStorageKey = function () {
             var userId = _this.filterModel && _this.filterModel.userId;
@@ -1302,12 +1333,37 @@ var TimesheetController = /** @class */ (function (_super) {
                 comments: r.comments
             };
         };
-        _this.pushLocalClip = function (item) {
+        _this.pushLocalClip = function (item, feedback) {
             _this.localClips.unshift(item);
             if (_this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
                 _this.localClips.length = TimesheetController.CLIPBOARD_MAX;
             }
             _this.saveClipboard();
+            _this.showClipboardCopiedFeedback(feedback || _this.defaultClipboardFeedback(item));
+        };
+        _this.defaultClipboardFeedback = function (item) {
+            if (!item) {
+                return "Copied to clipboard";
+            }
+            if (item.type === "week") {
+                return "Week copied to clipboard";
+            }
+            if (item.rowCount === 1) {
+                return "Entry copied to clipboard";
+            }
+            return "Day copied to clipboard";
+        };
+        _this.showClipboardCopiedFeedback = function (message) {
+            var me = _this;
+            me.clipboardToast = message || "Copied to clipboard";
+            if (me.clipboardToastTimer) {
+                me.$timeout.cancel(me.clipboardToastTimer);
+                me.clipboardToastTimer = null;
+            }
+            me.clipboardToastTimer = me.$timeout(function () {
+                me.clipboardToast = null;
+                me.clipboardToastTimer = null;
+            }, 2500);
         };
         /** Copy a single entry (allowed even when fields are incomplete). Stored as a 1-line day clip for paste. */
         _this.copyEntryToClipboard = function (record) {
@@ -1324,7 +1380,7 @@ var TimesheetController = /** @class */ (function (_super) {
                 rowCount: 1,
                 rows: [_this.clipboardRowFromRecord(record, 0)],
                 isSaved: false
-            });
+            }, "Entry copied to clipboard");
         };
         _this.copyDayToClipboard = function (day) {
             if (!day || !day.records || !day.records.length) {
@@ -1342,7 +1398,7 @@ var TimesheetController = /** @class */ (function (_super) {
                 rowCount: rows.length,
                 rows: rows,
                 isSaved: false
-            });
+            }, "Day copied to clipboard (" + rows.length + " line" + (rows.length === 1 ? "" : "s") + ")");
         };
         _this.copyWeekToClipboard = function () {
             var me = _this;
@@ -1371,7 +1427,7 @@ var TimesheetController = /** @class */ (function (_super) {
                 rowCount: rows.length,
                 rows: rows,
                 isSaved: false
-            });
+            }, "Week copied to clipboard (" + rows.length + " line" + (rows.length === 1 ? "" : "s") + ")");
         };
         /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
         _this.beginPaste = function (item, $event) {
@@ -1691,6 +1747,7 @@ var TimesheetController = /** @class */ (function (_super) {
         me.filterModel.billingCycleId = null;
         me.filterModel.startDate = null;
         me.filterModel.endDate = null;
+        me.filterModel.userId = null;
         BillingCycleService.billingCycleDropdownList()
             .then(function (results) {
             // Real cycles only — no "Manual Date" synthetic row
@@ -1699,14 +1756,19 @@ var TimesheetController = /** @class */ (function (_super) {
                 var defaultCycle = me.pickDefaultBillingCycle(me.filterOptions.billingCycles);
                 me.filterModel.billingCycleId = me.getCycleId(defaultCycle);
                 me.viewModel.billingCycle = defaultCycle;
-                me.applyBillingPeriod();
             }
+            me.tryInitialTimesheetLoad();
         }, function (error) {
             me.handleError(error);
         });
         UserService.userTimesheetFilterDropdown()
             .then(function (result) {
-            me.filterOptions.users = result;
+            me.filterOptions.users = result || [];
+            me.ensureDefaultFilterUser();
+            me.getUserProjects();
+            me.loadClipboard();
+            me.loadSavedTemplates();
+            me.tryInitialTimesheetLoad();
         }, function (error) {
             me.handleError(error);
         });
@@ -1740,13 +1802,8 @@ var TimesheetController = /** @class */ (function (_super) {
             model.projectId = me.filterModel.projectId;
             model.billingOption = me.filterModel.billingOption.val;
         }, null, $state);
-        me.filterModel.userId = SecurityService.getCurrentUserDetails().id;
-        // Populate user's projects
-        _this.getUserProjects();
-        // Load clipboard from localStorage + saved templates for this user
-        _this.loadClipboard();
+        // Drawer pref does not need userId; clips/templates wait until users dropdown is ready
         _this.loadClipboardDrawerPref();
-        _this.loadSavedTemplates();
         var onClipboardKeydown = function (e) {
             if (e.keyCode !== 27 || !me.clipboardDrawerOpen) {
                 return;
@@ -1766,6 +1823,10 @@ var TimesheetController = /** @class */ (function (_super) {
     }
     TimesheetController.prototype.getUserProjects = function () {
         var _this = this;
+        if (!this.filterModel.userId) {
+            this.filterOptions.userProjects = [];
+            return;
+        }
         this.ProjectService.getUserAllocatedProjects(this.filterModel.userId, false)
             .then(function (result) {
             _this.filterOptions.userProjects = result;

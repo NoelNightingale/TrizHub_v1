@@ -137,6 +137,65 @@
         opacity: 0.7;
     }
 
+    .ts-capture .ts-clip-rail.is-just-copied {
+        background: #1a5f7a;
+        color: #fff;
+        border-color: #1a5f7a;
+        box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.28);
+        animation: ts-clip-rail-pulse 0.55s ease-out 1;
+    }
+
+    .ts-capture .ts-clip-rail.is-just-copied .ts-clip-rail-badge {
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+    }
+
+    @keyframes ts-clip-rail-pulse {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.06); }
+        100% { transform: scale(1); }
+    }
+
+    .ts-capture .ts-clip-toast {
+        position: absolute;
+        top: 18px;
+        left: 44px;
+        z-index: 1048;
+        max-width: 280px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: #1a5f7a;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.35;
+        box-shadow: 2px 4px 14px rgba(26, 95, 122, 0.35);
+        pointer-events: none;
+        animation: ts-clip-toast-in 0.2s ease-out;
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-clip-toast i {
+        margin-right: 6px;
+        opacity: 0.9;
+    }
+
+    .ts-capture.is-clip-drawer-open .ts-clip-toast {
+        left: 16px;
+        top: 12px;
+    }
+
+    @keyframes ts-clip-toast-in {
+        from {
+            opacity: 0;
+            transform: translateX(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
     .ts-capture .ts-clip-drawer-backdrop {
         position: fixed;
         top: 0;
@@ -1379,12 +1438,16 @@
 
 <div class="padding ts-capture" ng-class="{'is-clip-drawer-open': vm.clipboardDrawerOpen}">
     <button type="button" class="ts-clip-rail"
+            ng-class="{'is-just-copied': vm.clipboardToast}"
             ng-click="vm.toggleClipboardDrawer()"
             title="{{vm.clipboardDrawerOpen ? 'Close clipboard' : 'Open clipboard'}}">
         <i class="fa fa-clipboard ts-clip-rail-icon"></i>
         <span class="ts-clip-rail-badge" ng-if="vm.clipboard.length">{{vm.clipboard.length}}</span>
         <i class="fa fa-chevron-right ts-clip-rail-chevron"></i>
     </button>
+    <div class="ts-clip-toast" ng-if="vm.clipboardToast" role="status" aria-live="polite">
+        <i class="fa fa-check"></i>{{vm.clipboardToast}}
+    </div>
 
     <div class="ts-clip-drawer-backdrop" ng-click="vm.closeClipboardDrawer()"></div>
     <aside class="ts-clip-drawer" aria-hidden="{{!vm.clipboardDrawerOpen}}">

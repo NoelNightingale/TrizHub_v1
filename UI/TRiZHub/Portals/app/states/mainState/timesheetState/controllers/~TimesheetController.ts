@@ -89,6 +89,7 @@ class TimesheetController extends CHControllerBase {
         me.filterModel.billingCycleId = null;
         me.filterModel.startDate = null;
         me.filterModel.endDate = null;
+        me.filterModel.userId = null;
 
         BillingCycleService.billingCycleDropdownList()
             .then(
@@ -99,8 +100,8 @@ class TimesheetController extends CHControllerBase {
                         const defaultCycle = me.pickDefaultBillingCycle(me.filterOptions.billingCycles);
                         me.filterModel.billingCycleId = me.getCycleId(defaultCycle);
                         me.viewModel.billingCycle = defaultCycle;
-                        me.applyBillingPeriod();
                     }
+                    me.tryInitialTimesheetLoad();
                 },
                 error => {
                     me.handleError(error);
@@ -109,7 +110,12 @@ class TimesheetController extends CHControllerBase {
         UserService.userTimesheetFilterDropdown()
             .then(
                 result => {
-                    me.filterOptions.users = result;
+                    me.filterOptions.users = result || [];
+                    me.ensureDefaultFilterUser();
+                    me.getUserProjects();
+                    me.loadClipboard();
+                    me.loadSavedTemplates();
+                    me.tryInitialTimesheetLoad();
                 },
                 error => {
                     me.handleError(error);
@@ -158,15 +164,8 @@ class TimesheetController extends CHControllerBase {
             null,
             $state);
 
-        me.filterModel.userId = SecurityService.getCurrentUserDetails().id;
-
-        // Populate user's projects
-        this.getUserProjects();
-
-        // Load clipboard from localStorage + saved templates for this user
-        this.loadClipboard();
+        // Drawer pref does not need userId; clips/templates wait until users dropdown is ready
         this.loadClipboardDrawerPref();
-        this.loadSavedTemplates();
 
         const onClipboardKeydown = (e: any) => {
             if (e.keyCode !== 27 || !me.clipboardDrawerOpen) {
@@ -185,7 +184,42 @@ class TimesheetController extends CHControllerBase {
         });
     }
 
+    /** True once the first successful bootstrap grid load has been kicked off. */
+    private initialTimesheetLoadDone = false;
+
+    /**
+     * Set filter user from the logged-in account after the users dropdown is populated,
+     * so AngularJS does not clear ng-model against an empty ng-options list.
+     */
+    ensureDefaultFilterUser = (): void => {
+        const me = this;
+        const users = me.filterOptions.users || [];
+        const selectedStillValid = me.filterModel.userId &&
+            users.some((u: any) => u.id === me.filterModel.userId);
+        if (selectedStillValid) {
+            return;
+        }
+        me.filterModel.userId = me.SecurityService.getCurrentUserDetails().id;
+    };
+
+    /** Run applyBillingPeriod only when both user and billing period are ready. */
+    tryInitialTimesheetLoad = (): void => {
+        const me = this;
+        if (me.initialTimesheetLoadDone) {
+            return;
+        }
+        if (!me.filterModel.userId || !me.filterModel.billingCycleId) {
+            return;
+        }
+        me.initialTimesheetLoadDone = true;
+        me.applyBillingPeriod();
+    };
+
     getUserProjects() {
+        if (!this.filterModel.userId) {
+            this.filterOptions.userProjects = [];
+            return;
+        }
         this.ProjectService.getUserAllocatedProjects(this.filterModel.userId, false)
             .then(
                 result => {
@@ -1523,6 +1557,9 @@ class TimesheetController extends CHControllerBase {
     clipboardDetailItem: any = null;
     /** Left clipboard drawer open state. */
     clipboardDrawerOpen: boolean = false;
+    /** Brief “copied” toast next to the clipboard rail. */
+    clipboardToast: string = null;
+    private clipboardToastTimer: any = null;
 
     /** localStorage key for the currently selected user's local clips. */
     private clipboardStorageKey = (): string => {
@@ -1643,12 +1680,39 @@ class TimesheetController extends CHControllerBase {
         };
     };
 
-    private pushLocalClip = (item: any): void => {
+    private pushLocalClip = (item: any, feedback?: string): void => {
         this.localClips.unshift(item);
         if (this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
             this.localClips.length = TimesheetController.CLIPBOARD_MAX;
         }
         this.saveClipboard();
+        this.showClipboardCopiedFeedback(feedback || this.defaultClipboardFeedback(item));
+    };
+
+    private defaultClipboardFeedback = (item: any): string => {
+        if (!item) {
+            return "Copied to clipboard";
+        }
+        if (item.type === "week") {
+            return "Week copied to clipboard";
+        }
+        if (item.rowCount === 1) {
+            return "Entry copied to clipboard";
+        }
+        return "Day copied to clipboard";
+    };
+
+    showClipboardCopiedFeedback = (message: string): void => {
+        const me = this;
+        me.clipboardToast = message || "Copied to clipboard";
+        if (me.clipboardToastTimer) {
+            me.$timeout.cancel(me.clipboardToastTimer);
+            me.clipboardToastTimer = null;
+        }
+        me.clipboardToastTimer = me.$timeout(() => {
+            me.clipboardToast = null;
+            me.clipboardToastTimer = null;
+        }, 2500);
     };
 
     /** Copy a single entry (allowed even when fields are incomplete). Stored as a 1-line day clip for paste. */
@@ -1666,7 +1730,7 @@ class TimesheetController extends CHControllerBase {
             rowCount: 1,
             rows: [this.clipboardRowFromRecord(record, 0)],
             isSaved: false
-        });
+        }, "Entry copied to clipboard");
     };
 
     copyDayToClipboard = (day: any): void => {
@@ -1685,7 +1749,7 @@ class TimesheetController extends CHControllerBase {
             rowCount: rows.length,
             rows: rows,
             isSaved: false
-        });
+        }, "Day copied to clipboard (" + rows.length + " line" + (rows.length === 1 ? "" : "s") + ")");
     };
 
     copyWeekToClipboard = (): void => {
@@ -1715,7 +1779,7 @@ class TimesheetController extends CHControllerBase {
             rowCount: rows.length,
             rows: rows,
             isSaved: false
-        });
+        }, "Week copied to clipboard (" + rows.length + " line" + (rows.length === 1 ? "" : "s") + ")");
     };
 
     /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
