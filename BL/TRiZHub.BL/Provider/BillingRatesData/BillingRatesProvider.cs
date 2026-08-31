@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.BillingRatesData;
 using TRiZHub.BL.Entities.Types;
@@ -475,6 +477,135 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             }
 
             return rows;
+        }
+
+        public byte[] ExportBillingRatesExcel(IList<Guid> userAccountIds, IList<Guid> clientIds,
+            IList<Guid> projectIds, string scope, DateTime? activeOn, string resultMode)
+        {
+            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
+
+            var effectiveMode = string.Equals(resultMode, "effective", StringComparison.OrdinalIgnoreCase);
+            if (effectiveMode && !activeOn.HasValue)
+                throw new BillingRatesException("Active On date is required for Effective export.");
+
+            using (var pck = new ExcelPackage())
+            {
+                var sheet = pck.Workbook.Worksheets.Add(effectiveMode ? "Effective Rates" : "Rate Periods");
+                const string excelDateFormat = "yyyy/mm/dd";
+
+                if (effectiveMode)
+                {
+                    var asOf = activeOn.Value.Date;
+                    var rows = GetEffectiveRates(userAccountIds, clientIds, projectIds, asOf)
+                        .OrderBy(r => r.UserName)
+                        .ThenBy(r => r.ClientName)
+                        .ThenBy(r => r.ProjectName)
+                        .ToList();
+
+                    sheet.Cells[1, 1].Value = "Billing Rates — Effective";
+                    sheet.Cells[1, 1].Style.Font.Bold = true;
+                    sheet.Cells[2, 1].Value = "Active On";
+                    sheet.Cells[2, 2].Value = asOf;
+                    sheet.Cells[2, 2].Style.Numberformat.Format = excelDateFormat;
+
+                    var headerRow = 4;
+                    sheet.Cells[headerRow, 1].Value = "User";
+                    sheet.Cells[headerRow, 2].Value = "Client";
+                    sheet.Cells[headerRow, 3].Value = "Project";
+                    sheet.Cells[headerRow, 4].Value = "Effective Rate";
+                    sheet.Cells[headerRow, 5].Value = "Source";
+                    using (var range = sheet.Cells[headerRow, 1, headerRow, 5])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(236, 239, 241));
+                    }
+
+                    var rowIndex = headerRow;
+                    foreach (var r in rows)
+                    {
+                        rowIndex++;
+                        sheet.Cells[rowIndex, 1].Value = r.UserName;
+                        sheet.Cells[rowIndex, 2].Value = r.ClientName;
+                        sheet.Cells[rowIndex, 3].Value = r.ProjectName;
+                        if (r.EffectiveRate.HasValue)
+                            sheet.Cells[rowIndex, 4].Value = r.EffectiveRate.Value;
+                        sheet.Cells[rowIndex, 5].Value = r.EffectiveScope;
+                    }
+                }
+                else
+                {
+                    DateTime? asOf = activeOn.HasValue ? activeOn.Value.Date : (DateTime?)null;
+                    var query = BillingRatesFilterList(null, null, null, scope, asOf,
+                        userAccountIds, clientIds, projectIds);
+
+                    var rows = query
+                        .Select(a => new
+                        {
+                            UserName = a.UserAccount.FirstName + " " + a.UserAccount.Surname,
+                            Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
+                            ClientName = a.Client != null ? a.Client.EntityName : null,
+                            ProjectName = a.Project != null ? a.Project.ProjectName : null,
+                            a.Rate,
+                            a.StartDate,
+                            a.EndDate
+                        })
+                        .OrderBy(r => r.UserName)
+                        .ThenBy(r => r.StartDate)
+                        .ToList();
+
+                    sheet.Cells[1, 1].Value = "Billing Rates — Periods";
+                    sheet.Cells[1, 1].Style.Font.Bold = true;
+                    var headerRow = 3;
+                    if (asOf.HasValue)
+                    {
+                        sheet.Cells[2, 1].Value = "Active On";
+                        sheet.Cells[2, 2].Value = asOf.Value;
+                        sheet.Cells[2, 2].Style.Numberformat.Format = excelDateFormat;
+                        headerRow = 4;
+                    }
+
+                    sheet.Cells[headerRow, 1].Value = "User";
+                    sheet.Cells[headerRow, 2].Value = "Scope";
+                    sheet.Cells[headerRow, 3].Value = "Client";
+                    sheet.Cells[headerRow, 4].Value = "Project";
+                    sheet.Cells[headerRow, 5].Value = "Rate";
+                    sheet.Cells[headerRow, 6].Value = "Start Date";
+                    sheet.Cells[headerRow, 7].Value = "End Date";
+                    using (var range = sheet.Cells[headerRow, 1, headerRow, 7])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(236, 239, 241));
+                    }
+
+                    var rowIndex = headerRow;
+                    foreach (var r in rows)
+                    {
+                        rowIndex++;
+                        sheet.Cells[rowIndex, 1].Value = (r.UserName ?? "").Trim();
+                        sheet.Cells[rowIndex, 2].Value = r.Scope;
+                        sheet.Cells[rowIndex, 3].Value = r.ClientName;
+                        sheet.Cells[rowIndex, 4].Value = r.ProjectName;
+                        sheet.Cells[rowIndex, 5].Value = r.Rate;
+                        sheet.Cells[rowIndex, 6].Value = r.StartDate;
+                        sheet.Cells[rowIndex, 6].Style.Numberformat.Format = excelDateFormat;
+                        sheet.Cells[rowIndex, 7].Value = r.EndDate;
+                        sheet.Cells[rowIndex, 7].Style.Numberformat.Format = excelDateFormat;
+                    }
+                }
+
+                if (sheet.Dimension != null)
+                {
+                    for (var i = 1; i <= sheet.Dimension.End.Column; i++)
+                    {
+                        sheet.Column(i).AutoFit();
+                        sheet.Column(i).Width += 2;
+                    }
+                }
+
+                return pck.GetAsByteArray();
+            }
         }
 
         private class EffectiveContext

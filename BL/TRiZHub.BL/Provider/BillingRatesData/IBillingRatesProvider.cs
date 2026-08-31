@@ -41,5 +41,11 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         /// </summary>
         List<BillingRatesEffectiveRow> GetEffectiveRates(IList<Guid> userAccountIds, IList<Guid> clientIds,
             IList<Guid> projectIds, DateTime asOf);
+
+        /// <summary>
+        /// Excel export of periods or effective rates for the current filter selection (no paging).
+        /// </summary>
+        byte[] ExportBillingRatesExcel(IList<Guid> userAccountIds, IList<Guid> clientIds, IList<Guid> projectIds,
+            string scope, DateTime? activeOn, string resultMode);
     }
 }

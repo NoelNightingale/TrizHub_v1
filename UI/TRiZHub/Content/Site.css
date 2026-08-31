@@ -185,3 +185,374 @@
 hr {
     border-top: 1px solid rgba(0, 0, 0, 0.5);
 }
+
+/* Billing Rates workbench — light modernization, scoped to this screen */
+.br-workbench .br-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.br-workbench .br-header h2 {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.br-workbench .br-header-note {
+    margin: 0;
+    max-width: 640px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #78909c;
+}
+
+.br-workbench .br-cascade {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #90a4ae;
+}
+
+.br-workbench .br-cascade span {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #eceff1;
+    color: #546e7a;
+    font-weight: 500;
+}
+
+.br-workbench .br-filters {
+    margin-bottom: 14px;
+}
+
+.br-workbench .br-filter-panel {
+    background: #fafbfc;
+    border: 1px solid #e8ecf0;
+    border-radius: 4px;
+    padding: 10px 12px 12px;
+    height: 100%;
+}
+
+.br-workbench .br-filter-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #607d8b;
+}
+
+.br-workbench .br-filter-count {
+    display: inline-block;
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 16px;
+}
+
+.br-workbench .br-filter-count.is-zero {
+    background: #cfd8dc;
+    color: #546e7a;
+}
+
+.br-workbench .br-filter-list {
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e0e6eb;
+    border-radius: 3px;
+    padding: 6px 10px;
+    background: #fff;
+}
+
+.br-workbench .br-filter-list .md-check {
+    display: block;
+    margin: 0 0 2px 0;
+    padding: 5px 4px 5px 1.4rem;
+    font-weight: normal;
+    border-radius: 3px;
+}
+
+.br-workbench .br-filter-list .md-check:hover {
+    background: #f0f4ff;
+}
+
+.br-workbench .br-filter-list .md-check > i {
+    height: 18px;
+    margin-left: -22px;
+    margin-right: 12px;
+}
+
+/* Unchecked: stronger outline + light fill so boxes are easy to spot */
+.br-workbench .br-filter-list .md-check > i:before {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #546e7a;
+    background-color: #eceff1;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.br-workbench .br-filter-list .md-check:hover > i:before {
+    border-color: #3f51b5;
+    background-color: #e8eaf6;
+}
+
+/* Checked: solid indigo with white tick */
+.br-workbench .br-filter-list .md-check input:checked + i:before {
+    border-width: 0;
+    background-color: #3f51b5;
+}
+
+.br-workbench .br-filter-list .md-check input[type="checkbox"]:checked + i:after {
+    border-color: #fff;
+    left: 6px;
+    top: 2px;
+}
+
+.br-workbench .br-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: #f7f9fb;
+    border: 1px solid #e8ecf0;
+    border-radius: 4px;
+}
+
+.br-workbench .br-toolbar-field {
+    min-width: 140px;
+}
+
+.br-workbench .br-toolbar-field label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #78909c;
+}
+
+.br-workbench .br-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    padding-bottom: 1px;
+}
+
+.br-workbench .br-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.br-workbench .br-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 10px;
+    border-radius: 14px;
+    font-size: 12px;
+    line-height: 1.3;
+    border: 1px solid transparent;
+}
+
+.br-workbench .br-chip-user {
+    background: #e8eaf6;
+    color: #303f9f;
+    border-color: #c5cae9;
+}
+
+.br-workbench .br-chip-client {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: #bbdefb;
+}
+
+.br-workbench .br-chip-project {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+.br-workbench .br-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.7;
+    text-decoration: none !important;
+}
+
+.br-workbench .br-chip-user .br-chip-remove { color: #303f9f; }
+.br-workbench .br-chip-client .br-chip-remove { color: #1565c0; }
+.br-workbench .br-chip-project .br-chip-remove { color: #2e7d32; }
+
+.br-workbench .br-chip-remove:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.br-workbench .br-dirty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    border: 1px solid #ffe082;
+    background: #fff8e1;
+    color: #6d4c41;
+    font-size: 12px;
+}
+
+.br-workbench .br-dirty i {
+    color: #f9a825;
+}
+
+.br-workbench .br-results-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eceff1;
+}
+
+.br-workbench .br-mode-toggle .btn {
+    min-width: 88px;
+}
+
+.br-workbench .br-mode-hint {
+    font-size: 12px;
+    color: #90a4ae;
+}
+
+.br-workbench .br-table {
+    margin-bottom: 8px;
+    border: 1px solid #e8ecf0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.br-workbench .br-table > thead > tr > th {
+    background: #f5f7f9;
+    border-bottom: 1px solid #e0e6eb !important;
+    border-top: none !important;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #607d8b;
+    white-space: nowrap;
+}
+
+.br-workbench .br-table > thead > tr > th > a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.br-workbench .br-table > thead > tr > th > a:hover {
+    color: #3f51b5;
+}
+
+.br-workbench .br-table > thead > tr > th > a.btn {
+    color: #fff;
+    text-decoration: none;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.br-workbench .br-table > thead > tr > th > a.btn:hover,
+.br-workbench .br-table > thead > tr > th > a.btn:focus {
+    color: #fff;
+}
+
+.br-workbench .br-table > thead > tr > th > a.btn-primary {
+    background-color: #3f51b5;
+    border-color: #3f51b5;
+}
+
+.br-workbench .br-table > thead > tr > th > a.btn-primary:hover,
+.br-workbench .br-table > thead > tr > th > a.btn-primary:focus {
+    background-color: #303f9f;
+    border-color: #303f9f;
+    color: #fff;
+}
+
+.br-workbench .br-table > tbody > tr > td {
+    border-color: #f0f3f5;
+    font-size: 13px;
+}
+
+.br-workbench .br-table > tbody > tr:hover > td {
+    background: #f8fafc;
+}
+
+.br-workbench .br-table a.text-primary {
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.br-workbench .br-table a.text-primary:hover {
+    text-decoration: underline;
+}
+
+.br-workbench .br-scope {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #eceff1;
+    color: #546e7a;
+}
+
+.br-workbench .br-scope-default { background: #eceff1; color: #546e7a; }
+.br-workbench .br-scope-client { background: #e3f2fd; color: #1565c0; }
+.br-workbench .br-scope-project { background: #e8f5e9; color: #2e7d32; }
+
+.br-workbench .br-rate {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.br-workbench .br-empty {
+    text-align: center;
+    color: #90a4ae;
+    padding: 28px 12px !important;
+    font-size: 13px;
+}
+
+.br-workbench .br-loading-hint {
+    font-size: 12px;
+    color: #90a4ae;
+}

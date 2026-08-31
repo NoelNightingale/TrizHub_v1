@@ -114,6 +114,18 @@
         border-radius: 4px;
         margin-bottom: 4px;
         background: #fff;
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-clip-card:hover {
+        border-color: rgba(26, 95, 122, 0.35);
+        background: rgba(26, 95, 122, 0.03);
+    }
+
+    .ts-capture .ts-clip-card.is-detail {
+        border-color: #1a5f7a;
+        box-shadow: inset 0 0 0 1px rgba(26, 95, 122, 0.25);
+        background: rgba(26, 95, 122, 0.06);
     }
 
     .ts-capture .ts-clip-card:last-child {
@@ -328,6 +340,145 @@
         color: #fff;
     }
 
+    .ts-capture .ts-clip-detail-dialog {
+        background: #fff;
+        border-radius: 6px;
+        padding: 16px 18px 14px;
+        width: 92%;
+        max-width: 780px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .ts-capture .ts-clip-detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .ts-capture .ts-clip-detail-header h4 {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.8);
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .ts-capture .ts-clip-detail-close {
+        border: none;
+        background: transparent;
+        color: rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 16px;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-clip-detail-close:hover {
+        color: rgba(0, 0, 0, 0.75);
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .ts-capture .ts-clip-detail-meta {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 12px;
+        margin-bottom: 12px;
+        text-transform: capitalize;
+    }
+
+    .ts-capture .ts-clip-detail-table-wrap {
+        overflow: auto;
+        max-height: 52vh;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+        margin-bottom: 12px;
+    }
+
+    .ts-capture .ts-clip-detail-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .ts-capture .ts-clip-detail-table th,
+    .ts-capture .ts-clip-detail-table td {
+        padding: 7px 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .ts-capture .ts-clip-detail-table th {
+        background: rgba(0, 0, 0, 0.03);
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: rgba(0, 0, 0, 0.5);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .ts-capture .ts-clip-detail-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-empty {
+        color: rgba(0, 0, 0, 0.35);
+        font-style: italic;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-hours {
+        white-space: nowrap;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        margin-left: 4px;
+        padding: 0 4px;
+        border-radius: 3px;
+        vertical-align: middle;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill.is-billable {
+        background: rgba(27, 107, 69, 0.12);
+        color: #1b6b45;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill.is-nonbillable {
+        background: rgba(0, 0, 0, 0.06);
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-clip-detail-footer {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .ts-capture .ts-clip-detail-footer .btn-primary {
+        background: #1a5f7a;
+        border-color: #1a5f7a;
+    }
+
+    .ts-capture .ts-clip-detail-footer .btn-primary:hover {
+        background: #13485c;
+        border-color: #13485c;
+    }
+
     .ts-capture .ts-toolbar-filters {
         display: flex;
         flex-direction: column;
@@ -369,32 +520,31 @@
     .ts-capture .ts-totals {
         display: flex;
         align-items: stretch;
-        gap: 8px;
-        margin-left: auto;
+        gap: 4px;
         flex: 0 0 auto;
     }
 
     .ts-capture .ts-total {
-        min-width: 72px;
-        padding: 6px 10px;
-        border-radius: 6px;
+        min-width: 52px;
+        padding: 3px 8px;
+        border-radius: 5px;
         background: rgba(0, 0, 0, 0.04);
         text-align: center;
     }
 
     .ts-capture .ts-total .n {
         display: block;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
         line-height: 1.2;
         color: rgba(0, 0, 0, 0.75);
     }
 
     .ts-capture .ts-total .l {
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.03em;
         color: rgba(0, 0, 0, 0.4);
     }
 
@@ -406,13 +556,22 @@
         overflow-x: auto;
     }
 
+    .ts-capture .ts-heat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 0 0 6px;
+        flex-wrap: wrap;
+    }
+
     .ts-capture .ts-heat-caption {
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.04em;
         text-transform: uppercase;
         color: rgba(0, 0, 0, 0.45);
-        margin: 0 0 6px;
+        margin: 0;
     }
 
     .ts-capture table.ts-heat-table {
@@ -1029,20 +1188,6 @@
                                         ng-model="vm.filterModel.billingOption"
                                         ng-change="vm.reloadGrid()"></select>
                             </div>
-                            <div class="ts-totals">
-                                <div class="ts-total">
-                                    <span class="n">{{vm.summary.totalHours || 0}}</span>
-                                    <span class="l">Hours</span>
-                                </div>
-                                <div class="ts-total is-bill">
-                                    <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
-                                    <span class="l">Billable</span>
-                                </div>
-                                <div class="ts-total">
-                                    <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
-                                    <span class="l">Non-bill</span>
-                                </div>
-                            </div>
                         </form>
                     </div>
 
@@ -1061,9 +1206,13 @@
                                 <div class="ts-clipboard-section"
                                      ng-if="(vm.clipboard | filter:{isSaved:true}).length">
                                     <div class="ts-clipboard-section-label">Saved</div>
-                                    <div class="ts-clip-card is-saved" ng-repeat="clip in vm.clipboard | filter:{isSaved:true}">
+                                    <div class="ts-clip-card is-saved"
+                                         ng-repeat="clip in vm.clipboard | filter:{isSaved:true}"
+                                         ng-class="{'is-detail': vm.clipboardDetailItem === clip}"
+                                         ng-click="vm.showClipboardDetails(clip)"
+                                         title="View contents">
                                         <span class="ts-clip-icon">
-                                            <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : 'fa fa-calendar-o'"></i>
+                                            <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : (clip.rowCount === 1 ? 'fa fa-file-o' : 'fa fa-calendar-o')"></i>
                                         </span>
                                         <div class="ts-clip-info">
                                             <div class="ts-clip-label" title="{{clip.label}}"
@@ -1075,12 +1224,13 @@
                                                 <input type="text" class="ts-clip-label-edit"
                                                        ng-model="clip._editLabel"
                                                        ng-keydown="$event.keyCode === 13 && vm.commitRenameClipboardItem(clip, $event); $event.keyCode === 27 && vm.cancelRenameClipboardItem($event)"
-                                                       ng-blur="vm.commitRenameClipboardItem(clip)" />
+                                                       ng-blur="vm.commitRenameClipboardItem(clip)"
+                                                       ng-click="$event.stopPropagation()" />
                                             </div>
                                             <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
                                         </div>
-                                        <div class="ts-clip-actions">
-                                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip)" title="Paste">
+                                        <div class="ts-clip-actions" ng-click="$event.stopPropagation()">
+                                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip, $event)" title="Paste">
                                                 <i class="fa fa-paste"></i>
                                             </button>
                                             <button type="button" class="ts-clip-rename"
@@ -1100,9 +1250,13 @@
                                 <div class="ts-clipboard-section"
                                      ng-if="(vm.clipboard | filter:{isSaved:false}).length">
                                     <div class="ts-clipboard-section-label">Local</div>
-                                    <div class="ts-clip-card" ng-repeat="clip in vm.clipboard | filter:{isSaved:false}">
+                                    <div class="ts-clip-card"
+                                         ng-repeat="clip in vm.clipboard | filter:{isSaved:false}"
+                                         ng-class="{'is-detail': vm.clipboardDetailItem === clip}"
+                                         ng-click="vm.showClipboardDetails(clip)"
+                                         title="View contents">
                                         <span class="ts-clip-icon">
-                                            <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : 'fa fa-calendar-o'"></i>
+                                            <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : (clip.rowCount === 1 ? 'fa fa-file-o' : 'fa fa-calendar-o')"></i>
                                         </span>
                                         <div class="ts-clip-info">
                                             <div class="ts-clip-label" title="{{clip.label}}"
@@ -1113,12 +1267,13 @@
                                                 <input type="text" class="ts-clip-label-edit"
                                                        ng-model="clip._editLabel"
                                                        ng-keydown="$event.keyCode === 13 && vm.commitRenameClipboardItem(clip, $event); $event.keyCode === 27 && vm.cancelRenameClipboardItem($event)"
-                                                       ng-blur="vm.commitRenameClipboardItem(clip)" />
+                                                       ng-blur="vm.commitRenameClipboardItem(clip)"
+                                                       ng-click="$event.stopPropagation()" />
                                             </div>
                                             <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
                                         </div>
-                                        <div class="ts-clip-actions">
-                                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip)" title="Paste">
+                                        <div class="ts-clip-actions" ng-click="$event.stopPropagation()">
+                                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip, $event)" title="Paste">
                                                 <i class="fa fa-paste"></i>
                                             </button>
                                             <button type="button" class="ts-clip-rename"
@@ -1133,7 +1288,7 @@
                                                 <i class="fa fa-thumb-tack"></i>
                                             </button>
                                             <button type="button" class="ts-clip-remove"
-                                                    ng-click="vm.removeClipboardItem(clip)"
+                                                    ng-click="vm.removeClipboardItem(clip, $event)"
                                                     title="Remove">
                                                 <i class="fa fa-times"></i>
                                             </button>
@@ -1142,7 +1297,86 @@
                                 </div>
                             </div>
                             <div class="ts-clipboard-empty" ng-if="!vm.clipboard.length">
-                                Copy a day or week to start
+                                Copy a day, week, or entry to start
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clipboard detail overlay -->
+                    <div class="ts-paste-overlay" ng-if="vm.clipboardDetailItem"
+                         ng-click="vm.closeClipboardDetails()">
+                        <div class="ts-clip-detail-dialog" ng-click="$event.stopPropagation()">
+                            <div class="ts-clip-detail-header">
+                                <h4>{{vm.clipboardDetailItem.label}}</h4>
+                                <button type="button" class="ts-clip-detail-close"
+                                        ng-click="vm.closeClipboardDetails()"
+                                        title="Close">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="ts-clip-detail-meta">
+                                {{vm.clipboardDetailItem.type}}
+                                &middot; {{vm.clipboardDetailItem.rowCount}} line{{vm.clipboardDetailItem.rowCount === 1 ? '' : 's'}}
+                                &middot; {{vm.clipboardRelativeTime(vm.clipboardDetailItem.copiedAt)}}
+                                <span ng-if="vm.clipboardDetailItem.isSaved"> &middot; saved</span>
+                            </div>
+                            <div class="ts-clip-detail-table-wrap" ng-if="vm.clipboardDetailItem.rows.length">
+                                <table class="ts-clip-detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th ng-if="vm.clipboardDetailItem.type === 'week'">Day</th>
+                                            <th>Project</th>
+                                            <th>Team</th>
+                                            <th>Activity</th>
+                                            <th>Comments</th>
+                                            <th style="text-align:right">Hours</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="row in vm.clipboardDetailItem.rows">
+                                            <td ng-if="vm.clipboardDetailItem.type === 'week'">
+                                                {{vm.clipboardDayLabel(row.dayOffset) || '—'}}
+                                            </td>
+                                            <td>
+                                                <span ng-if="vm.clipboardProjectLabel(row)">
+                                                    {{vm.clipboardProjectLabel(row)}}
+                                                    <span class="ts-clip-detail-bill"
+                                                          ng-class="(row.billable == 1 || row.billable === true) ? 'is-billable' : 'is-nonbillable'">
+                                                        {{(row.billable == 1 || row.billable === true) ? 'B' : 'NB'}}
+                                                    </span>
+                                                </span>
+                                                <span class="ts-clip-detail-empty" ng-if="!vm.clipboardProjectLabel(row)">—</span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="vm.clipboardTeamName(row.teamId)">{{vm.clipboardTeamName(row.teamId)}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="!vm.clipboardTeamName(row.teamId)">—</span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="vm.clipboardActivityName(row.activityId)">{{vm.clipboardActivityName(row.activityId)}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="!vm.clipboardActivityName(row.activityId)">—</span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="row.comments">{{row.comments}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="!row.comments">—</span>
+                                            </td>
+                                            <td class="ts-clip-detail-hours">
+                                                <span ng-if="row.hours != null && row.hours !== ''">{{row.hours}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="row.hours == null || row.hours === ''">—</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="ts-clipboard-empty" ng-if="!vm.clipboardDetailItem.rows.length">
+                                This clipboard item has no lines.
+                            </div>
+                            <div class="ts-clip-detail-footer">
+                                <button type="button" class="btn btn-default" ng-click="vm.closeClipboardDetails()">Close</button>
+                                <button type="button" class="btn btn-primary"
+                                        ng-click="vm.pasteFromClipboardDetails()"
+                                        ng-disabled="!vm.clipboardDetailItem.rows.length">
+                                    <i class="fa fa-paste"></i> Paste
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1181,7 +1415,23 @@
 
                     <div class="ts-top-right" ng-if="vm.weeks.length">
                         <div class="ts-heat">
-                            <div class="ts-heat-caption">Period summary</div>
+                            <div class="ts-heat-header">
+                                <div class="ts-heat-caption">Period summary</div>
+                                <div class="ts-totals">
+                                    <div class="ts-total">
+                                        <span class="n">{{vm.summary.totalHours || 0}}</span>
+                                        <span class="l">Hours</span>
+                                    </div>
+                                    <div class="ts-total is-bill">
+                                        <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
+                                        <span class="l">Billable</span>
+                                    </div>
+                                    <div class="ts-total">
+                                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
+                                        <span class="l">Non-bill</span>
+                                    </div>
+                                </div>
+                            </div>
                             <table class="ts-heat-table">
                                 <thead>
                                     <tr>
@@ -1392,6 +1642,11 @@
                                                 </div>
                                             </td>
                                             <td>
+                                                <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
+                                                   ng-click="vm.copyEntryToClipboard(i)"
+                                                   title="Copy this entry to clipboard">
+                                                    <i class="fa fa-copy"></i>
+                                                </a>
                                                 <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
                                                    ng-click="vm.resetRecord(i)" ng-hide="i.new">
                                                     <i class="fa fa-refresh"></i>

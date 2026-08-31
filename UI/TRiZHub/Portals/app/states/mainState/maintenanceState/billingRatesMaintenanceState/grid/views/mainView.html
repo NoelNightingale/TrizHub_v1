@@ -1,90 +1,125 @@
 <div class="row center-container">
     <div class="col-sm-12 col-md-12 col-lg-11">
         <div class="padding">
-            <div class="box">
+            <div class="box br-workbench">
                 <div class="box-header b-b">
-                    <h2>Billing Rates</h2>
-                    <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;">
-                        Effective rate = Project, else Client, else Default.
-                        Filter lists cascade from User / Client / Project assignments.
-                        Change filters, then click <strong>Apply</strong> to reload the grid.
-                    </p>
+                    <div class="br-header">
+                        <div>
+                            <h2>Billing Rates</h2>
+                            <p class="br-header-note">
+                                Browse and maintain rate periods across users, clients and projects.
+                                Filter lists cascade from assignments. Change filters, then apply to reload the grid.
+                            </p>
+                            <div class="br-cascade" title="Resolved billing rate precedence">
+                                <span>Project</span>
+                                <i class="fa fa-angle-right"></i>
+                                <span>Client</span>
+                                <i class="fa fa-angle-right"></i>
+                                <span>Default</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="box-body">
 
                     <!-- Filter workbench -->
-                    <div class="form-group row" style="margin-bottom: 8px;">
-                        <div class="col-sm-4">
-                            <label class="form-control-label">Users</label>
-                            <input type="text" class="form-control input-sm" placeholder="Search users"
-                                   ng-model="vm.userFilterText" style="margin-bottom: 6px;" />
-                            <div style="height: 220px; overflow-y: scroll; border: 1px solid #ddd; padding: 6px 8px;">
-                                <div ng-repeat="u in vm.filteredUsers()">
-                                    <label class="md-check">
-                                        <input type="checkbox"
-                                               ng-checked="vm.isSelected(vm.filters.userAccountIds, u.id)"
-                                               ng-click="vm.toggleUser(u.id); $event.preventDefault();">
-                                        <i class="indigo"></i>
-                                        {{u.name}}
-                                    </label>
+                    <div class="row br-filters">
+                        <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div class="br-filter-panel">
+                                <div class="br-filter-panel-title">
+                                    <span>Users</span>
+                                    <span class="br-filter-count"
+                                          ng-class="{'is-zero': !vm.filters.userAccountIds.length}">
+                                        {{vm.filters.userAccountIds.length}}
+                                    </span>
                                 </div>
-                                <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredUsers().length === 0">
-                                    No matching users
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-control-label">Clients</label>
-                            <input type="text" class="form-control input-sm" placeholder="Search clients"
-                                   ng-model="vm.clientFilterText" style="margin-bottom: 6px;" />
-                            <div style="height: 220px; overflow-y: scroll; border: 1px solid #ddd; padding: 6px 8px;">
-                                <div ng-repeat="c in vm.filteredClients()">
-                                    <label class="md-check">
-                                        <input type="checkbox"
-                                               ng-checked="vm.isSelected(vm.filters.clientIds, c.id)"
-                                               ng-click="vm.toggleClient(c.id); $event.preventDefault();">
-                                        <i class="indigo"></i>
-                                        {{c.name}}
-                                    </label>
-                                </div>
-                                <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredClients().length === 0">
-                                    No matching clients
+                                <input type="text" class="form-control input-sm" placeholder="Search users"
+                                       ng-model="vm.userFilterText" style="margin-bottom: 8px;" />
+                                <div class="br-filter-list">
+                                    <div ng-repeat="u in vm.filteredUsers()">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.isSelected(vm.filters.userAccountIds, u.id)"
+                                                   ng-click="vm.toggleUser(u.id); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{u.name}}
+                                        </label>
+                                    </div>
+                                    <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredUsers().length === 0">
+                                        No matching users
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <label class="form-control-label">Projects</label>
-                            <input type="text" class="form-control input-sm" placeholder="Search projects"
-                                   ng-model="vm.projectFilterText" style="margin-bottom: 6px;" />
-                            <div style="height: 220px; overflow-y: scroll; border: 1px solid #ddd; padding: 6px 8px;">
-                                <div ng-repeat="p in vm.filteredProjects()">
-                                    <label class="md-check">
-                                        <input type="checkbox"
-                                               ng-checked="vm.isSelected(vm.filters.projectIds, p.id)"
-                                               ng-click="vm.toggleProject(p.id); $event.preventDefault();">
-                                        <i class="indigo"></i>
-                                        {{p.name}}
-                                    </label>
+                        <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div class="br-filter-panel">
+                                <div class="br-filter-panel-title">
+                                    <span>Clients</span>
+                                    <span class="br-filter-count"
+                                          ng-class="{'is-zero': !vm.filters.clientIds.length}">
+                                        {{vm.filters.clientIds.length}}
+                                    </span>
                                 </div>
-                                <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredProjects().length === 0">
-                                    No matching projects
+                                <input type="text" class="form-control input-sm" placeholder="Search clients"
+                                       ng-model="vm.clientFilterText" style="margin-bottom: 8px;" />
+                                <div class="br-filter-list">
+                                    <div ng-repeat="c in vm.filteredClients()">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.isSelected(vm.filters.clientIds, c.id)"
+                                                   ng-click="vm.toggleClient(c.id); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{c.name}}
+                                        </label>
+                                    </div>
+                                    <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredClients().length === 0">
+                                        No matching clients
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div class="br-filter-panel">
+                                <div class="br-filter-panel-title">
+                                    <span>Projects</span>
+                                    <span class="br-filter-count"
+                                          ng-class="{'is-zero': !vm.filters.projectIds.length}">
+                                        {{vm.filters.projectIds.length}}
+                                    </span>
+                                </div>
+                                <input type="text" class="form-control input-sm" placeholder="Search projects"
+                                       ng-model="vm.projectFilterText" style="margin-bottom: 8px;" />
+                                <div class="br-filter-list">
+                                    <div ng-repeat="p in vm.filteredProjects()">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.isSelected(vm.filters.projectIds, p.id)"
+                                                   ng-click="vm.toggleProject(p.id); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{p.name}}
+                                        </label>
+                                    </div>
+                                    <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredProjects().length === 0">
+                                        No matching projects
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group row" style="margin-bottom: 8px;">
-                        <div class="col-sm-3" ng-if="vm.resultMode === 'periods'">
-                            <label class="form-control-label">Scope</label>
-                            <select class="form-control" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
+                    <!-- Toolbar -->
+                    <div class="br-toolbar">
+                        <div class="br-toolbar-field" ng-if="vm.resultMode === 'periods'">
+                            <label>Scope</label>
+                            <select class="form-control input-sm" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
                                 <option value="">All</option>
                                 <option value="Default">Default</option>
                                 <option value="Client">Client</option>
                                 <option value="Project">Project</option>
                             </select>
                         </div>
-                        <div class="col-sm-3">
-                            <label class="form-control-label">Active on</label>
+                        <div class="br-toolbar-field">
+                            <label>Active on</label>
                             <input type="text" class="form-control input-sm"
                                    ng-model="vm.filters.activeOn"
                                    data-icon-left="fa fa-chevron-left"
@@ -94,74 +129,71 @@
                                    bs-datepicker placeholder="(optional)" autocomplete="off"
                                    ng-change="vm.onActiveOnChanged()" />
                         </div>
-                        <div class="col-sm-6" style="padding-top: 22px;">
+                        <div class="br-toolbar-actions">
                             <button type="button" class="btn btn-sm"
                                     ng-class="vm.filtersDirty ? 'btn-warning' : 'btn-primary'"
                                     ng-click="vm.applyFilters()">
                                 <i class="fa fa-refresh" ng-if="vm.filtersDirty"></i>
                                 {{vm.filtersDirty ? 'Apply filters to reload grid' : 'Apply'}}
                             </button>
-                            <button type="button" class="btn btn-sm btn-default" style="margin-left: 6px;"
-                                    ng-click="vm.clearAllFilters()">Clear filters</button>
-                            <span class="text-muted" style="margin-left: 10px; font-size: 12px;" ng-if="vm.optionsLoading">Updating lists…</span>
+                            <button type="button" class="btn btn-sm btn-default"
+                                    ng-click="vm.clearAllFilters()">Clear</button>
+                            <button type="button" class="btn btn-sm btn-outline b-primary text-primary"
+                                    ng-click="vm.exportExcel()"
+                                    ng-disabled="vm.exporting">
+                                <i class="fa" ng-class="vm.exporting ? 'fa-spinner fa-spin' : 'fa-file-excel-o'"></i>
+                                {{vm.exporting ? 'Exporting…' : 'Export to Excel'}}
+                            </button>
+                            <span class="br-loading-hint" ng-if="vm.optionsLoading">
+                                <i class="fa fa-spinner fa-spin"></i> Updating lists…
+                            </span>
                         </div>
                     </div>
 
                     <!-- Chips -->
-                    <div style="margin-bottom: 10px;"
+                    <div class="br-chips"
                          ng-if="vm.filters.userAccountIds.length || vm.filters.clientIds.length || vm.filters.projectIds.length">
-                        <span class="label label-primary"
-                              style="display: inline-block; margin: 0 6px 6px 0; padding: 6px 8px; font-size: 12px;"
-                              ng-repeat="id in vm.filters.userAccountIds">
-                            User: {{vm.chipName(vm.optionUsers, id)}}
-                            <a href="" style="color: #fff; margin-left: 6px;" ng-click="vm.removeUserChip(id)">×</a>
+                        <span class="br-chip br-chip-user" ng-repeat="id in vm.filters.userAccountIds">
+                            {{vm.chipName(vm.optionUsers, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeUserChip(id)" title="Remove">×</a>
                         </span>
-                        <span class="label label-info"
-                              style="display: inline-block; margin: 0 6px 6px 0; padding: 6px 8px; font-size: 12px;"
-                              ng-repeat="id in vm.filters.clientIds">
-                            Client: {{vm.chipName(vm.optionClients, id)}}
-                            <a href="" style="color: #fff; margin-left: 6px;" ng-click="vm.removeClientChip(id)">×</a>
+                        <span class="br-chip br-chip-client" ng-repeat="id in vm.filters.clientIds">
+                            {{vm.chipName(vm.optionClients, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeClientChip(id)" title="Remove">×</a>
                         </span>
-                        <span class="label label-success"
-                              style="display: inline-block; margin: 0 6px 6px 0; padding: 6px 8px; font-size: 12px;"
-                              ng-repeat="id in vm.filters.projectIds">
-                            Project: {{vm.chipName(vm.optionProjects, id)}}
-                            <a href="" style="color: #fff; margin-left: 6px;" ng-click="vm.removeProjectChip(id)">×</a>
+                        <span class="br-chip br-chip-project" ng-repeat="id in vm.filters.projectIds">
+                            {{vm.chipName(vm.optionProjects, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeProjectChip(id)" title="Remove">×</a>
                         </span>
                     </div>
 
-                    <div class="alert alert-warning" style="padding: 8px 12px; margin-bottom: 12px;"
-                         ng-if="vm.filtersDirty">
-                        Filters have changed. Click <strong>Apply filters to reload grid</strong> to update the results below.
+                    <div class="br-dirty" ng-if="vm.filtersDirty">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span>Filters have changed. Click <strong>Apply filters to reload grid</strong> to update the results below.</span>
                     </div>
 
                     <!-- Result mode: only when Active On is set -->
-                    <div class="form-group row" style="margin-bottom: 12px;" ng-if="vm.hasActiveOn()">
-                        <div class="col-sm-12">
-                            <label class="form-control-label" style="margin-right: 10px;">Show</label>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm"
-                                        ng-class="vm.resultMode === 'periods' ? 'btn-primary' : 'btn-default'"
-                                        ng-click="vm.setResultMode('periods')">Periods</button>
-                                <button type="button" class="btn btn-sm"
-                                        ng-class="vm.resultMode === 'effective' ? 'btn-primary' : 'btn-default'"
-                                        ng-click="vm.setResultMode('effective')">Effective</button>
-                            </div>
-                            <span class="text-muted" style="margin-left: 10px; font-size: 12px;"
-                                  ng-if="vm.resultMode === 'periods'">
-                                Rate periods that cover the Active On date (start / end shown).
-                            </span>
-                            <span class="text-muted" style="margin-left: 10px; font-size: 12px;"
-                                  ng-if="vm.resultMode === 'effective'">
-                                Resolved effective rate as of Active On (Project → Client → Default).
-                            </span>
+                    <div class="br-results-bar" ng-if="vm.hasActiveOn()">
+                        <div class="btn-group br-mode-toggle">
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.resultMode === 'periods' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setResultMode('periods')">Periods</button>
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.resultMode === 'effective' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setResultMode('effective')">Effective</button>
                         </div>
+                        <span class="br-mode-hint" ng-if="vm.resultMode === 'periods'">
+                            Rate periods that cover the Active On date
+                        </span>
+                        <span class="br-mode-hint" ng-if="vm.resultMode === 'effective'">
+                            Resolved rate as of Active On (Project → Client → Default)
+                        </span>
                     </div>
 
                     <!-- Periods grid -->
                     <div ng-if="vm.resultMode === 'periods'">
                         <div class="table-responsive">
-                            <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
+                            <table st-table="rowCollectionBasic" class="table table-striped br-table">
                                 <thead>
                                 <tr>
                                     <th>
@@ -180,12 +212,12 @@
                                         <a ng-click="vm.pageGrid.sort('Rate')">Rate</a>
                                     </th>
                                     <th>
-                                        <a ng-click="vm.pageGrid.sort('startDate')">Start Date</a>
+                                        <a ng-click="vm.pageGrid.sort('startDate')">Start</a>
                                     </th>
                                     <th>
-                                        <a ng-click="vm.pageGrid.sort('endDate')">End Date</a>
+                                        <a ng-click="vm.pageGrid.sort('endDate')">End</a>
                                     </th>
-                                    <th>
+                                    <th style="width: 90px;">
                                         <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newRecord()">
                                             <i class="fa fa-plus"></i> New
                                         </a>
@@ -201,7 +233,14 @@
                                             {{i.userName}}
                                         </a>
                                     </td>
-                                    <td>{{i.scope}}</td>
+                                    <td>
+                                        <span class="br-scope"
+                                              ng-class="{'br-scope-default': i.scope === 'Default',
+                                                         'br-scope-client': i.scope === 'Client',
+                                                         'br-scope-project': i.scope === 'Project'}">
+                                            {{i.scope}}
+                                        </span>
+                                    </td>
                                     <td>
                                         <a class="text-primary" ng-if="i.clientId"
                                            title="Open client rates"
@@ -218,7 +257,7 @@
                                         </a>
                                         <span ng-if="!i.projectId" class="text-muted">—</span>
                                     </td>
-                                    <td>{{i.rate}}</td>
+                                    <td class="br-rate">{{i.rate}}</td>
                                     <td>{{i.startDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>
@@ -229,7 +268,7 @@
                                     </td>
                                 </tr>
                                 <tr ng-show="vm.gridModel.data.length == 0">
-                                    <td colspan="8">
+                                    <td colspan="8" class="br-empty">
                                         No billing rates match the selected filters.
                                     </td>
                                 </tr>
@@ -254,7 +293,7 @@
                     <!-- Effective grid -->
                     <div ng-if="vm.resultMode === 'effective'">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped">
+                            <table class="table table-striped br-table">
                                 <thead>
                                 <tr>
                                     <th>
@@ -272,7 +311,7 @@
                                     <th>
                                         <a ng-click="vm.pageGrid.sort('effectiveScope')">Source</a>
                                     </th>
-                                    <th>
+                                    <th style="width: 90px;">
                                         <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newRecord()">
                                             <i class="fa fa-plus"></i> New
                                         </a>
@@ -305,11 +344,16 @@
                                         <span class="text-muted" ng-if="!i.projectId">—</span>
                                     </td>
                                     <td>
-                                        <strong ng-if="i.effectiveRate != null">{{i.effectiveRate}}</strong>
+                                        <span class="br-rate" ng-if="i.effectiveRate != null">{{i.effectiveRate}}</span>
                                         <span class="text-muted" ng-if="i.effectiveRate == null">Not set</span>
                                     </td>
                                     <td>
-                                        <span class="label label-default" ng-if="i.effectiveScope">{{i.effectiveScope}}</span>
+                                        <span class="br-scope" ng-if="i.effectiveScope"
+                                              ng-class="{'br-scope-default': i.effectiveScope === 'Default',
+                                                         'br-scope-client': i.effectiveScope === 'Client',
+                                                         'br-scope-project': i.effectiveScope === 'Project'}">
+                                            {{i.effectiveScope}}
+                                        </span>
                                         <span class="text-muted" ng-if="!i.effectiveScope">—</span>
                                     </td>
                                     <td>
@@ -326,7 +370,7 @@
                                     </td>
                                 </tr>
                                 <tr ng-show="vm.gridModel.data.length == 0">
-                                    <td colspan="6">
+                                    <td colspan="6" class="br-empty">
                                         No effective rates for the selected filters and Active On date.
                                     </td>
                                 </tr>
@@ -353,4 +397,3 @@
         </div>
     </div>
 </div>
-

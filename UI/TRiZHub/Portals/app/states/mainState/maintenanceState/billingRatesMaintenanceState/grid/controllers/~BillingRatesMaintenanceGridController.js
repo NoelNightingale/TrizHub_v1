@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
     __extends(BillingRatesMaintenanceGridController, _super);
+    //#endregion
     //#region Ctor
     function BillingRatesMaintenanceGridController($scope, $state, $timeout, BillingRatesService, Popups, tcrGrid) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
@@ -24,7 +25,6 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.BillingRatesService = BillingRatesService;
         _this.Popups = Popups;
         _this.tcrGrid = tcrGrid;
-        //#region Members
         _this.loadingIsDone = false;
         _this.gridModel = {
             data: [],
@@ -54,6 +54,8 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.projectFilterText = "";
         _this.optionsLoading = false;
         _this.cascadeTimer = null;
+        _this.exporting = false;
+        //#endregion
         _this.gridSearch = function (req) {
             if (_this.resultMode === "effective" && _this.filters.activeOn) {
                 return _this.BillingRatesService.effectiveRatesGrid(req);
@@ -272,7 +274,47 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             }
             _this.newRecord(scope, row.clientId, row.projectId, row.userAccountId);
         };
-        //#endregion
+        _this.exportExcel = function () {
+            var self = _this;
+            if (self.exporting) {
+                return;
+            }
+            if (self.resultMode === "effective" && !self.hasActiveOn()) {
+                self.handleError("Active On date is required for Effective export.");
+                return;
+            }
+            self.exporting = true;
+            self.BillingRatesService.exportExcel({
+                userAccountIds: self.filters.userAccountIds || [],
+                clientIds: self.filters.clientIds || [],
+                projectIds: self.filters.projectIds || [],
+                scope: self.resultMode === "periods" ? (self.filters.scope || null) : null,
+                activeOn: self.filters.activeOn || null,
+                resultMode: self.resultMode
+            }).then(function (response) {
+                self.exporting = false;
+                var disposition = response.headers("content-disposition") || "";
+                var filename = "BillingRates.xlsx";
+                var match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i.exec(disposition);
+                if (match && match[1]) {
+                    filename = match[1].replace(/['"]/g, "");
+                }
+                var blob = new Blob([response.data], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                var url = window.URL.createObjectURL(blob);
+                var link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, function (error) {
+                self.exporting = false;
+                self.handleError(error);
+            });
+        };
         var self = _this;
         _this.pageGrid = new TcrGridServiceModule.TcrGridService("startDate", _this.gridSearch, _this.onDataLoaded, function (model) {
             model.userAccountIds = self.filters.userAccountIds || [];
@@ -285,7 +327,6 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.applyFilters();
         return _this;
     }
-    //#endregion
     BillingRatesMaintenanceGridController.prototype.onLoadEvent = function (event) {
         this.gridModel = event;
         if (this.gridModel.totalItems > 0) {
@@ -303,3 +344,4 @@ angular.module("AngularApp")
     "Popups",
     BillingRatesMaintenanceGridController
 ]);
+//# sourceMappingURL=~BillingRatesMaintenanceGridController.js.map

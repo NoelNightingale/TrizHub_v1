@@ -34,6 +34,11 @@
             When set, only rates whose period covers this date (StartDate ≤ ActiveOn ≤ EndDate).
             </summary>
         </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ResultMode">
+            <summary>
+            Export / grid mode: "periods" (default) or "effective".
+            </summary>
+        </member>
         <member name="M:TRiZHub.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
             <summary>
             Generates an URI-friendly ID for the <see cref="T:System.Web.Http.Description.ApiDescription"/>. E.g. "Get-Values-id_name" instead of "GetValues/{id}?name={name}"
@@ -575,6 +580,12 @@
             <summary>
             Retrieve list of Billing rates sorted by Startdate.
             Filter by UserAccountId and/or ClientId and/or ProjectId, Scope, and ActiveOn.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.ExportExcel(TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel)">
+            <summary>
+            Export current filter selection to Excel (all matching rows, no paging).
+            ResultMode: "periods" (default) or "effective".
             </summary>
         </member>
         <member name="M:TRiZHub.Controllers.BillingRatesController.EffectiveRatesGrid(TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel)">

@@ -2,9 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security;
 using System.Web.Http;
 using TRiZHub.BL.Context;
@@ -216,6 +218,52 @@ namespace TRiZHub.Controllers
             var returnList = filteredQuery.ToList();
 
             return new GridResultModel<BillingRatesGridModel>(returnList, totalNumberOfRecords);
+        }
+
+        /// <summary>
+        /// Export current filter selection to Excel (all matching rows, no paging).
+        /// ResultMode: "periods" (default) or "effective".
+        /// </summary>
+        [HttpPost]
+        public HttpResponseMessage ExportExcel(BillingRatesSearchModel model)
+        {
+            try
+            {
+                DateTime? activeOn = null;
+                if (model != null && model.ActiveOn.HasValue)
+                    activeOn = model.ActiveOn.Value.ToLocalTime().Date;
+
+                var excel = BillingRatesProvider.ExportBillingRatesExcel(
+                    model != null ? model.UserAccountIds : null,
+                    model != null ? model.ClientIds : null,
+                    model != null ? model.ProjectIds : null,
+                    model != null ? model.Scope : null,
+                    activeOn,
+                    model != null ? model.ResultMode : null);
+
+                var mode = model != null &&
+                           string.Equals(model.ResultMode, "effective", StringComparison.OrdinalIgnoreCase)
+                    ? "Effective"
+                    : "Periods";
+                var filename = "BillingRates-" + mode + "-" + DateTime.Now.ToString("yyyyMMdd-HHmm") + ".xlsx";
+
+                var response = Request.CreateResponse(HttpStatusCode.OK);
+                response.Content = new StreamContent(new MemoryStream(excel));
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                {
+                    FileName = filename
+                };
+                return response;
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
         }
 
         /// <summary>

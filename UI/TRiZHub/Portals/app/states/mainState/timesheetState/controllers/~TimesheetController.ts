@@ -180,7 +180,11 @@ class TimesheetController extends CHControllerBase {
     }
 
     userSelectChange = (): void => {
+        this.cancelPaste();
+        this.closeClipboardDetails();
+        this.clipboardEditingLabel = null;
         this.getUserProjects();
+        this.loadClipboard();
         this.loadSavedTemplates();
         this.reloadGrid();
     };
@@ -1489,17 +1493,43 @@ class TimesheetController extends CHControllerBase {
 
     /** Display list (saved templates + local clips). */
     clipboard: any[] = [];
-    /** Ephemeral clips in localStorage only. */
+    /** Ephemeral clips in localStorage only (scoped to filter user). */
     localClips: any[] = [];
     /** Persisted templates for the filter user. */
     savedTemplates: any[] = [];
     clipboardPasteTarget: any = null;
     clipboardPasteItem: any = null;
     clipboardEditingLabel: any = null;
+    /** Clip currently shown in the detail preview overlay. */
+    clipboardDetailItem: any = null;
+
+    /** localStorage key for the currently selected user's local clips. */
+    private clipboardStorageKey = (): string => {
+        const userId = this.filterModel && this.filterModel.userId;
+        if (!userId) {
+            return null;
+        }
+        return TimesheetController.CLIPBOARD_KEY + "_" + userId;
+    };
 
     loadClipboard = (): void => {
+        const key = this.clipboardStorageKey();
+        if (!key) {
+            this.localClips = [];
+            this.rebuildClipboardView();
+            return;
+        }
         try {
-            const raw = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
+            let raw = localStorage.getItem(key);
+            // One-time migration from the old unscoped clipboard key
+            if (!raw) {
+                const legacy = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
+                if (legacy) {
+                    raw = legacy;
+                    localStorage.setItem(key, legacy);
+                    localStorage.removeItem(TimesheetController.CLIPBOARD_KEY);
+                }
+            }
             this.localClips = raw ? JSON.parse(raw) : [];
         } catch (e) {
             this.localClips = [];
@@ -1508,9 +1538,12 @@ class TimesheetController extends CHControllerBase {
     };
 
     saveClipboard = (): void => {
-        try {
-            localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(this.localClips));
-        } catch (e) { }
+        const key = this.clipboardStorageKey();
+        if (key) {
+            try {
+                localStorage.setItem(key, JSON.stringify(this.localClips));
+            } catch (e) { }
+        }
         this.rebuildClipboardView();
     };
 
@@ -1573,6 +1606,48 @@ class TimesheetController extends CHControllerBase {
         };
     };
 
+    /** Serialize one timesheet row for clipboard storage. Incomplete fields are kept as-is. */
+    private clipboardRowFromRecord = (r: any, dayOffset: number): any => {
+        return {
+            dayOffset: dayOffset,
+            projectGridId: r.projectGridId || r.projectId,
+            projectDescription: r.projectDescription,
+            clientEntityName: r.clientEntityName,
+            billable: r.billable,
+            subProjectId: r.subProjectId,
+            teamId: r.teamId,
+            activityId: r.activityId,
+            hours: r.hours,
+            comments: r.comments
+        };
+    };
+
+    private pushLocalClip = (item: any): void => {
+        this.localClips.unshift(item);
+        if (this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
+            this.localClips.length = TimesheetController.CLIPBOARD_MAX;
+        }
+        this.saveClipboard();
+    };
+
+    /** Copy a single entry (allowed even when fields are incomplete). Stored as a 1-line day clip for paste. */
+    copyEntryToClipboard = (record: any): void => {
+        if (!record) {
+            return;
+        }
+        const label = record.projectDescription
+            ? ((record.clientEntityName ? record.clientEntityName + " — " : "") + record.projectDescription)
+            : "Incomplete entry";
+        this.pushLocalClip({
+            type: "day",
+            label: label,
+            copiedAt: new Date().toISOString(),
+            rowCount: 1,
+            rows: [this.clipboardRowFromRecord(record, 0)],
+            isSaved: false
+        });
+    };
+
     copyDayToClipboard = (day: any): void => {
         if (!day || !day.records || !day.records.length) {
             this.Popups.showError(this.$scope, "This day has no records to copy.");
@@ -1580,33 +1655,16 @@ class TimesheetController extends CHControllerBase {
         }
         const rows = [];
         for (let i = 0; i < day.records.length; i++) {
-            const r = day.records[i];
-            rows.push({
-                dayOffset: 0,
-                projectGridId: r.projectGridId || r.projectId,
-                projectDescription: r.projectDescription,
-                clientEntityName: r.clientEntityName,
-                billable: r.billable,
-                subProjectId: r.subProjectId,
-                teamId: r.teamId,
-                activityId: r.activityId,
-                hours: r.hours,
-                comments: r.comments
-            });
+            rows.push(this.clipboardRowFromRecord(day.records[i], 0));
         }
-        const item = {
+        this.pushLocalClip({
             type: "day",
             label: day.label || this.formatDayLabel(day.date),
             copiedAt: new Date().toISOString(),
             rowCount: rows.length,
             rows: rows,
             isSaved: false
-        };
-        this.localClips.unshift(item);
-        if (this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
-            this.localClips.length = TimesheetController.CLIPBOARD_MAX;
-        }
-        this.saveClipboard();
+        });
     };
 
     copyWeekToClipboard = (): void => {
@@ -1622,53 +1680,97 @@ class TimesheetController extends CHControllerBase {
             const offset = day.weekdayIndex != null ? day.weekdayIndex : d;
             const records = day.records || [];
             for (let i = 0; i < records.length; i++) {
-                const r = records[i];
-                rows.push({
-                    dayOffset: offset,
-                    projectGridId: r.projectGridId || r.projectId,
-                    projectDescription: r.projectDescription,
-                    clientEntityName: r.clientEntityName,
-                    billable: r.billable,
-                    subProjectId: r.subProjectId,
-                    teamId: r.teamId,
-                    activityId: r.activityId,
-                    hours: r.hours,
-                    comments: r.comments
-                });
+                rows.push(me.clipboardRowFromRecord(records[i], offset));
             }
         }
         if (!rows.length) {
             me.Popups.showError(me.$scope, "Selected week has no records to copy.");
             return;
         }
-        const item = {
+        me.pushLocalClip({
             type: "week",
             label: week.label || ("Week " + week.weekNum),
             copiedAt: new Date().toISOString(),
             rowCount: rows.length,
             rows: rows,
             isSaved: false
-        };
-        me.localClips.unshift(item);
-        if (me.localClips.length > TimesheetController.CLIPBOARD_MAX) {
-            me.localClips.length = TimesheetController.CLIPBOARD_MAX;
-        }
-        me.saveClipboard();
+        });
     };
 
     /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
-    beginPaste = (item: any): void => {
-        this.clipboardPasteItem = item;
-        if (item.type === "week") {
-            this.clipboardPasteTarget = null;
-        } else {
-            this.clipboardPasteTarget = null;
+    beginPaste = (item: any, $event?: any): void => {
+        if ($event) {
+            $event.stopPropagation();
         }
+        this.closeClipboardDetails();
+        this.clipboardPasteItem = item;
+        this.clipboardPasteTarget = null;
     };
 
     cancelPaste = (): void => {
         this.clipboardPasteItem = null;
         this.clipboardPasteTarget = null;
+    };
+
+    showClipboardDetails = (item: any, $event?: any): void => {
+        if ($event) {
+            $event.stopPropagation();
+        }
+        if (!item) {
+            return;
+        }
+        this.cancelPaste();
+        this.clipboardDetailItem = item;
+    };
+
+    closeClipboardDetails = (): void => {
+        this.clipboardDetailItem = null;
+    };
+
+    pasteFromClipboardDetails = (): void => {
+        const item = this.clipboardDetailItem;
+        this.closeClipboardDetails();
+        if (item) {
+            this.beginPaste(item);
+        }
+    };
+
+    clipboardDayLabel = (dayOffset: number): string => {
+        if (dayOffset == null || dayOffset < 0 || dayOffset > 6) {
+            return "";
+        }
+        const header = this.weekDayHeaders[dayOffset];
+        return header ? header.full : "";
+    };
+
+    clipboardLookupName = (list: any[], id: any): string => {
+        if (id == null || id === "" || !list || !list.length) {
+            return "";
+        }
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === id) {
+                return list[i].description || "";
+            }
+        }
+        return "";
+    };
+
+    clipboardTeamName = (teamId: any): string => {
+        return this.clipboardLookupName(this.filterOptions.teams, teamId);
+    };
+
+    clipboardActivityName = (activityId: any): string => {
+        return this.clipboardLookupName(this.filterOptions.activities, activityId);
+    };
+
+    clipboardProjectLabel = (row: any): string => {
+        if (!row) {
+            return "";
+        }
+        if (row.projectDescription) {
+            return (row.clientEntityName ? row.clientEntityName + " — " : "") + row.projectDescription;
+        }
+        return "";
     };
 
     confirmPaste = (mode: string, targetDay?: any): void => {
@@ -1792,7 +1894,13 @@ class TimesheetController extends CHControllerBase {
         me.gridModel.data.push(newRecord);
     }
 
-    removeClipboardItem = (item: any): void => {
+    removeClipboardItem = (item: any, $event?: any): void => {
+        if ($event) {
+            $event.stopPropagation();
+        }
+        if (this.clipboardDetailItem === item) {
+            this.closeClipboardDetails();
+        }
         if (item && item.isSaved) {
             this.unpinClipboardItem(item);
             return;
@@ -1815,6 +1923,7 @@ class TimesheetController extends CHControllerBase {
     };
 
     clearClipboard = (): void => {
+        this.closeClipboardDetails();
         this.localClips = [];
         this.saveClipboard();
     };
@@ -1935,6 +2044,11 @@ class TimesheetController extends CHControllerBase {
                 me.TimesheetTemplateService.deleteTemplate(item.templateId)
                     .then(
                         () => {
+                            if (me.clipboardDetailItem &&
+                                (me.clipboardDetailItem === item ||
+                                 me.clipboardDetailItem.templateId === item.templateId)) {
+                                me.closeClipboardDetails();
+                            }
                             for (let i = me.savedTemplates.length - 1; i >= 0; i--) {
                                 if (me.savedTemplates[i].templateId === item.templateId) {
                                     me.savedTemplates.splice(i, 1);

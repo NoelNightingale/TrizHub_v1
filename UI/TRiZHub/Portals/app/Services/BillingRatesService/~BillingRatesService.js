@@ -134,6 +134,29 @@ var BillingRatesServiceModule;
                 });
                 return deferred.promise;
             };
+            _this.exportExcel = function (req) {
+                var deferred = _this.$q.defer();
+                _this.$http.post(_this.urlRoot + "ExportExcel", req || {}, { responseType: "arraybuffer" })
+                    .then(function (result) {
+                    deferred.resolve(result);
+                }, function (error) {
+                    var message = "Export failed.";
+                    try {
+                        if (error && error.data) {
+                            var decoded = String.fromCharCode.apply(null, new Uint8Array(error.data));
+                            var parsed = angular.fromJson(decoded);
+                            if (parsed && parsed.message) {
+                                message = parsed.message;
+                            }
+                        }
+                    }
+                    catch (e) {
+                        // keep default message
+                    }
+                    deferred.reject(message);
+                });
+                return deferred.promise;
+            };
             return _this;
         }
         return BillingRatesService;

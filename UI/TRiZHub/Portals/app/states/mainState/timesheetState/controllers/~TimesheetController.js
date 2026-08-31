@@ -60,7 +60,11 @@ var TimesheetController = /** @class */ (function (_super) {
             { index: 6, short: "S", full: "Sunday" }
         ];
         _this.userSelectChange = function () {
+            _this.cancelPaste();
+            _this.closeClipboardDetails();
+            _this.clipboardEditingLabel = null;
             _this.getUserProjects();
+            _this.loadClipboard();
             _this.loadSavedTemplates();
             _this.reloadGrid();
         };
@@ -1174,16 +1178,41 @@ var TimesheetController = /** @class */ (function (_super) {
         };
         /** Display list (saved templates + local clips). */
         _this.clipboard = [];
-        /** Ephemeral clips in localStorage only. */
+        /** Ephemeral clips in localStorage only (scoped to filter user). */
         _this.localClips = [];
         /** Persisted templates for the filter user. */
         _this.savedTemplates = [];
         _this.clipboardPasteTarget = null;
         _this.clipboardPasteItem = null;
         _this.clipboardEditingLabel = null;
+        /** Clip currently shown in the detail preview overlay. */
+        _this.clipboardDetailItem = null;
+        /** localStorage key for the currently selected user's local clips. */
+        _this.clipboardStorageKey = function () {
+            var userId = _this.filterModel && _this.filterModel.userId;
+            if (!userId) {
+                return null;
+            }
+            return TimesheetController.CLIPBOARD_KEY + "_" + userId;
+        };
         _this.loadClipboard = function () {
+            var key = _this.clipboardStorageKey();
+            if (!key) {
+                _this.localClips = [];
+                _this.rebuildClipboardView();
+                return;
+            }
             try {
-                var raw = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
+                var raw = localStorage.getItem(key);
+                // One-time migration from the old unscoped clipboard key
+                if (!raw) {
+                    var legacy = localStorage.getItem(TimesheetController.CLIPBOARD_KEY);
+                    if (legacy) {
+                        raw = legacy;
+                        localStorage.setItem(key, legacy);
+                        localStorage.removeItem(TimesheetController.CLIPBOARD_KEY);
+                    }
+                }
                 _this.localClips = raw ? JSON.parse(raw) : [];
             }
             catch (e) {
@@ -1192,10 +1221,13 @@ var TimesheetController = /** @class */ (function (_super) {
             _this.rebuildClipboardView();
         };
         _this.saveClipboard = function () {
-            try {
-                localStorage.setItem(TimesheetController.CLIPBOARD_KEY, JSON.stringify(_this.localClips));
+            var key = _this.clipboardStorageKey();
+            if (key) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(_this.localClips));
+                }
+                catch (e) { }
             }
-            catch (e) { }
             _this.rebuildClipboardView();
         };
         _this.rebuildClipboardView = function () {
@@ -1252,6 +1284,45 @@ var TimesheetController = /** @class */ (function (_super) {
                 rows: t.rows || []
             };
         };
+        /** Serialize one timesheet row for clipboard storage. Incomplete fields are kept as-is. */
+        _this.clipboardRowFromRecord = function (r, dayOffset) {
+            return {
+                dayOffset: dayOffset,
+                projectGridId: r.projectGridId || r.projectId,
+                projectDescription: r.projectDescription,
+                clientEntityName: r.clientEntityName,
+                billable: r.billable,
+                subProjectId: r.subProjectId,
+                teamId: r.teamId,
+                activityId: r.activityId,
+                hours: r.hours,
+                comments: r.comments
+            };
+        };
+        _this.pushLocalClip = function (item) {
+            _this.localClips.unshift(item);
+            if (_this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
+                _this.localClips.length = TimesheetController.CLIPBOARD_MAX;
+            }
+            _this.saveClipboard();
+        };
+        /** Copy a single entry (allowed even when fields are incomplete). Stored as a 1-line day clip for paste. */
+        _this.copyEntryToClipboard = function (record) {
+            if (!record) {
+                return;
+            }
+            var label = record.projectDescription
+                ? ((record.clientEntityName ? record.clientEntityName + " — " : "") + record.projectDescription)
+                : "Incomplete entry";
+            _this.pushLocalClip({
+                type: "day",
+                label: label,
+                copiedAt: new Date().toISOString(),
+                rowCount: 1,
+                rows: [_this.clipboardRowFromRecord(record, 0)],
+                isSaved: false
+            });
+        };
         _this.copyDayToClipboard = function (day) {
             if (!day || !day.records || !day.records.length) {
                 _this.Popups.showError(_this.$scope, "This day has no records to copy.");
@@ -1259,33 +1330,16 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             var rows = [];
             for (var i = 0; i < day.records.length; i++) {
-                var r = day.records[i];
-                rows.push({
-                    dayOffset: 0,
-                    projectGridId: r.projectGridId || r.projectId,
-                    projectDescription: r.projectDescription,
-                    clientEntityName: r.clientEntityName,
-                    billable: r.billable,
-                    subProjectId: r.subProjectId,
-                    teamId: r.teamId,
-                    activityId: r.activityId,
-                    hours: r.hours,
-                    comments: r.comments
-                });
+                rows.push(_this.clipboardRowFromRecord(day.records[i], 0));
             }
-            var item = {
+            _this.pushLocalClip({
                 type: "day",
                 label: day.label || _this.formatDayLabel(day.date),
                 copiedAt: new Date().toISOString(),
                 rowCount: rows.length,
                 rows: rows,
                 isSaved: false
-            };
-            _this.localClips.unshift(item);
-            if (_this.localClips.length > TimesheetController.CLIPBOARD_MAX) {
-                _this.localClips.length = TimesheetController.CLIPBOARD_MAX;
-            }
-            _this.saveClipboard();
+            });
         };
         _this.copyWeekToClipboard = function () {
             var me = _this;
@@ -1300,52 +1354,87 @@ var TimesheetController = /** @class */ (function (_super) {
                 var offset = day.weekdayIndex != null ? day.weekdayIndex : d;
                 var records = day.records || [];
                 for (var i = 0; i < records.length; i++) {
-                    var r = records[i];
-                    rows.push({
-                        dayOffset: offset,
-                        projectGridId: r.projectGridId || r.projectId,
-                        projectDescription: r.projectDescription,
-                        clientEntityName: r.clientEntityName,
-                        billable: r.billable,
-                        subProjectId: r.subProjectId,
-                        teamId: r.teamId,
-                        activityId: r.activityId,
-                        hours: r.hours,
-                        comments: r.comments
-                    });
+                    rows.push(me.clipboardRowFromRecord(records[i], offset));
                 }
             }
             if (!rows.length) {
                 me.Popups.showError(me.$scope, "Selected week has no records to copy.");
                 return;
             }
-            var item = {
+            me.pushLocalClip({
                 type: "week",
                 label: week.label || ("Week " + week.weekNum),
                 copiedAt: new Date().toISOString(),
                 rowCount: rows.length,
                 rows: rows,
                 isSaved: false
-            };
-            me.localClips.unshift(item);
-            if (me.localClips.length > TimesheetController.CLIPBOARD_MAX) {
-                me.localClips.length = TimesheetController.CLIPBOARD_MAX;
-            }
-            me.saveClipboard();
+            });
         };
         /** Begin paste flow — for day items, user picks a target day; for week items, target is current week. */
-        _this.beginPaste = function (item) {
+        _this.beginPaste = function (item, $event) {
+            if ($event) {
+                $event.stopPropagation();
+            }
+            _this.closeClipboardDetails();
             _this.clipboardPasteItem = item;
-            if (item.type === "week") {
-                _this.clipboardPasteTarget = null;
-            }
-            else {
-                _this.clipboardPasteTarget = null;
-            }
+            _this.clipboardPasteTarget = null;
         };
         _this.cancelPaste = function () {
             _this.clipboardPasteItem = null;
             _this.clipboardPasteTarget = null;
+        };
+        _this.showClipboardDetails = function (item, $event) {
+            if ($event) {
+                $event.stopPropagation();
+            }
+            if (!item) {
+                return;
+            }
+            _this.cancelPaste();
+            _this.clipboardDetailItem = item;
+        };
+        _this.closeClipboardDetails = function () {
+            _this.clipboardDetailItem = null;
+        };
+        _this.pasteFromClipboardDetails = function () {
+            var item = _this.clipboardDetailItem;
+            _this.closeClipboardDetails();
+            if (item) {
+                _this.beginPaste(item);
+            }
+        };
+        _this.clipboardDayLabel = function (dayOffset) {
+            if (dayOffset == null || dayOffset < 0 || dayOffset > 6) {
+                return "";
+            }
+            var header = _this.weekDayHeaders[dayOffset];
+            return header ? header.full : "";
+        };
+        _this.clipboardLookupName = function (list, id) {
+            if (id == null || id === "" || !list || !list.length) {
+                return "";
+            }
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].id === id) {
+                    return list[i].description || "";
+                }
+            }
+            return "";
+        };
+        _this.clipboardTeamName = function (teamId) {
+            return _this.clipboardLookupName(_this.filterOptions.teams, teamId);
+        };
+        _this.clipboardActivityName = function (activityId) {
+            return _this.clipboardLookupName(_this.filterOptions.activities, activityId);
+        };
+        _this.clipboardProjectLabel = function (row) {
+            if (!row) {
+                return "";
+            }
+            if (row.projectDescription) {
+                return (row.clientEntityName ? row.clientEntityName + " — " : "") + row.projectDescription;
+            }
+            return "";
         };
         _this.confirmPaste = function (mode, targetDay) {
             var me = _this;
@@ -1381,7 +1470,13 @@ var TimesheetController = /** @class */ (function (_super) {
             me.applyDefaultDayExpand();
             me.summaryList();
         };
-        _this.removeClipboardItem = function (item) {
+        _this.removeClipboardItem = function (item, $event) {
+            if ($event) {
+                $event.stopPropagation();
+            }
+            if (_this.clipboardDetailItem === item) {
+                _this.closeClipboardDetails();
+            }
             if (item && item.isSaved) {
                 _this.unpinClipboardItem(item);
                 return;
@@ -1404,6 +1499,7 @@ var TimesheetController = /** @class */ (function (_super) {
             }
         };
         _this.clearClipboard = function () {
+            _this.closeClipboardDetails();
             _this.localClips = [];
             _this.saveClipboard();
         };
@@ -1506,6 +1602,11 @@ var TimesheetController = /** @class */ (function (_super) {
                 }
                 me.TimesheetTemplateService.deleteTemplate(item.templateId)
                     .then(function () {
+                    if (me.clipboardDetailItem &&
+                        (me.clipboardDetailItem === item ||
+                            me.clipboardDetailItem.templateId === item.templateId)) {
+                        me.closeClipboardDetails();
+                    }
                     for (var i = me.savedTemplates.length - 1; i >= 0; i--) {
                         if (me.savedTemplates[i].templateId === item.templateId) {
                             me.savedTemplates.splice(i, 1);

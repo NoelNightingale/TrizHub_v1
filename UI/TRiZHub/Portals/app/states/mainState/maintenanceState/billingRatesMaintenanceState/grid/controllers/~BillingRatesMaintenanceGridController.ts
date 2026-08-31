@@ -78,7 +78,7 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
 
     cascadeTimer: any = null;
 
-
+    exporting = false;
 
     //#endregion
 
@@ -662,6 +662,52 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
 
         this.newRecord(scope, row.clientId, row.projectId, row.userAccountId);
 
+    };
+
+    exportExcel = () => {
+        const self = this;
+        if (self.exporting) {
+            return;
+        }
+        if (self.resultMode === "effective" && !self.hasActiveOn()) {
+            self.handleError("Active On date is required for Effective export.");
+            return;
+        }
+
+        self.exporting = true;
+        self.BillingRatesService.exportExcel({
+            userAccountIds: self.filters.userAccountIds || [],
+            clientIds: self.filters.clientIds || [],
+            projectIds: self.filters.projectIds || [],
+            scope: self.resultMode === "periods" ? (self.filters.scope || null) : null,
+            activeOn: self.filters.activeOn || null,
+            resultMode: self.resultMode
+        }).then(
+            (response: any) => {
+                self.exporting = false;
+                const disposition = response.headers("content-disposition") || "";
+                let filename = "BillingRates.xlsx";
+                const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i.exec(disposition);
+                if (match && match[1]) {
+                    filename = match[1].replace(/['"]/g, "");
+                }
+
+                const blob = new Blob([response.data], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            },
+            error => {
+                self.exporting = false;
+                self.handleError(error);
+            });
     };
 
 }

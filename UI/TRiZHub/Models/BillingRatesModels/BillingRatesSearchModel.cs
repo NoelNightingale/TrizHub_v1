@@ -37,6 +37,11 @@ namespace TRiZHub.Models.BillingRatesModels
         /// When set, only rates whose period covers this date (StartDate ≤ ActiveOn ≤ EndDate).
         /// </summary>
         public DateTime? ActiveOn { get; set; }
+
+        /// <summary>
+        /// Export / grid mode: "periods" (default) or "effective".
+        /// </summary>
+        public string ResultMode { get; set; }
     }
 
     public class BillingRatesFilterOptionsRequest
