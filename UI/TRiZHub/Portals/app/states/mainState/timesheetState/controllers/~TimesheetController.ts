@@ -165,7 +165,24 @@ class TimesheetController extends CHControllerBase {
 
         // Load clipboard from localStorage + saved templates for this user
         this.loadClipboard();
+        this.loadClipboardDrawerPref();
         this.loadSavedTemplates();
+
+        const onClipboardKeydown = (e: any) => {
+            if (e.keyCode !== 27 || !me.clipboardDrawerOpen) {
+                return;
+            }
+            if (me.clipboardDetailItem || me.clipboardPasteItem || me.clipboardEditingLabel) {
+                return;
+            }
+            me.$scope.$applyAsync(() => {
+                me.closeClipboardDrawer();
+            });
+        };
+        angular.element(document).on("keydown.tsClipboardDrawer", onClipboardKeydown);
+        me.$scope.$on("$destroy", () => {
+            angular.element(document).off("keydown.tsClipboardDrawer", onClipboardKeydown);
+        });
     }
 
     getUserProjects() {
@@ -182,6 +199,7 @@ class TimesheetController extends CHControllerBase {
     userSelectChange = (): void => {
         this.cancelPaste();
         this.closeClipboardDetails();
+        this.closeClipboardDrawer();
         this.clipboardEditingLabel = null;
         this.getUserProjects();
         this.loadClipboard();
@@ -1489,6 +1507,7 @@ class TimesheetController extends CHControllerBase {
     //#region Clipboard
 
     private static CLIPBOARD_KEY = "trizhub_ts_clipboard";
+    private static CLIPBOARD_DRAWER_KEY = "trizhub_ts_clipboard_drawer";
     private static CLIPBOARD_MAX = 20;
 
     /** Display list (saved templates + local clips). */
@@ -1502,6 +1521,8 @@ class TimesheetController extends CHControllerBase {
     clipboardEditingLabel: any = null;
     /** Clip currently shown in the detail preview overlay. */
     clipboardDetailItem: any = null;
+    /** Left clipboard drawer open state. */
+    clipboardDrawerOpen: boolean = false;
 
     /** localStorage key for the currently selected user's local clips. */
     private clipboardStorageKey = (): string => {
@@ -1725,6 +1746,40 @@ class TimesheetController extends CHControllerBase {
 
     closeClipboardDetails = (): void => {
         this.clipboardDetailItem = null;
+    };
+
+    loadClipboardDrawerPref = (): void => {
+        try {
+            this.clipboardDrawerOpen = localStorage.getItem(TimesheetController.CLIPBOARD_DRAWER_KEY) === "1";
+        } catch (e) {
+            this.clipboardDrawerOpen = false;
+        }
+    };
+
+    private persistClipboardDrawerPref = (): void => {
+        try {
+            localStorage.setItem(
+                TimesheetController.CLIPBOARD_DRAWER_KEY,
+                this.clipboardDrawerOpen ? "1" : "0");
+        } catch (e) { }
+    };
+
+    openClipboardDrawer = (): void => {
+        this.clipboardDrawerOpen = true;
+        this.persistClipboardDrawerPref();
+    };
+
+    closeClipboardDrawer = (): void => {
+        this.clipboardDrawerOpen = false;
+        this.persistClipboardDrawerPref();
+    };
+
+    toggleClipboardDrawer = (): void => {
+        if (this.clipboardDrawerOpen) {
+            this.closeClipboardDrawer();
+        } else {
+            this.openClipboardDrawer();
+        }
     };
 
     pasteFromClipboardDetails = (): void => {

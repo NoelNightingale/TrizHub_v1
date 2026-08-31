@@ -62,6 +62,7 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.userSelectChange = function () {
             _this.cancelPaste();
             _this.closeClipboardDetails();
+            _this.closeClipboardDrawer();
             _this.clipboardEditingLabel = null;
             _this.getUserProjects();
             _this.loadClipboard();
@@ -1187,6 +1188,8 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.clipboardEditingLabel = null;
         /** Clip currently shown in the detail preview overlay. */
         _this.clipboardDetailItem = null;
+        /** Left clipboard drawer open state. */
+        _this.clipboardDrawerOpen = false;
         /** localStorage key for the currently selected user's local clips. */
         _this.clipboardStorageKey = function () {
             var userId = _this.filterModel && _this.filterModel.userId;
@@ -1395,6 +1398,36 @@ var TimesheetController = /** @class */ (function (_super) {
         };
         _this.closeClipboardDetails = function () {
             _this.clipboardDetailItem = null;
+        };
+        _this.loadClipboardDrawerPref = function () {
+            try {
+                _this.clipboardDrawerOpen = localStorage.getItem(TimesheetController.CLIPBOARD_DRAWER_KEY) === "1";
+            }
+            catch (e) {
+                _this.clipboardDrawerOpen = false;
+            }
+        };
+        _this.persistClipboardDrawerPref = function () {
+            try {
+                localStorage.setItem(TimesheetController.CLIPBOARD_DRAWER_KEY, _this.clipboardDrawerOpen ? "1" : "0");
+            }
+            catch (e) { }
+        };
+        _this.openClipboardDrawer = function () {
+            _this.clipboardDrawerOpen = true;
+            _this.persistClipboardDrawerPref();
+        };
+        _this.closeClipboardDrawer = function () {
+            _this.clipboardDrawerOpen = false;
+            _this.persistClipboardDrawerPref();
+        };
+        _this.toggleClipboardDrawer = function () {
+            if (_this.clipboardDrawerOpen) {
+                _this.closeClipboardDrawer();
+            }
+            else {
+                _this.openClipboardDrawer();
+            }
         };
         _this.pasteFromClipboardDetails = function () {
             var item = _this.clipboardDetailItem;
@@ -1712,7 +1745,23 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.getUserProjects();
         // Load clipboard from localStorage + saved templates for this user
         _this.loadClipboard();
+        _this.loadClipboardDrawerPref();
         _this.loadSavedTemplates();
+        var onClipboardKeydown = function (e) {
+            if (e.keyCode !== 27 || !me.clipboardDrawerOpen) {
+                return;
+            }
+            if (me.clipboardDetailItem || me.clipboardPasteItem || me.clipboardEditingLabel) {
+                return;
+            }
+            me.$scope.$applyAsync(function () {
+                me.closeClipboardDrawer();
+            });
+        };
+        angular.element(document).on("keydown.tsClipboardDrawer", onClipboardKeydown);
+        me.$scope.$on("$destroy", function () {
+            angular.element(document).off("keydown.tsClipboardDrawer", onClipboardKeydown);
+        });
         return _this;
     }
     TimesheetController.prototype.getUserProjects = function () {
@@ -1839,6 +1888,7 @@ var TimesheetController = /** @class */ (function (_super) {
     };
     //#region Clipboard
     TimesheetController.CLIPBOARD_KEY = "trizhub_ts_clipboard";
+    TimesheetController.CLIPBOARD_DRAWER_KEY = "trizhub_ts_clipboard_drawer";
     TimesheetController.CLIPBOARD_MAX = 20;
     return TimesheetController;
 }(CHControllerBase));

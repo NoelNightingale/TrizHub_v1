@@ -528,7 +528,8 @@
                                 animation: false,
                                 templateUrl: _root + "TimeSheetAddRecords.html?" + (typeof APP_CACHE_VER !== "undefined" ? APP_CACHE_VER : "v=1"),
                                 scope: $scope,
-                                size: "lg"
+                                size: "lg",
+                                windowClass: "ts-bulk-populate-modal"
                             }),
                         noClick: function () {
                             const me = this;

@@ -1,4 +1,53 @@
 ﻿<style>
+    .ts-bulk-populate-modal .modal-content {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    }
+
+    .ts-bulk-populate .modal-header {
+        background: #6a6a6a;
+        color: #fff;
+        border: none;
+        padding: 14px 18px;
+        border-radius: 0;
+    }
+
+    .ts-bulk-populate .modal-header .modal-title {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin: 0;
+        color: #fff;
+    }
+
+    .ts-bulk-populate .modal-body {
+        background: #fff;
+    }
+
+    .ts-bulk-populate .modal-footer {
+        background: #fff;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-bulk-populate .ts-bulk-populate-primary {
+        background: #6a6a6a;
+        border-color: #6a6a6a;
+        color: #fff;
+    }
+
+    .ts-bulk-populate .ts-bulk-populate-primary:hover:not(:disabled),
+    .ts-bulk-populate .ts-bulk-populate-primary:focus:not(:disabled) {
+        background: #555;
+        border-color: #555;
+        color: #fff;
+    }
+
+    .ts-bulk-populate .ts-bulk-populate-primary:disabled {
+        opacity: 0.55;
+    }
+
     .ts-day-picker {
         margin-top: 8px;
         margin-bottom: 12px;
@@ -21,7 +70,7 @@
     .ts-day-picker .ts-day-picker-count {
         font-size: 12px;
         font-weight: 600;
-        color: #1a5f7a;
+        color: #6a6a6a;
     }
 
     .ts-day-picker table {
@@ -64,8 +113,8 @@
 
     .ts-day-picker th.ts-day-col:hover,
     .ts-day-picker th.ts-corner:hover {
-        background: rgba(26, 95, 122, 0.1);
-        color: #1a5f7a;
+        background: rgba(106, 106, 106, 0.1);
+        color: #6a6a6a;
     }
 
     .ts-day-picker th.ts-corner {
@@ -106,11 +155,11 @@
     }
 
     .ts-day-picker td.ts-day-cell.in-period:hover {
-        background: rgba(26, 95, 122, 0.06);
+        background: rgba(106, 106, 106, 0.06);
     }
 
     .ts-day-picker td.ts-day-cell.in-period.selected {
-        background: rgba(26, 95, 122, 0.16);
+        background: rgba(106, 106, 106, 0.16);
     }
 
     .ts-day-picker td.ts-day-cell.out-of-period {
@@ -136,7 +185,7 @@
     }
 
     .ts-day-picker td.ts-day-cell.selected .ts-day-check {
-        color: #1a5f7a;
+        color: #6a6a6a;
         font-weight: 700;
     }
 
@@ -152,11 +201,12 @@
     }
 </style>
 
-<div class="modal-header {{app.setting.theme.info}}">
-    <h4 class="modal-title">{{popupModel.header}}</h4>
-</div>
+<div class="ts-bulk-populate">
+    <div class="modal-header">
+        <h4 class="modal-title">{{popupModel.header}}</h4>
+    </div>
 
-<div class="modal-body">
+    <div class="modal-body">
     <form role="form" class="form-horizontal">
         <fieldset>
             <div class="form-group" show-errors style="margin-bottom: 8px;">
@@ -266,9 +316,10 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
+    <button class="btn btn-default"
             type="button" ng-click="popupModel.noClick()">{{popupModel.noButton}}</button>
-    <button class="btn {{app.setting.theme.primary}}" type="button"
+    <button class="btn ts-bulk-populate-primary" type="button"
             ng-click="popupModel.yesClick()"
             ng-disabled="popupModel.selectedCount() === 0">{{popupModel.yesButton}}</button>
+</div>
 </div>
