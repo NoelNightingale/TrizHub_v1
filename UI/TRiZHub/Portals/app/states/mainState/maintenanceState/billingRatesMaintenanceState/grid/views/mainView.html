@@ -109,7 +109,7 @@
 
                     <!-- Toolbar -->
                     <div class="br-toolbar">
-                        <div class="br-toolbar-field" ng-if="vm.resultMode === 'periods'">
+                        <div class="br-toolbar-field">
                             <label>Scope</label>
                             <select class="form-control input-sm" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
                                 <option value="">All</option>
@@ -172,27 +172,7 @@
                         <span>Filters have changed. Click <strong>Apply filters to reload grid</strong> to update the results below.</span>
                     </div>
 
-                    <!-- Result mode: only when Active On is set -->
-                    <div class="br-results-bar" ng-if="vm.hasActiveOn()">
-                        <div class="btn-group br-mode-toggle">
-                            <button type="button" class="btn btn-sm"
-                                    ng-class="vm.resultMode === 'periods' ? 'btn-primary' : 'btn-default'"
-                                    ng-click="vm.setResultMode('periods')">Periods</button>
-                            <button type="button" class="btn btn-sm"
-                                    ng-class="vm.resultMode === 'effective' ? 'btn-primary' : 'btn-default'"
-                                    ng-click="vm.setResultMode('effective')">Effective</button>
-                        </div>
-                        <span class="br-mode-hint" ng-if="vm.resultMode === 'periods'">
-                            Rate periods that cover the Active On date
-                        </span>
-                        <span class="br-mode-hint" ng-if="vm.resultMode === 'effective'">
-                            Resolved rate as of Active On (Project → Client → Default)
-                        </span>
-                    </div>
-
-                    <!-- Periods grid -->
-                    <div ng-if="vm.resultMode === 'periods'">
-                        <div class="table-responsive">
+                    <div class="table-responsive">
                             <table st-table="rowCollectionBasic" class="table table-striped br-table">
                                 <thead>
                                 <tr>
@@ -288,109 +268,6 @@
                                 </uib-pagination>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Effective grid -->
-                    <div ng-if="vm.resultMode === 'effective'">
-                        <div class="table-responsive">
-                            <table class="table table-striped br-table">
-                                <thead>
-                                <tr>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('userName')">User</a>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('clientName')">Client</a>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('projectName')">Project</a>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('effectiveRate')">Effective Rate</a>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('effectiveScope')">Source</a>
-                                    </th>
-                                    <th style="width: 90px;">
-                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newRecord()">
-                                            <i class="fa fa-plus"></i> New
-                                        </a>
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr data-ng-repeat="i in vm.gridModel.data">
-                                    <td>
-                                        <a class="text-primary"
-                                           title="Open default rates for this user"
-                                           ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: i.userAccountId})">
-                                            {{i.userName}}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a class="text-primary" ng-if="i.clientId"
-                                           title="Open client rates"
-                                           ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId})">
-                                            {{i.clientName}}
-                                        </a>
-                                        <span class="text-muted" ng-if="!i.clientId">—</span>
-                                    </td>
-                                    <td>
-                                        <a class="text-primary" ng-if="i.projectId"
-                                           title="Open project rates"
-                                           ui-sref="mainState.maintenance.projectMaintenance.teamRates({id: i.projectId})">
-                                            {{i.projectName}}
-                                        </a>
-                                        <span class="text-muted" ng-if="!i.projectId">—</span>
-                                    </td>
-                                    <td>
-                                        <span class="br-rate" ng-if="i.effectiveRate != null">{{i.effectiveRate}}</span>
-                                        <span class="text-muted" ng-if="i.effectiveRate == null">Not set</span>
-                                    </td>
-                                    <td>
-                                        <span class="br-scope" ng-if="i.effectiveScope"
-                                              ng-class="{'br-scope-default': i.effectiveScope === 'Default',
-                                                         'br-scope-client': i.effectiveScope === 'Client',
-                                                         'br-scope-project': i.effectiveScope === 'Project'}">
-                                            {{i.effectiveScope}}
-                                        </span>
-                                        <span class="text-muted" ng-if="!i.effectiveScope">—</span>
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
-                                           ng-if="i.id"
-                                           ng-click="vm.editRecord(i.id)">
-                                            <i class="fa fa-edit"></i> Edit
-                                        </a>
-                                        <a class="btn btn-xs btn-fw btn-primary"
-                                           ng-if="!i.id"
-                                           ng-click="vm.addFromEffectiveRow(i)">
-                                            <i class="fa fa-plus"></i> Add
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr ng-show="vm.gridModel.data.length == 0">
-                                    <td colspan="6" class="br-empty">
-                                        No effective rates for the selected filters and Active On date.
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-
-                            <div class="w-full m-b-2 center-container">
-                                <uib-pagination total-items="vm.gridModel.totalItems"
-                                                ng-model="vm.gridModel.currentPage"
-                                                max-size="vm.gridModel.maxSize"
-                                                class="pagination-sm m-b-sm m-t-sm white"
-                                                boundary-links="true"
-                                                previous-text="<" next-text=">"
-                                                rotate="false"
-                                                ng-change="vm.pageGrid.pageChanged()"
-                                                items-per-page="vm.gridModel.recordsPerPage">
-                                </uib-pagination>
-                            </div>
-                        </div>
-                    </div>
 
                 </div>
             </div>

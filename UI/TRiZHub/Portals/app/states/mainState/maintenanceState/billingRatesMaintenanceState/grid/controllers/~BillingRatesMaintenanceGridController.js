@@ -35,8 +35,6 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             recordsPerPage: 60
         };
         _this.onDataLoaded = function (event) { _this.onLoadEvent(event); };
-        /** "periods" = rate periods grid; "effective" = effective rate as of Active On */
-        _this.resultMode = "periods";
         /** True when filters changed since the last successful Apply / grid load. */
         _this.filtersDirty = false;
         _this.filters = {
@@ -55,40 +53,13 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.optionsLoading = false;
         _this.cascadeTimer = null;
         _this.exporting = false;
-        //#endregion
-        _this.gridSearch = function (req) {
-            if (_this.resultMode === "effective" && _this.filters.activeOn) {
-                return _this.BillingRatesService.effectiveRatesGrid(req);
-            }
-            return _this.BillingRatesService.billingRatesGrid(req);
-        };
-        _this.hasActiveOn = function () {
-            return !!_this.filters.activeOn;
-        };
         _this.markFiltersDirty = function () {
             _this.filtersDirty = true;
         };
         _this.onActiveOnChanged = function () {
-            if (!_this.filters.activeOn && _this.resultMode === "effective") {
-                _this.resultMode = "periods";
-            }
             _this.markFiltersDirty();
         };
-        _this.setResultMode = function (mode) {
-            if (mode === "effective" && !_this.hasActiveOn()) {
-                return;
-            }
-            if (_this.resultMode === mode) {
-                return;
-            }
-            _this.resultMode = mode;
-            // Display mode change reloads with the current filter selection.
-            _this.applyFilters();
-        };
         _this.applyFilters = function () {
-            if (_this.resultMode === "effective" && !_this.hasActiveOn()) {
-                _this.resultMode = "periods";
-            }
             _this.filtersDirty = false;
             if (_this.pageGrid && _this.pageGrid.gridModel) {
                 _this.pageGrid.gridModel.currentPage = 1;
@@ -101,7 +72,6 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             _this.filters.projectIds = [];
             _this.filters.scope = "";
             _this.filters.activeOn = null;
-            _this.resultMode = "periods";
             _this.refreshFilterOptions(false);
             _this.applyFilters();
         };
@@ -261,26 +231,9 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             }
             _this.$state.transitionTo("mainState.maintenance.billingRatesMaintenance.detail", { id: rateId });
         };
-        _this.addFromEffectiveRow = function (row) {
-            if (!row) {
-                return;
-            }
-            var scope = "Default";
-            if (row.projectId) {
-                scope = "Project";
-            }
-            else if (row.clientId) {
-                scope = "Client";
-            }
-            _this.newRecord(scope, row.clientId, row.projectId, row.userAccountId);
-        };
         _this.exportExcel = function () {
             var self = _this;
             if (self.exporting) {
-                return;
-            }
-            if (self.resultMode === "effective" && !self.hasActiveOn()) {
-                self.handleError("Active On date is required for Effective export.");
                 return;
             }
             self.exporting = true;
@@ -288,9 +241,9 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
                 userAccountIds: self.filters.userAccountIds || [],
                 clientIds: self.filters.clientIds || [],
                 projectIds: self.filters.projectIds || [],
-                scope: self.resultMode === "periods" ? (self.filters.scope || null) : null,
+                scope: self.filters.scope || null,
                 activeOn: self.filters.activeOn || null,
-                resultMode: self.resultMode
+                resultMode: "periods"
             }).then(function (response) {
                 self.exporting = false;
                 var disposition = response.headers("content-disposition") || "";
@@ -316,17 +269,18 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             });
         };
         var self = _this;
-        _this.pageGrid = new TcrGridServiceModule.TcrGridService("startDate", _this.gridSearch, _this.onDataLoaded, function (model) {
+        _this.pageGrid = new TcrGridServiceModule.TcrGridService("startDate", _this.BillingRatesService.billingRatesGrid, _this.onDataLoaded, function (model) {
             model.userAccountIds = self.filters.userAccountIds || [];
             model.clientIds = self.filters.clientIds || [];
             model.projectIds = self.filters.projectIds || [];
-            model.scope = self.resultMode === "periods" ? (self.filters.scope || null) : null;
+            model.scope = self.filters.scope || null;
             model.activeOn = self.filters.activeOn || null;
         }, null, _this.$state);
         _this.refreshFilterOptions(false);
         _this.applyFilters();
         return _this;
     }
+    //#endregion
     BillingRatesMaintenanceGridController.prototype.onLoadEvent = function (event) {
         this.gridModel = event;
         if (this.gridModel.totalItems > 0) {
