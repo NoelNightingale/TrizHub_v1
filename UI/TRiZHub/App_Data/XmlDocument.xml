@@ -39,6 +39,21 @@
             Export / grid mode: "periods" (default) or "effective".
             </summary>
         </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.UserStatus">
+            <summary>
+            "active", "inactive", or "all". Null = do not filter (nested screens).
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ClientStatus">
+            <summary>
+            "active", "inactive", or "all". Null = do not filter (nested screens).
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ProjectStatus">
+            <summary>
+            "active", "inactive", or "all". Null = do not filter (nested screens).
+            </summary>
+        </member>
         <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesFilterOptionsRequest.UserStatus">
             <summary>
             "active" (default), "inactive", or "all".

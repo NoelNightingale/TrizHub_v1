@@ -878,6 +878,16 @@
         box-shadow: inset 0 0 0 2px rgba(30, 41, 59, 0.25);
     }
 
+    .ts-capture table.ts-heat-table td.ts-heat-cell.out-of-period {
+        cursor: default;
+        background: rgba(0, 0, 0, 0.03);
+        color: transparent;
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell.out-of-period:hover {
+        box-shadow: none;
+    }
+
     .ts-capture .ts-heat-date {
         display: block;
         font-size: 10px;
@@ -1764,13 +1774,13 @@
                                             {{week.weekNum}}
                                             <span class="sub">{{week.label.split('·')[1]}}</span>
                                         </th>
-                                        <td ng-repeat="day in week.days"
+                                        <td ng-repeat="day in week.daysByCol track by $index"
                                             class="ts-heat-cell"
-                                            ng-class="{'hrs-ok': day.hours >= 8, 'hrs-low': day.hours > 0 && day.hours < 8, 'hrs-gap': !day.hours}"
-                                            ng-click="vm.selectWeek(week.index); day.expanded = true"
-                                            title="{{day.date | date:'d MMM'}} — {{day.hours || 0}}h total, {{day.billhours || 0}} billable, {{(day.hours || 0) - (day.billhours || 0)}} non-billable">
-                                            <span class="ts-heat-date">{{day.date | date:'d'}}</span>
-                                            <span class="ts-heat-body">
+                                            ng-class="vm.heatClassFor(week, $index)"
+                                            ng-click="vm.jumpToCol(week, $index)"
+                                            title="{{day ? ((day.date | date:'d MMM') + ' — ' + (day.hours || 0) + 'h total, ' + (day.billhours || 0) + ' billable, ' + ((day.hours || 0) - (day.billhours || 0)) + ' non-billable') : ''}}">
+                                            <span class="ts-heat-date" ng-if="day">{{day.dayOfMonth || (day.date | date:'d')}}</span>
+                                            <span class="ts-heat-body" ng-if="day">
                                                 <span class="ts-heat-hours">{{day.hours || 0}}</span>
                                                 <span class="ts-heat-chips">
                                                     <span class="ts-heat-chip is-bill" title="Billable">{{day.billhours || 0}}</span>

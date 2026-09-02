@@ -128,7 +128,8 @@ namespace TRiZHub.Controllers
 
             var filteredQuery = BillingRatesProvider.BillingRatesFilterList(
                     model.UserAccountId, model.ClientId, model.ProjectId, model.Scope, activeOn,
-                    model.UserAccountIds, model.ClientIds, model.ProjectIds)
+                    model.UserAccountIds, model.ClientIds, model.ProjectIds,
+                    model.UserStatus, model.ClientStatus, model.ProjectStatus)
                 .Select(a => new BillingRatesGridModel
                 {
                     Id = a.Id,
@@ -239,7 +240,10 @@ namespace TRiZHub.Controllers
                     model != null ? model.ProjectIds : null,
                     model != null ? model.Scope : null,
                     activeOn,
-                    model != null ? model.ResultMode : null);
+                    model != null ? model.ResultMode : null,
+                    model != null ? model.UserStatus : null,
+                    model != null ? model.ClientStatus : null,
+                    model != null ? model.ProjectStatus : null);
 
                 var mode = model != null &&
                            string.Equals(model.ResultMode, "effective", StringComparison.OrdinalIgnoreCase)

@@ -65,6 +65,9 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
                 model.projectIds = self.filters.projectIds || [];
                 model.scope = self.filters.scope || null;
                 model.activeOn = self.filters.activeOn || null;
+                model.userStatus = self.filters.userStatus || "active";
+                model.clientStatus = self.filters.clientStatus || "active";
+                model.projectStatus = self.filters.projectStatus || "active";
             },
             null,
             this.$state);
@@ -87,6 +90,11 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
     };
 
     onActiveOnChanged = () => {
+        this.markFiltersDirty();
+    };
+
+    clearEffectiveDate = () => {
+        this.filters.activeOn = null;
         this.markFiltersDirty();
     };
 
@@ -332,7 +340,10 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
             projectIds: self.filters.projectIds || [],
             scope: self.filters.scope || null,
             activeOn: self.filters.activeOn || null,
-            resultMode: "periods"
+            resultMode: "periods",
+            userStatus: self.filters.userStatus || "active",
+            clientStatus: self.filters.clientStatus || "active",
+            projectStatus: self.filters.projectStatus || "active"
         }).then(
             (response: any) => {
                 self.exporting = false;

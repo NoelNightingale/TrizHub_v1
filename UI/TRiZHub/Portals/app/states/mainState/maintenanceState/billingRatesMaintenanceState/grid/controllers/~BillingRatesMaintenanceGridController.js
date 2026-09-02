@@ -62,6 +62,10 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.onActiveOnChanged = function () {
             _this.markFiltersDirty();
         };
+        _this.clearEffectiveDate = function () {
+            _this.filters.activeOn = null;
+            _this.markFiltersDirty();
+        };
         _this.setStatusFilter = function (dimension, status) {
             if (dimension === "user") {
                 if (_this.filters.userStatus === status) {
@@ -277,7 +281,10 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
                 projectIds: self.filters.projectIds || [],
                 scope: self.filters.scope || null,
                 activeOn: self.filters.activeOn || null,
-                resultMode: "periods"
+                resultMode: "periods",
+                userStatus: self.filters.userStatus || "active",
+                clientStatus: self.filters.clientStatus || "active",
+                projectStatus: self.filters.projectStatus || "active"
             }).then(function (response) {
                 self.exporting = false;
                 var disposition = response.headers("content-disposition") || "";
@@ -309,6 +316,9 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             model.projectIds = self.filters.projectIds || [];
             model.scope = self.filters.scope || null;
             model.activeOn = self.filters.activeOn || null;
+            model.userStatus = self.filters.userStatus || "active";
+            model.clientStatus = self.filters.clientStatus || "active";
+            model.projectStatus = self.filters.projectStatus || "active";
         }, null, _this.$state);
         _this.refreshFilterOptions(false);
         _this.applyFilters();

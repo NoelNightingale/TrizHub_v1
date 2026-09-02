@@ -30,7 +30,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         public IQueryable<BillingRates> BillingRatesFilterList(Guid? userAccountId, Guid? clientId, Guid? projectId,
             string scope = null, DateTime? activeOn = null,
-            IList<Guid> userAccountIds = null, IList<Guid> clientIds = null, IList<Guid> projectIds = null)
+            IList<Guid> userAccountIds = null, IList<Guid> clientIds = null, IList<Guid> projectIds = null,
+            string userStatus = null, string clientStatus = null, string projectStatus = null)
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
 
@@ -89,6 +90,44 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             {
                 var onDate = activeOn.Value.Date;
                 query = query.Where(a => a.StartDate <= onDate && a.EndDate >= onDate);
+            }
+
+            // Status filters (null = do not apply — preserves nested User Billing Rates behaviour).
+            if (!string.IsNullOrWhiteSpace(userStatus))
+            {
+                var userMode = NormalizeActiveStatus(userStatus);
+                if (userMode == "active")
+                    query = query.Where(a => a.UserAccount.Active);
+                else if (userMode == "inactive")
+                    query = query.Where(a => !a.UserAccount.Active);
+            }
+
+            if (!string.IsNullOrWhiteSpace(clientStatus))
+            {
+                var clientMode = NormalizeActiveStatus(clientStatus);
+                if (clientMode == "active")
+                {
+                    // Keep Default rates; Client/Project rates must belong to an active client.
+                    query = query.Where(a =>
+                        (a.ClientId == null && a.ProjectId == null)
+                        || (a.ClientId != null && a.Client.IsActive)
+                        || (a.ProjectId != null && a.Project.Client.IsActive));
+                }
+                else if (clientMode == "inactive")
+                {
+                    query = query.Where(a =>
+                        (a.ClientId != null && !a.Client.IsActive)
+                        || (a.ProjectId != null && !a.Project.Client.IsActive));
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(projectStatus))
+            {
+                var projectMode = NormalizeActiveStatus(projectStatus);
+                if (projectMode == "active")
+                    query = query.Where(a => a.ProjectId == null || a.Project.IsActive);
+                else if (projectMode == "inactive")
+                    query = query.Where(a => a.ProjectId != null && !a.Project.IsActive);
             }
 
             return query;
@@ -507,7 +546,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         }
 
         public byte[] ExportBillingRatesExcel(IList<Guid> userAccountIds, IList<Guid> clientIds,
-            IList<Guid> projectIds, string scope, DateTime? activeOn, string resultMode)
+            IList<Guid> projectIds, string scope, DateTime? activeOn, string resultMode,
+            string userStatus = null, string clientStatus = null, string projectStatus = null)
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
 
@@ -564,7 +604,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 {
                     DateTime? asOf = activeOn.HasValue ? activeOn.Value.Date : (DateTime?)null;
                     var query = BillingRatesFilterList(null, null, null, scope, asOf,
-                        userAccountIds, clientIds, projectIds);
+                        userAccountIds, clientIds, projectIds, userStatus, clientStatus, projectStatus);
 
                     var rows = query
                         .Select(a => new

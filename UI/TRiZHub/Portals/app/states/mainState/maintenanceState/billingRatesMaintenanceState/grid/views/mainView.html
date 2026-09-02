@@ -164,7 +164,12 @@
                             </select>
                         </div>
                         <div class="br-toolbar-field">
-                            <label>Effective Date</label>
+                            <label>
+                                Effective Date
+                                <a href="" class="br-clear-date" ng-if="vm.filters.activeOn"
+                                   ng-click="vm.clearEffectiveDate(); $event.preventDefault()"
+                                   title="Clear effective date">Clear</a>
+                            </label>
                             <input type="text" class="form-control input-sm"
                                    ng-model="vm.filters.activeOn"
                                    data-icon-left="fa fa-chevron-left"

@@ -42,6 +42,21 @@ namespace TRiZHub.Models.BillingRatesModels
         /// Export / grid mode: "periods" (default) or "effective".
         /// </summary>
         public string ResultMode { get; set; }
+
+        /// <summary>
+        /// "active", "inactive", or "all". Null = do not filter (nested screens).
+        /// </summary>
+        public string UserStatus { get; set; }
+
+        /// <summary>
+        /// "active", "inactive", or "all". Null = do not filter (nested screens).
+        /// </summary>
+        public string ClientStatus { get; set; }
+
+        /// <summary>
+        /// "active", "inactive", or "all". Null = do not filter (nested screens).
+        /// </summary>
+        public string ProjectStatus { get; set; }
     }
 
     public class BillingRatesFilterOptionsRequest
