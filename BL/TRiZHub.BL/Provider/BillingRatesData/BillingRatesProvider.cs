@@ -95,13 +95,17 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         }
 
         public BillingRatesFilterOptionsResult GetFilterOptions(IList<Guid> userAccountIds, IList<Guid> clientIds,
-            IList<Guid> projectIds)
+            IList<Guid> projectIds, string userStatus = null, string clientStatus = null,
+            string projectStatus = null)
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
 
             var selectedUsers = NormalizeIds(userAccountIds);
             var selectedClients = NormalizeIds(clientIds);
             var selectedProjects = NormalizeIds(projectIds);
+            var userMode = NormalizeActiveStatus(userStatus);
+            var clientMode = NormalizeActiveStatus(clientStatus);
+            var projectMode = NormalizeActiveStatus(projectStatus);
 
             HashSet<Guid> allowedUsers = null;
             HashSet<Guid> allowedClients = null;
@@ -127,8 +131,9 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     .Distinct()
                     .ToList();
 
+                // Assignment cascade: include all non-deleted projects; status filter applied on final list.
                 var projectsFromClientAssign = DataContext.ProjectSet
-                    .Where(p => clientFromAssign.Contains(p.ClientId) && !p.IsDeleted && p.IsActive)
+                    .Where(p => clientFromAssign.Contains(p.ClientId) && !p.IsDeleted)
                     .Select(p => p.Id)
                     .Distinct()
                     .ToList();
@@ -140,7 +145,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             if (selectedClients.Count > 0)
             {
                 var clientProjectIds = DataContext.ProjectSet
-                    .Where(p => selectedClients.Contains(p.ClientId) && !p.IsDeleted && p.IsActive)
+                    .Where(p => selectedClients.Contains(p.ClientId) && !p.IsDeleted)
                     .Select(p => p.Id)
                     .Distinct()
                     .ToList();
@@ -178,17 +183,29 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             }
 
             var usersQuery = DataContext.UserAccountSet
-                .Where(u => u.Active && u.FirstName != "Importer");
+                .Where(u => u.FirstName != "Importer");
+            if (userMode == "active")
+                usersQuery = usersQuery.Where(u => u.Active);
+            else if (userMode == "inactive")
+                usersQuery = usersQuery.Where(u => !u.Active);
             if (allowedUsers != null)
                 usersQuery = usersQuery.Where(u => allowedUsers.Contains(u.Id));
 
             var clientsQuery = DataContext.ClientEntitySet
                 .Where(c => !c.IsDeleted);
+            if (clientMode == "active")
+                clientsQuery = clientsQuery.Where(c => c.IsActive);
+            else if (clientMode == "inactive")
+                clientsQuery = clientsQuery.Where(c => !c.IsActive);
             if (allowedClients != null)
                 clientsQuery = clientsQuery.Where(c => allowedClients.Contains(c.Id));
 
             var projectsQuery = DataContext.ProjectSet
-                .Where(p => !p.IsDeleted && p.IsActive);
+                .Where(p => !p.IsDeleted);
+            if (projectMode == "active")
+                projectsQuery = projectsQuery.Where(p => p.IsActive);
+            else if (projectMode == "inactive")
+                projectsQuery = projectsQuery.Where(p => !p.IsActive);
             if (allowedProjects != null)
                 projectsQuery = projectsQuery.Where(p => allowedProjects.Contains(p.Id));
 
@@ -222,6 +239,16 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     })
                     .ToList()
             };
+        }
+
+        private static string NormalizeActiveStatus(string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+                return "active";
+            status = status.Trim().ToLowerInvariant();
+            if (status == "inactive" || status == "all")
+                return status;
+            return "active";
         }
 
         public List<BillingRatesEffectiveRow> GetEffectiveRates(IList<Guid> userAccountIds, IList<Guid> clientIds,
@@ -486,7 +513,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
             var effectiveMode = string.Equals(resultMode, "effective", StringComparison.OrdinalIgnoreCase);
             if (effectiveMode && !activeOn.HasValue)
-                throw new BillingRatesException("Active On date is required for Effective export.");
+                throw new BillingRatesException("Effective Date is required for Effective export.");
 
             using (var pck = new ExcelPackage())
             {
@@ -504,7 +531,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
                     sheet.Cells[1, 1].Value = "Billing Rates — Effective";
                     sheet.Cells[1, 1].Style.Font.Bold = true;
-                    sheet.Cells[2, 1].Value = "Active On";
+                    sheet.Cells[2, 1].Value = "Effective Date";
                     sheet.Cells[2, 2].Value = asOf;
                     sheet.Cells[2, 2].Style.Numberformat.Format = excelDateFormat;
 
@@ -559,7 +586,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     var headerRow = 3;
                     if (asOf.HasValue)
                     {
-                        sheet.Cells[2, 1].Value = "Active On";
+                        sheet.Cells[2, 1].Value = "Effective Date";
                         sheet.Cells[2, 2].Value = asOf.Value;
                         sheet.Cells[2, 2].Style.Numberformat.Format = excelDateFormat;
                         headerRow = 4;

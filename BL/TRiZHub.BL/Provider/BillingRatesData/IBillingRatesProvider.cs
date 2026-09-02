@@ -32,8 +32,12 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         UserRatesAsOfResult GetUserRatesAsOf(Guid userAccountId, DateTime asOfDate);
 
+        /// <summary>
+        /// Cascading filter option lists. Status values: "active" (default), "inactive", or "all".
+        /// </summary>
         BillingRatesFilterOptionsResult GetFilterOptions(IList<Guid> userAccountIds, IList<Guid> clientIds,
-            IList<Guid> projectIds);
+            IList<Guid> projectIds, string userStatus = null, string clientStatus = null,
+            string projectStatus = null);
 
         /// <summary>
         /// Effective rates as of a date for the selected users/clients/projects

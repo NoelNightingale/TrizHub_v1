@@ -7,7 +7,7 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
     gridModel: any = {
         data: [],
         totalItems: 0,
-        sortKeyOrder: { order: "ASC", key: "startdate" },
+        sortKeyOrder: { order: "ASC", key: "userName" },
         currentPage: 1,
         maxSize: 5,
         recordsPerPage: 60
@@ -17,12 +17,15 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
     /** True when filters changed since the last successful Apply / grid load. */
     filtersDirty = false;
 
-    filters: any = {
+        filters: any = {
         userAccountIds: [] as string[],
         clientIds: [] as string[],
         projectIds: [] as string[],
         scope: "",
-        activeOn: null
+        activeOn: new Date(),
+        userStatus: "active",
+        clientStatus: "active",
+        projectStatus: "active"
     };
 
     optionUsers: any[] = [];
@@ -53,7 +56,7 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         const self = this;
 
         this.pageGrid = new TcrGridServiceModule.TcrGridService(
-            "startDate",
+            "userName",
             this.BillingRatesService.billingRatesGrid,
             this.onDataLoaded,
             model => {
@@ -87,6 +90,29 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         this.markFiltersDirty();
     };
 
+    setStatusFilter = (dimension: string, status: string) => {
+        if (dimension === "user") {
+            if (this.filters.userStatus === status) {
+                return;
+            }
+            this.filters.userStatus = status;
+        } else if (dimension === "client") {
+            if (this.filters.clientStatus === status) {
+                return;
+            }
+            this.filters.clientStatus = status;
+        } else if (dimension === "project") {
+            if (this.filters.projectStatus === status) {
+                return;
+            }
+            this.filters.projectStatus = status;
+        } else {
+            return;
+        }
+        this.markFiltersDirty();
+        this.scheduleCascade();
+    };
+
     applyFilters = () => {
         this.filtersDirty = false;
         if (this.pageGrid && this.pageGrid.gridModel) {
@@ -100,7 +126,10 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         this.filters.clientIds = [];
         this.filters.projectIds = [];
         this.filters.scope = "";
-        this.filters.activeOn = null;
+        this.filters.activeOn = new Date();
+        this.filters.userStatus = "active";
+        this.filters.clientStatus = "active";
+        this.filters.projectStatus = "active";
         this.refreshFilterOptions(false);
         this.applyFilters();
     };
@@ -212,7 +241,10 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         self.BillingRatesService.filterOptions({
             userAccountIds: self.filters.userAccountIds,
             clientIds: self.filters.clientIds,
-            projectIds: self.filters.projectIds
+            projectIds: self.filters.projectIds,
+            userStatus: self.filters.userStatus || "active",
+            clientStatus: self.filters.clientStatus || "active",
+            projectStatus: self.filters.projectStatus || "active"
         }).then(
             result => {
                 self.optionUsers = result.users || [];

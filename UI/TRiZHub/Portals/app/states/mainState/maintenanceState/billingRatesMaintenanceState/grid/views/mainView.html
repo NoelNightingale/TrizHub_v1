@@ -27,11 +27,26 @@
                         <div class="col-sm-4" style="margin-bottom: 10px;">
                             <div class="br-filter-panel">
                                 <div class="br-filter-panel-title">
-                                    <span>Users</span>
-                                    <span class="br-filter-count"
-                                          ng-class="{'is-zero': !vm.filters.userAccountIds.length}">
-                                        {{vm.filters.userAccountIds.length}}
+                                    <span>Users
+                                        <span class="br-filter-count"
+                                              ng-class="{'is-zero': !vm.filters.userAccountIds.length}">
+                                            {{vm.filters.userAccountIds.length}}
+                                        </span>
                                     </span>
+                                    <div class="btn-group br-status-toggle">
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.userStatus === 'active' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('user', 'active')"
+                                                title="Active users">Active</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.userStatus === 'inactive' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('user', 'inactive')"
+                                                title="Inactive users">Inactive</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.userStatus === 'all' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('user', 'all')"
+                                                title="All users">All</button>
+                                    </div>
                                 </div>
                                 <input type="text" class="form-control input-sm" placeholder="Search users"
                                        ng-model="vm.userFilterText" style="margin-bottom: 8px;" />
@@ -54,11 +69,26 @@
                         <div class="col-sm-4" style="margin-bottom: 10px;">
                             <div class="br-filter-panel">
                                 <div class="br-filter-panel-title">
-                                    <span>Clients</span>
-                                    <span class="br-filter-count"
-                                          ng-class="{'is-zero': !vm.filters.clientIds.length}">
-                                        {{vm.filters.clientIds.length}}
+                                    <span>Clients
+                                        <span class="br-filter-count"
+                                              ng-class="{'is-zero': !vm.filters.clientIds.length}">
+                                            {{vm.filters.clientIds.length}}
+                                        </span>
                                     </span>
+                                    <div class="btn-group br-status-toggle">
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.clientStatus === 'active' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('client', 'active')"
+                                                title="Active clients">Active</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.clientStatus === 'inactive' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('client', 'inactive')"
+                                                title="Inactive clients">Inactive</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.clientStatus === 'all' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('client', 'all')"
+                                                title="All clients">All</button>
+                                    </div>
                                 </div>
                                 <input type="text" class="form-control input-sm" placeholder="Search clients"
                                        ng-model="vm.clientFilterText" style="margin-bottom: 8px;" />
@@ -81,11 +111,26 @@
                         <div class="col-sm-4" style="margin-bottom: 10px;">
                             <div class="br-filter-panel">
                                 <div class="br-filter-panel-title">
-                                    <span>Projects</span>
-                                    <span class="br-filter-count"
-                                          ng-class="{'is-zero': !vm.filters.projectIds.length}">
-                                        {{vm.filters.projectIds.length}}
+                                    <span>Projects
+                                        <span class="br-filter-count"
+                                              ng-class="{'is-zero': !vm.filters.projectIds.length}">
+                                            {{vm.filters.projectIds.length}}
+                                        </span>
                                     </span>
+                                    <div class="btn-group br-status-toggle">
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.projectStatus === 'active' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('project', 'active')"
+                                                title="Active projects">Active</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.projectStatus === 'inactive' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('project', 'inactive')"
+                                                title="Inactive projects">Inactive</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.projectStatus === 'all' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('project', 'all')"
+                                                title="All projects">All</button>
+                                    </div>
                                 </div>
                                 <input type="text" class="form-control input-sm" placeholder="Search projects"
                                        ng-model="vm.projectFilterText" style="margin-bottom: 8px;" />
@@ -119,7 +164,7 @@
                             </select>
                         </div>
                         <div class="br-toolbar-field">
-                            <label>Active on</label>
+                            <label>Effective Date</label>
                             <input type="text" class="form-control input-sm"
                                    ng-model="vm.filters.activeOn"
                                    data-icon-left="fa fa-chevron-left"
@@ -176,26 +221,47 @@
                             <table st-table="rowCollectionBasic" class="table table-striped br-table">
                                 <thead>
                                 <tr>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'userName'}">
                                         <a ng-click="vm.pageGrid.sort('userName')">User</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'userName',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'userName'}"></i>
                                     </th>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'scope'}">
                                         <a ng-click="vm.pageGrid.sort('scope')">Scope</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'scope',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'scope'}"></i>
                                     </th>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'clientName'}">
                                         <a ng-click="vm.pageGrid.sort('clientName')">Client</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'clientName',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'clientName'}"></i>
                                     </th>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'projectName'}">
                                         <a ng-click="vm.pageGrid.sort('projectName')">Project</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'projectName',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'projectName'}"></i>
                                     </th>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'Rate'}">
                                         <a ng-click="vm.pageGrid.sort('Rate')">Rate</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'Rate',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'Rate'}"></i>
                                     </th>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'startDate'}">
                                         <a ng-click="vm.pageGrid.sort('startDate')">Start</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'startDate',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'startDate'}"></i>
                                     </th>
-                                    <th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'endDate'}">
                                         <a ng-click="vm.pageGrid.sort('endDate')">End</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'endDate',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'endDate'}"></i>
                                     </th>
                                     <th style="width: 90px;">
                                         <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newRecord()">

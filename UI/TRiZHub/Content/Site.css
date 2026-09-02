@@ -243,12 +243,33 @@ hr {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     margin-bottom: 8px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #607d8b;
+}
+
+.br-workbench .br-filter-panel-title > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.br-workbench .br-status-toggle {
+    flex-shrink: 0;
+}
+
+.br-workbench .br-status-toggle .btn {
+    padding: 2px 7px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.4;
 }
 
 .br-workbench .br-filter-count {
@@ -479,6 +500,20 @@ hr {
 
 .br-workbench .br-table > thead > tr > th > a:hover {
     color: #3f51b5;
+}
+
+.br-workbench .br-table > thead > tr > th.br-sorted {
+    color: #3f51b5;
+}
+
+.br-workbench .br-table > thead > tr > th.br-sorted > a {
+    color: #3f51b5;
+}
+
+.br-workbench .br-table > thead > tr > th > i.fa {
+    margin-left: 4px;
+    color: #3f51b5;
+    font-size: 12px;
 }
 
 .br-workbench .br-table > thead > tr > th > a.btn {

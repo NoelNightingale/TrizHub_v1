@@ -39,6 +39,21 @@
             Export / grid mode: "periods" (default) or "effective".
             </summary>
         </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesFilterOptionsRequest.UserStatus">
+            <summary>
+            "active" (default), "inactive", or "all".
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesFilterOptionsRequest.ClientStatus">
+            <summary>
+            "active" (default), "inactive", or "all".
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesFilterOptionsRequest.ProjectStatus">
+            <summary>
+            "active" (default), "inactive", or "all".
+            </summary>
+        </member>
         <member name="M:TRiZHub.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
             <summary>
             Generates an URI-friendly ID for the <see cref="T:System.Web.Http.Description.ApiDescription"/>. E.g. "Get-Values-id_name" instead of "GetValues/{id}?name={name}"

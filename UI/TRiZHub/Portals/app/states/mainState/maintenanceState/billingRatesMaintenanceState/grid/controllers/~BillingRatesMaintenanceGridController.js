@@ -29,7 +29,7 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.gridModel = {
             data: [],
             totalItems: 0,
-            sortKeyOrder: { order: "ASC", key: "startdate" },
+            sortKeyOrder: { order: "ASC", key: "userName" },
             currentPage: 1,
             maxSize: 5,
             recordsPerPage: 60
@@ -42,7 +42,10 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             clientIds: [],
             projectIds: [],
             scope: "",
-            activeOn: null
+            activeOn: new Date(),
+            userStatus: "active",
+            clientStatus: "active",
+            projectStatus: "active"
         };
         _this.optionUsers = [];
         _this.optionClients = [];
@@ -59,6 +62,31 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.onActiveOnChanged = function () {
             _this.markFiltersDirty();
         };
+        _this.setStatusFilter = function (dimension, status) {
+            if (dimension === "user") {
+                if (_this.filters.userStatus === status) {
+                    return;
+                }
+                _this.filters.userStatus = status;
+            }
+            else if (dimension === "client") {
+                if (_this.filters.clientStatus === status) {
+                    return;
+                }
+                _this.filters.clientStatus = status;
+            }
+            else if (dimension === "project") {
+                if (_this.filters.projectStatus === status) {
+                    return;
+                }
+                _this.filters.projectStatus = status;
+            }
+            else {
+                return;
+            }
+            _this.markFiltersDirty();
+            _this.scheduleCascade();
+        };
         _this.applyFilters = function () {
             _this.filtersDirty = false;
             if (_this.pageGrid && _this.pageGrid.gridModel) {
@@ -71,7 +99,10 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             _this.filters.clientIds = [];
             _this.filters.projectIds = [];
             _this.filters.scope = "";
-            _this.filters.activeOn = null;
+            _this.filters.activeOn = new Date();
+            _this.filters.userStatus = "active";
+            _this.filters.clientStatus = "active";
+            _this.filters.projectStatus = "active";
             _this.refreshFilterOptions(false);
             _this.applyFilters();
         };
@@ -168,7 +199,10 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             self.BillingRatesService.filterOptions({
                 userAccountIds: self.filters.userAccountIds,
                 clientIds: self.filters.clientIds,
-                projectIds: self.filters.projectIds
+                projectIds: self.filters.projectIds,
+                userStatus: self.filters.userStatus || "active",
+                clientStatus: self.filters.clientStatus || "active",
+                projectStatus: self.filters.projectStatus || "active"
             }).then(function (result) {
                 self.optionUsers = result.users || [];
                 self.optionClients = result.clients || [];
@@ -269,7 +303,7 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             });
         };
         var self = _this;
-        _this.pageGrid = new TcrGridServiceModule.TcrGridService("startDate", _this.BillingRatesService.billingRatesGrid, _this.onDataLoaded, function (model) {
+        _this.pageGrid = new TcrGridServiceModule.TcrGridService("userName", _this.BillingRatesService.billingRatesGrid, _this.onDataLoaded, function (model) {
             model.userAccountIds = self.filters.userAccountIds || [];
             model.clientIds = self.filters.clientIds || [];
             model.projectIds = self.filters.projectIds || [];

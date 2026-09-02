@@ -275,7 +275,7 @@ namespace TRiZHub.Controllers
             try
             {
                 if (model == null || !model.ActiveOn.HasValue)
-                    throw new BillingRatesException("Active On date is required for Effective view.");
+                    throw new BillingRatesException("Effective Date is required for Effective view.");
 
                 var begin = SetupGridParams(model);
                 var asOf = model.ActiveOn.Value.ToLocalTime().Date;
@@ -369,7 +369,10 @@ namespace TRiZHub.Controllers
                 var result = BillingRatesProvider.GetFilterOptions(
                     model != null ? model.UserAccountIds : null,
                     model != null ? model.ClientIds : null,
-                    model != null ? model.ProjectIds : null);
+                    model != null ? model.ProjectIds : null,
+                    model != null ? model.UserStatus : null,
+                    model != null ? model.ClientStatus : null,
+                    model != null ? model.ProjectStatus : null);
 
                 return new BillingRatesFilterOptionsModel
                 {

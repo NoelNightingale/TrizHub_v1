@@ -49,6 +49,21 @@ namespace TRiZHub.Models.BillingRatesModels
         public List<Guid> UserAccountIds { get; set; }
         public List<Guid> ClientIds { get; set; }
         public List<Guid> ProjectIds { get; set; }
+
+        /// <summary>
+        /// "active" (default), "inactive", or "all".
+        /// </summary>
+        public string UserStatus { get; set; }
+
+        /// <summary>
+        /// "active" (default), "inactive", or "all".
+        /// </summary>
+        public string ClientStatus { get; set; }
+
+        /// <summary>
+        /// "active" (default), "inactive", or "all".
+        /// </summary>
+        public string ProjectStatus { get; set; }
     }
 
     public class BillingRatesFilterOptionModel
