@@ -557,9 +557,12 @@
     <Content Include="Scripts\3.0.0\AddPermissionSet.sql" />
     <Content Include="Scripts\3.0.0\GetProjectAllocationReport.sql" />
     <Content Include="Scripts\3.0.0\SeedUseridentityProject.sql" />
+    <Content Include="Scripts\4.0.0\backward\lsp_GetTimesheetReportDetail.sql" />
+    <Content Include="Scripts\4.0.0\forward\lsp_GetTimesheetReportDetail.sql" />
     <Content Include="Scripts\CheckEF6MigrationStatus.sql" />
     <Content Include="Scripts\EF6_DiagnosticCommands.txt" />
     <Content Include="Scripts\FixMigrationHistoryTable.sql" />
+    <Content Include="Scripts\lsp_getTimesheetReportDetail.sql" />
     <Content Include="Scripts\ScorecardProcedure\lsp_getScoreCardSummary.sql" />
     <Content Include="Scripts\StoredProcedures\lsp_getProjectAllocationReport.sql" />
     <Content Include="Scripts\Updates\ScoreCardTemplatePeriod.sql" />
