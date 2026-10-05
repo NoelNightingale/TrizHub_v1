@@ -25,5 +25,13 @@ namespace TRiZHub.Models.BillingRatesModels
 
         [Required]
         public DateTime EndDate { get; set; }
+
+        // Read-only display fields; ignored on save.
+        public string ClientName { get; set; }
+        public string ProjectName { get; set; }
+        public Guid? ProjectClientId { get; set; }
+        public string ProjectClientName { get; set; }
+        public bool IsLocked { get; set; }
+        public string LockReason { get; set; }
     }
 }

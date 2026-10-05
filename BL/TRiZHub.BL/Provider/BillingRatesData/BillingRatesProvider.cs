@@ -7,6 +7,8 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.BillingRatesData;
+using TRiZHub.BL.Entities.ClientEntityData;
+using TRiZHub.BL.Entities.ProjectData;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Extensions;
 using TRiZHub.BL.Provider.Security;
@@ -615,7 +617,11 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                             ProjectName = a.Project != null ? a.Project.ProjectName : null,
                             a.Rate,
                             a.StartDate,
-                            a.EndDate
+                            a.EndDate,
+                            ClientInactive = a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted),
+                            ProjectInactive = a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted),
+                            ProjectClientInactive = a.Project != null &&
+                                                    (!a.Project.Client.IsActive || a.Project.Client.IsDeleted)
                         })
                         .OrderBy(r => r.UserName)
                         .ThenBy(r => r.StartDate)
@@ -639,7 +645,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     sheet.Cells[headerRow, 5].Value = "Rate";
                     sheet.Cells[headerRow, 6].Value = "Start Date";
                     sheet.Cells[headerRow, 7].Value = "End Date";
-                    using (var range = sheet.Cells[headerRow, 1, headerRow, 7])
+                    sheet.Cells[headerRow, 8].Value = "Status";
+                    using (var range = sheet.Cells[headerRow, 1, headerRow, 8])
                     {
                         range.Style.Font.Bold = true;
                         range.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -659,6 +666,19 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                         sheet.Cells[rowIndex, 6].Style.Numberformat.Format = excelDateFormat;
                         sheet.Cells[rowIndex, 7].Value = r.EndDate;
                         sheet.Cells[rowIndex, 7].Style.Numberformat.Format = excelDateFormat;
+
+                        string status;
+                        if (r.ClientInactive)
+                            status = "Client inactive";
+                        else if (r.ProjectInactive)
+                            status = "Project inactive";
+                        else if (r.ProjectClientInactive)
+                            status = "Project's client inactive";
+                        else
+                            status = "Active";
+                        sheet.Cells[rowIndex, 8].Value = status;
+                        if (status != "Active")
+                            sheet.Cells[rowIndex, 8].Style.Font.Color.SetColor(System.Drawing.Color.FromArgb(230, 81, 0));
                     }
                 }
 
@@ -707,6 +727,10 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
             if (record != null)
             {
+                var lockReason = GetLockReason(record.Client, record.Project);
+                if (lockReason != null)
+                    throw new BillingRatesException(lockReason);
+
                 DataContext.BillingRatesSet.Remove(record);
                 DataContext.SaveChanges();
             }
@@ -716,6 +740,55 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
             return DataContext.BillingRatesSet.FirstOrDefault(a => a.Id == id);
+        }
+
+        /// <summary>
+        /// Rates for an inactive or deleted client/project (or a project whose client is inactive/deleted)
+        /// are read-only. Returns the user-facing reason, or null when the rate may be edited.
+        /// </summary>
+        public string GetLockReason(ClientEntity client, Project project)
+        {
+            if (client != null)
+            {
+                if (client.IsDeleted)
+                    return "This rate belongs to deleted client '" + client.EntityName + "' and can't be edited.";
+                if (!client.IsActive)
+                    return "This rate belongs to inactive client '" + client.EntityName +
+                           "' and can't be edited. Reactivate the client first to change its rates.";
+            }
+
+            if (project != null)
+            {
+                var projectName = FormatProjectName(project);
+                if (project.IsDeleted)
+                    return "This rate belongs to deleted project '" + projectName + "' and can't be edited.";
+                if (!project.IsActive)
+                    return "This rate belongs to inactive project '" + projectName +
+                           "' and can't be edited. Reactivate the project first to change its rates.";
+
+                var projectClient = project.Client;
+                if (projectClient != null)
+                {
+                    if (projectClient.IsDeleted)
+                        return "This rate belongs to project '" + projectName + "' of deleted client '" +
+                               projectClient.EntityName + "' and can't be edited.";
+                    if (!projectClient.IsActive)
+                        return "This rate belongs to project '" + projectName + "' of inactive client '" +
+                               projectClient.EntityName +
+                               "' and can't be edited. Reactivate the client first to change its rates.";
+                }
+            }
+
+            return null;
+        }
+
+        public static string FormatProjectName(Project project)
+        {
+            if (project == null)
+                return null;
+            return string.IsNullOrEmpty(project.ProjectNumber)
+                ? project.ProjectName
+                : "[" + project.ProjectNumber + "] " + project.ProjectName;
         }
 
         public BillingRates SaveBillingRates(Guid? id, Guid userAccountId, decimal rate, DateTime startDate,
@@ -738,19 +811,36 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             if (clientId.HasValue && projectId.HasValue)
                 throw new BillingRatesException("A billing rate cannot be scoped to both a Client and a Project!");
 
+            if (id.HasValue)
+            {
+                var existing = DataContext.BillingRatesSet.FirstOrDefault(a => a.Id == id.Value);
+                if (existing != null)
+                {
+                    var existingLockReason = GetLockReason(existing.Client, existing.Project);
+                    if (existingLockReason != null)
+                        throw new BillingRatesException(existingLockReason);
+                }
+            }
+
+            ClientEntity targetClient = null;
             if (clientId.HasValue)
             {
-                var clientExists = DataContext.ClientEntitySet.Any(c => c.Id == clientId.Value);
-                if (!clientExists)
+                targetClient = DataContext.ClientEntitySet.FirstOrDefault(c => c.Id == clientId.Value);
+                if (targetClient == null)
                     throw new BillingRatesException("Selected Client was not found!");
             }
 
+            Project targetProject = null;
             if (projectId.HasValue)
             {
-                var projectExists = DataContext.ProjectSet.Any(p => p.Id == projectId.Value);
-                if (!projectExists)
+                targetProject = DataContext.ProjectSet.FirstOrDefault(p => p.Id == projectId.Value);
+                if (targetProject == null)
                     throw new BillingRatesException("Selected Project was not found!");
             }
+
+            var targetLockReason = GetLockReason(targetClient, targetProject);
+            if (targetLockReason != null)
+                throw new BillingRatesException(targetLockReason);
 
             if (startDate.Date >= endDate.Date)
                 throw new BillingRatesException("Selected End Date is bofore or on selected Start Date!");
@@ -1176,7 +1266,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 {
                     p.Id,
                     p.ProjectName,
-                    p.ClientId
+                    p.ClientId,
+                    p.IsActive
                 })
                 .ToList();
 
@@ -1189,7 +1280,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
             var clients = DataContext.ClientEntitySet
                 .Where(c => allClientIds.Contains(c.Id))
-                .Select(c => new { c.Id, c.EntityName })
+                .Select(c => new { c.Id, c.EntityName, IsInactive = !c.IsActive || c.IsDeleted })
                 .OrderBy(c => c.EntityName)
                 .ToList();
 
@@ -1258,7 +1349,9 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                         ProjectRate = projectRate,
                         ProjectRateId = projectRecord != null ? projectRecord.Id : (Guid?)null,
                         EffectiveRate = projectEffective,
-                        EffectiveScope = projectEffectiveScope
+                        EffectiveScope = projectEffectiveScope,
+                        IsInactive = !project.IsActive,
+                        IsLocked = !project.IsActive || client.IsInactive
                     });
                 }
 
@@ -1271,6 +1364,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     ClientRateId = clientRecord != null ? clientRecord.Id : (Guid?)null,
                     EffectiveRate = clientEffective,
                     EffectiveScope = clientEffectiveScope,
+                    IsInactive = client.IsInactive,
                     Projects = projectRows
                 });
             }

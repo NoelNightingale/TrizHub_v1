@@ -276,7 +276,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row">
+                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row"
+                                    ng-class="{'br-row-locked': i.isLocked}">
                                     <td>
                                         <a class="text-primary"
                                            title="Open default rates for this user"
@@ -298,6 +299,8 @@
                                            ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId})">
                                             {{i.clientName}}
                                         </a>
+                                        <span class="br-inactive-badge" ng-if="i.clientInactive"
+                                              title="Client is inactive. Reactivate it to edit this rate.">Inactive</span>
                                         <span ng-if="!i.clientId" class="text-muted">—</span>
                                     </td>
                                     <td>
@@ -306,6 +309,10 @@
                                            ui-sref="mainState.maintenance.projectMaintenance.teamRates({id: i.projectId})">
                                             {{i.projectName}}
                                         </a>
+                                        <span class="br-inactive-badge" ng-if="i.projectInactive"
+                                              title="Project is inactive. Reactivate it to edit this rate.">Inactive</span>
+                                        <span class="br-inactive-badge" ng-if="!i.projectInactive && i.projectClientInactive"
+                                              title="This project's client is inactive. Reactivate the client to edit this rate.">Client inactive</span>
                                         <span ng-if="!i.projectId" class="text-muted">—</span>
                                     </td>
                                     <td class="br-rate">{{i.rate}}</td>
@@ -313,8 +320,9 @@
                                     <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>
                                         <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
-                                           ui-sref="mainState.maintenance.billingRatesMaintenance.detail({id: i.id})">
-                                            <i class="fa fa-edit"></i> Edit
+                                           ui-sref="mainState.maintenance.billingRatesMaintenance.detail({id: i.id})"
+                                           title="{{i.isLocked ? 'Read-only: client or project is inactive' : 'Edit rate'}}">
+                                            <i class="fa" ng-class="i.isLocked ? 'fa-eye' : 'fa-edit'"></i> {{i.isLocked ? 'View' : 'Edit'}}
                                         </a>
                                     </td>
                                 </tr>

@@ -127,6 +127,8 @@ class BillingRatesMaintenanceDetailController extends CHControllerBase {
 
     submitForm = () => {
         const self = this;
+        if (this.viewModel.isLocked)
+            return;
         this.$scope.$broadcast("show-errors-check-validity");
         if (this.$scope["EditForm"].$invalid)
             return;
@@ -150,7 +152,7 @@ class BillingRatesMaintenanceDetailController extends CHControllerBase {
     deleteRecord = () => {
         const self = this;
 
-        if (self.isNew || !self.viewModel?.id) {
+        if (self.isNew || !self.viewModel?.id || self.viewModel.isLocked) {
             return;
         }
 

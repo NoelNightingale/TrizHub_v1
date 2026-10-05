@@ -32,6 +32,9 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         _this.successMessage = "Saved Successfully";
         _this.saveSuccess = false;
         _this.scopeType = "Default";
+        _this.filteredProjectDropdown = [];
+        // UI-only: Project-scope rates are saved with ClientId null.
+        _this.projectClientFilterId = null;
         _this.applyNewPrefill = function () {
             var scope = _this.$stateParams["scope"];
             var clientId = _this.$stateParams["clientId"];
@@ -66,14 +69,48 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 _this.viewModel.projectId = null;
             }
             else if (_this.scopeType === "Client") {
+                if (!_this.viewModel.clientId && _this.projectClientFilterId)
+                    _this.viewModel.clientId = _this.projectClientFilterId;
                 _this.viewModel.projectId = null;
             }
             else if (_this.scopeType === "Project") {
+                if (_this.viewModel.clientId && !_this.projectClientFilterId)
+                    _this.projectClientFilterId = _this.viewModel.clientId;
                 _this.viewModel.clientId = null;
+                _this.applyProjectClientFilter();
             }
+        };
+        _this.syncProjectClientFilter = function () {
+            if (!_this.projectClientFilterId && _this.viewModel.projectClientId)
+                _this.projectClientFilterId = _this.viewModel.projectClientId;
+            if (!_this.projectClientFilterId && _this.projectDropdown && _this.viewModel.projectId) {
+                var project = _this.findProject(_this.viewModel.projectId);
+                if (project && project.clientId)
+                    _this.projectClientFilterId = project.clientId;
+            }
+            _this.applyProjectClientFilter();
+        };
+        _this.applyProjectClientFilter = function () {
+            var all = _this.projectDropdown || [];
+            var clientId = _this.projectClientFilterId;
+            _this.filteredProjectDropdown = clientId
+                ? all.filter(function (p) { return p.clientId === clientId; })
+                : [];
+            // Leave projects that aren't in the dropdown at all (e.g. inactive) untouched.
+            var selected = _this.findProject(_this.viewModel.projectId);
+            if (selected && _this.filteredProjectDropdown.indexOf(selected) < 0)
+                _this.viewModel.projectId = null;
+        };
+        _this.findProject = function (projectId) {
+            if (!projectId || !_this.projectDropdown)
+                return null;
+            var matches = _this.projectDropdown.filter(function (p) { return p.id === projectId; });
+            return matches.length ? matches[0] : null;
         };
         _this.submitForm = function () {
             var self = _this;
+            if (_this.viewModel.isLocked)
+                return;
             _this.$scope.$broadcast("show-errors-check-validity");
             if (_this.$scope["EditForm"].$invalid)
                 return;
@@ -101,6 +138,7 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         ProjectService.projectDropdownList()
             .then(function (result) {
             self.projectDropdown = result;
+            self.syncProjectClientFilter();
         }, function (error) {
             self.handleError(error);
         });
@@ -109,6 +147,7 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 .then(function (result) {
                 self.viewModel = result;
                 self.scopeType = self.resolveScopeType(result);
+                self.syncProjectClientFilter();
             }, function (error) {
                 self.handleError(error);
             });

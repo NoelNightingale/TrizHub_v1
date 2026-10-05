@@ -97,6 +97,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         public Guid? ProjectRateId { get; set; }
         public decimal? EffectiveRate { get; set; }
         public string EffectiveScope { get; set; }
+        public bool IsInactive { get; set; }
+        public bool IsLocked { get; set; }
     }
 
     public class UserRatesAsOfClientRow
@@ -107,6 +109,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         public Guid? ClientRateId { get; set; }
         public decimal? EffectiveRate { get; set; }
         public string EffectiveScope { get; set; }
+        public bool IsInactive { get; set; }
         public List<UserRatesAsOfProjectRow> Projects { get; set; }
     }
 

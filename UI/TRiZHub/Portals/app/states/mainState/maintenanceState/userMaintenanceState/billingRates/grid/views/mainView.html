@@ -80,17 +80,29 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row">
+                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row"
+                                    ng-class="{'br-row-locked': i.isLocked}">
                                     <td>{{i.scope}}</td>
-                                    <td>{{i.clientName}}</td>
-                                    <td>{{i.projectName}}</td>
+                                    <td>
+                                        {{i.clientName}}
+                                        <span class="br-inactive-badge" ng-if="i.clientInactive"
+                                              title="Client is inactive. Reactivate it to edit this rate.">Inactive</span>
+                                    </td>
+                                    <td>
+                                        {{i.projectName}}
+                                        <span class="br-inactive-badge" ng-if="i.projectInactive"
+                                              title="Project is inactive. Reactivate it to edit this rate.">Inactive</span>
+                                        <span class="br-inactive-badge" ng-if="!i.projectInactive && i.projectClientInactive"
+                                              title="This project's client is inactive. Reactivate the client to edit this rate.">Client inactive</span>
+                                    </td>
                                     <td>{{i.rate}}</td>
                                     <td>{{i.startDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>
                                         <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
-                                           ui-sref="mainState.maintenance.userMaintenance.billingRatesDetail({userid: vm.viewModel.id, id: i.id})">
-                                            <i class="fa fa-edit"></i> Edit
+                                           ui-sref="mainState.maintenance.userMaintenance.billingRatesDetail({userid: vm.viewModel.id, id: i.id})"
+                                           title="{{i.isLocked ? 'Read-only: client or project is inactive' : 'Edit rate'}}">
+                                            <i class="fa" ng-class="i.isLocked ? 'fa-eye' : 'fa-edit'"></i> {{i.isLocked ? 'View' : 'Edit'}}
                                         </a>
                                     </td>
                                 </tr>
@@ -155,9 +167,11 @@
 
                             <!-- Clients + nested projects (one tbody per client) -->
                             <tbody ng-repeat="client in vm.asOfModel.clients">
-                            <tr style="background: #f7f7f7;">
+                            <tr style="background: #f7f7f7;" ng-class="{'br-row-locked': client.isInactive}">
                                 <td>
                                     <strong>Client:</strong> {{client.clientName}}
+                                    <span class="br-inactive-badge" ng-if="client.isInactive"
+                                          title="Client is inactive. Reactivate it to edit its rates.">Inactive</span>
                                 </td>
                                 <td>
                                     <span ng-if="client.clientRate != null">{{client.clientRate}}</span>
@@ -174,18 +188,20 @@
                                     <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
                                        ng-if="client.clientRateId"
                                        ng-click="vm.editRecord(client.clientRateId)">
-                                        <i class="fa fa-edit"></i> Edit
+                                        <i class="fa" ng-class="client.isInactive ? 'fa-eye' : 'fa-edit'"></i> {{client.isInactive ? 'View' : 'Edit'}}
                                     </a>
                                     <a class="btn btn-xs btn-fw btn-primary"
-                                       ng-if="!client.clientRateId"
+                                       ng-if="!client.clientRateId && !client.isInactive"
                                        ng-click="vm.newRecord('Client', client.clientId)">
                                         <i class="fa fa-plus"></i> Add client rate
                                     </a>
                                 </td>
                             </tr>
-                            <tr ng-repeat="project in client.projects">
+                            <tr ng-repeat="project in client.projects" ng-class="{'br-row-locked': project.isLocked}">
                                 <td style="padding-left: 28px;">
                                     <span class="text-muted">└</span> {{project.projectName}}
+                                    <span class="br-inactive-badge" ng-if="project.isInactive"
+                                          title="Project is inactive. Reactivate it to edit its rates.">Inactive</span>
                                 </td>
                                 <td>
                                     <span ng-if="project.projectRate != null">{{project.projectRate}}</span>
@@ -202,10 +218,10 @@
                                     <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
                                        ng-if="project.projectRateId"
                                        ng-click="vm.editRecord(project.projectRateId)">
-                                        <i class="fa fa-edit"></i> Edit
+                                        <i class="fa" ng-class="project.isLocked ? 'fa-eye' : 'fa-edit'"></i> {{project.isLocked ? 'View' : 'Edit'}}
                                     </a>
                                     <a class="btn btn-xs btn-fw btn-primary"
-                                       ng-if="!project.projectRateId"
+                                       ng-if="!project.projectRateId && !project.isLocked"
                                        ng-click="vm.newRecord('Project', null, project.projectId)">
                                         <i class="fa fa-plus"></i> Add project rate
                                     </a>

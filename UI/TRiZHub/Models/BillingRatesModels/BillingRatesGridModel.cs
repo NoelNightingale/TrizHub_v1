@@ -22,6 +22,10 @@ namespace TRiZHub.Models.BillingRatesModels
         public decimal Rate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public bool ClientInactive { get; set; }
+        public bool ProjectInactive { get; set; }
+        public bool ProjectClientInactive { get; set; }
+        public bool IsLocked { get; set; }
     }
 
     /// <summary>

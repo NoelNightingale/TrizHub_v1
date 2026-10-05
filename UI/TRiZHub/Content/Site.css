@@ -591,6 +591,26 @@ hr {
 .br-workbench .br-scope-client { background: #e3f2fd; color: #1565c0; }
 .br-workbench .br-scope-project { background: #e8f5e9; color: #2e7d32; }
 
+/* Used on both billing-rate grids and the rate edit screens (not scoped to .br-workbench). */
+.br-inactive-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    vertical-align: middle;
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffcc80;
+}
+
+tr.br-row-locked > td {
+    color: #78909c;
+}
+
 .br-workbench .br-rate {
     font-variant-numeric: tabular-nums;
     font-weight: 600;

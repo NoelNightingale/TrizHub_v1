@@ -7,7 +7,11 @@
                 </h2>
             </div>
             <div class="box-body">
+                <div class="alert alert-warning" ng-if="vm.viewModel.isLocked">
+                    <i class="fa fa-lock"></i> {{vm.viewModel.lockReason}}
+                </div>
                 <form role="form" name="EditForm" novalidate>
+                    <fieldset ng-disabled="vm.viewModel.isLocked">
 
                     <div class="form-group row" show-errors>
                         <label for="user" class="col-sm-2 form-control-label">User:</label>
@@ -33,7 +37,23 @@
                         </div>
                     </div>
 
-                    <div class="form-group row" show-errors ng-show="vm.scopeType === 'Client'">
+                    <div class="form-group row" ng-if="vm.viewModel.isLocked && vm.scopeType === 'Client'">
+                        <label class="col-sm-2 form-control-label">Client:</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static">{{vm.viewModel.clientName}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group row" ng-if="vm.viewModel.isLocked && vm.scopeType === 'Project'">
+                        <label class="col-sm-2 form-control-label">Project:</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static">
+                                {{vm.viewModel.projectName}}
+                                <span class="text-muted" ng-if="vm.viewModel.projectClientName">(client: {{vm.viewModel.projectClientName}})</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" show-errors ng-show="vm.scopeType === 'Client'" ng-if="!vm.viewModel.isLocked">
                         <label for="client" class="col-sm-2 form-control-label">Client:</label>
                         <div class="col-sm-9">
                             <select name="client"
@@ -45,7 +65,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group row" show-errors ng-show="vm.scopeType === 'Project'">
+                    <div class="form-group row" show-errors ng-show="vm.scopeType === 'Project'" ng-if="!vm.viewModel.isLocked">
                         <label for="project" class="col-sm-2 form-control-label">Project:</label>
                         <div class="col-sm-9">
                             <select name="project"
@@ -92,19 +112,20 @@
                             <span class="text-help" ng-show="EditForm.endDate.$invalid">!*</span>
                         </div>
                     </div>
+                    </fieldset>
 
                     <hr />
                     <div class="form-group row">
                         <div class="col-md-12 pull-right text-right">
                             <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.billingRatesMaintenance.grid">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> {{vm.viewModel.isLocked ? 'Back' : 'Cancel'}}
                             </button>
                             <a class="btn btn-outline b-danger text-danger"
-                               ng-if="!vm.isNew"
+                               ng-if="!vm.isNew && !vm.viewModel.isLocked"
                                ng-click="vm.deleteRecord()">
                                 <i class="fa fa-trash"></i> Delete
                             </a>
-                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()" ng-if="!vm.viewModel.isLocked">
                                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
                             </button>
                         </div>

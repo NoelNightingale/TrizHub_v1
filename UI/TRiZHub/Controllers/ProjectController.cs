@@ -673,7 +673,7 @@ namespace TRiZHub.Controllers
         {
             var returnList = new List<ProjectDropdownModel>();
             returnList.AddRange(ProjectProvider.ProjectList().Where(a => a.IsActive == true && !a.IsDeleted)
-                .Select(a => new ProjectDropdownModel { ProjectId = a.Id, ProjectName = (a.ProjectNumber == null || a.ProjectNumber.Equals("")) ? a.ProjectName : ("[" + a.ProjectNumber + "] " + a.ProjectName), IsActive = a.IsActive }));
+                .Select(a => new ProjectDropdownModel { ProjectId = a.Id, ProjectName = (a.ProjectNumber == null || a.ProjectNumber.Equals("")) ? a.ProjectName : ("[" + a.ProjectNumber + "] " + a.ProjectName), IsActive = a.IsActive, ClientId = a.ClientId }));
             return returnList.ToList().OrderBy(a => a.Description).ToList();
         }
 

@@ -94,6 +94,8 @@ namespace TRiZHub.Controllers
             try
             {
                 var billingRates = BillingRatesProvider.GetBillingRates(id);
+                var lockReason = BillingRatesProvider.GetLockReason(billingRates.Client, billingRates.Project);
+                var projectClient = billingRates.Project != null ? billingRates.Project.Client : null;
 
                 var model = new BillingRatesEditModel
                 {
@@ -104,6 +106,12 @@ namespace TRiZHub.Controllers
                     Rate = billingRates.Rate,
                     StartDate = billingRates.StartDate,
                     EndDate = billingRates.EndDate,
+                    ClientName = billingRates.Client != null ? billingRates.Client.EntityName : null,
+                    ProjectName = BillingRatesProvider.FormatProjectName(billingRates.Project),
+                    ProjectClientId = projectClient != null ? projectClient.Id : (Guid?)null,
+                    ProjectClientName = projectClient != null ? projectClient.EntityName : null,
+                    IsLocked = lockReason != null,
+                    LockReason = lockReason,
                 };
                 return model;
             }
@@ -146,6 +154,13 @@ namespace TRiZHub.Controllers
                     Rate = a.Rate,
                     StartDate = a.StartDate,
                     EndDate = a.EndDate,
+                    ClientInactive = a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted),
+                    ProjectInactive = a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted),
+                    ProjectClientInactive = a.Project != null &&
+                                            (!a.Project.Client.IsActive || a.Project.Client.IsDeleted),
+                    IsLocked = (a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted))
+                               || (a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted
+                                                         || !a.Project.Client.IsActive || a.Project.Client.IsDeleted)),
                 });
 
             var totalNumberOfRecords = filteredQuery.Count();
@@ -633,6 +648,7 @@ namespace TRiZHub.Controllers
                         ClientRateId = c.ClientRateId,
                         EffectiveRate = c.EffectiveRate,
                         EffectiveScope = c.EffectiveScope,
+                        IsInactive = c.IsInactive,
                         Projects = c.Projects.Select(p => new UserRatesAsOfProjectRowModel
                         {
                             ProjectId = p.ProjectId,
@@ -640,7 +656,9 @@ namespace TRiZHub.Controllers
                             ProjectRate = p.ProjectRate,
                             ProjectRateId = p.ProjectRateId,
                             EffectiveRate = p.EffectiveRate,
-                            EffectiveScope = p.EffectiveScope
+                            EffectiveScope = p.EffectiveScope,
+                            IsInactive = p.IsInactive,
+                            IsLocked = p.IsLocked
                         }).ToList()
                     }).ToList()
                 };

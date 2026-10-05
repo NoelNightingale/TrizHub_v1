@@ -8,6 +8,9 @@
     scopeType = "Default";
     clientDropdown: any;
     projectDropdown: any;
+    filteredProjectDropdown: any[] = [];
+    // UI-only: Project-scope rates are saved with ClientId null.
+    projectClientFilterId: string = null;
 
     //#endregion
 
@@ -42,6 +45,7 @@
             .then(
                 result => {
                     self.projectDropdown = result;
+                    self.syncProjectClientFilter();
                 },
                 error => {
                     self.handleError(error);
@@ -53,6 +57,7 @@
                     result => {
                         self.viewModel = result;
                         self.scopeType = self.resolveScopeType(result);
+                        self.syncProjectClientFilter();
                     },
                     error => {
                         self.handleError(error);
@@ -98,14 +103,52 @@
             this.viewModel.clientId = null;
             this.viewModel.projectId = null;
         } else if (this.scopeType === "Client") {
+            if (!this.viewModel.clientId && this.projectClientFilterId)
+                this.viewModel.clientId = this.projectClientFilterId;
             this.viewModel.projectId = null;
         } else if (this.scopeType === "Project") {
+            if (this.viewModel.clientId && !this.projectClientFilterId)
+                this.projectClientFilterId = this.viewModel.clientId;
             this.viewModel.clientId = null;
+            this.applyProjectClientFilter();
         }
+    };
+
+    syncProjectClientFilter = () => {
+        if (!this.projectClientFilterId && this.viewModel.projectClientId)
+            this.projectClientFilterId = this.viewModel.projectClientId;
+        if (!this.projectClientFilterId && this.projectDropdown && this.viewModel.projectId) {
+            const project = this.findProject(this.viewModel.projectId);
+            if (project && project.clientId)
+                this.projectClientFilterId = project.clientId;
+        }
+        this.applyProjectClientFilter();
+    };
+
+    applyProjectClientFilter = () => {
+        const all: any[] = this.projectDropdown || [];
+        const clientId = this.projectClientFilterId;
+        this.filteredProjectDropdown = clientId
+            ? all.filter(p => p.clientId === clientId)
+            : [];
+
+        // Leave projects that aren't in the dropdown at all (e.g. inactive) untouched.
+        const selected = this.findProject(this.viewModel.projectId);
+        if (selected && this.filteredProjectDropdown.indexOf(selected) < 0)
+            this.viewModel.projectId = null;
+    };
+
+    findProject = (projectId: string): any => {
+        if (!projectId || !this.projectDropdown)
+            return null;
+        const matches = (this.projectDropdown as any[]).filter(p => p.id === projectId);
+        return matches.length ? matches[0] : null;
     };
 
     submitForm = () => {
         const self = this;
+        if (this.viewModel.isLocked)
+            return;
         this.$scope.$broadcast("show-errors-check-validity");
         if (this.$scope["EditForm"].$invalid)
             return;

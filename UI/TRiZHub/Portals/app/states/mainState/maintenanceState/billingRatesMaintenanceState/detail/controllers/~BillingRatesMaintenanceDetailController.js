@@ -79,6 +79,8 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
         };
         _this.submitForm = function () {
             var self = _this;
+            if (_this.viewModel.isLocked)
+                return;
             _this.$scope.$broadcast("show-errors-check-validity");
             if (_this.$scope["EditForm"].$invalid)
                 return;
@@ -96,7 +98,7 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
         _this.deleteRecord = function () {
             var _a;
             var self = _this;
-            if (self.isNew || !((_a = self.viewModel) === null || _a === void 0 ? void 0 : _a.id)) {
+            if (self.isNew || !((_a = self.viewModel) === null || _a === void 0 ? void 0 : _a.id) || self.viewModel.isLocked) {
                 return;
             }
             self.Popups.confirmationDialog(self.$scope, "Are you sure you want to delete?", "You are about to delete this record...")

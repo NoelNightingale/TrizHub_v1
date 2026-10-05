@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Entities.BillingRatesData;
+using TRiZHub.BL.Entities.ClientEntityData;
+using TRiZHub.BL.Entities.ProjectData;
 
 #endregion
 
@@ -20,6 +22,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             DateTime endDate, Guid? clientId, Guid? projectId);
 
         BillingRates GetBillingRates(Guid id);
+
+        string GetLockReason(ClientEntity client, Project project);
 
         void DeleteBillingRatesEntry(Guid id);
 

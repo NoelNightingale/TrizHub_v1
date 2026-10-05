@@ -117,6 +117,8 @@ namespace TRiZHub.Models.BillingRatesModels
         public Guid? ProjectRateId { get; set; }
         public decimal? EffectiveRate { get; set; }
         public string EffectiveScope { get; set; }
+        public bool IsInactive { get; set; }
+        public bool IsLocked { get; set; }
     }
 
     public class UserRatesAsOfClientRowModel
@@ -127,6 +129,7 @@ namespace TRiZHub.Models.BillingRatesModels
         public Guid? ClientRateId { get; set; }
         public decimal? EffectiveRate { get; set; }
         public string EffectiveScope { get; set; }
+        public bool IsInactive { get; set; }
         public List<UserRatesAsOfProjectRowModel> Projects { get; set; }
     }
 
