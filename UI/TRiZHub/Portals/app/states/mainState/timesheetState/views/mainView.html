@@ -27,17 +27,105 @@
         align-items: flex-start;
     }
 
-    .ts-capture .ts-top-left,
-    .ts-capture .ts-top-right {
+    .ts-capture .ts-top-left {
+        flex: 1 1 100%;
         min-width: 0;
     }
 
-    .ts-capture .ts-top-left {
-        flex: 0 0 38%;
+    .ts-capture .ts-top-heading {
+        flex-wrap: wrap;
+        min-height: 48px;
+        padding: 8px 14px;
     }
 
-    .ts-capture .ts-top-right {
-        flex: 1 1 60%;
+    .ts-capture .ts-panel-title.ts-screen-title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        text-transform: none;
+        color: #2f2f2f;
+    }
+
+    .ts-capture .ts-top-summary {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+
+    .ts-capture .ts-summary-toggle {
+        border: 1px solid rgba(106, 106, 106, 0.3);
+        background: #fff;
+        color: #3f3f3f;
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        outline: none;
+        line-height: 1.2;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .ts-capture .ts-summary-toggle:hover,
+    .ts-capture .ts-summary-toggle.is-active {
+        background: #6a6a6a;
+        border-color: #6a6a6a;
+        color: #fff;
+    }
+
+    .ts-capture .ts-summary-drawer-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.22);
+        z-index: 1045;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .ts-capture.is-summary-drawer-open .ts-summary-drawer-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .ts-capture .ts-summary-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 600px;
+        max-width: calc(100vw - 48px);
+        z-index: 1046;
+        background: #fafbfc;
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.14);
+        transform: translateX(105%);
+        transition: transform 0.2s ease;
+        padding: 14px 14px 16px;
+        overflow-y: auto;
+        pointer-events: none;
+    }
+
+    .ts-capture.is-summary-drawer-open .ts-summary-drawer {
+        transform: translateX(0);
+        pointer-events: auto;
+    }
+
+    .ts-capture .ts-summary-drawer .ts-totals {
+        margin-left: auto;
+    }
+
+    .ts-capture .ts-summary-hint {
+        margin-top: 8px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.4);
     }
 
     /* Shared section titles — charcoal accent from week tabs / grid headers */
@@ -713,14 +801,32 @@
 
     .ts-capture .ts-toolbar-filters {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 8px 12px;
     }
 
-    .ts-capture .ts-field,
-    .ts-capture .ts-field-wide {
-        width: 100%;
+    .ts-capture .ts-field {
+        flex: 1 1 160px;
+        min-width: 140px;
         max-width: none;
+    }
+
+    .ts-capture .ts-field.ts-field-wide {
+        flex: 2 1 260px;
+    }
+
+    .ts-capture .ts-field.ts-field-period {
+        flex: 1.2 1 160px;
+    }
+
+    .ts-capture .ts-field.ts-field-billable {
+        flex: 0.6 1 100px;
+        min-width: 100px;
+    }
+
+    .ts-capture .ts-field.ts-field-project {
+        flex: 3.2 1 320px;
     }
 
     .ts-capture .ts-filter-project {
@@ -1445,7 +1551,7 @@
     }
 </style>
 
-<div class="padding ts-capture" ng-class="{'is-clip-drawer-open': vm.clipboardDrawerOpen}">
+<div class="padding ts-capture" ng-class="{'is-clip-drawer-open': vm.clipboardDrawerOpen, 'is-summary-drawer-open': vm.summaryDrawerOpen}">
     <button type="button" class="ts-clip-rail"
             ng-class="{'is-just-copied': vm.clipboardToast}"
             ng-click="vm.toggleClipboardDrawer()"
@@ -1577,16 +1683,116 @@
         </div>
     </aside>
 
+    <div class="ts-summary-drawer-backdrop" ng-click="vm.closeSummaryDrawer()"></div>
+    <aside class="ts-summary-drawer" aria-hidden="{{!vm.summaryDrawerOpen}}">
+        <div class="ts-heat" ng-if="vm.weeks.length">
+            <div class="ts-panel-heading ts-heat-header">
+                <span class="ts-panel-title">Period summary</span>
+                <div class="ts-totals">
+                    <div class="ts-total">
+                        <span class="n">{{vm.summary.totalHours || 0}}</span>
+                        <span class="l">Hours</span>
+                    </div>
+                    <div class="ts-total is-bill">
+                        <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
+                        <span class="l">Billable</span>
+                    </div>
+                    <div class="ts-total is-nonbill">
+                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
+                        <span class="l">Non-bill</span>
+                    </div>
+                </div>
+                <button type="button" class="ts-clipboard-clear ts-summary-close"
+                        ng-click="vm.closeSummaryDrawer()"
+                        title="Close period summary">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <table class="ts-heat-table">
+                <thead>
+                    <tr>
+                        <th class="ts-heat-week">Wk</th>
+                        <th>M</th>
+                        <th>T</th>
+                        <th>W</th>
+                        <th>T</th>
+                        <th>F</th>
+                        <th>S</th>
+                        <th>S</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="week in vm.weeks">
+                        <th class="ts-heat-week"
+                            ng-class="{'is-active': vm.selectedWeekIndex === week.index}"
+                            ng-click="vm.selectWeekFromSummary(week.index)">
+                            {{week.weekNum}}
+                            <span class="sub">{{week.label.split('·')[1]}}</span>
+                        </th>
+                        <td ng-repeat="day in week.daysByCol track by $index"
+                            class="ts-heat-cell"
+                            ng-class="vm.heatClassFor(week, $index)"
+                            ng-click="vm.jumpToColFromSummary(week, $index)"
+                            title="{{day ? ((day.date | date:'d MMM') + ' — ' + (day.hours || 0) + 'h total, ' + (day.billhours || 0) + ' billable, ' + ((day.hours || 0) - (day.billhours || 0)) + ' non-billable') : ''}}">
+                            <span class="ts-heat-date" ng-if="day">{{day.dayOfMonth || (day.date | date:'d')}}</span>
+                            <span class="ts-heat-body" ng-if="day">
+                                <span class="ts-heat-hours">{{day.hours || 0}}</span>
+                                <span class="ts-heat-chips">
+                                    <span class="ts-heat-chip is-bill" title="Billable">{{day.billhours || 0}}</span>
+                                    <span class="ts-heat-chip is-nonbill" title="Non-billable">{{(day.hours || 0) - (day.billhours || 0)}}</span>
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="ts-heat-legend">
+                <span class="lg-gap">No time</span>
+                <span class="lg-low">Under 8h</span>
+                <span class="lg-ok">8h+</span>
+                <span class="lg-bill">Billable</span>
+                <span class="lg-nonbill">Non-bill</span>
+            </div>
+            <div class="ts-summary-hint">Click a day to jump to it in the grid.</div>
+        </div>
+        <div class="ts-clipboard-empty" ng-if="!vm.weeks.length">
+            Select a billing period to see the summary.
+        </div>
+    </aside>
+
     <div class="box">
         <div class="box-body">
             <div class="ts-top">
                 <div class="ts-top-layout">
                     <div class="ts-top-left">
-                        <div class="ts-panel-heading">
-                            <span class="ts-panel-title">Billing Period</span>
+                        <div class="ts-panel-heading ts-top-heading">
+                            <h3 class="ts-panel-title ts-screen-title">Timesheet Capture</h3>
+                            <div class="ts-top-summary" ng-if="vm.weeks.length">
+                                <div class="ts-totals">
+                                    <div class="ts-total">
+                                        <span class="n">{{vm.summary.totalHours || 0}}</span>
+                                        <span class="l">Hours</span>
+                                    </div>
+                                    <div class="ts-total is-bill">
+                                        <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
+                                        <span class="l">Billable</span>
+                                    </div>
+                                    <div class="ts-total is-nonbill">
+                                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
+                                        <span class="l">Non-bill</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="ts-summary-toggle"
+                                        ng-class="{'is-active': vm.summaryDrawerOpen}"
+                                        ng-click="vm.toggleSummaryDrawer()"
+                                        title="Open the period calendar">
+                                    <i class="fa fa-calendar"></i> Period summary
+                                </button>
+                            </div>
                         </div>
                         <form role="form" name="EditForm" class="ts-filter-bar ts-toolbar-filters">
-                            <div class="ts-field ts-field-wide">
+                            <div class="ts-field ts-field-period">
+                                <label>Period</label>
                                 <select class="form-control"
                                         ng-options="s.id as s.optionLabel for s in vm.filterOptions.billingCycles"
                                         ng-model="vm.filterModel.billingCycleId"
@@ -1600,7 +1806,7 @@
                                         ng-model="vm.filterModel.userId"
                                         ng-required="true"></select>
                             </div>
-                            <div class="ts-field ts-field-wide">
+                            <div class="ts-field ts-field-project">
                                 <label>Project</label>
                                 <div class="ts-filter-project">
                                     <input name="projectFilter" readonly type="text"
@@ -1613,7 +1819,7 @@
                                        ng-click="vm.clearProjectFilter($event)">×</a>
                                 </div>
                             </div>
-                            <div class="ts-field">
+                            <div class="ts-field ts-field-billable">
                                 <label>Billable</label>
                                 <select class="form-control"
                                         ng-options="s.description for s in vm.filterOptions.billingOptions"
@@ -1734,72 +1940,6 @@
                         </div>
                     </div>
 
-                    <div class="ts-top-right" ng-if="vm.weeks.length">
-                        <div class="ts-heat">
-                            <div class="ts-panel-heading ts-heat-header">
-                                <span class="ts-panel-title">Period summary</span>
-                                <div class="ts-totals">
-                                    <div class="ts-total">
-                                        <span class="n">{{vm.summary.totalHours || 0}}</span>
-                                        <span class="l">Hours</span>
-                                    </div>
-                                    <div class="ts-total is-bill">
-                                        <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
-                                        <span class="l">Billable</span>
-                                    </div>
-                                    <div class="ts-total is-nonbill">
-                                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
-                                        <span class="l">Non-bill</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <table class="ts-heat-table">
-                                <thead>
-                                    <tr>
-                                        <th class="ts-heat-week">Wk</th>
-                                        <th>M</th>
-                                        <th>T</th>
-                                        <th>W</th>
-                                        <th>T</th>
-                                        <th>F</th>
-                                        <th>S</th>
-                                        <th>S</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="week in vm.weeks">
-                                        <th class="ts-heat-week"
-                                            ng-class="{'is-active': vm.selectedWeekIndex === week.index}"
-                                            ng-click="vm.selectWeek(week.index)">
-                                            {{week.weekNum}}
-                                            <span class="sub">{{week.label.split('·')[1]}}</span>
-                                        </th>
-                                        <td ng-repeat="day in week.daysByCol track by $index"
-                                            class="ts-heat-cell"
-                                            ng-class="vm.heatClassFor(week, $index)"
-                                            ng-click="vm.jumpToCol(week, $index)"
-                                            title="{{day ? ((day.date | date:'d MMM') + ' — ' + (day.hours || 0) + 'h total, ' + (day.billhours || 0) + ' billable, ' + ((day.hours || 0) - (day.billhours || 0)) + ' non-billable') : ''}}">
-                                            <span class="ts-heat-date" ng-if="day">{{day.dayOfMonth || (day.date | date:'d')}}</span>
-                                            <span class="ts-heat-body" ng-if="day">
-                                                <span class="ts-heat-hours">{{day.hours || 0}}</span>
-                                                <span class="ts-heat-chips">
-                                                    <span class="ts-heat-chip is-bill" title="Billable">{{day.billhours || 0}}</span>
-                                                    <span class="ts-heat-chip is-nonbill" title="Non-billable">{{(day.hours || 0) - (day.billhours || 0)}}</span>
-                                                </span>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="ts-heat-legend">
-                                <span class="lg-gap">No time</span>
-                                <span class="lg-low">Under 8h</span>
-                                <span class="lg-ok">8h+</span>
-                                <span class="lg-bill">Billable</span>
-                                <span class="lg-nonbill">Non-bill</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 

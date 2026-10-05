@@ -156,6 +156,37 @@ var TimesheetController = /** @class */ (function (_super) {
             _this.selectWeek(week.index);
             day.expanded = true;
         };
+        /** Right-hand Period summary drawer open state. */
+        _this.summaryDrawerOpen = false;
+        _this.openSummaryDrawer = function () {
+            if (_this.clipboardDrawerOpen) {
+                _this.closeClipboardDrawer();
+            }
+            _this.summaryDrawerOpen = true;
+        };
+        _this.closeSummaryDrawer = function () {
+            _this.summaryDrawerOpen = false;
+        };
+        _this.toggleSummaryDrawer = function () {
+            if (_this.summaryDrawerOpen) {
+                _this.closeSummaryDrawer();
+            }
+            else {
+                _this.openSummaryDrawer();
+            }
+        };
+        /** Calendar click inside the summary drawer: jump to the day and get the drawer out of the way. */
+        _this.jumpToColFromSummary = function (week, col) {
+            if (!_this.dayAt(week, col)) {
+                return;
+            }
+            _this.jumpToCol(week, col);
+            _this.closeSummaryDrawer();
+        };
+        _this.selectWeekFromSummary = function (index) {
+            _this.selectWeek(index);
+            _this.closeSummaryDrawer();
+        };
         _this.clearProjectFilter = function ($event) {
             if ($event) {
                 $event.stopPropagation();
@@ -1470,6 +1501,7 @@ var TimesheetController = /** @class */ (function (_super) {
             catch (e) { }
         };
         _this.openClipboardDrawer = function () {
+            _this.summaryDrawerOpen = false;
             _this.clipboardDrawerOpen = true;
             _this.persistClipboardDrawerPref();
         };
@@ -1805,7 +1837,7 @@ var TimesheetController = /** @class */ (function (_super) {
         // Drawer pref does not need userId; clips/templates wait until users dropdown is ready
         _this.loadClipboardDrawerPref();
         var onClipboardKeydown = function (e) {
-            if (e.keyCode !== 27 || !me.clipboardDrawerOpen) {
+            if (e.keyCode !== 27 || (!me.clipboardDrawerOpen && !me.summaryDrawerOpen)) {
                 return;
             }
             if (me.clipboardDetailItem || me.clipboardPasteItem || me.clipboardEditingLabel) {
@@ -1813,6 +1845,7 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             me.$scope.$applyAsync(function () {
                 me.closeClipboardDrawer();
+                me.closeSummaryDrawer();
             });
         };
         angular.element(document).on("keydown.tsClipboardDrawer", onClipboardKeydown);

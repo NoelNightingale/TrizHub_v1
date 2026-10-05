@@ -168,7 +168,7 @@ class TimesheetController extends CHControllerBase {
         this.loadClipboardDrawerPref();
 
         const onClipboardKeydown = (e: any) => {
-            if (e.keyCode !== 27 || !me.clipboardDrawerOpen) {
+            if (e.keyCode !== 27 || (!me.clipboardDrawerOpen && !me.summaryDrawerOpen)) {
                 return;
             }
             if (me.clipboardDetailItem || me.clipboardPasteItem || me.clipboardEditingLabel) {
@@ -176,6 +176,7 @@ class TimesheetController extends CHControllerBase {
             }
             me.$scope.$applyAsync(() => {
                 me.closeClipboardDrawer();
+                me.closeSummaryDrawer();
             });
         };
         angular.element(document).on("keydown.tsClipboardDrawer", onClipboardKeydown);
@@ -305,6 +306,41 @@ class TimesheetController extends CHControllerBase {
         day.expanded = true;
     };
 
+    /** Right-hand Period summary drawer open state. */
+    summaryDrawerOpen = false;
+
+    openSummaryDrawer = (): void => {
+        if (this.clipboardDrawerOpen) {
+            this.closeClipboardDrawer();
+        }
+        this.summaryDrawerOpen = true;
+    };
+
+    closeSummaryDrawer = (): void => {
+        this.summaryDrawerOpen = false;
+    };
+
+    toggleSummaryDrawer = (): void => {
+        if (this.summaryDrawerOpen) {
+            this.closeSummaryDrawer();
+        } else {
+            this.openSummaryDrawer();
+        }
+    };
+
+    /** Calendar click inside the summary drawer: jump to the day and get the drawer out of the way. */
+    jumpToColFromSummary = (week: any, col: number): void => {
+        if (!this.dayAt(week, col)) {
+            return;
+        }
+        this.jumpToCol(week, col);
+        this.closeSummaryDrawer();
+    };
+
+    selectWeekFromSummary = (index: number): void => {
+        this.selectWeek(index);
+        this.closeSummaryDrawer();
+    };
     clearProjectFilter = ($event?: any): void => {
         if ($event) {
             $event.stopPropagation();
@@ -1829,6 +1865,7 @@ class TimesheetController extends CHControllerBase {
     };
 
     openClipboardDrawer = (): void => {
+        this.summaryDrawerOpen = false;
         this.clipboardDrawerOpen = true;
         this.persistClipboardDrawerPref();
     };
