@@ -33,7 +33,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         public IQueryable<BillingRates> BillingRatesFilterList(Guid? userAccountId, Guid? clientId, Guid? projectId,
             string scope = null, DateTime? activeOn = null,
             IList<Guid> userAccountIds = null, IList<Guid> clientIds = null, IList<Guid> projectIds = null,
-            string userStatus = null, string clientStatus = null, string projectStatus = null)
+            string userStatus = null, string clientStatus = null, string projectStatus = null,
+            DateTime? rangeStart = null, DateTime? rangeEnd = null)
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
 
@@ -92,6 +93,19 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             {
                 var onDate = activeOn.Value.Date;
                 query = query.Where(a => a.StartDate <= onDate && a.EndDate >= onDate);
+            }
+
+            // Date range: any period that overlaps [rangeStart, rangeEnd]; either bound optional.
+            if (rangeStart.HasValue)
+            {
+                var fromDate = rangeStart.Value.Date;
+                query = query.Where(a => a.EndDate >= fromDate);
+            }
+
+            if (rangeEnd.HasValue)
+            {
+                var toDate = rangeEnd.Value.Date;
+                query = query.Where(a => a.StartDate <= toDate);
             }
 
             // Status filters (null = do not apply — preserves nested User Billing Rates behaviour).
@@ -549,13 +563,14 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         public byte[] ExportBillingRatesExcel(IList<Guid> userAccountIds, IList<Guid> clientIds,
             IList<Guid> projectIds, string scope, DateTime? activeOn, string resultMode,
-            string userStatus = null, string clientStatus = null, string projectStatus = null)
+            string userStatus = null, string clientStatus = null, string projectStatus = null,
+            DateTime? rangeStart = null, DateTime? rangeEnd = null)
         {
             Authenticate(PrivilegeType.UserBillingRatesMaintenance);
 
             var effectiveMode = string.Equals(resultMode, "effective", StringComparison.OrdinalIgnoreCase);
             if (effectiveMode && !activeOn.HasValue)
-                throw new BillingRatesException("Effective Date is required for Effective export.");
+                throw new BillingRatesException("Effective On date is required for Effective export.");
 
             using (var pck = new ExcelPackage())
             {
@@ -573,7 +588,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
                     sheet.Cells[1, 1].Value = "Billing Rates — Effective";
                     sheet.Cells[1, 1].Style.Font.Bold = true;
-                    sheet.Cells[2, 1].Value = "Effective Date";
+                    sheet.Cells[2, 1].Value = "Effective On";
                     sheet.Cells[2, 2].Value = asOf;
                     sheet.Cells[2, 2].Style.Numberformat.Format = excelDateFormat;
 
@@ -605,8 +620,11 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 else
                 {
                     DateTime? asOf = activeOn.HasValue ? activeOn.Value.Date : (DateTime?)null;
+                    DateTime? fromDate = rangeStart.HasValue ? rangeStart.Value.Date : (DateTime?)null;
+                    DateTime? toDate = rangeEnd.HasValue ? rangeEnd.Value.Date : (DateTime?)null;
                     var query = BillingRatesFilterList(null, null, null, scope, asOf,
-                        userAccountIds, clientIds, projectIds, userStatus, clientStatus, projectStatus);
+                        userAccountIds, clientIds, projectIds, userStatus, clientStatus, projectStatus,
+                        fromDate, toDate);
 
                     var rows = query
                         .Select(a => new
@@ -629,14 +647,29 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
                     sheet.Cells[1, 1].Value = "Billing Rates — Periods";
                     sheet.Cells[1, 1].Style.Font.Bold = true;
-                    var headerRow = 3;
+                    var infoRow = 2;
                     if (asOf.HasValue)
                     {
-                        sheet.Cells[2, 1].Value = "Effective Date";
-                        sheet.Cells[2, 2].Value = asOf.Value;
-                        sheet.Cells[2, 2].Style.Numberformat.Format = excelDateFormat;
-                        headerRow = 4;
+                        sheet.Cells[infoRow, 1].Value = "Effective On";
+                        sheet.Cells[infoRow, 2].Value = asOf.Value;
+                        sheet.Cells[infoRow, 2].Style.Numberformat.Format = excelDateFormat;
+                        infoRow++;
                     }
+                    if (fromDate.HasValue)
+                    {
+                        sheet.Cells[infoRow, 1].Value = "Start Date";
+                        sheet.Cells[infoRow, 2].Value = fromDate.Value;
+                        sheet.Cells[infoRow, 2].Style.Numberformat.Format = excelDateFormat;
+                        infoRow++;
+                    }
+                    if (toDate.HasValue)
+                    {
+                        sheet.Cells[infoRow, 1].Value = "End Date";
+                        sheet.Cells[infoRow, 2].Value = toDate.Value;
+                        sheet.Cells[infoRow, 2].Style.Numberformat.Format = excelDateFormat;
+                        infoRow++;
+                    }
+                    var headerRow = infoRow == 2 ? 3 : infoRow + 1;
 
                     sheet.Cells[headerRow, 1].Value = "User";
                     sheet.Cells[headerRow, 2].Value = "Scope";

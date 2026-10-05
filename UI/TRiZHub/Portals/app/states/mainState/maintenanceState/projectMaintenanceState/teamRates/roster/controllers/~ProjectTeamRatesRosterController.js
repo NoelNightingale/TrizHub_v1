@@ -25,7 +25,19 @@ var ProjectTeamRatesRosterController = /** @class */ (function (_super) {
         _this.BillingRatesService = BillingRatesService;
         _this.Popups = Popups;
         _this.loading = false;
+        _this.viewMode = "asOf"; // "periods" | "asOf"
+        _this.periodGroups = [];
+        _this.periodsLoading = false;
         //#endregion
+        _this.setViewMode = function (mode) {
+            _this.viewMode = mode;
+            if (mode === "periods") {
+                _this.loadPeriods();
+            }
+            else {
+                _this.loadTeam();
+            }
+        };
         _this.loadTeam = function () {
             var self = _this;
             self.loading = true;
@@ -38,6 +50,42 @@ var ProjectTeamRatesRosterController = /** @class */ (function (_super) {
                 self.loading = false;
                 self.handleError(error);
             });
+        };
+        _this.loadPeriods = function () {
+            var self = _this;
+            self.periodsLoading = true;
+            self.BillingRatesService.billingRatesGrid({
+                projectId: self.projectId,
+                scope: "Project",
+                sortKey: "user",
+                sortOrder: "ASC",
+                currentPage: 1,
+                recordsPerPage: 10000
+            })
+                .then(function (result) {
+                self.periodGroups = self.groupByUser(result.results || []);
+                self.periodsLoading = false;
+            }, function (error) {
+                self.periodsLoading = false;
+                self.handleError(error);
+            });
+        };
+        _this.groupByUser = function (rows) {
+            var groups = [];
+            var byUser = {};
+            rows.forEach(function (r) {
+                var group = byUser[r.userAccountId];
+                if (!group) {
+                    group = { userAccountId: r.userAccountId, userName: r.userName, rates: [] };
+                    byUser[r.userAccountId] = group;
+                    groups.push(group);
+                }
+                group.rates.push(r);
+            });
+            groups.forEach(function (g) { return g.rates.sort(function (a, b) {
+                return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+            }); });
+            return groups;
         };
         _this.formatRate = function (rate) {
             if (rate === null || rate === undefined)

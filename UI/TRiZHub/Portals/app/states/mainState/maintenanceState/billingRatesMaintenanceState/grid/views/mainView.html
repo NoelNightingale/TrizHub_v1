@@ -8,7 +8,7 @@
                             <h2>Billing Rates</h2>
                             <p class="br-header-note">
                                 Browse and maintain rate periods across users, clients and projects.
-                                Filter lists cascade from assignments. Change filters, then apply to reload the grid.
+                                Filter lists cascade from assignments. Change filters, then click Refresh data to reload the grid.
                             </p>
                             <div class="br-cascade" title="Resolved billing rate precedence">
                                 <span>Project</span>
@@ -154,7 +154,7 @@
 
                     <!-- Toolbar -->
                     <div class="br-toolbar">
-                        <div class="br-toolbar-field">
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
                             <label>Scope</label>
                             <select class="form-control input-sm" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
                                 <option value="">All</option>
@@ -163,29 +163,50 @@
                                 <option value="Project">Project</option>
                             </select>
                         </div>
-                        <div class="br-toolbar-field">
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
                             <label>
-                                Effective Date
-                                <a href="" class="br-clear-date" ng-if="vm.filters.activeOn"
-                                   ng-click="vm.clearEffectiveDate(); $event.preventDefault()"
-                                   title="Clear effective date">Clear</a>
+                                Start Date
+                                <a href="" class="br-clear-date" ng-if="vm.filters.rangeStart"
+                                   ng-click="vm.clearDate('rangeStart'); $event.preventDefault()"
+                                   title="Clear start date">Clear</a>
                             </label>
+                            <input type="text" class="form-control input-sm"
+                                   ng-model="vm.filters.rangeStart"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true"
+                                   name="rangeStart" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="(optional)" autocomplete="off"
+                                   ng-change="vm.markFiltersDirty()" />
+                        </div>
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
+                            <label>
+                                End Date
+                                <a href="" class="br-clear-date" ng-if="vm.filters.rangeEnd"
+                                   ng-click="vm.clearDate('rangeEnd'); $event.preventDefault()"
+                                   title="Clear end date">Clear</a>
+                            </label>
+                            <input type="text" class="form-control input-sm"
+                                   ng-model="vm.filters.rangeEnd"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true"
+                                   name="rangeEnd" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="(optional)" autocomplete="off"
+                                   ng-change="vm.markFiltersDirty()" />
+                        </div>
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'effective'">
+                            <label>Effective On</label>
                             <input type="text" class="form-control input-sm"
                                    ng-model="vm.filters.activeOn"
                                    data-icon-left="fa fa-chevron-left"
                                    data-icon-right="fa fa-chevron-right"
                                    autoclose="true"
                                    name="activeOn" data-date-format="yyyy/MM/dd"
-                                   bs-datepicker placeholder="(optional)" autocomplete="off"
+                                   bs-datepicker placeholder="Required" autocomplete="off"
                                    ng-change="vm.onActiveOnChanged()" />
                         </div>
                         <div class="br-toolbar-actions">
-                            <button type="button" class="btn btn-sm"
-                                    ng-class="vm.filtersDirty ? 'btn-warning' : 'btn-primary'"
-                                    ng-click="vm.applyFilters()">
-                                <i class="fa fa-refresh" ng-if="vm.filtersDirty"></i>
-                                {{vm.filtersDirty ? 'Apply filters to reload grid' : 'Apply'}}
-                            </button>
                             <button type="button" class="btn btn-sm btn-default"
                                     ng-click="vm.clearAllFilters()">Clear</button>
                             <button type="button" class="btn btn-sm btn-outline b-primary text-primary"
@@ -217,12 +238,141 @@
                         </span>
                     </div>
 
-                    <div class="br-dirty" ng-if="vm.filtersDirty">
-                        <i class="fa fa-exclamation-circle"></i>
-                        <span>Filters have changed. Click <strong>Apply filters to reload grid</strong> to update the results below.</span>
+                    <div class="br-results-bar">
+                        <div class="btn-group br-mode-toggle">
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.viewMode === 'periods' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setViewMode('periods')">Period</button>
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.viewMode === 'effective' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setViewMode('effective')">Effective On</button>
+                        </div>
+                        <span class="br-mode-hint" ng-if="vm.viewMode === 'periods'">
+                            Rate periods that overlap the Start Date to End Date range.
+                        </span>
+                        <span class="br-mode-hint" ng-if="vm.viewMode === 'effective'">
+                            The rate that applies on {{vm.filters.activeOn | date: 'yyyy/MM/dd'}}: Project, else Client, else Default.
+                        </span>
                     </div>
 
-                    <div class="table-responsive">
+                    <!-- Shown instead of the grid until the new filter selection is loaded -->
+                    <div class="br-stale" ng-if="vm.filtersDirty">
+                        <i class="fa fa-filter br-stale-icon"></i>
+                        <div class="br-stale-title">Your filter selection has changed</div>
+                        <div class="br-stale-text">Click <strong>Refresh data</strong> to load the results for the new selection.</div>
+                        <button type="button" class="btn btn-sm btn-warning" ng-click="vm.applyFilters()">
+                            <i class="fa fa-refresh"></i> Refresh data
+                        </button>
+                    </div>
+
+                    <!-- Effective On -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'effective' && !vm.filtersDirty">
+                        <table class="table table-striped br-table">
+                            <thead>
+                            <tr>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'userName'}">
+                                    <a ng-click="vm.effectiveGrid.sort('userName')">User</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'userName',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'userName'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'clientName'}">
+                                    <a ng-click="vm.effectiveGrid.sort('clientName')">Client</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'clientName',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'clientName'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'projectName'}">
+                                    <a ng-click="vm.effectiveGrid.sort('projectName')">Project</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'projectName',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'projectName'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'effectiveRate'}">
+                                    <a ng-click="vm.effectiveGrid.sort('effectiveRate')">Effective Rate</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveRate',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveRate'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'effectiveScope'}">
+                                    <a ng-click="vm.effectiveGrid.sort('effectiveScope')">Source</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveScope',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveScope'}"></i>
+                                </th>
+                                <th style="width: 90px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr data-ng-repeat="i in vm.effectiveGridModel.data">
+                                <td>
+                                    <a class="text-primary"
+                                       title="Open billing rates for this user"
+                                       ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: i.userAccountId})">
+                                        {{i.userName}}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="text-primary" ng-if="i.clientId"
+                                       title="Open client rates"
+                                       ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId})">
+                                        {{i.clientName}}
+                                    </a>
+                                    <span ng-if="!i.clientId" class="text-muted">—</span>
+                                </td>
+                                <td>
+                                    <a class="text-primary" ng-if="i.projectId"
+                                       title="Open project rates"
+                                       ui-sref="mainState.maintenance.projectMaintenance.teamRates({id: i.projectId})">
+                                        {{i.projectName}}
+                                    </a>
+                                    <span ng-if="!i.projectId" class="text-muted">—</span>
+                                </td>
+                                <td class="br-rate">
+                                    <span ng-if="i.effectiveRate != null">{{i.effectiveRate}}</span>
+                                    <span class="text-muted" ng-if="i.effectiveRate == null">Not set</span>
+                                </td>
+                                <td>
+                                    <span class="br-scope" ng-if="i.effectiveScope"
+                                          ng-class="{'br-scope-default': i.effectiveScope === 'Default',
+                                                     'br-scope-client': i.effectiveScope === 'Client',
+                                                     'br-scope-project': i.effectiveScope === 'Project'}">
+                                        {{i.effectiveScope}}
+                                    </span>
+                                    <span ng-if="!i.effectiveScope" class="text-muted">—</span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary" ng-if="i.id"
+                                       ui-sref="mainState.maintenance.billingRatesMaintenance.detail({id: i.id})"
+                                       title="Open the rate period that applies">
+                                        <i class="fa fa-external-link"></i> Open
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr ng-show="vm.effectiveGridModel.data.length == 0">
+                                <td colspan="6" class="br-empty">
+                                    No users match the selected filters.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="w-full m-b-2 center-container">
+                            <uib-pagination total-items="vm.effectiveGridModel.totalItems"
+                                            ng-model="vm.effectiveGridModel.currentPage"
+                                            max-size="vm.effectiveGridModel.maxSize"
+                                            class="pagination-sm m-b-sm m-t-sm white"
+                                            boundary-links="true"
+                                            previous-text="<" next-text=">"
+                                            rotate="false"
+                                            ng-change="vm.effectiveGrid.pageChanged()"
+                                            items-per-page="vm.effectiveGridModel.recordsPerPage">
+                            </uib-pagination>
+                        </div>
+                    </div>
+
+                    <!-- Period -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'periods' && !vm.filtersDirty">
                             <table st-table="rowCollectionBasic" class="table table-striped br-table">
                                 <thead>
                                 <tr>

@@ -16,10 +16,10 @@
                             <div class="btn-group">
                                 <button type="button" class="btn btn-sm"
                                         ng-class="vm.viewMode === 'all' ? 'btn-primary' : 'btn-default'"
-                                        ng-click="vm.setViewMode('all')">All periods</button>
+                                        ng-click="vm.setViewMode('all')">Period</button>
                                 <button type="button" class="btn btn-sm"
                                         ng-class="vm.viewMode === 'asOf' ? 'btn-primary' : 'btn-default'"
-                                        ng-click="vm.setViewMode('asOf')">As of</button>
+                                        ng-click="vm.setViewMode('asOf')">Effective Date</button>
                             </div>
                         </div>
                         <div class="col-sm-6" ng-if="vm.viewMode === 'asOf'">
@@ -84,7 +84,7 @@
                                     ng-class="{'br-row-locked': i.isLocked}">
                                     <td>{{i.scope}}</td>
                                     <td>
-                                        {{i.clientName}}
+                                        {{i.clientName || i.projectClientName}}
                                         <span class="br-inactive-badge" ng-if="i.clientInactive"
                                               title="Client is inactive. Reactivate it to edit this rate.">Inactive</span>
                                     </td>

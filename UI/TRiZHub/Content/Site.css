@@ -454,21 +454,32 @@ hr {
     background: rgba(0, 0, 0, 0.06);
 }
 
-.br-workbench .br-dirty {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+.br-workbench .br-stale {
+    text-align: center;
+    padding: 36px 16px;
     margin-bottom: 12px;
+    border: 1px dashed #ffcc80;
     border-radius: 4px;
-    border: 1px solid #ffe082;
-    background: #fff8e1;
+    background: #fffaf2;
     color: #6d4c41;
-    font-size: 12px;
 }
 
-.br-workbench .br-dirty i {
+.br-workbench .br-stale-icon {
+    font-size: 26px;
     color: #f9a825;
+    margin-bottom: 8px;
+}
+
+.br-workbench .br-stale-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.br-workbench .br-stale-text {
+    font-size: 12px;
+    color: #8d6e63;
+    margin-bottom: 14px;
 }
 
 .br-workbench .br-results-bar {
@@ -609,6 +620,20 @@ hr {
 
 tr.br-row-locked > td {
     color: #78909c;
+}
+
+/* Segmented controls used as tabs. The theme sets button border-width to 0,
+   so an unselected option disappears on a white background. */
+.btn-group > .btn {
+    border-width: 1px;
+    border-style: solid;
+}
+
+.btn-group > .btn.btn-default,
+.btn-group > .btn.white {
+    border-color: #78909c;
+    border-bottom-color: transparent;
+    box-shadow: none;
 }
 
 .br-workbench .br-rate {

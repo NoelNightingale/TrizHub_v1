@@ -133,11 +133,14 @@ namespace TRiZHub.Controllers
             DateTime? activeOn = null;
             if (model.ActiveOn.HasValue)
                 activeOn = model.ActiveOn.Value.ToLocalTime().Date;
+            DateTime? rangeStart = model.RangeStart.HasValue ? model.RangeStart.Value.ToLocalTime().Date : (DateTime?)null;
+            DateTime? rangeEnd = model.RangeEnd.HasValue ? model.RangeEnd.Value.ToLocalTime().Date : (DateTime?)null;
 
             var filteredQuery = BillingRatesProvider.BillingRatesFilterList(
                     model.UserAccountId, model.ClientId, model.ProjectId, model.Scope, activeOn,
                     model.UserAccountIds, model.ClientIds, model.ProjectIds,
-                    model.UserStatus, model.ClientStatus, model.ProjectStatus)
+                    model.UserStatus, model.ClientStatus, model.ProjectStatus,
+                    rangeStart, rangeEnd)
                 .Select(a => new BillingRatesGridModel
                 {
                     Id = a.Id,
@@ -150,6 +153,7 @@ namespace TRiZHub.Controllers
                     ClientName = a.Client != null ? a.Client.EntityName : null,
                     ProjectId = a.ProjectId,
                     ProjectName = a.Project != null ? a.Project.ProjectName : null,
+                    ProjectClientName = a.Project != null ? a.Project.Client.EntityName : null,
                     Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
                     Rate = a.Rate,
                     StartDate = a.StartDate,
@@ -226,7 +230,8 @@ namespace TRiZHub.Controllers
                 (!model.ClientId.HasValue || model.ClientId.Value == Guid.Empty) &&
                 (!model.ProjectId.HasValue || model.ProjectId.Value == Guid.Empty) &&
                 string.IsNullOrWhiteSpace(model.Scope) &&
-                !model.ActiveOn.HasValue;
+                !model.ActiveOn.HasValue &&
+                !rangeStart.HasValue && !rangeEnd.HasValue;
 
             if (!returnAllForSingleUser)
                 filteredQuery = filteredQuery.Skip(begin).Take(model.RecordsPerPage.Value);
@@ -258,7 +263,9 @@ namespace TRiZHub.Controllers
                     model != null ? model.ResultMode : null,
                     model != null ? model.UserStatus : null,
                     model != null ? model.ClientStatus : null,
-                    model != null ? model.ProjectStatus : null);
+                    model != null ? model.ProjectStatus : null,
+                    model != null && model.RangeStart.HasValue ? model.RangeStart.Value.ToLocalTime().Date : (DateTime?)null,
+                    model != null && model.RangeEnd.HasValue ? model.RangeEnd.Value.ToLocalTime().Date : (DateTime?)null);
 
                 var mode = model != null &&
                            string.Equals(model.ResultMode, "effective", StringComparison.OrdinalIgnoreCase)
@@ -294,7 +301,7 @@ namespace TRiZHub.Controllers
             try
             {
                 if (model == null || !model.ActiveOn.HasValue)
-                    throw new BillingRatesException("Effective Date is required for Effective view.");
+                    throw new BillingRatesException("Effective On date is required for Effective view.");
 
                 var begin = SetupGridParams(model);
                 var asOf = model.ActiveOn.Value.ToLocalTime().Date;

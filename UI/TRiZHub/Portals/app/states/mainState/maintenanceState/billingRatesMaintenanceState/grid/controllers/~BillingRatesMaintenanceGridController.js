@@ -35,6 +35,16 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             recordsPerPage: 60
         };
         _this.onDataLoaded = function (event) { _this.onLoadEvent(event); };
+        _this.effectiveGridModel = {
+            data: [],
+            totalItems: 0,
+            sortKeyOrder: { order: "ASC", key: "userName" },
+            currentPage: 1,
+            maxSize: 5,
+            recordsPerPage: 60
+        };
+        _this.onEffectiveLoaded = function (event) { _this.effectiveGridModel = event; };
+        _this.viewMode = "periods"; // "periods" | "effective"
         /** True when filters changed since the last successful Apply / grid load. */
         _this.filtersDirty = false;
         _this.filters = {
@@ -43,6 +53,8 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             projectIds: [],
             scope: "",
             activeOn: new Date(),
+            rangeStart: new Date(),
+            rangeEnd: new Date(),
             userStatus: "active",
             clientStatus: "active",
             projectStatus: "active"
@@ -62,9 +74,16 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.onActiveOnChanged = function () {
             _this.markFiltersDirty();
         };
-        _this.clearEffectiveDate = function () {
-            _this.filters.activeOn = null;
+        _this.clearDate = function (field) {
+            _this.filters[field] = null;
             _this.markFiltersDirty();
+        };
+        _this.setViewMode = function (mode) {
+            if (_this.viewMode === mode) {
+                return;
+            }
+            _this.viewMode = mode;
+            _this.applyFilters();
         };
         _this.setStatusFilter = function (dimension, status) {
             if (dimension === "user") {
@@ -92,11 +111,30 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             _this.scheduleCascade();
         };
         _this.applyFilters = function () {
-            _this.filtersDirty = false;
-            if (_this.pageGrid && _this.pageGrid.gridModel) {
-                _this.pageGrid.gridModel.currentPage = 1;
+            if (!_this.validateDates()) {
+                return;
             }
-            _this.pageGrid.loadGrid();
+            _this.filtersDirty = false;
+            var grid = _this.viewMode === "effective" ? _this.effectiveGrid : _this.pageGrid;
+            if (grid && grid.gridModel) {
+                grid.gridModel.currentPage = 1;
+            }
+            grid.loadGrid();
+        };
+        _this.validateDates = function () {
+            if (_this.viewMode === "effective") {
+                if (!_this.filters.activeOn) {
+                    _this.Popups.showError(_this.$scope, "Select an Effective On date.");
+                    return false;
+                }
+                return true;
+            }
+            if (_this.filters.rangeStart && _this.filters.rangeEnd
+                && new Date(_this.filters.rangeStart).getTime() > new Date(_this.filters.rangeEnd).getTime()) {
+                _this.Popups.showError(_this.$scope, "Start Date must be on or before End Date.");
+                return false;
+            }
+            return true;
         };
         _this.clearAllFilters = function () {
             _this.filters.userAccountIds = [];
@@ -104,6 +142,8 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             _this.filters.projectIds = [];
             _this.filters.scope = "";
             _this.filters.activeOn = new Date();
+            _this.filters.rangeStart = new Date();
+            _this.filters.rangeEnd = new Date();
             _this.filters.userStatus = "active";
             _this.filters.clientStatus = "active";
             _this.filters.projectStatus = "active";
@@ -271,17 +311,20 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         };
         _this.exportExcel = function () {
             var self = _this;
-            if (self.exporting) {
+            if (self.exporting || !self.validateDates()) {
                 return;
             }
+            var effective = self.viewMode === "effective";
             self.exporting = true;
             self.BillingRatesService.exportExcel({
                 userAccountIds: self.filters.userAccountIds || [],
                 clientIds: self.filters.clientIds || [],
                 projectIds: self.filters.projectIds || [],
-                scope: self.filters.scope || null,
-                activeOn: self.filters.activeOn || null,
-                resultMode: "periods",
+                scope: effective ? null : (self.filters.scope || null),
+                activeOn: effective ? self.filters.activeOn : null,
+                rangeStart: effective ? null : (self.filters.rangeStart || null),
+                rangeEnd: effective ? null : (self.filters.rangeEnd || null),
+                resultMode: effective ? "effective" : "periods",
                 userStatus: self.filters.userStatus || "active",
                 clientStatus: self.filters.clientStatus || "active",
                 projectStatus: self.filters.projectStatus || "active"
@@ -315,10 +358,18 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             model.clientIds = self.filters.clientIds || [];
             model.projectIds = self.filters.projectIds || [];
             model.scope = self.filters.scope || null;
-            model.activeOn = self.filters.activeOn || null;
+            model.activeOn = null;
+            model.rangeStart = self.filters.rangeStart || null;
+            model.rangeEnd = self.filters.rangeEnd || null;
             model.userStatus = self.filters.userStatus || "active";
             model.clientStatus = self.filters.clientStatus || "active";
             model.projectStatus = self.filters.projectStatus || "active";
+        }, null, _this.$state);
+        _this.effectiveGrid = new TcrGridServiceModule.TcrGridService("userName", _this.BillingRatesService.effectiveRatesGrid, _this.onEffectiveLoaded, function (model) {
+            model.userAccountIds = self.filters.userAccountIds || [];
+            model.clientIds = self.filters.clientIds || [];
+            model.projectIds = self.filters.projectIds || [];
+            model.activeOn = self.filters.activeOn;
         }, null, _this.$state);
         _this.refreshFilterOptions(false);
         _this.applyFilters();

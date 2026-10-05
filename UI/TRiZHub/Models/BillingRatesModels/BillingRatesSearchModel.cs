@@ -39,6 +39,13 @@ namespace TRiZHub.Models.BillingRatesModels
         public DateTime? ActiveOn { get; set; }
 
         /// <summary>
+        /// Optional date range: only rates whose period overlaps [RangeStart, RangeEnd]. Either bound may be null.
+        /// </summary>
+        public DateTime? RangeStart { get; set; }
+
+        public DateTime? RangeEnd { get; set; }
+
+        /// <summary>
         /// Export / grid mode: "periods" (default) or "effective".
         /// </summary>
         public string ResultMode { get; set; }

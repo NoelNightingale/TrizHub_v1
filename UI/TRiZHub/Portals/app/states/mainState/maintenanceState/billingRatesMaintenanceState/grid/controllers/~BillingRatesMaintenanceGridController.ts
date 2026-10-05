@@ -14,6 +14,19 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
     };
     onDataLoaded = (event) => { this.onLoadEvent(event); };
 
+    effectiveGrid: any;
+    effectiveGridModel: any = {
+        data: [],
+        totalItems: 0,
+        sortKeyOrder: { order: "ASC", key: "userName" },
+        currentPage: 1,
+        maxSize: 5,
+        recordsPerPage: 60
+    };
+    onEffectiveLoaded = (event) => { this.effectiveGridModel = event; };
+
+    viewMode: string = "periods"; // "periods" | "effective"
+
     /** True when filters changed since the last successful Apply / grid load. */
     filtersDirty = false;
 
@@ -23,6 +36,8 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         projectIds: [] as string[],
         scope: "",
         activeOn: new Date(),
+        rangeStart: new Date(),
+        rangeEnd: new Date(),
         userStatus: "active",
         clientStatus: "active",
         projectStatus: "active"
@@ -64,10 +79,25 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
                 model.clientIds = self.filters.clientIds || [];
                 model.projectIds = self.filters.projectIds || [];
                 model.scope = self.filters.scope || null;
-                model.activeOn = self.filters.activeOn || null;
+                model.activeOn = null;
+                model.rangeStart = self.filters.rangeStart || null;
+                model.rangeEnd = self.filters.rangeEnd || null;
                 model.userStatus = self.filters.userStatus || "active";
                 model.clientStatus = self.filters.clientStatus || "active";
                 model.projectStatus = self.filters.projectStatus || "active";
+            },
+            null,
+            this.$state);
+
+        this.effectiveGrid = new TcrGridServiceModule.TcrGridService(
+            "userName",
+            this.BillingRatesService.effectiveRatesGrid,
+            this.onEffectiveLoaded,
+            model => {
+                model.userAccountIds = self.filters.userAccountIds || [];
+                model.clientIds = self.filters.clientIds || [];
+                model.projectIds = self.filters.projectIds || [];
+                model.activeOn = self.filters.activeOn;
             },
             null,
             this.$state);
@@ -93,9 +123,17 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         this.markFiltersDirty();
     };
 
-    clearEffectiveDate = () => {
-        this.filters.activeOn = null;
+    clearDate = (field: string) => {
+        this.filters[field] = null;
         this.markFiltersDirty();
+    };
+
+    setViewMode = (mode: string) => {
+        if (this.viewMode === mode) {
+            return;
+        }
+        this.viewMode = mode;
+        this.applyFilters();
     };
 
     setStatusFilter = (dimension: string, status: string) => {
@@ -122,11 +160,31 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
     };
 
     applyFilters = () => {
-        this.filtersDirty = false;
-        if (this.pageGrid && this.pageGrid.gridModel) {
-            this.pageGrid.gridModel.currentPage = 1;
+        if (!this.validateDates()) {
+            return;
         }
-        this.pageGrid.loadGrid();
+        this.filtersDirty = false;
+        const grid = this.viewMode === "effective" ? this.effectiveGrid : this.pageGrid;
+        if (grid && grid.gridModel) {
+            grid.gridModel.currentPage = 1;
+        }
+        grid.loadGrid();
+    };
+
+    private validateDates = (): boolean => {
+        if (this.viewMode === "effective") {
+            if (!this.filters.activeOn) {
+                this.Popups.showError(this.$scope, "Select an Effective On date.");
+                return false;
+            }
+            return true;
+        }
+        if (this.filters.rangeStart && this.filters.rangeEnd
+            && new Date(this.filters.rangeStart).getTime() > new Date(this.filters.rangeEnd).getTime()) {
+            this.Popups.showError(this.$scope, "Start Date must be on or before End Date.");
+            return false;
+        }
+        return true;
     };
 
     clearAllFilters = () => {
@@ -135,6 +193,8 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         this.filters.projectIds = [];
         this.filters.scope = "";
         this.filters.activeOn = new Date();
+        this.filters.rangeStart = new Date();
+        this.filters.rangeEnd = new Date();
         this.filters.userStatus = "active";
         this.filters.clientStatus = "active";
         this.filters.projectStatus = "active";
@@ -329,18 +389,21 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
 
     exportExcel = () => {
         const self = this;
-        if (self.exporting) {
+        if (self.exporting || !self.validateDates()) {
             return;
         }
 
+        const effective = self.viewMode === "effective";
         self.exporting = true;
         self.BillingRatesService.exportExcel({
             userAccountIds: self.filters.userAccountIds || [],
             clientIds: self.filters.clientIds || [],
             projectIds: self.filters.projectIds || [],
-            scope: self.filters.scope || null,
-            activeOn: self.filters.activeOn || null,
-            resultMode: "periods",
+            scope: effective ? null : (self.filters.scope || null),
+            activeOn: effective ? self.filters.activeOn : null,
+            rangeStart: effective ? null : (self.filters.rangeStart || null),
+            rangeEnd: effective ? null : (self.filters.rangeEnd || null),
+            resultMode: effective ? "effective" : "periods",
             userStatus: self.filters.userStatus || "active",
             clientStatus: self.filters.clientStatus || "active",
             projectStatus: self.filters.projectStatus || "active"

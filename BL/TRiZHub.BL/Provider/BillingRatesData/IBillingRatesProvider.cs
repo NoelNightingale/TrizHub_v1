@@ -16,7 +16,8 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         IQueryable<BillingRates> BillingRatesFilterList(Guid? userAccountId, Guid? clientId, Guid? projectId,
             string scope = null, DateTime? activeOn = null,
             IList<Guid> userAccountIds = null, IList<Guid> clientIds = null, IList<Guid> projectIds = null,
-            string userStatus = null, string clientStatus = null, string projectStatus = null);
+            string userStatus = null, string clientStatus = null, string projectStatus = null,
+            DateTime? rangeStart = null, DateTime? rangeEnd = null);
 
         BillingRates SaveBillingRates(Guid? id, Guid userAccountId, decimal rate, DateTime startDate,
             DateTime endDate, Guid? clientId, Guid? projectId);
@@ -56,6 +57,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         /// </summary>
         byte[] ExportBillingRatesExcel(IList<Guid> userAccountIds, IList<Guid> clientIds, IList<Guid> projectIds,
             string scope, DateTime? activeOn, string resultMode,
-            string userStatus = null, string clientStatus = null, string projectStatus = null);
+            string userStatus = null, string clientStatus = null, string projectStatus = null,
+            DateTime? rangeStart = null, DateTime? rangeEnd = null);
     }
 }

@@ -8,6 +8,10 @@ class ClientTeamRatesRosterController extends CHControllerBase {
     team: any[];
     loading = false;
 
+    viewMode: string = "asOf"; // "periods" | "asOf"
+    periodGroups: any[] = [];
+    periodsLoading = false;
+
     //#endregion
 
     //#region Ctor
@@ -28,6 +32,15 @@ class ClientTeamRatesRosterController extends CHControllerBase {
 
     //#endregion
 
+    setViewMode = (mode: string) => {
+        this.viewMode = mode;
+        if (mode === "periods") {
+            this.loadPeriods();
+        } else {
+            this.loadTeam();
+        }
+    };
+
     loadTeam = () => {
         const self = this;
         self.loading = true;
@@ -42,6 +55,45 @@ class ClientTeamRatesRosterController extends CHControllerBase {
                     self.loading = false;
                     self.handleError(error);
                 });
+    };
+
+    loadPeriods = () => {
+        const self = this;
+        self.periodsLoading = true;
+        self.BillingRatesService.billingRatesGrid(<any>{
+                clientId: self.clientId,
+                scope: "Client",
+                sortKey: "user",
+                sortOrder: "ASC",
+                currentPage: 1,
+                recordsPerPage: 10000
+            })
+            .then(
+                result => {
+                    self.periodGroups = self.groupByUser((<any>result).results || []);
+                    self.periodsLoading = false;
+                },
+                error => {
+                    self.periodsLoading = false;
+                    self.handleError(error);
+                });
+    };
+
+    groupByUser = (rows: any[]): any[] => {
+        const groups: any[] = [];
+        const byUser: { [id: string]: any } = {};
+        rows.forEach(r => {
+            let group = byUser[r.userAccountId];
+            if (!group) {
+                group = { userAccountId: r.userAccountId, userName: r.userName, rates: [] };
+                byUser[r.userAccountId] = group;
+                groups.push(group);
+            }
+            group.rates.push(r);
+        });
+        groups.forEach(g => g.rates.sort((a, b) =>
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()));
+        return groups;
     };
 
     projectOverridesLabel = (count: number): string => {

@@ -34,6 +34,11 @@
             When set, only rates whose period covers this date (StartDate ≤ ActiveOn ≤ EndDate).
             </summary>
         </member>
+        <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.RangeStart">
+            <summary>
+            Optional date range: only rates whose period overlaps [RangeStart, RangeEnd]. Either bound may be null.
+            </summary>
+        </member>
         <member name="P:TRiZHub.Models.BillingRatesModels.BillingRatesSearchModel.ResultMode">
             <summary>
             Export / grid mode: "periods" (default) or "effective".
