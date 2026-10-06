@@ -45,6 +45,15 @@
                                 <input type="text" class="form-control input-sm" placeholder="Search users"
                                        ng-model="vm.userFilterText" style="margin-bottom: 8px;" />
                                 <div class="br-filter-list">
+                                    <div class="br-select-all" ng-if="vm.filteredUsers().length > 0">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.areAllSelected('user')"
+                                                   ng-click="vm.toggleSelectAll('user'); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{vm.userFilterText ? 'Select all matching' : 'Select all'}}
+                                        </label>
+                                    </div>
                                     <div ng-repeat="u in vm.filteredUsers()">
                                         <label class="md-check">
                                             <input type="checkbox"
@@ -87,6 +96,15 @@
                                 <input type="text" class="form-control input-sm" placeholder="Search clients"
                                        ng-model="vm.clientFilterText" style="margin-bottom: 8px;" />
                                 <div class="br-filter-list">
+                                    <div class="br-select-all" ng-if="vm.filteredClients().length > 0">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.areAllSelected('client')"
+                                                   ng-click="vm.toggleSelectAll('client'); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{vm.clientFilterText ? 'Select all matching' : 'Select all'}}
+                                        </label>
+                                    </div>
                                     <div ng-repeat="c in vm.filteredClients()">
                                         <label class="md-check">
                                             <input type="checkbox"
@@ -129,6 +147,15 @@
                                 <input type="text" class="form-control input-sm" placeholder="Search projects"
                                        ng-model="vm.projectFilterText" style="margin-bottom: 8px;" />
                                 <div class="br-filter-list">
+                                    <div class="br-select-all" ng-if="vm.filteredProjects().length > 0">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.areAllSelected('project')"
+                                                   ng-click="vm.toggleSelectAll('project'); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{vm.projectFilterText ? 'Select all matching' : 'Select all'}}
+                                        </label>
+                                    </div>
                                     <div ng-repeat="p in vm.filteredProjects()">
                                         <label class="md-check">
                                             <input type="checkbox"

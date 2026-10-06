@@ -231,6 +231,61 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         this.scheduleCascade();
     };
 
+    /** True when every option currently visible in the list (after search) is selected. */
+    areAllSelected = (dimension: string): boolean => {
+        const visible = this.visibleOptions(dimension);
+        const selected = this.selectedList(dimension);
+        if (!visible.length || !selected) {
+            return false;
+        }
+        return visible.every(o => selected.indexOf(o.id) >= 0);
+    };
+
+    toggleSelectAll = (dimension: string) => {
+        const visible = this.visibleOptions(dimension);
+        const selected = this.selectedList(dimension);
+        if (!visible.length || !selected) {
+            return;
+        }
+        if (this.areAllSelected(dimension)) {
+            visible.forEach(o => this.removeFromList(selected, o.id));
+        } else {
+            visible.forEach(o => {
+                if (selected.indexOf(o.id) < 0) {
+                    selected.push(o.id);
+                }
+            });
+        }
+        this.markFiltersDirty();
+        this.scheduleCascade();
+    };
+
+    private visibleOptions = (dimension: string): any[] => {
+        if (dimension === "user") {
+            return this.filteredUsers();
+        }
+        if (dimension === "client") {
+            return this.filteredClients();
+        }
+        if (dimension === "project") {
+            return this.filteredProjects();
+        }
+        return [];
+    };
+
+    private selectedList = (dimension: string): string[] => {
+        if (dimension === "user") {
+            return this.filters.userAccountIds;
+        }
+        if (dimension === "client") {
+            return this.filters.clientIds;
+        }
+        if (dimension === "project") {
+            return this.filters.projectIds;
+        }
+        return null;
+    };
+
     removeUserChip = (id: string) => {
         this.removeFromList(this.filters.userAccountIds, id);
         this.markFiltersDirty();

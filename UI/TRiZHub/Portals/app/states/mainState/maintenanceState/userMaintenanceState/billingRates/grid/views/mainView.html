@@ -4,10 +4,10 @@
             <div class="box">
                 <div class="box-header b-b">
                     <h2>
-                        <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})">{{vm.user.firstName}} {{vm.user.surName}}</a>/ Billing Rates
+                        <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.detail({id: vm.viewModel.id})">{{vm.user.firstName}} {{vm.user.surname}}</a> / Billing Rates
                     </h2>
                     <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;" ng-if="vm.viewMode === 'asOf'">
-                        Effective = Project, else Client, else Default. Clients and projects include assignments and rate history.
+                        Effective = Project, else Client, else Employee. Clients and projects include assignments and rate history.
                     </p>
                 </div>
                 <div class="box-body">
@@ -49,7 +49,7 @@
                                 <thead>
                                 <tr>
                                     <th>
-                                        <a ng-click="vm.pageGrid.sort('scope')"> Scope</a>
+                                        <a ng-click="vm.pageGrid.sort('scope')"> Rate Type</a>
                                     </th>
                                     <th>
                                         <a ng-click="vm.pageGrid.sort('clientName')"> Client</a>
@@ -82,7 +82,7 @@
                                 <tbody>
                                 <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row"
                                     ng-class="{'br-row-locked': i.isLocked}">
-                                    <td>{{i.scope}}</td>
+                                    <td>{{i.scope === 'Default' ? 'Employee' : i.scope}}</td>
                                     <td>
                                         {{i.clientName || i.projectClientName}}
                                         <span class="br-inactive-badge" ng-if="i.clientInactive"
@@ -127,7 +127,7 @@
                         <table class="table table-bordered" ng-if="!vm.asOfLoading && vm.asOfModel">
                             <thead>
                             <tr>
-                                <th>Scope</th>
+                                <th>Rate Type</th>
                                 <th>Rate</th>
                                 <th>Effective</th>
                                 <th style="width: 220px;"></th>
@@ -136,7 +136,7 @@
                             <tbody>
                             <!-- Default -->
                             <tr>
-                                <td><strong>Default</strong></td>
+                                <td><strong>Employee</strong></td>
                                 <td>
                                     <span ng-if="vm.asOfModel.defaultRate != null">{{vm.asOfModel.defaultRate}}</span>
                                     <span class="text-muted" ng-if="vm.asOfModel.defaultRate == null">Not set</span>
@@ -144,7 +144,7 @@
                                 <td>
                                     <span ng-if="vm.asOfModel.defaultRate != null">
                                         {{vm.asOfModel.defaultRate}}
-                                        <span class="label label-default" style="margin-left: 6px;">Default</span>
+                                        <span class="label label-default" style="margin-left: 6px;">Employee</span>
                                     </span>
                                     <span class="text-muted" ng-if="vm.asOfModel.defaultRate == null">—</span>
                                 </td>
@@ -180,7 +180,7 @@
                                 <td>
                                     <span ng-if="client.effectiveRate != null">
                                         {{client.effectiveRate}}
-                                        <span class="label label-default" style="margin-left: 6px;">{{client.effectiveScope}}</span>
+                                        <span class="label label-default" style="margin-left: 6px;">{{client.effectiveScope === 'Default' ? 'Employee' : client.effectiveScope}}</span>
                                     </span>
                                     <span class="text-muted" ng-if="client.effectiveRate == null">Not set</span>
                                 </td>
@@ -210,7 +210,7 @@
                                 <td>
                                     <span ng-if="project.effectiveRate != null">
                                         {{project.effectiveRate}}
-                                        <span class="label label-default" style="margin-left: 6px;">{{project.effectiveScope}}</span>
+                                        <span class="label label-default" style="margin-left: 6px;">{{project.effectiveScope === 'Default' ? 'Employee' : project.effectiveScope}}</span>
                                     </span>
                                     <span class="text-muted" ng-if="project.effectiveRate == null">Not set</span>
                                 </td>

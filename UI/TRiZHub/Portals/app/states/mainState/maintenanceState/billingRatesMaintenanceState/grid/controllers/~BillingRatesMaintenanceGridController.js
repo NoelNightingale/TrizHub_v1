@@ -172,6 +172,58 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             _this.markFiltersDirty();
             _this.scheduleCascade();
         };
+        /** True when every option currently visible in the list (after search) is selected. */
+        _this.areAllSelected = function (dimension) {
+            var visible = _this.visibleOptions(dimension);
+            var selected = _this.selectedList(dimension);
+            if (!visible.length || !selected) {
+                return false;
+            }
+            return visible.every(function (o) { return selected.indexOf(o.id) >= 0; });
+        };
+        _this.toggleSelectAll = function (dimension) {
+            var visible = _this.visibleOptions(dimension);
+            var selected = _this.selectedList(dimension);
+            if (!visible.length || !selected) {
+                return;
+            }
+            if (_this.areAllSelected(dimension)) {
+                visible.forEach(function (o) { return _this.removeFromList(selected, o.id); });
+            }
+            else {
+                visible.forEach(function (o) {
+                    if (selected.indexOf(o.id) < 0) {
+                        selected.push(o.id);
+                    }
+                });
+            }
+            _this.markFiltersDirty();
+            _this.scheduleCascade();
+        };
+        _this.visibleOptions = function (dimension) {
+            if (dimension === "user") {
+                return _this.filteredUsers();
+            }
+            if (dimension === "client") {
+                return _this.filteredClients();
+            }
+            if (dimension === "project") {
+                return _this.filteredProjects();
+            }
+            return [];
+        };
+        _this.selectedList = function (dimension) {
+            if (dimension === "user") {
+                return _this.filters.userAccountIds;
+            }
+            if (dimension === "client") {
+                return _this.filters.clientIds;
+            }
+            if (dimension === "project") {
+                return _this.filters.projectIds;
+            }
+            return null;
+        };
         _this.removeUserChip = function (id) {
             _this.removeFromList(_this.filters.userAccountIds, id);
             _this.markFiltersDirty();
