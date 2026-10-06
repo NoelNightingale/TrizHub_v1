@@ -1,4 +1,4 @@
-﻿var APP_CACHE_VER = "v=2026081903";
+﻿var APP_CACHE_VER = "v=2026100603";
 
 angular.module("AngularApp",
     [
@@ -1213,27 +1213,12 @@ angular.module("AngularApp",
                             resolve: {
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
+                                        // The detail controller drives the edit modal opened from the grid.
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/grid/controllers/~BillingRatesMaintenanceGridController.js?" + APP_CACHE_VER);
-                                    }
-                                ]
-                            }
-                        })
-                    // Billing Rates Maintenance Detail
-                    .state("mainState.maintenance.billingRatesMaintenance.detail",
-                        {
-                            url: "/detail/:id?userId&scope&clientId&projectId",
-                            views: {
-                                'detail': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "BillingRatesMaintenanceDetailController as vm"
-                                }
-                            },
-                            resolve: {
-                                loadMainCtrl: [
-                                    "$ocLazyLoad", function ($ocLazyLoad) {
-                                        return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/detail/controllers/~BillingRatesMaintenanceDetailController.js?" + APP_CACHE_VER);
+                                            .load([
+                                                "Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/grid/controllers/~BillingRatesMaintenanceGridController.js?" + APP_CACHE_VER,
+                                                "Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/detail/controllers/~BillingRatesMaintenanceDetailController.js?" + APP_CACHE_VER
+                                            ]);
                                     }
                                 ]
                             }

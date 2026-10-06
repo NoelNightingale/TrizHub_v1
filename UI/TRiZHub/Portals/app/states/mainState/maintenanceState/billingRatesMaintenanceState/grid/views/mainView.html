@@ -4,19 +4,13 @@
             <div class="box br-workbench">
                 <div class="box-header b-b">
                     <div class="br-header">
-                        <div>
-                            <h2>Billing Rates</h2>
-                            <p class="br-header-note">
-                                Browse and maintain rate periods across users, clients and projects.
-                                Filter lists cascade from assignments. Change filters, then click Refresh data to reload the grid.
-                            </p>
-                            <div class="br-cascade" title="Resolved billing rate precedence">
-                                <span>Project</span>
-                                <i class="fa fa-angle-right"></i>
-                                <span>Client</span>
-                                <i class="fa fa-angle-right"></i>
-                                <span>Default</span>
-                            </div>
+                        <h2>Billing Rates</h2>
+                        <div class="br-cascade" title="Resolved billing rate precedence">
+                            <span>Project</span>
+                            <i class="fa fa-angle-right"></i>
+                            <span>Client</span>
+                            <i class="fa fa-angle-right"></i>
+                            <span>Employee</span>
                         </div>
                     </div>
                 </div>
@@ -155,10 +149,10 @@
                     <!-- Toolbar -->
                     <div class="br-toolbar">
                         <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
-                            <label>Scope</label>
+                            <label>Rate Type</label>
                             <select class="form-control input-sm" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
                                 <option value="">All</option>
-                                <option value="Default">Default</option>
+                                <option value="Default">Employee</option>
                                 <option value="Client">Client</option>
                                 <option value="Project">Project</option>
                             </select>
@@ -251,7 +245,7 @@
                             Rate periods that overlap the Start Date to End Date range.
                         </span>
                         <span class="br-mode-hint" ng-if="vm.viewMode === 'effective'">
-                            The rate that applies on {{vm.filters.activeOn | date: 'yyyy/MM/dd'}}: Project, else Client, else Default.
+                            The rate that applies on {{vm.filters.activeOn | date: 'yyyy/MM/dd'}}: Project, else Client, else Employee.
                         </span>
                     </div>
 
@@ -304,7 +298,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr data-ng-repeat="i in vm.effectiveGridModel.data">
+                                <tr data-ng-repeat="i in vm.effectiveGridModel.data"
+                                    ng-class="{'br-row-flash': vm.highlightId === i.id}">
                                 <td>
                                     <a class="text-primary"
                                        title="Open billing rates for this user"
@@ -337,13 +332,13 @@
                                           ng-class="{'br-scope-default': i.effectiveScope === 'Default',
                                                      'br-scope-client': i.effectiveScope === 'Client',
                                                      'br-scope-project': i.effectiveScope === 'Project'}">
-                                        {{i.effectiveScope}}
+                                        {{i.effectiveScope === 'Default' ? 'Employee' : i.effectiveScope}}
                                     </span>
                                     <span ng-if="!i.effectiveScope" class="text-muted">—</span>
                                 </td>
                                 <td>
-                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary" ng-if="i.id"
-                                       ui-sref="mainState.maintenance.billingRatesMaintenance.detail({id: i.id})"
+                                    <a href="" class="btn btn-xs btn-fw btn-outline b-primary text-primary" ng-if="i.id"
+                                       ng-click="vm.editRecord(i.id)"
                                        title="Open the rate period that applies">
                                         <i class="fa fa-external-link"></i> Open
                                     </a>
@@ -383,7 +378,7 @@
                                                       'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'userName'}"></i>
                                     </th>
                                     <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'scope'}">
-                                        <a ng-click="vm.pageGrid.sort('scope')">Scope</a>
+                                        <a ng-click="vm.pageGrid.sort('scope')">Rate Type</a>
                                         <i class="fa"
                                            ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'scope',
                                                       'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'scope'}"></i>
@@ -427,7 +422,7 @@
                                 </thead>
                                 <tbody>
                                 <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row"
-                                    ng-class="{'br-row-locked': i.isLocked}">
+                                    ng-class="{'br-row-locked': i.isLocked, 'br-row-flash': vm.highlightId === i.id}">
                                     <td>
                                         <a class="text-primary"
                                            title="Open default rates for this user"
@@ -440,18 +435,18 @@
                                               ng-class="{'br-scope-default': i.scope === 'Default',
                                                          'br-scope-client': i.scope === 'Client',
                                                          'br-scope-project': i.scope === 'Project'}">
-                                            {{i.scope}}
+                                            {{i.scope === 'Default' ? 'Employee' : i.scope}}
                                         </span>
                                     </td>
                                     <td>
-                                        <a class="text-primary" ng-if="i.clientId"
+                                        <a class="text-primary" ng-if="i.clientId || i.projectClientId"
                                            title="Open client rates"
-                                           ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId})">
-                                            {{i.clientName}}
+                                           ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId || i.projectClientId})">
+                                            {{i.clientName || i.projectClientName}}
                                         </a>
                                         <span class="br-inactive-badge" ng-if="i.clientInactive"
                                               title="Client is inactive. Reactivate it to edit this rate.">Inactive</span>
-                                        <span ng-if="!i.clientId" class="text-muted">—</span>
+                                        <span ng-if="!i.clientId && !i.projectClientId" class="text-muted">—</span>
                                     </td>
                                     <td>
                                         <a class="text-primary" ng-if="i.projectId"
@@ -469,8 +464,8 @@
                                     <td>{{i.startDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
                                     <td>
-                                        <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
-                                           ui-sref="mainState.maintenance.billingRatesMaintenance.detail({id: i.id})"
+                                        <a href="" class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                           ng-click="vm.editRecord(i.id)"
                                            title="{{i.isLocked ? 'Read-only: client or project is inactive' : 'Edit rate'}}">
                                             <i class="fa" ng-class="i.isLocked ? 'fa-eye' : 'fa-edit'"></i> {{i.isLocked ? 'View' : 'Edit'}}
                                         </a>

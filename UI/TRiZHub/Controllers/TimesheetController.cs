@@ -95,7 +95,10 @@ namespace TRiZHub.Controllers
                     DateEntry = a.DateEntry,
                     Hours = a.Hours,
                     ProjectGridId = a.SubProjectId != null ? a.SubProjectId.Value : a.ProjectId,
-                    Billable = a.Project.Billable
+                    Billable = a.Project.Billable,
+                    IsNonEligible = (a.SubProject != null && a.SubProject.SubProjectType != null
+                        ? a.SubProject.SubProjectType.Name
+                        : a.Project.ProjectType.Name) == "Non-Eligible"
                 });
 
             if (model.ProjectId != null)

@@ -82,7 +82,7 @@ class TimesheetController extends CHControllerBase {
         };
 
         me.gridModel = { data: [], originalData: [], totalItems: 0 } as any;
-        me.summary = { days: [], totalHours: 0, totalBillableHours: 0 };
+        me.summary = { days: [], totalHours: 0, totalBillableHours: 0, totalNonEligibleHours: 0 };
 
         // Set default Billable — Manual Date is not offered; period always comes from a real billing cycle
         me.filterModel.billingOption = me.filterOptions.billingOptions[0];
@@ -731,6 +731,7 @@ class TimesheetController extends CHControllerBase {
                     dayOfMonth: dayDate.getDate(),
                     hours: 0,
                     billhours: 0,
+                    nehours: 0,
                     expanded: false,
                     records: []
                 });
@@ -745,6 +746,8 @@ class TimesheetController extends CHControllerBase {
                     end: days[days.length - 1].date,
                     label: "Week " + weekNum + " · " + me.formatShortDate(days[0].date) + "–" + me.formatShortDate(days[days.length - 1].date),
                     totalHours: 0,
+                    totalBillableHours: 0,
+                    totalNonEligibleHours: 0,
                     days: days,
                     daysByCol: null
                 };
@@ -861,23 +864,19 @@ class TimesheetController extends CHControllerBase {
 
         for (let w = 0; w < me.weeks.length; w++) {
             let weekHours = 0;
+            let weekBillHours = 0;
+            let weekNeHours = 0;
             for (let d = 0; d < me.weeks[w].days.length; d++) {
                 const day = me.weeks[w].days[d];
                 day.records = byKey[day.dateKey] || [];
-                let hours = 0;
-                let billhours = 0;
-                for (let r = 0; r < day.records.length; r++) {
-                    const h = day.records[r].hours || 0;
-                    hours += h;
-                    if (day.records[r].billable) {
-                        billhours += h;
-                    }
-                }
-                day.hours = hours;
-                day.billhours = billhours;
-                weekHours += hours;
+                me.refreshDayTotals(day);
+                weekHours += day.hours;
+                weekBillHours += day.billhours;
+                weekNeHours += day.nehours;
             }
             me.weeks[w].totalHours = weekHours;
+            me.weeks[w].totalBillableHours = weekBillHours;
+            me.weeks[w].totalNonEligibleHours = weekNeHours;
             me.indexDaysByCol(me.weeks[w]);
         }
 
@@ -1199,6 +1198,7 @@ class TimesheetController extends CHControllerBase {
                                 projectId: project.projectId,
                                 clientEntityName: project.clientEntityName || project.clientName || '',
                                 billable: project.billable != null ? project.billable : project.isBillable,
+                                isNonEligible: !!project.isNonEligible,
                                 subProjectId: project.subProjectId,
                                 project: {
                                     description: project.projectDescription,
@@ -1353,15 +1353,37 @@ class TimesheetController extends CHControllerBase {
     refreshDayTotals = (day: any): void => {
         let hours = 0;
         let billhours = 0;
+        let nehours = 0;
         for (let r = 0; r < day.records.length; r++) {
             const h = day.records[r].hours || 0;
             hours += h;
-            if (day.records[r].billable) {
+            const bucket = this.hoursBucket(day.records[r]);
+            if (bucket === "bill") {
                 billhours += h;
+            } else if (bucket === "ne") {
+                nehours += h;
             }
         }
         day.hours = hours;
         day.billhours = billhours;
+        day.nehours = nehours;
+    };
+
+    /** Billable always wins; Non-Eligible is carved out of non-billable so the three buckets sum to total. */
+    hoursBucket = (record: any): string => {
+        if (record.billable) {
+            return "bill";
+        }
+        return record.isNonEligible ? "ne" : "nonbill";
+    };
+
+    /** Clips saved before isNonEligible existed resolve it from the user's project list, as paste does. */
+    clipboardRowBucket = (row: any): string => {
+        if (row.billable == 1 || row.billable === true) {
+            return "bill";
+        }
+        const isNonEligible = row.isNonEligible != null ? !!row.isNonEligible : this.lookupNonEligible(row.projectGridId);
+        return isNonEligible ? "ne" : "nonbill";
     };
 
     private applyOriginalValues = (object: any): void => {
@@ -1398,6 +1420,7 @@ class TimesheetController extends CHControllerBase {
 
         object.clientEntityName = originalObject.clientEntityName;
         object.billable = originalObject.billable;
+        object.isNonEligible = originalObject.isNonEligible;
     }
 
     resetRecord = (object) => {
@@ -1510,6 +1533,7 @@ class TimesheetController extends CHControllerBase {
         me.summary = {};
         me.summary.totalHours = 0;
         me.summary.totalBillableHours = 0;
+        me.summary.totalNonEligibleHours = 0;
         me.summary.days = [];
         if (me.gridModel && me.gridModel.data) {
             for (let i = 0; i < me.gridModel.data.length; i++) {
@@ -1518,22 +1542,21 @@ class TimesheetController extends CHControllerBase {
                     continue;
                 }
                 const hours = me.gridModel.data[i].hours || 0;
-                const existing = me.$filter("filter")(me.summary.days, { date: date }, true)[0];
-                if (existing) {
-                    existing["hours"] += hours;
-                    if (me.gridModel.data[i].billable)
-                        existing["billhours"] += hours;
+                const bucket = me.hoursBucket(me.gridModel.data[i]);
+                let existing: any = me.$filter("filter")(me.summary.days, { date: date }, true)[0];
+                if (!existing) {
+                    existing = { date: date, hours: 0, billhours: 0, nehours: 0 };
+                    me.summary.days.push(existing);
                 }
-                else {
-                    var billhours = 0;
-                    if (me.gridModel.data[i].billable)
-                        billhours += hours;
-                    me.summary.days.push({ date: date, hours: hours, billhours: billhours });
-                }
-
+                existing.hours += hours;
                 me.summary.totalHours += hours;
-                if (me.gridModel.data[i].billable)
+                if (bucket === "bill") {
+                    existing.billhours += hours;
                     me.summary.totalBillableHours += hours;
+                } else if (bucket === "ne") {
+                    existing.nehours += hours;
+                    me.summary.totalNonEligibleHours += hours;
+                }
             }
         }
     };
@@ -1553,6 +1576,7 @@ class TimesheetController extends CHControllerBase {
                     item.subProjectId = null;
                     item.clientEntityName = '';
                     item.billable = false;
+                    item.isNonEligible = false;
                 }
                 else {
                     if (item === undefined)
@@ -1564,11 +1588,13 @@ class TimesheetController extends CHControllerBase {
                     item.subProjectId = project.subProjectId;
                     item.clientEntityName = project.clientName;
                     item.billable = project.isBillable;
+                    item.isNonEligible = !!project.isNonEligible;
                 }
                 if (item === me.filterModel) {
                     me.reloadGrid();
                 } else {
                     me.validateOriginal('projectGridId', item);
+                    me.refreshTotalsForRecord(item);
                 }
             });
 
@@ -1708,6 +1734,7 @@ class TimesheetController extends CHControllerBase {
             projectDescription: r.projectDescription,
             clientEntityName: r.clientEntityName,
             billable: r.billable,
+            isNonEligible: r.isNonEligible,
             subProjectId: r.subProjectId,
             teamId: r.teamId,
             activityId: r.activityId,
@@ -2030,6 +2057,7 @@ class TimesheetController extends CHControllerBase {
             projectDescription: row.projectDescription,
             clientEntityName: row.clientEntityName,
             billable: row.billable,
+            isNonEligible: row.isNonEligible != null ? !!row.isNonEligible : me.lookupNonEligible(row.projectGridId),
             subProjectId: row.subProjectId,
             teamId: row.teamId,
             activityId: row.activityId,
@@ -2048,6 +2076,21 @@ class TimesheetController extends CHControllerBase {
             }
         };
         me.gridModel.data.push(newRecord);
+    }
+
+    /** projectGridId is the SubProject Id when present, else the Project Id. */
+    private lookupNonEligible(projectGridId: any): boolean {
+        const projects = this.filterOptions && this.filterOptions.userProjects;
+        if (!projectGridId || !projects) {
+            return false;
+        }
+        for (let i = 0; i < projects.length; i++) {
+            const p = projects[i];
+            if (p.subProjectId ? p.subProjectId === projectGridId : p.projectId === projectGridId) {
+                return !!p.isNonEligible;
+            }
+        }
+        return false;
     }
 
     removeClipboardItem = (item: any, $event?: any): void => {

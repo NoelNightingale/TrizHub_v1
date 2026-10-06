@@ -41,5 +41,7 @@ namespace TRiZHub.Models.TimesheetModels
         public DateTime DateEntry { get; set; }
 
         public bool Billable { get; set; }
+
+        public bool IsNonEligible { get; set; }
     }
 }

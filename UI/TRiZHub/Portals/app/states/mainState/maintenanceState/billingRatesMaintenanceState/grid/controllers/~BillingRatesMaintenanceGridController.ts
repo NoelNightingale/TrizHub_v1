@@ -1,3 +1,5 @@
+declare var APP_CACHE_VER: string;
+
 class BillingRatesMaintenanceGridController extends CHControllerBase {
 
     //#region Members
@@ -55,6 +57,10 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
     cascadeTimer: any = null;
     exporting = false;
 
+    /** Id of the row just saved from the edit modal; drives a brief highlight. */
+    highlightId: string = null;
+    private highlightTimer: any = null;
+
     //#endregion
 
     //#region Ctor
@@ -63,6 +69,7 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
         private $scope: ng.IScope,
         private $state: ng.ui.IStateService,
         private $timeout: ng.ITimeoutService,
+        private $uibModal: any,
         private BillingRatesService: BillingRatesServiceModule.BillingRatesService,
         private Popups: any,
         private tcrGrid: TcrGridServiceModule.TcrGridService) {
@@ -377,14 +384,109 @@ class BillingRatesMaintenanceGridController extends CHControllerBase {
             params.projectId = projectId;
         }
 
-        this.$state.transitionTo("mainState.maintenance.billingRatesMaintenance.detail", params);
+        this.openEditor(params);
     };
 
     editRecord = (rateId: string) => {
         if (!rateId) {
             return;
         }
-        this.$state.transitionTo("mainState.maintenance.billingRatesMaintenance.detail", { id: rateId });
+        this.openEditor({ id: rateId });
+    };
+
+    private openEditor = (params: any) => {
+        const self = this;
+        const modal = this.$uibModal.open({
+            animation: false,
+            templateUrl: "Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
+            controller: "BillingRatesMaintenanceDetailController",
+            controllerAs: "vm",
+            backdrop: "static",
+            windowClass: "br-edit-modal",
+            resolve: {
+                modalParams: () => params
+            }
+        });
+        modal.result.then(
+            result => {
+                self.onEditorClosed(result);
+            },
+            () => { });
+    };
+
+    private onEditorClosed = (result: any) => {
+        const self = this;
+        if (!result || !result.id) {
+            return;
+        }
+        if (this.viewMode === "effective") {
+            if (result.action === "saved") {
+                this.flashRow(result.id);
+            }
+            this.effectiveGrid.loadGrid();
+            return;
+        }
+        if (result.action === "deleted") {
+            this.removeRow(result.id);
+            return;
+        }
+        this.BillingRatesService.billingRatesGridRow(result.id)
+            .then(
+                row => {
+                    if (row) {
+                        self.upsertRow(row);
+                    } else {
+                        self.pageGrid.loadGrid();
+                    }
+                },
+                error => {
+                    self.handleError(error);
+                });
+    };
+
+    private findRowIndex = (id: string): number => {
+        const data = this.gridModel.data || [];
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].id === id) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    private removeRow = (id: string) => {
+        const idx = this.findRowIndex(id);
+        if (idx < 0) {
+            return;
+        }
+        this.gridModel.data.splice(idx, 1);
+        this.gridModel.totalItems = Math.max(0, (this.gridModel.totalItems || 0) - 1);
+    };
+
+    private upsertRow = (row: any) => {
+        if (!this.gridModel.data) {
+            this.gridModel.data = [];
+        }
+        const idx = this.findRowIndex(row.id);
+        if (idx >= 0) {
+            this.gridModel.data[idx] = row;
+        } else {
+            this.gridModel.data.unshift(row);
+            this.gridModel.totalItems = (this.gridModel.totalItems || 0) + 1;
+        }
+        this.flashRow(row.id);
+    };
+
+    private flashRow = (id: string) => {
+        const self = this;
+        if (self.highlightTimer) {
+            self.$timeout.cancel(self.highlightTimer);
+        }
+        self.highlightId = id;
+        self.highlightTimer = self.$timeout(() => {
+            self.highlightId = null;
+            self.highlightTimer = null;
+        }, 2500);
     };
 
     exportExcel = () => {
@@ -442,6 +544,7 @@ angular.module("AngularApp")
         "$scope",
         "$state",
         "$timeout",
+        "$uibModal",
         "BillingRatesService",
         "Popups",
         BillingRatesMaintenanceGridController

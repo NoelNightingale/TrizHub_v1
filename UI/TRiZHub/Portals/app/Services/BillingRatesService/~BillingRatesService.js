@@ -64,6 +64,16 @@ var BillingRatesServiceModule;
                 });
                 return deferred.promise;
             };
+            _this.billingRatesGridRow = function (id) {
+                var deferred = _this.$q.defer();
+                _this.$http.get(_this.urlRoot + "BillingRatesGridRow/" + id)
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
             _this.billingRatesDelete = function (viewModel) {
                 var deferred = _this.$q.defer();
                 _this.$http.post(_this.urlRoot + "BillingRatesDelete", viewModel)

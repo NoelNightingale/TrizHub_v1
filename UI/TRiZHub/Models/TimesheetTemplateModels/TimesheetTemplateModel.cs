@@ -14,6 +14,7 @@ namespace TRiZHub.Models.TimesheetTemplateModels
         public string ProjectDescription { get; set; }
         public string ClientEntityName { get; set; }
         public bool? Billable { get; set; }
+        public bool? IsNonEligible { get; set; }
         public Guid? SubProjectId { get; set; }
         public Guid TeamId { get; set; }
         public Guid ActivityId { get; set; }

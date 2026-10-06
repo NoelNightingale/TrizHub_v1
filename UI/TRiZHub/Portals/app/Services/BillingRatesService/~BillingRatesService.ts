@@ -6,6 +6,7 @@
         billingRatesGrid: (req: GridModel) => ng.IPromise<GridResultModel<BillingRatesGridModel>>;
         effectiveRatesGrid: (req: GridModel) => ng.IPromise<GridResultModel<any>>;
         billingRatesGet: (id: string) => ng.IPromise<BillingRatesEditModel>;
+        billingRatesGridRow: (id: string) => ng.IPromise<BillingRatesGridModel>;
         billingRatesDelete: (viewModel: BillingRatesEditModel) => ng.IPromise<BillingRatesEditModel>;
         projectTeamRates: (projectId: string, asOfDate: any) => ng.IPromise<any>;
         userRatesForProjectContext: (userId: string, projectId: string) => ng.IPromise<any>;
@@ -73,6 +74,20 @@
         billingRatesGet = (id: string): ng.IPromise<BillingRatesEditModel> => {
             var deferred = this.$q.defer();
             this.$http.get(this.urlRoot + "BillingRatesGet/" + id)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        billingRatesGridRow = (id: string): ng.IPromise<BillingRatesGridModel> => {
+            var deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "BillingRatesGridRow/" + id)
                 .then(
                     result => {
                         deferred.resolve(result.data);

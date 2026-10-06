@@ -546,6 +546,7 @@ var TimesheetController = /** @class */ (function (_super) {
                         dayOfMonth: dayDate.getDate(),
                         hours: 0,
                         billhours: 0,
+                        nehours: 0,
                         expanded: false,
                         records: []
                     });
@@ -559,6 +560,8 @@ var TimesheetController = /** @class */ (function (_super) {
                         end: days[days.length - 1].date,
                         label: "Week " + weekNum + " · " + me.formatShortDate(days[0].date) + "–" + me.formatShortDate(days[days.length - 1].date),
                         totalHours: 0,
+                        totalBillableHours: 0,
+                        totalNonEligibleHours: 0,
                         days: days,
                         daysByCol: null
                     };
@@ -666,23 +669,19 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             for (var w = 0; w < me.weeks.length; w++) {
                 var weekHours = 0;
+                var weekBillHours = 0;
+                var weekNeHours = 0;
                 for (var d = 0; d < me.weeks[w].days.length; d++) {
                     var day = me.weeks[w].days[d];
                     day.records = byKey[day.dateKey] || [];
-                    var hours = 0;
-                    var billhours = 0;
-                    for (var r = 0; r < day.records.length; r++) {
-                        var h = day.records[r].hours || 0;
-                        hours += h;
-                        if (day.records[r].billable) {
-                            billhours += h;
-                        }
-                    }
-                    day.hours = hours;
-                    day.billhours = billhours;
-                    weekHours += hours;
+                    me.refreshDayTotals(day);
+                    weekHours += day.hours;
+                    weekBillHours += day.billhours;
+                    weekNeHours += day.nehours;
                 }
                 me.weeks[w].totalHours = weekHours;
+                me.weeks[w].totalBillableHours = weekBillHours;
+                me.weeks[w].totalNonEligibleHours = weekNeHours;
                 me.indexDaysByCol(me.weeks[w]);
             }
             if (me.weeks[me.selectedWeekIndex]) {
@@ -919,6 +918,7 @@ var TimesheetController = /** @class */ (function (_super) {
                             projectId: project.projectId,
                             clientEntityName: project.clientEntityName || project.clientName || '',
                             billable: project.billable != null ? project.billable : project.isBillable,
+                            isNonEligible: !!project.isNonEligible,
                             subProjectId: project.subProjectId,
                             project: {
                                 description: project.projectDescription,
@@ -1059,15 +1059,36 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.refreshDayTotals = function (day) {
             var hours = 0;
             var billhours = 0;
+            var nehours = 0;
             for (var r = 0; r < day.records.length; r++) {
                 var h = day.records[r].hours || 0;
                 hours += h;
-                if (day.records[r].billable) {
+                var bucket = _this.hoursBucket(day.records[r]);
+                if (bucket === "bill") {
                     billhours += h;
+                }
+                else if (bucket === "ne") {
+                    nehours += h;
                 }
             }
             day.hours = hours;
             day.billhours = billhours;
+            day.nehours = nehours;
+        };
+        /** Billable always wins; Non-Eligible is carved out of non-billable so the three buckets sum to total. */
+        _this.hoursBucket = function (record) {
+            if (record.billable) {
+                return "bill";
+            }
+            return record.isNonEligible ? "ne" : "nonbill";
+        };
+        /** Clips saved before isNonEligible existed resolve it from the user's project list, as paste does. */
+        _this.clipboardRowBucket = function (row) {
+            if (row.billable == 1 || row.billable === true) {
+                return "bill";
+            }
+            var isNonEligible = row.isNonEligible != null ? !!row.isNonEligible : _this.lookupNonEligible(row.projectGridId);
+            return isNonEligible ? "ne" : "nonbill";
         };
         _this.applyOriginalValues = function (object) {
             var me = _this;
@@ -1095,6 +1116,7 @@ var TimesheetController = /** @class */ (function (_super) {
             object.valid["hours"] = true;
             object.clientEntityName = originalObject.clientEntityName;
             object.billable = originalObject.billable;
+            object.isNonEligible = originalObject.isNonEligible;
         };
         _this.resetRecord = function (object) {
             var me = _this;
@@ -1178,6 +1200,7 @@ var TimesheetController = /** @class */ (function (_super) {
             me.summary = {};
             me.summary.totalHours = 0;
             me.summary.totalBillableHours = 0;
+            me.summary.totalNonEligibleHours = 0;
             me.summary.days = [];
             if (me.gridModel && me.gridModel.data) {
                 for (var i = 0; i < me.gridModel.data.length; i++) {
@@ -1186,21 +1209,22 @@ var TimesheetController = /** @class */ (function (_super) {
                         continue;
                     }
                     var hours = me.gridModel.data[i].hours || 0;
+                    var bucket = me.hoursBucket(me.gridModel.data[i]);
                     var existing = me.$filter("filter")(me.summary.days, { date: date }, true)[0];
-                    if (existing) {
-                        existing["hours"] += hours;
-                        if (me.gridModel.data[i].billable)
-                            existing["billhours"] += hours;
+                    if (!existing) {
+                        existing = { date: date, hours: 0, billhours: 0, nehours: 0 };
+                        me.summary.days.push(existing);
                     }
-                    else {
-                        var billhours = 0;
-                        if (me.gridModel.data[i].billable)
-                            billhours += hours;
-                        me.summary.days.push({ date: date, hours: hours, billhours: billhours });
-                    }
+                    existing.hours += hours;
                     me.summary.totalHours += hours;
-                    if (me.gridModel.data[i].billable)
+                    if (bucket === "bill") {
+                        existing.billhours += hours;
                         me.summary.totalBillableHours += hours;
+                    }
+                    else if (bucket === "ne") {
+                        existing.nehours += hours;
+                        me.summary.totalNonEligibleHours += hours;
+                    }
                 }
             }
         };
@@ -1217,6 +1241,7 @@ var TimesheetController = /** @class */ (function (_super) {
                     item.subProjectId = null;
                     item.clientEntityName = '';
                     item.billable = false;
+                    item.isNonEligible = false;
                 }
                 else {
                     if (item === undefined)
@@ -1227,12 +1252,14 @@ var TimesheetController = /** @class */ (function (_super) {
                     item.subProjectId = project.subProjectId;
                     item.clientEntityName = project.clientName;
                     item.billable = project.isBillable;
+                    item.isNonEligible = !!project.isNonEligible;
                 }
                 if (item === me.filterModel) {
                     me.reloadGrid();
                 }
                 else {
                     me.validateOriginal('projectGridId', item);
+                    me.refreshTotalsForRecord(item);
                 }
             });
         };
@@ -1357,6 +1384,7 @@ var TimesheetController = /** @class */ (function (_super) {
                 projectDescription: r.projectDescription,
                 clientEntityName: r.clientEntityName,
                 billable: r.billable,
+                isNonEligible: r.isNonEligible,
                 subProjectId: r.subProjectId,
                 teamId: r.teamId,
                 activityId: r.activityId,
@@ -1773,7 +1801,7 @@ var TimesheetController = /** @class */ (function (_super) {
             userTeams: []
         };
         me.gridModel = { data: [], originalData: [], totalItems: 0 };
-        me.summary = { days: [], totalHours: 0, totalBillableHours: 0 };
+        me.summary = { days: [], totalHours: 0, totalBillableHours: 0, totalNonEligibleHours: 0 };
         // Set default Billable — Manual Date is not offered; period always comes from a real billing cycle
         me.filterModel.billingOption = me.filterOptions.billingOptions[0];
         me.filterModel.billingCycleId = null;
@@ -1961,6 +1989,7 @@ var TimesheetController = /** @class */ (function (_super) {
             projectDescription: row.projectDescription,
             clientEntityName: row.clientEntityName,
             billable: row.billable,
+            isNonEligible: row.isNonEligible != null ? !!row.isNonEligible : me.lookupNonEligible(row.projectGridId),
             subProjectId: row.subProjectId,
             teamId: row.teamId,
             activityId: row.activityId,
@@ -1979,6 +2008,20 @@ var TimesheetController = /** @class */ (function (_super) {
             }
         };
         me.gridModel.data.push(newRecord);
+    };
+    /** projectGridId is the SubProject Id when present, else the Project Id. */
+    TimesheetController.prototype.lookupNonEligible = function (projectGridId) {
+        var projects = this.filterOptions && this.filterOptions.userProjects;
+        if (!projectGridId || !projects) {
+            return false;
+        }
+        for (var i = 0; i < projects.length; i++) {
+            var p = projects[i];
+            if (p.subProjectId ? p.subProjectId === projectGridId : p.projectId === projectGridId) {
+                return !!p.isNonEligible;
+            }
+        }
+        return false;
     };
     //#region Clipboard
     TimesheetController.CLIPBOARD_KEY = "trizhub_ts_clipboard";

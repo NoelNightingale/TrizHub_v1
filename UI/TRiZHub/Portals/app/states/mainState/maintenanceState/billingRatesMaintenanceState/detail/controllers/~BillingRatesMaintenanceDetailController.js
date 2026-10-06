@@ -17,28 +17,35 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
     __extends(BillingRatesMaintenanceDetailController, _super);
     //#endregion
     //#region Ctor
-    function BillingRatesMaintenanceDetailController($scope, $stateParams, $timeout, $window, $state, BillingRatesService, ClientService, ProjectService, UserService, Popups) {
+    /**
+     * Runs inside a $uibModal opened by BillingRatesMaintenanceGridController.
+     * modalParams: { id: string | "new", userId?, scope?, clientId?, projectId? }
+     * Closes with { action: "saved" | "deleted", id } or dismisses on cancel.
+     */
+    function BillingRatesMaintenanceDetailController($scope, modalParams, $uibModalInstance, $state, BillingRatesService, ClientService, ProjectService, UserService, Popups) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$scope = $scope;
-        _this.$stateParams = $stateParams;
-        _this.$timeout = $timeout;
-        _this.$window = $window;
+        _this.modalParams = modalParams;
+        _this.$uibModalInstance = $uibModalInstance;
         _this.$state = $state;
         _this.BillingRatesService = BillingRatesService;
         _this.ClientService = ClientService;
         _this.ProjectService = ProjectService;
         _this.UserService = UserService;
         _this.Popups = Popups;
-        //#region members
-        _this.successMessage = "Saved Successfully";
-        _this.saveSuccess = false;
         _this.scopeType = "Default";
+        /** Client chosen to narrow the project list for Project rates; not saved. */
+        _this.projectClientFilter = null;
+        _this.projectClientOptions = [];
+        _this.filteredProjects = [];
         _this.isNew = false;
         _this.userLocked = false;
+        _this.saving = false;
         _this.applyNewPrefill = function () {
-            var scope = _this.$stateParams["scope"];
-            var clientId = _this.$stateParams["clientId"];
-            var projectId = _this.$stateParams["projectId"];
+            var params = _this.modalParams || {};
+            var scope = params.scope;
+            var clientId = params.clientId;
+            var projectId = params.projectId;
             if (scope === "Client" || (clientId && !projectId)) {
                 _this.scopeType = "Client";
                 _this.viewModel.clientId = clientId || null;
@@ -48,6 +55,7 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
                 _this.scopeType = "Project";
                 _this.viewModel.projectId = projectId || null;
                 _this.viewModel.clientId = null;
+                _this.projectClientFilter = clientId || null;
             }
             else {
                 _this.scopeType = "Default";
@@ -68,30 +76,60 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
                 _this.viewModel.projectId = null;
             }
             else if (_this.scopeType === "Client") {
+                if (!_this.viewModel.clientId && _this.projectClientFilter) {
+                    _this.viewModel.clientId = _this.projectClientFilter;
+                }
                 _this.viewModel.projectId = null;
             }
             else if (_this.scopeType === "Project") {
+                if (!_this.projectClientFilter && _this.viewModel.clientId) {
+                    _this.projectClientFilter = _this.viewModel.clientId;
+                    _this.refreshProjectOptions();
+                }
                 _this.viewModel.clientId = null;
             }
         };
+        _this.refreshProjectOptions = function () {
+            var projects = _this.projectDropdown || [];
+            var clients = _this.clientDropdown || [];
+            if (!_this.projectClientFilter && _this.viewModel.projectId) {
+                var current = projects.filter(function (p) { return p.id === _this.viewModel.projectId; })[0];
+                if (current) {
+                    _this.projectClientFilter = current.clientId;
+                }
+            }
+            var clientHasProjects = {};
+            projects.forEach(function (p) { clientHasProjects[p.clientId] = true; });
+            _this.projectClientOptions = clients.filter(function (c) { return !!clientHasProjects[c.id]; });
+            var clientId = _this.projectClientFilter;
+            _this.filteredProjects = clientId ? projects.filter(function (p) { return p.clientId === clientId; }) : [];
+        };
+        _this.onProjectClientChanged = function () {
+            var projects = _this.projectDropdown || [];
+            var current = projects.filter(function (p) { return p.id === _this.viewModel.projectId; })[0];
+            if (!current || current.clientId !== _this.projectClientFilter) {
+                _this.viewModel.projectId = null;
+            }
+            _this.refreshProjectOptions();
+        };
         _this.cancel = function () {
-            _this.$state.go("mainState.maintenance.billingRatesMaintenance.grid");
+            _this.$uibModalInstance.dismiss("cancel");
         };
         _this.submitForm = function () {
             var self = _this;
-            if (_this.viewModel.isLocked)
+            if (_this.viewModel.isLocked || _this.saving)
                 return;
             _this.$scope.$broadcast("show-errors-check-validity");
             if (_this.$scope["EditForm"].$invalid)
                 return;
             _this.onScopeChanged();
+            _this.saving = true;
             _this.BillingRatesService.billingRatesSave(_this.viewModel)
                 .then(function (result) {
-                self.saveSuccess = true;
-                self.$timeout(function () {
-                    self.$state.go("mainState.maintenance.billingRatesMaintenance.grid");
-                }, 1000);
+                self.saving = false;
+                self.$uibModalInstance.close({ action: "saved", id: result.id });
             }, function (error) {
+                self.saving = false;
                 self.handleError(error);
             });
         };
@@ -108,8 +146,7 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
                 }
                 self.BillingRatesService.billingRatesDelete(self.viewModel)
                     .then(function (result) {
-                    self.saveSuccess = false;
-                    self.$state.go("mainState.maintenance.billingRatesMaintenance.grid");
+                    self.$uibModalInstance.close({ action: "deleted", id: self.viewModel.id });
                 }, function (error) {
                     self.handleError(error);
                 });
@@ -118,29 +155,29 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
             });
         };
         var self = _this;
+        var params = _this.modalParams || {};
         _this.viewModel = {};
-        _this.viewModel.id = _this.$stateParams["id"];
-        _this.viewModel.userAccountId = _this.$stateParams["userId"] || null;
+        _this.viewModel.id = params.id || "new";
+        _this.viewModel.userAccountId = params.userId || null;
         _this.isNew = _this.viewModel.id === "new";
         _this.userLocked = !_this.isNew && !!_this.viewModel.userAccountId;
         UserService.userDropdownList()
             .then(function (result) {
             self.userDropdown = result;
-            if (self.userLocked) {
-                // Dropdown will still render the selected value even if it's not in list.
-            }
         }, function (error) {
             self.handleError(error);
         });
         ClientService.clientDropdownList()
             .then(function (result) {
             self.clientDropdown = result;
+            self.refreshProjectOptions();
         }, function (error) {
             self.handleError(error);
         });
         ProjectService.projectDropdownList()
             .then(function (result) {
             self.projectDropdown = result;
+            self.refreshProjectOptions();
         }, function (error) {
             self.handleError(error);
         });
@@ -150,6 +187,8 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
                 self.viewModel = result;
                 self.scopeType = self.resolveScopeType(result);
                 self.userLocked = true;
+                self.projectClientFilter = result.projectClientId || null;
+                self.refreshProjectOptions();
             }, function (error) {
                 self.handleError(error);
             });
@@ -165,9 +204,8 @@ var BillingRatesMaintenanceDetailController = /** @class */ (function (_super) {
 angular.module("AngularApp")
     .controller("BillingRatesMaintenanceDetailController", [
     "$scope",
-    "$stateParams",
-    "$timeout",
-    "$window",
+    "modalParams",
+    "$uibModalInstance",
     "$state",
     "BillingRatesService",
     "ClientService",

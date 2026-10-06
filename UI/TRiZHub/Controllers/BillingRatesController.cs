@@ -4,12 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security;
 using System.Web.Http;
 using TRiZHub.BL.Context;
+using TRiZHub.BL.Entities.BillingRatesData;
 using TRiZHub.BL.Provider.BillingRatesData;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.Settings;
@@ -121,6 +123,53 @@ namespace TRiZHub.Controllers
             }
         }
 
+        private static readonly Expression<Func<BillingRates, BillingRatesGridModel>> GridRowProjection =
+            a => new BillingRatesGridModel
+            {
+                Id = a.Id,
+                UserAccountId = a.UserAccountId,
+                Account = a.UserAccount.AccountName,
+                FirstName = a.UserAccount.FirstName,
+                Surname = a.UserAccount.Surname,
+                UserName = a.UserAccount.FirstName + " " + a.UserAccount.Surname,
+                ClientId = a.ClientId,
+                ClientName = a.Client != null ? a.Client.EntityName : null,
+                ProjectId = a.ProjectId,
+                ProjectName = a.Project != null ? a.Project.ProjectName : null,
+                ProjectClientId = a.Project != null ? a.Project.ClientId : (Guid?)null,
+                ProjectClientName = a.Project != null ? a.Project.Client.EntityName : null,
+                Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
+                Rate = a.Rate,
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                ClientInactive = a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted),
+                ProjectInactive = a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted),
+                ProjectClientInactive = a.Project != null &&
+                                        (!a.Project.Client.IsActive || a.Project.Client.IsDeleted),
+                IsLocked = (a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted))
+                           || (a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted
+                                                     || !a.Project.Client.IsActive || a.Project.Client.IsDeleted)),
+            };
+
+        /// <summary>
+        /// A single Billing Rates grid row, shaped like the rows returned by BillingRatesGrid.
+        /// </summary>
+        [HttpGet]
+        public BillingRatesGridModel BillingRatesGridRow(Guid id)
+        {
+            try
+            {
+                return BillingRatesProvider.BillingRatesFilterList(null, null, null)
+                    .Where(a => a.Id == id)
+                    .Select(GridRowProjection)
+                    .FirstOrDefault();
+            }
+            catch (SecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
         /// <summary>
         /// Retrieve list of Billing rates sorted by Startdate.
         /// Filter by UserAccountId and/or ClientId and/or ProjectId, Scope, and ActiveOn.
@@ -141,31 +190,7 @@ namespace TRiZHub.Controllers
                     model.UserAccountIds, model.ClientIds, model.ProjectIds,
                     model.UserStatus, model.ClientStatus, model.ProjectStatus,
                     rangeStart, rangeEnd)
-                .Select(a => new BillingRatesGridModel
-                {
-                    Id = a.Id,
-                    UserAccountId = a.UserAccountId,
-                    Account = a.UserAccount.AccountName,
-                    FirstName = a.UserAccount.FirstName,
-                    Surname = a.UserAccount.Surname,
-                    UserName = a.UserAccount.FirstName + " " + a.UserAccount.Surname,
-                    ClientId = a.ClientId,
-                    ClientName = a.Client != null ? a.Client.EntityName : null,
-                    ProjectId = a.ProjectId,
-                    ProjectName = a.Project != null ? a.Project.ProjectName : null,
-                    ProjectClientName = a.Project != null ? a.Project.Client.EntityName : null,
-                    Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
-                    Rate = a.Rate,
-                    StartDate = a.StartDate,
-                    EndDate = a.EndDate,
-                    ClientInactive = a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted),
-                    ProjectInactive = a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted),
-                    ProjectClientInactive = a.Project != null &&
-                                            (!a.Project.Client.IsActive || a.Project.Client.IsDeleted),
-                    IsLocked = (a.Client != null && (!a.Client.IsActive || a.Client.IsDeleted))
-                               || (a.Project != null && (!a.Project.IsActive || a.Project.IsDeleted
-                                                         || !a.Project.Client.IsActive || a.Project.Client.IsDeleted)),
-                });
+                .Select(GridRowProjection);
 
             var totalNumberOfRecords = filteredQuery.Count();
 
@@ -190,8 +215,8 @@ namespace TRiZHub.Controllers
                 case "clientname":
                 case "client":
                     filteredQuery = model.SortOrder == "ASC"
-                        ? filteredQuery.OrderBy(r => r.ClientName)
-                        : filteredQuery.OrderByDescending(r => r.ClientName);
+                        ? filteredQuery.OrderBy(r => r.ClientName ?? r.ProjectClientName)
+                        : filteredQuery.OrderByDescending(r => r.ClientName ?? r.ProjectClientName);
                     break;
                 case "projectname":
                 case "project":

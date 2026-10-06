@@ -166,6 +166,7 @@ namespace TRiZHub.Controllers
                     ProjectDescription = i.ProjectDescription,
                     ClientEntityName = i.ClientEntityName,
                     Billable = i.Billable,
+                    IsNonEligible = IsNonEligible(i),
                     SubProjectId = i.SubProjectId,
                     TeamId = i.TeamId,
                     ActivityId = i.ActivityId,
@@ -184,6 +185,20 @@ namespace TRiZHub.Controllers
                 RowCount = rows.Count,
                 Rows = rows
             };
+        }
+
+        /// <summary>Null when the project navigation is not loaded, so the client can resolve it itself.</summary>
+        private static bool? IsNonEligible(TimesheetTemplateItem i)
+        {
+            if (i.Project == null || (i.SubProjectId.HasValue && i.SubProject == null))
+            {
+                return null;
+            }
+
+            var type = i.SubProject != null && i.SubProject.SubProjectType != null
+                ? i.SubProject.SubProjectType
+                : i.Project.ProjectType;
+            return type != null && type.Name == "Non-Eligible";
         }
     }
 }

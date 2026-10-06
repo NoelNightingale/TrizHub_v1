@@ -783,6 +783,11 @@
         color: rgba(0, 0, 0, 0.45);
     }
 
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill.is-noneligible {
+        background: #fff3cd;
+        color: #8a6d00;
+    }
+
     .ts-capture .ts-clip-detail-footer {
         display: flex;
         gap: 8px;
@@ -905,6 +910,15 @@
         color: #c62828;
     }
 
+    .ts-capture .ts-total.is-noneligible {
+        background: #fff3cd;
+        border-color: rgba(138, 109, 0, 0.25);
+    }
+
+    .ts-capture .ts-total.is-noneligible .n {
+        color: #8a6d00;
+    }
+
     .ts-capture .ts-heat {
         overflow-x: auto;
     }
@@ -1005,6 +1019,7 @@
 
     .ts-capture .ts-heat-body {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         gap: 4px;
@@ -1022,13 +1037,13 @@
 
     .ts-capture .ts-heat-chips {
         display: flex;
-        gap: 3px;
+        gap: 2px;
         flex: 0 0 auto;
     }
 
     .ts-capture .ts-heat-chip {
-        min-width: 22px;
-        padding: 2px 4px;
+        min-width: 16px;
+        padding: 2px 3px;
         border-radius: 3px;
         text-align: center;
         font-size: 10px;
@@ -1046,6 +1061,12 @@
         color: #616161;
         background: rgba(0, 0, 0, 0.08);
         box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture .ts-heat-chip.is-noneligible {
+        color: #8a6d00;
+        background: #fff3cd;
+        box-shadow: 0 0 0 1px rgba(138, 109, 0, 0.25);
     }
 
     .ts-capture table.ts-heat-table td.hrs-gap,
@@ -1109,6 +1130,11 @@
     .ts-capture .ts-heat-legend .lg-nonbill:before {
         background: #e0e0e0;
         border-color: #9e9e9e;
+    }
+
+    .ts-capture .ts-heat-legend .lg-noneligible:before {
+        background: #fff3cd;
+        border-color: rgba(138, 109, 0, 0.4);
     }
 
     .ts-capture .ts-week-bar {
@@ -1175,22 +1201,29 @@
     }
 
     .ts-capture .ts-week-tab {
-        display: inline-block;
-        padding: 10px 16px;
-        border: 1px solid transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        min-width: 170px;
+        padding: 10px 18px 8px;
+        border: 1px solid rgba(0, 0, 0, 0.14);
         border-bottom: none;
         border-radius: 6px 6px 0 0;
-        background: transparent;
-        color: rgba(0, 0, 0, 0.55);
+        background: #fafafa;
+        color: rgba(0, 0, 0, 0.6);
         cursor: pointer;
         font-weight: 500;
         font-size: 13px;
+        text-decoration: none;
         transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
     .ts-capture .ts-week-tab:hover {
         background: rgba(63, 63, 63, 0.08);
+        border-color: rgba(0, 0, 0, 0.3);
         color: #3f3f3f;
+        text-decoration: none;
     }
 
     .ts-capture .ts-week-tab.active {
@@ -1198,19 +1231,90 @@
         border-color: #6a6a6a;
         color: #fff;
         box-shadow: none;
-        font-weight: 600;
+    }
+
+    .ts-capture .ts-week-tab .ts-week-label {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-week-tab .ts-week-name {
+        font-weight: 700;
+    }
+
+    .ts-capture .ts-week-tab .ts-week-range {
+        font-size: 11px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-range {
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .ts-capture .ts-week-tab .ts-week-hours {
         display: block;
-        font-size: 11px;
-        font-weight: 400;
-        color: rgba(0, 0, 0, 0.4);
-        margin-top: 2px;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #3f3f3f;
     }
 
     .ts-capture .ts-week-tab.active .ts-week-hours {
-        color: rgba(255, 255, 255, 0.65);
+        color: #fff;
+    }
+
+    .ts-capture .ts-week-breakdown {
+        display: flex;
+        gap: 4px;
+    }
+
+    .ts-capture .ts-week-chip {
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-week-chip.is-bill {
+        color: #1b5e20;
+        background: rgba(46, 125, 79, 0.16);
+        box-shadow: 0 0 0 1px rgba(46, 125, 79, 0.22);
+    }
+
+    .ts-capture .ts-week-chip.is-nonbill {
+        color: #616161;
+        background: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture .ts-week-chip.is-noneligible {
+        color: #8a6d00;
+        background: #fff3cd;
+        box-shadow: 0 0 0 1px rgba(138, 109, 0, 0.25);
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip {
+        box-shadow: none;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip.is-bill {
+        color: #1b5e20;
+        background: #d4edda;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip.is-nonbill {
+        color: #424242;
+        background: #eeeeee;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip.is-noneligible {
+        color: #6d5600;
+        background: #fff3cd;
     }
 
     .ts-capture .ts-day-panel {
@@ -1546,6 +1650,16 @@
         box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.15);
     }
 
+    .ts-capture .ts-bill-flag.is-noneligible {
+        color: #8a6d00;
+        background: #fff3cd;
+        border: 1px solid rgba(138, 109, 0, 0.3);
+    }
+
+    .ts-capture tr.ts-row-noneligible > td:first-child {
+        box-shadow: inset 3px 0 0 #d4a72c;
+    }
+
     .ts-capture .readOnlyLight {
         cursor: pointer;
     }
@@ -1698,8 +1812,12 @@
                         <span class="l">Billable</span>
                     </div>
                     <div class="ts-total is-nonbill">
-                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
+                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0) - (vm.summary.totalNonEligibleHours || 0)}}</span>
                         <span class="l">Non-bill</span>
+                    </div>
+                    <div class="ts-total is-noneligible">
+                        <span class="n">{{vm.summary.totalNonEligibleHours || 0}}</span>
+                        <span class="l">Non-elig</span>
                     </div>
                 </div>
                 <button type="button" class="ts-clipboard-clear ts-summary-close"
@@ -1733,13 +1851,14 @@
                             class="ts-heat-cell"
                             ng-class="vm.heatClassFor(week, $index)"
                             ng-click="vm.jumpToColFromSummary(week, $index)"
-                            title="{{day ? ((day.date | date:'d MMM') + ' — ' + (day.hours || 0) + 'h total, ' + (day.billhours || 0) + ' billable, ' + ((day.hours || 0) - (day.billhours || 0)) + ' non-billable') : ''}}">
+                            title="{{day ? ((day.date | date:'d MMM') + ' — ' + (day.hours || 0) + 'h total, ' + (day.billhours || 0) + ' billable, ' + ((day.hours || 0) - (day.billhours || 0) - (day.nehours || 0)) + ' non-billable, ' + (day.nehours || 0) + ' non-eligible') : ''}}">
                             <span class="ts-heat-date" ng-if="day">{{day.dayOfMonth || (day.date | date:'d')}}</span>
                             <span class="ts-heat-body" ng-if="day">
                                 <span class="ts-heat-hours">{{day.hours || 0}}</span>
                                 <span class="ts-heat-chips">
                                     <span class="ts-heat-chip is-bill" title="Billable">{{day.billhours || 0}}</span>
-                                    <span class="ts-heat-chip is-nonbill" title="Non-billable">{{(day.hours || 0) - (day.billhours || 0)}}</span>
+                                    <span class="ts-heat-chip is-nonbill" title="Non-billable">{{(day.hours || 0) - (day.billhours || 0) - (day.nehours || 0)}}</span>
+                                    <span class="ts-heat-chip is-noneligible" title="Non-eligible">{{day.nehours || 0}}</span>
                                 </span>
                             </span>
                         </td>
@@ -1752,6 +1871,7 @@
                 <span class="lg-ok">8h+</span>
                 <span class="lg-bill">Billable</span>
                 <span class="lg-nonbill">Non-bill</span>
+                <span class="lg-noneligible">Non-elig</span>
             </div>
             <div class="ts-summary-hint">Click a day to jump to it in the grid.</div>
         </div>
@@ -1778,8 +1898,12 @@
                                         <span class="l">Billable</span>
                                     </div>
                                     <div class="ts-total is-nonbill">
-                                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0)}}</span>
+                                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0) - (vm.summary.totalNonEligibleHours || 0)}}</span>
                                         <span class="l">Non-bill</span>
+                                    </div>
+                                    <div class="ts-total is-noneligible">
+                                        <span class="n">{{vm.summary.totalNonEligibleHours || 0}}</span>
+                                        <span class="l">Non-elig</span>
                                     </div>
                                 </div>
                                 <button type="button" class="ts-summary-toggle"
@@ -1868,8 +1992,8 @@
                                                 <span ng-if="vm.clipboardProjectLabel(row)">
                                                     {{vm.clipboardProjectLabel(row)}}
                                                     <span class="ts-clip-detail-bill"
-                                                          ng-class="(row.billable == 1 || row.billable === true) ? 'is-billable' : 'is-nonbillable'">
-                                                        {{(row.billable == 1 || row.billable === true) ? 'B' : 'NB'}}
+                                                          ng-class="{'is-billable': vm.clipboardRowBucket(row) === 'bill', 'is-nonbillable': vm.clipboardRowBucket(row) === 'nonbill', 'is-noneligible': vm.clipboardRowBucket(row) === 'ne'}">
+                                                        {{vm.clipboardRowBucket(row) === 'bill' ? 'B' : (vm.clipboardRowBucket(row) === 'ne' ? 'NE' : 'NB')}}
                                                     </span>
                                                 </span>
                                                 <span class="ts-clip-detail-empty" ng-if="!vm.clipboardProjectLabel(row)">—</span>
@@ -1962,8 +2086,16 @@
                             <a class="ts-week-tab"
                                ng-class="{'active': vm.selectedWeekIndex === week.index}"
                                ng-click="vm.selectWeek(week.index)">
-                                {{week.label}}
+                                <span class="ts-week-label">
+                                    <span class="ts-week-name">Week {{week.weekNum}}</span>
+                                    <span class="ts-week-range">{{week.label.split('·')[1]}}</span>
+                                </span>
                                 <span class="ts-week-hours">{{week.totalHours || 0}}h</span>
+                                <span class="ts-week-breakdown">
+                                    <span class="ts-week-chip is-bill" title="Billable">B {{week.totalBillableHours || 0}}</span>
+                                    <span class="ts-week-chip is-nonbill" title="Non-billable">NB {{(week.totalHours || 0) - (week.totalBillableHours || 0) - (week.totalNonEligibleHours || 0)}}</span>
+                                    <span class="ts-week-chip is-noneligible" title="Non-eligible">NE {{week.totalNonEligibleHours || 0}}</span>
+                                </span>
                             </a>
                         </li>
                     </ul>
@@ -2009,6 +2141,11 @@
                                 <span ng-class="day.hours >= 8 ? 'ts-hours-ok' : 'ts-hours-low'">
                                     {{day.hours || 0}}h
                                 </span>
+                                <span class="ts-week-breakdown">
+                                    <span class="ts-week-chip is-bill" title="Billable">B {{day.billhours || 0}}</span>
+                                    <span class="ts-week-chip is-nonbill" title="Non-billable">NB {{(day.hours || 0) - (day.billhours || 0) - (day.nehours || 0)}}</span>
+                                    <span class="ts-week-chip is-noneligible" title="Non-eligible">NE {{day.nehours || 0}}</span>
+                                </span>
                                 <span ng-if="day.records.length">{{day.records.length}} line{{day.records.length === 1 ? '' : 's'}}</span>
                                 <button type="button" class="ts-btn-add-line"
                                         title="Add a line for this day"
@@ -2039,7 +2176,7 @@
                                     </thead>
                                     <tbody>
                                         <tr ng-repeat="i in day.records"
-                                            ng-class="{'ts-row-billable': i.billable == 1 || i.billable === true, 'ts-row-nonbillable': !(i.billable == 1 || i.billable === true)}">
+                                            ng-class="{'ts-row-billable': vm.hoursBucket(i) === 'bill', 'ts-row-nonbillable': vm.hoursBucket(i) === 'nonbill', 'ts-row-noneligible': vm.hoursBucket(i) === 'ne'}">
                                             <td>
                                                 <div class="ts-project-cell form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}">
                                                     <input type="hidden" name="projectGridId{{i.id}}"
@@ -2099,9 +2236,9 @@
                                             <td class="ts-row-actions-col">
                                                 <div class="ts-row-actions">
                                                     <span class="ts-bill-flag"
-                                                          ng-class="(i.billable == 1 || i.billable === true) ? 'is-billable' : 'is-nonbillable'"
-                                                          title="{{(i.billable == 1 || i.billable === true) ? 'Billable' : 'Non-billable'}}">
-                                                        {{(i.billable == 1 || i.billable === true) ? 'B' : 'NB'}}
+                                                          ng-class="{'is-billable': vm.hoursBucket(i) === 'bill', 'is-nonbillable': vm.hoursBucket(i) === 'nonbill', 'is-noneligible': vm.hoursBucket(i) === 'ne'}"
+                                                          title="{{vm.hoursBucket(i) === 'bill' ? 'Billable' : (vm.hoursBucket(i) === 'ne' ? 'Non-eligible' : 'Non-billable')}}">
+                                                        {{vm.hoursBucket(i) === 'bill' ? 'B' : (vm.hoursBucket(i) === 'ne' ? 'NE' : 'NB')}}
                                                     </span>
                                                     <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
                                                        ng-click="vm.copyEntryToClipboard(i)"

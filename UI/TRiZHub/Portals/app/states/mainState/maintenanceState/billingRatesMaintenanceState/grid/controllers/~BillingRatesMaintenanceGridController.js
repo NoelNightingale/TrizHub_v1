@@ -17,11 +17,12 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
     __extends(BillingRatesMaintenanceGridController, _super);
     //#endregion
     //#region Ctor
-    function BillingRatesMaintenanceGridController($scope, $state, $timeout, BillingRatesService, Popups, tcrGrid) {
+    function BillingRatesMaintenanceGridController($scope, $state, $timeout, $uibModal, BillingRatesService, Popups, tcrGrid) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$scope = $scope;
         _this.$state = $state;
         _this.$timeout = $timeout;
+        _this.$uibModal = $uibModal;
         _this.BillingRatesService = BillingRatesService;
         _this.Popups = Popups;
         _this.tcrGrid = tcrGrid;
@@ -68,6 +69,9 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
         _this.optionsLoading = false;
         _this.cascadeTimer = null;
         _this.exporting = false;
+        /** Id of the row just saved from the edit modal; drives a brief highlight. */
+        _this.highlightId = null;
+        _this.highlightTimer = null;
         _this.markFiltersDirty = function () {
             _this.filtersDirty = true;
         };
@@ -301,13 +305,100 @@ var BillingRatesMaintenanceGridController = /** @class */ (function (_super) {
             if (projectId) {
                 params.projectId = projectId;
             }
-            _this.$state.transitionTo("mainState.maintenance.billingRatesMaintenance.detail", params);
+            _this.openEditor(params);
         };
         _this.editRecord = function (rateId) {
             if (!rateId) {
                 return;
             }
-            _this.$state.transitionTo("mainState.maintenance.billingRatesMaintenance.detail", { id: rateId });
+            _this.openEditor({ id: rateId });
+        };
+        _this.openEditor = function (params) {
+            var self = _this;
+            var modal = _this.$uibModal.open({
+                animation: false,
+                templateUrl: "Portals/app/states/mainState/maintenanceState/billingRatesMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
+                controller: "BillingRatesMaintenanceDetailController",
+                controllerAs: "vm",
+                backdrop: "static",
+                windowClass: "br-edit-modal",
+                resolve: {
+                    modalParams: function () { return params; }
+                }
+            });
+            modal.result.then(function (result) {
+                self.onEditorClosed(result);
+            }, function () { });
+        };
+        _this.onEditorClosed = function (result) {
+            var self = _this;
+            if (!result || !result.id) {
+                return;
+            }
+            if (_this.viewMode === "effective") {
+                if (result.action === "saved") {
+                    _this.flashRow(result.id);
+                }
+                _this.effectiveGrid.loadGrid();
+                return;
+            }
+            if (result.action === "deleted") {
+                _this.removeRow(result.id);
+                return;
+            }
+            _this.BillingRatesService.billingRatesGridRow(result.id)
+                .then(function (row) {
+                if (row) {
+                    self.upsertRow(row);
+                }
+                else {
+                    self.pageGrid.loadGrid();
+                }
+            }, function (error) {
+                self.handleError(error);
+            });
+        };
+        _this.findRowIndex = function (id) {
+            var data = _this.gridModel.data || [];
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].id === id) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+        _this.removeRow = function (id) {
+            var idx = _this.findRowIndex(id);
+            if (idx < 0) {
+                return;
+            }
+            _this.gridModel.data.splice(idx, 1);
+            _this.gridModel.totalItems = Math.max(0, (_this.gridModel.totalItems || 0) - 1);
+        };
+        _this.upsertRow = function (row) {
+            if (!_this.gridModel.data) {
+                _this.gridModel.data = [];
+            }
+            var idx = _this.findRowIndex(row.id);
+            if (idx >= 0) {
+                _this.gridModel.data[idx] = row;
+            }
+            else {
+                _this.gridModel.data.unshift(row);
+                _this.gridModel.totalItems = (_this.gridModel.totalItems || 0) + 1;
+            }
+            _this.flashRow(row.id);
+        };
+        _this.flashRow = function (id) {
+            var self = _this;
+            if (self.highlightTimer) {
+                self.$timeout.cancel(self.highlightTimer);
+            }
+            self.highlightId = id;
+            self.highlightTimer = self.$timeout(function () {
+                self.highlightId = null;
+                self.highlightTimer = null;
+            }, 2500);
         };
         _this.exportExcel = function () {
             var self = _this;
@@ -389,6 +480,7 @@ angular.module("AngularApp")
     "$scope",
     "$state",
     "$timeout",
+    "$uibModal",
     "BillingRatesService",
     "Popups",
     BillingRatesMaintenanceGridController

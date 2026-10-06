@@ -189,14 +189,14 @@ hr {
 /* Billing Rates workbench — light modernization, scoped to this screen */
 .br-workbench .br-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
 }
 
 .br-workbench .br-header h2 {
-    margin: 0 0 4px 0;
+    margin: 0;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
@@ -213,7 +213,6 @@ hr {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-top: 8px;
     font-size: 11px;
     color: #90a4ae;
 }
@@ -620,6 +619,31 @@ hr {
 
 tr.br-row-locked > td {
     color: #78909c;
+}
+
+@keyframes br-row-flash {
+    from { background-color: #fff3c4; }
+    to { background-color: transparent; }
+}
+
+tr.br-row-flash > td {
+    animation: br-row-flash 2.5s ease-out;
+}
+
+/* Billing Rates edit modal */
+.br-edit-modal .modal-content {
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+}
+
+.br-edit .modal-header .modal-title {
+    font-weight: 600;
+    margin: 0;
+}
+
+.br-edit .modal-footer {
+    border-top: 1px solid #eceff1;
 }
 
 /* Segmented controls used as tabs. The theme sets button border-width to 0,

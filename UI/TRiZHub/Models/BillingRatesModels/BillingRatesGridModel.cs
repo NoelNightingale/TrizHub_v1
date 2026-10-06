@@ -18,6 +18,7 @@ namespace TRiZHub.Models.BillingRatesModels
         public string ClientName { get; set; }
         public Guid? ProjectId { get; set; }
         public string ProjectName { get; set; }
+        public Guid? ProjectClientId { get; set; }
         public string ProjectClientName { get; set; }
         public string Scope { get; set; }
         public decimal Rate { get; set; }

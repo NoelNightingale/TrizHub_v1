@@ -631,7 +631,9 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                         {
                             UserName = a.UserAccount.FirstName + " " + a.UserAccount.Surname,
                             Scope = a.ProjectId != null ? "Project" : (a.ClientId != null ? "Client" : "Default"),
-                            ClientName = a.Client != null ? a.Client.EntityName : null,
+                            ClientName = a.Client != null
+                                ? a.Client.EntityName
+                                : (a.Project != null ? a.Project.Client.EntityName : null),
                             ProjectName = a.Project != null ? a.Project.ProjectName : null,
                             a.Rate,
                             a.StartDate,
@@ -672,7 +674,7 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     var headerRow = infoRow == 2 ? 3 : infoRow + 1;
 
                     sheet.Cells[headerRow, 1].Value = "User";
-                    sheet.Cells[headerRow, 2].Value = "Scope";
+                    sheet.Cells[headerRow, 2].Value = "Rate Type";
                     sheet.Cells[headerRow, 3].Value = "Client";
                     sheet.Cells[headerRow, 4].Value = "Project";
                     sheet.Cells[headerRow, 5].Value = "Rate";
