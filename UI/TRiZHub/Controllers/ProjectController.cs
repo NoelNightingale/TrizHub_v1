@@ -27,6 +27,8 @@ namespace TRiZHub.Controllers
     [NoCache]
     public class ProjectController : TCRControllerBase
     {
+        private const string NonEligibleProjectTypeName = "Non-Eligible";
+
         #region Ctor
 
         public ProjectController()
@@ -625,7 +627,8 @@ namespace TRiZHub.Controllers
                             ClientId = project.ClientId,
                             ClientName = project.Client.EntityName,
                             IsActive = project.IsActive,
-                            IsBillable = project.Billable
+                            IsBillable = project.Billable,
+                            IsNonEligible = project.ProjectType != null && project.ProjectType.Name == NonEligibleProjectTypeName
                         });
                    }
 
@@ -646,8 +649,9 @@ namespace TRiZHub.Controllers
                                 ClientId = project.ClientId,
                                 ClientName = project.Client.EntityName,
                                 IsActive = subProject.IsActive,
-                                IsBillable = project.Billable
-
+                                IsBillable = project.Billable,
+                                IsNonEligible = (subProject.SubProjectType ?? project.ProjectType) != null
+                                    && (subProject.SubProjectType ?? project.ProjectType).Name == NonEligibleProjectTypeName
                             });
                         }
 
@@ -673,7 +677,7 @@ namespace TRiZHub.Controllers
         {
             var returnList = new List<ProjectDropdownModel>();
             returnList.AddRange(ProjectProvider.ProjectList().Where(a => a.IsActive == true && !a.IsDeleted)
-                .Select(a => new ProjectDropdownModel { ProjectId = a.Id, ProjectName = (a.ProjectNumber == null || a.ProjectNumber.Equals("")) ? a.ProjectName : ("[" + a.ProjectNumber + "] " + a.ProjectName), IsActive = a.IsActive }));
+                .Select(a => new ProjectDropdownModel { ProjectId = a.Id, ProjectName = (a.ProjectNumber == null || a.ProjectNumber.Equals("")) ? a.ProjectName : ("[" + a.ProjectNumber + "] " + a.ProjectName), IsActive = a.IsActive, ClientId = a.ClientId }));
             return returnList.ToList().OrderBy(a => a.Description).ToList();
         }
 

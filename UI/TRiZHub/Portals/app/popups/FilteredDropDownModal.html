@@ -1,27 +1,199 @@
-﻿<div class="modal-header {{app.setting.theme.warn}}" style="width:100%">
-    <h4 class="modal-title">Project Select</h4>
-</div>
+﻿<style>
+    .ts-project-select-modal .modal-content {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    }
 
-<div class="modal-body" style="height:440px;">
-    <input type="text" ng-model="filterText" class="form-control" style="margin-bottom: 15px;" autofocus/>
+    .ts-project-select .modal-header {
+        background: #6a6a6a;
+        color: #fff;
+        border: none;
+        padding: 14px 18px;
+        border-radius: 0;
+    }
 
-    <div style="height: 316px; overflow: auto;">
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th width="70%">Project</th>
-                    <th>Client</th>
-                    <th>Billable</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="item in dropDownList | filter: filterText" style="cursor: pointer;" ng-click="popupModel1.itemChoosen(item);">
-                    <td>{{item.description}}</td>
-                    <td>{{item.clientName}}</td>
-                    <td>{{item.isBillable ? 'Yes' : 'No'}}</td>
-                </tr>
-            </tbody>
+    .ts-project-select .modal-header .modal-title {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin: 0;
+        color: #fff;
+    }
 
-        </table>
+    .ts-project-select .modal-body {
+        padding: 14px 16px 16px;
+        height: 440px;
+        background: #fff;
+    }
+
+    .ts-project-select .ts-ps-search {
+        position: relative;
+        margin-bottom: 12px;
+    }
+
+    .ts-project-select .ts-ps-search .fa-search {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(0, 0, 0, 0.35);
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .ts-project-select .ts-ps-search .form-control {
+        padding-left: 32px;
+        border-radius: 6px;
+        border-color: rgba(0, 0, 0, 0.12);
+        box-shadow: none;
+        height: 36px;
+    }
+
+    .ts-project-select .ts-ps-search .form-control:focus {
+        border-color: #6a6a6a;
+        box-shadow: 0 0 0 2px rgba(106, 106, 106, 0.15);
+    }
+
+    .ts-project-select .ts-ps-list {
+        height: 348px;
+        overflow: auto;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 6px;
+    }
+
+    .ts-project-select .ts-ps-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+    }
+
+    .ts-project-select .ts-ps-table > thead > tr > th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.92);
+        background: #6a6a6a;
+        border: none;
+        padding: 9px 12px;
+        vertical-align: middle;
+    }
+
+    .ts-project-select .ts-ps-table > tbody > tr > td {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        padding: 9px 12px;
+        vertical-align: middle;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.8);
+        background: #fff;
+    }
+
+    .ts-project-select .ts-ps-table > tbody > tr:last-child > td {
+        border-bottom: none;
+    }
+
+    .ts-project-select .ts-ps-table > tbody > tr {
+        cursor: pointer;
+    }
+
+    .ts-project-select .ts-ps-table > tbody > tr:hover > td {
+        background: rgba(106, 106, 106, 0.08);
+    }
+
+    .ts-project-select .ts-ps-project {
+        font-weight: 500;
+        line-height: 1.35;
+    }
+
+    .ts-project-select .ts-ps-client {
+        color: rgba(0, 0, 0, 0.55);
+        font-size: 12px;
+    }
+
+    .ts-project-select .ts-ps-bill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 18px;
+        padding: 0 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        line-height: 1;
+    }
+
+    .ts-project-select .ts-ps-bill.is-yes {
+        color: #1b6b45;
+        background: rgba(46, 125, 79, 0.12);
+        border: 1px solid rgba(46, 125, 79, 0.28);
+    }
+
+    .ts-project-select .ts-ps-bill.is-no {
+        color: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-project-select .ts-ps-empty {
+        padding: 28px 16px;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 13px;
+        font-style: italic;
+    }
+</style>
+
+<div class="ts-project-select">
+    <div class="modal-header">
+        <h4 class="modal-title">Project Select</h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="ts-ps-search">
+            <i class="fa fa-search"></i>
+            <input type="text"
+                   ng-model="filterText"
+                   class="form-control"
+                   placeholder="Filter by project or client…"
+                   autofocus />
+        </div>
+
+        <div class="ts-ps-list">
+            <table class="ts-ps-table">
+                <thead>
+                    <tr>
+                        <th width="62%">Project</th>
+                        <th width="26%">Client</th>
+                        <th width="12%">Billable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in dropDownList | filter: filterText"
+                        ng-click="popupModel1.itemChoosen(item);">
+                        <td><span class="ts-ps-project">{{item.description}}</span></td>
+                        <td><span class="ts-ps-client">{{item.clientName}}</span></td>
+                        <td>
+                            <span class="ts-ps-bill" ng-class="item.isBillable ? 'is-yes' : 'is-no'">
+                                {{item.isBillable ? 'Yes' : 'No'}}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="ts-ps-empty"
+                 ng-if="!(dropDownList | filter: filterText).length">
+                No projects match your filter
+            </div>
+        </div>
     </div>
 </div>

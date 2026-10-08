@@ -1,0 +1,141 @@
+<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box">
+                <div class="box-header b-b">
+                    <h2>
+                        <a class="text-success" ui-sref="mainState.maintenance.projectMaintenance.detail({id: vm.projectId})">{{vm.viewModel.projectName || 'Project'}}</a>
+                        / Billing Rates
+                    </h2>
+                    <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;" ng-if="vm.viewMode === 'asOf'">
+                        Effective rate = Project, else Client ({{vm.viewModel.clientName}}), else Default.
+                    </p>
+                    <p class="text-muted m-t-sm m-b-0" style="font-size: 12px;" ng-if="vm.viewMode === 'periods'">
+                        Project rate periods per person. Use Edit rates to maintain them.
+                    </p>
+                </div>
+                <div class="box-body">
+                    <div class="form-group row" style="margin-bottom: 16px;">
+                        <div class="col-sm-12">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm"
+                                        ng-class="vm.viewMode === 'periods' ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.setViewMode('periods')">Period</button>
+                                <button type="button" class="btn btn-sm"
+                                        ng-class="vm.viewMode === 'asOf' ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.setViewMode('asOf')">Effective Date</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Period: project rate periods grouped per person -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'periods'">
+                        <p class="text-muted" ng-if="vm.periodsLoading">Loading…</p>
+                        <table class="table table-bordered" ng-if="!vm.periodsLoading">
+                            <thead>
+                            <tr>
+                                <th>Person</th>
+                                <th>Rate</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody ng-repeat="group in vm.periodGroups">
+                            <tr ng-repeat="row in group.rates">
+                                <td ng-if="$first" ng-attr-rowspan="{{group.rates.length}}" style="vertical-align: top;">
+                                    <strong>{{group.userName}}</strong>
+                                </td>
+                                <td>{{row.rate}}</td>
+                                <td>{{row.startDate | date: 'yyyy/MM/dd'}}</td>
+                                <td>{{row.endDate | date: 'yyyy/MM/dd'}}</td>
+                                <td ng-if="$first" ng-attr-rowspan="{{group.rates.length}}" style="vertical-align: top;">
+                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                       ng-click="vm.editRates(group)">
+                                        <i class="fa fa-edit"></i> Edit rates
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                            <tbody ng-if="vm.periodGroups.length == 0">
+                            <tr>
+                                <td colspan="5" class="text-muted">No project rate periods for this project.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Effective Date -->
+                    <div class="form-group row" ng-if="vm.viewMode === 'asOf'">
+                        <label class="col-sm-2 form-control-label">Effective Date:</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control"
+                                   ng-model="vm.asOfDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true"
+                                   name="asOfDate" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="Effective Date" autocomplete="off"
+                                   ng-change="vm.loadTeam()">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" ng-if="vm.viewMode === 'asOf'">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Person</th>
+                                <th>Effective</th>
+                                <th>Project</th>
+                                <th>Client</th>
+                                <th>Default</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr data-ng-repeat="row in vm.team">
+                                <td>
+                                    <strong>{{row.userName}}</strong>
+                                </td>
+                                <td>
+                                    <span ng-if="row.effectiveRate != null">
+                                        <strong>{{row.effectiveRate}}</strong>
+                                        <span class="label label-default" style="margin-left: 6px;">{{row.effectiveScope}}</span>
+                                    </span>
+                                    <span class="text-muted" ng-if="row.effectiveRate == null">Not set</span>
+                                </td>
+                                <td>
+                                    <span ng-if="row.projectRate != null">{{row.projectRate}}</span>
+                                    <span class="text-muted" ng-if="row.projectRate == null">—</span>
+                                </td>
+                                <td>
+                                    <span ng-if="row.clientRate != null">{{row.clientRate}}</span>
+                                    <span class="text-muted" ng-if="row.clientRate == null">—</span>
+                                </td>
+                                <td>
+                                    <span ng-if="row.defaultRate != null">{{row.defaultRate}}</span>
+                                    <span class="text-muted" ng-if="row.defaultRate == null">—</span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                       ng-click="vm.editRates(row)">
+                                        <i class="fa fa-edit"></i> Edit rates
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr ng-show="!vm.loading && vm.team.length == 0">
+                                <td colspan="6">
+                                    No people are assigned to this project (or its client).
+                                    Assign people under User Maintenance → Projects.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

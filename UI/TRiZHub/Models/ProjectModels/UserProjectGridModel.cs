@@ -35,6 +35,8 @@ namespace TRiZHub.Models.ProjectModels
 
         public bool IsBillable { get; set; }
 
+        public bool IsNonEligible { get; set; }
+
         public string ClientName { get; set; }
         public Guid? ClientId { get; set; }
     }

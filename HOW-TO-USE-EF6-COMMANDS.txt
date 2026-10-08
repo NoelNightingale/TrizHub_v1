@@ -1,0 +1,76 @@
+# ==============================================================================
+# HOW TO USE EF6 COMMANDS IN PACKAGE MANAGER CONSOLE
+# ==============================================================================
+
+## IMPORTANT SETUP:
+1. In Visual Studio, open Package Manager Console:
+   Tools > NuGet Package Manager > Package Manager Console
+
+2. **SET THE DEFAULT PROJECT TO: TRiZHub.BL**
+   - Look at the top of the Package Manager Console window
+   - Find the "Default project" dropdown
+   - Select "TRiZHub.BL" (NOT "TRiZHub")
+
+## COMMANDS TO USE:
+
+### Check What Migrations Exist:
+Since you upgraded to EF 6.5.1, use the FULL command name:
+
+```powershell
+EntityFramework\Get-Migrations
+```
+
+### Create a New Migration:
+```powershell
+EntityFramework\Add-Migration YourMigrationName
+```
+
+For your timesheet changes, use:
+```powershell
+
+```EntityFramework\Add-Migration AddTimesheetTemplateUpdates
+
+### Apply Migrations to Database:
+```powershell
+EntityFramework\Update-Database -Verbose
+```
+
+### Generate SQL Script (without applying):
+```powershell
+EntityFramework\Update-Database -Script -Verbose
+```
+
+## WHY THE EntityFramework\ PREFIX?
+
+You now have BOTH EF6 (6.5.1) and EF Core tools installed.
+- Without the prefix, PowerShell uses EF Core commands (which don't work with your EF6 project)
+- With "EntityFramework\", you explicitly use the EF6 commands
+
+## SUMMARY OF YOUR CURRENT SITUATION:
+
+? Build is now successful
+? Configuration.cs is fixed
+? You're using EF 6.5.1
+? Latest migration in code: 202503060742046_ProjectTimeCaptureAssignment
+? Pending changes detected in:
+  - TimesheetTemplate.cs
+  - TimesheetTemplateItem.cs
+
+## NEXT STEPS:
+
+1. Open Package Manager Console in Visual Studio
+2. Set Default project to: TRiZHub.BL
+3. Run: EntityFramework\Add-Migration AddTimesheetTemplateUpdates
+4. Review the generated migration file
+5. Run: EntityFramework\Update-Database -Verbose
+6. Your application should now run without migration errors!
+
+## ALTERNATIVE (if PMC still has issues):
+
+You can use the command line ef6.exe tool:
+```powershell
+.\packages\EntityFramework.6.5.1\tools\net45\any\ef6.exe database update --assembly ".\BL\TRiZHub.BL\bin\Debug\TRiZHub.BL.dll" --config ".\BL\TRiZHub.BL\App.config" --verbose
+```
+
+However, ef6.exe cannot CREATE migrations - only apply them.
+So you MUST use Package Manager Console to create the migration.

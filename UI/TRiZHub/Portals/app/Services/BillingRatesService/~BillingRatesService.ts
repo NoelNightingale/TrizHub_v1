@@ -4,8 +4,17 @@
 
         billingRatesSave: (viewModel: BillingRatesEditModel) => ng.IPromise<BillingRatesEditModel>;
         billingRatesGrid: (req: GridModel) => ng.IPromise<GridResultModel<BillingRatesGridModel>>;
+        effectiveRatesGrid: (req: GridModel) => ng.IPromise<GridResultModel<any>>;
         billingRatesGet: (id: string) => ng.IPromise<BillingRatesEditModel>;
+        billingRatesGridRow: (id: string) => ng.IPromise<BillingRatesGridModel>;
         billingRatesDelete: (viewModel: BillingRatesEditModel) => ng.IPromise<BillingRatesEditModel>;
+        projectTeamRates: (projectId: string, asOfDate: any) => ng.IPromise<any>;
+        userRatesForProjectContext: (userId: string, projectId: string) => ng.IPromise<any>;
+        clientTeamRates: (clientId: string, asOfDate: any) => ng.IPromise<any>;
+        userRatesForClientContext: (userId: string, clientId: string) => ng.IPromise<any>;
+        userRatesAsOf: (userAccountId: string, asOfDate: any) => ng.IPromise<any>;
+        filterOptions: (req: any) => ng.IPromise<any>;
+        exportExcel: (req: any) => ng.IPromise<any>;
 
     }
 
@@ -33,6 +42,20 @@
                     );
                 return deferred.promise;
             };
+
+        effectiveRatesGrid = (req: any): ng.IPromise<GridResultModel<any>> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "EffectiveRatesGrid", req)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
 
         billingRatesSave = (viewModel: BillingRatesEditModel): ng.IPromise<BillingRatesEditModel> => {
             var deferred = this.$q.defer();
@@ -62,6 +85,20 @@
             return deferred.promise;
         };
 
+        billingRatesGridRow = (id: string): ng.IPromise<BillingRatesGridModel> => {
+            var deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "BillingRatesGridRow/" + id)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
         billingRatesDelete = (viewModel: BillingRatesEditModel): ng.IPromise<BillingRatesEditModel> => {
             const deferred = this.$q.defer();
             this.$http.post(this.urlRoot + "BillingRatesDelete", viewModel)
@@ -71,6 +108,116 @@
                     },
                     error => {
                         deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        projectTeamRates = (projectId: string, asOfDate: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "ProjectTeamRates", { projectId: projectId, asOfDate: asOfDate })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        userRatesForProjectContext = (userId: string, projectId: string): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "UserRatesForProjectContext?userId=" + userId + "&projectId=" + projectId)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        clientTeamRates = (clientId: string, asOfDate: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "ClientTeamRates", { clientId: clientId, asOfDate: asOfDate })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        userRatesForClientContext = (userId: string, clientId: string): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "UserRatesForClientContext?userId=" + userId + "&clientId=" + clientId)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        userRatesAsOf = (userAccountId: string, asOfDate: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "UserRatesAsOf", { userAccountId: userAccountId, asOfDate: asOfDate })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        filterOptions = (req: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "FilterOptions", req || {})
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        exportExcel = (req: any): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "ExportExcel", req || {}, { responseType: "arraybuffer" })
+                .then(
+                    result => {
+                        deferred.resolve(result);
+                    },
+                    error => {
+                        let message = "Export failed.";
+                        try {
+                            if (error && error.data) {
+                                const decoded = String.fromCharCode.apply(null, new Uint8Array(error.data as ArrayBuffer) as any);
+                                const parsed = angular.fromJson(decoded);
+                                if (parsed && parsed.message) {
+                                    message = parsed.message;
+                                }
+                            }
+                        } catch (e) {
+                            // keep default message
+                        }
+                        deferred.reject(message);
                     }
                 );
             return deferred.promise;

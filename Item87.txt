@@ -1,0 +1,10 @@
+Timecapture enhancements.
+- might be good idea to have this in a seperate feature branch under the epic .. just a thought
+The timecapture screen needs to be enhached with along the following guides.
+- We need to change the capture grid into a weekly based capure grid. Currently the user select a billing period on top, wich is usually configured to encaptulate a 4 or 5 week time span. The weeks usuall runs from a Monday through to the following sunday. 
+- My thinking is that when a user select a billing period, we create tabs for each week above the grid, representing the weeks, 
+- Each tab then contains an expandable section for the 7 days, so that he can expand / group the days.
+- One of the outcomes i want here is that i dont want the user to select a day day when he captures, it will reduce his effort of he just captures the time along the correct date. 
+- We might also need to remove the manual date option to enforce the billing period selection. This is important as we will do more work later on that got billing period specific business logic.
+- It would also be good to do a bit of style look and feel modernization to make it feel fresh and new.
+- Happy if you have a different approuch to try this. 

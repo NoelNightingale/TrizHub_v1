@@ -26,6 +26,7 @@ class ProjectMaintenanceDetailController extends CHControllerBase {
         private UserService: UserServiceModule.UserService,
         private ProjectService: ProjectServiceModule.ProjectService,
         private EnumService: EnumServiceModule.EnumService,
+        private SecurityService: SecurityServiceModule.SecurityService,
         private Popups: any) {
         super($scope, Popups, $state);
         const self = this;
@@ -125,6 +126,10 @@ class ProjectMaintenanceDetailController extends CHControllerBase {
                     });
         }
     };
+
+    isAllowed = (privilegeType: string): boolean => {
+        return this.SecurityService.isAllowed(privilegeType);
+    };
 }
 
 angular.module("AngularApp")
@@ -139,6 +144,7 @@ angular.module("AngularApp")
             "UserService",
             "ProjectService",
             "EnumService",
+            "SecurityService",
             "Popups",
             ProjectMaintenanceDetailController
         ]);

@@ -31,6 +31,7 @@ using System.Web;
 using TRiZHub.BL.Entities.TeamJobDesignationData;
 using TRiZHub.BL.Entities.EmployerData;
 using TRiZHub.BL.Entities.BillingCycleData;
+using TRiZHub.BL.Entities.BillingRatesData;
 using TRiZHub.BL.Entities.UserIdentityProject;
 using TRiZHub.BL.Provider.ClientEntityData;
 using TRiZHub.BL.Provider.ProjectData;
@@ -1107,10 +1108,13 @@ namespace TRiZHub.BL.Provider.ReportData
         {
             int rowIndex = 1;
             sheet.Cells[rowIndex, 1].Value = "Resource";
-            sheet.Cells[rowIndex, 2].Value = "Rate StartDate";
-            sheet.Cells[rowIndex, 3].Value = "Rate EndDate";
-            sheet.Cells[rowIndex, 4].Value = "Rate";
-            using (var rng = sheet.Cells[rowIndex, 1, rowIndex, 4])
+            sheet.Cells[rowIndex, 2].Value = "Scope";
+            sheet.Cells[rowIndex, 3].Value = "Client";
+            sheet.Cells[rowIndex, 4].Value = "Project";
+            sheet.Cells[rowIndex, 5].Value = "Rate StartDate";
+            sheet.Cells[rowIndex, 6].Value = "Rate EndDate";
+            sheet.Cells[rowIndex, 7].Value = "Rate";
+            using (var rng = sheet.Cells[rowIndex, 1, rowIndex, 7])
             {
                 rng.Style.Font.Bold = true;
                 rng.Style.Fill.PatternType = ExcelFillStyle.Solid; //Set Pattern for the background to Solid
@@ -1119,23 +1123,33 @@ namespace TRiZHub.BL.Provider.ReportData
             }
 
             rowIndex++;
-            foreach (var user in DataContext.UserAccountSet.Include(u => u.BillingRates).Where(u => persons.Contains(u.Id)).OrderBy(u => u.FirstName))
+            var rates = DataContext.BillingRatesSet
+                .Include(r => r.UserAccount)
+                .Include(r => r.Client)
+                .Include(r => r.Project)
+                .Where(r => persons.Contains(r.UserAccountId)
+                            && startdate.CompareTo(r.EndDate) <= 0
+                            && r.StartDate.CompareTo(enddate) <= 0)
+                .OrderBy(r => r.UserAccount.FirstName)
+                .ThenBy(r => r.UserAccount.Surname)
+                .ThenBy(r => r.StartDate)
+                .ToList();
+
+            foreach (var rate in rates)
             {
-                sheet.Cells[rowIndex, 1].Value = user.FirstName + " " + user.Surname;
-                foreach (var rate in user.BillingRates.OrderBy(r => r.StartDate))
-                {
-                    if (startdate.CompareTo(rate.EndDate) <= 0 &&
-                        rate.StartDate.CompareTo(enddate) <= 0)
-                    {
-                        sheet.Cells[rowIndex, 2].Value = rate.StartDate.ToShortDateString();
-                        sheet.Cells[rowIndex, 3].Value = rate.EndDate.ToShortDateString();
-                        sheet.Cells[rowIndex, 4].Value = rate.Rate;
-                        sheet.Cells[rowIndex, 4].Style.Numberformat.Format = "\"$\"#,##0.00;[Red]\"$\"#,##0.00";
-                        rowIndex++;
-                    }
-                }
+                sheet.Cells[rowIndex, 1].Value = (rate.UserAccount.FirstName + " " + rate.UserAccount.Surname).Trim();
+                sheet.Cells[rowIndex, 2].Value = rate.ProjectId != null
+                    ? "Project"
+                    : (rate.ClientId != null ? "Client" : "Default");
+                sheet.Cells[rowIndex, 3].Value = rate.Client != null ? rate.Client.EntityName : null;
+                sheet.Cells[rowIndex, 4].Value = rate.Project != null ? rate.Project.ProjectName : null;
+                sheet.Cells[rowIndex, 5].Value = rate.StartDate.ToShortDateString();
+                sheet.Cells[rowIndex, 6].Value = rate.EndDate.ToShortDateString();
+                sheet.Cells[rowIndex, 7].Value = rate.Rate;
+                sheet.Cells[rowIndex, 7].Style.Numberformat.Format = "\"$\"#,##0.00;[Red]\"$\"#,##0.00";
                 rowIndex++;
             }
+
             AutoWidthColumns(ref sheet);
         }
 
@@ -2985,6 +2999,23 @@ namespace TRiZHub.BL.Provider.ReportData
                     bool addedBlank = false;
                     using (var ctx = new DataContext())
                     {
+                        var allUserIds = timesheetData.SelectMany(g => g.Entries.Select(e => e.UserAccountId)).Distinct().ToList();
+                        var allProjectIds = timesheetData.SelectMany(g => g.Entries.Select(e => e.ProjectId)).Distinct().ToList();
+                        var allClientIds = timesheetData.Select(g => g.ClientId).Distinct().ToList();
+
+                        var billingRates = ctx.BillingRatesSet
+                            .Where(r => allUserIds.Contains(r.UserAccountId)
+                                        && r.EndDate >= repStartDate
+                                        && r.StartDate < repEndDate
+                                        && (
+                                            (r.ClientId == null && r.ProjectId == null)
+                                            || (r.ClientId != null && r.ProjectId == null &&
+                                                allClientIds.Contains(r.ClientId.Value))
+                                            || (r.ProjectId != null && r.ClientId == null &&
+                                                allProjectIds.Contains(r.ProjectId.Value))
+                                        ))
+                            .ToList();
+
                         foreach (var group in timesheetData)
                         {
                             foreach (var entry in group.Entries)
@@ -3029,8 +3060,9 @@ namespace TRiZHub.BL.Provider.ReportData
                                     entry.SubProjectTypeId = subProjectDict[entry.SubProjectId.Value].SubProjectTypeId;
                                 }
 
-                                // Set billing rate
-                                var billingRate = ctx.BillingRatesSet.FirstOrDefault(br => br.UserAccountId == entry.UserAccountId && entry.DateEntry >= br.StartDate && entry.DateEntry <= br.EndDate);
+                                // Set billing rate (Project → Client → Default cascade)
+                                var billingRate = ResolveEffectiveBillingRate(
+                                    billingRates, entry.UserAccountId, entry.DateEntry, group.ClientId, entry.ProjectId);
 
                                 if (billingRate != null)
                                 {
@@ -6107,6 +6139,57 @@ namespace TRiZHub.BL.Provider.ReportData
                     (ReportHiddenColumn)Attribute.GetCustomAttribute(property, typeof(ReportHiddenColumn)))
                 .Where(attribute => attribute != null))
                 sheet.Column(attribute.ColumnNumber).Hidden = true;
+        }
+
+        /// <summary>
+        /// Resolves the effective billing rate for a timesheet entry using the same
+        /// Project → Client → Default cascade as billing rate maintenance.
+        /// </summary>
+        private static BillingRates ResolveEffectiveBillingRate(IEnumerable<BillingRates> rates,
+            Guid userAccountId, DateTime dateEntry, Guid clientId, Guid projectId)
+        {
+            var asOf = dateEntry.Date;
+
+            var projectRate = FindBillingRateForScope(rates, userAccountId, asOf, null, projectId);
+            if (projectRate != null)
+                return projectRate;
+
+            var clientRate = FindBillingRateForScope(rates, userAccountId, asOf, clientId, null);
+            if (clientRate != null)
+                return clientRate;
+
+            return FindBillingRateForScope(rates, userAccountId, asOf, null, null);
+        }
+
+        private static BillingRates FindBillingRateForScope(IEnumerable<BillingRates> rates, Guid userAccountId,
+            DateTime asOf, Guid? clientId, Guid? projectId)
+        {
+            if (projectId.HasValue)
+            {
+                return rates.FirstOrDefault(r =>
+                    r.UserAccountId == userAccountId
+                    && r.ProjectId == projectId
+                    && r.ClientId == null
+                    && r.StartDate.Date <= asOf
+                    && r.EndDate.Date >= asOf);
+            }
+
+            if (clientId.HasValue)
+            {
+                return rates.FirstOrDefault(r =>
+                    r.UserAccountId == userAccountId
+                    && r.ClientId == clientId
+                    && r.ProjectId == null
+                    && r.StartDate.Date <= asOf
+                    && r.EndDate.Date >= asOf);
+            }
+
+            return rates.FirstOrDefault(r =>
+                r.UserAccountId == userAccountId
+                && r.ClientId == null
+                && r.ProjectId == null
+                && r.StartDate.Date <= asOf
+                && r.EndDate.Date >= asOf);
         }
 
         #endregion Static Report Actions

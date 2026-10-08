@@ -1,0 +1,521 @@
+<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box br-workbench">
+                <div class="box-header b-b">
+                    <div class="br-header">
+                        <h2>Billing Rates</h2>
+                        <div class="br-cascade" title="Resolved billing rate precedence">
+                            <span>Project</span>
+                            <i class="fa fa-angle-right"></i>
+                            <span>Client</span>
+                            <i class="fa fa-angle-right"></i>
+                            <span>Employee</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-body">
+
+                    <!-- Filter workbench -->
+                    <div class="row br-filters">
+                        <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div class="br-filter-panel">
+                                <div class="br-filter-panel-title">
+                                    <span>Users
+                                        <span class="br-filter-count"
+                                              ng-class="{'is-zero': !vm.filters.userAccountIds.length}">
+                                            {{vm.filters.userAccountIds.length}}
+                                        </span>
+                                    </span>
+                                    <div class="btn-group br-status-toggle">
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.userStatus === 'active' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('user', 'active')"
+                                                title="Active users">Active</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.userStatus === 'inactive' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('user', 'inactive')"
+                                                title="Inactive users">Inactive</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.userStatus === 'all' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('user', 'all')"
+                                                title="All users">All</button>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control input-sm" placeholder="Search users"
+                                       ng-model="vm.userFilterText" style="margin-bottom: 8px;" />
+                                <div class="br-filter-list">
+                                    <div class="br-select-all" ng-if="vm.filteredUsers().length > 0">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.areAllSelected('user')"
+                                                   ng-click="vm.toggleSelectAll('user'); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{vm.userFilterText ? 'Select all matching' : 'Select all'}}
+                                        </label>
+                                    </div>
+                                    <div ng-repeat="u in vm.filteredUsers()">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.isSelected(vm.filters.userAccountIds, u.id)"
+                                                   ng-click="vm.toggleUser(u.id); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{u.name}}
+                                        </label>
+                                    </div>
+                                    <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredUsers().length === 0">
+                                        No matching users
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div class="br-filter-panel">
+                                <div class="br-filter-panel-title">
+                                    <span>Clients
+                                        <span class="br-filter-count"
+                                              ng-class="{'is-zero': !vm.filters.clientIds.length}">
+                                            {{vm.filters.clientIds.length}}
+                                        </span>
+                                    </span>
+                                    <div class="btn-group br-status-toggle">
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.clientStatus === 'active' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('client', 'active')"
+                                                title="Active clients">Active</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.clientStatus === 'inactive' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('client', 'inactive')"
+                                                title="Inactive clients">Inactive</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.clientStatus === 'all' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('client', 'all')"
+                                                title="All clients">All</button>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control input-sm" placeholder="Search clients"
+                                       ng-model="vm.clientFilterText" style="margin-bottom: 8px;" />
+                                <div class="br-filter-list">
+                                    <div class="br-select-all" ng-if="vm.filteredClients().length > 0">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.areAllSelected('client')"
+                                                   ng-click="vm.toggleSelectAll('client'); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{vm.clientFilterText ? 'Select all matching' : 'Select all'}}
+                                        </label>
+                                    </div>
+                                    <div ng-repeat="c in vm.filteredClients()">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.isSelected(vm.filters.clientIds, c.id)"
+                                                   ng-click="vm.toggleClient(c.id); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{c.name}}
+                                        </label>
+                                    </div>
+                                    <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredClients().length === 0">
+                                        No matching clients
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div class="br-filter-panel">
+                                <div class="br-filter-panel-title">
+                                    <span>Projects
+                                        <span class="br-filter-count"
+                                              ng-class="{'is-zero': !vm.filters.projectIds.length}">
+                                            {{vm.filters.projectIds.length}}
+                                        </span>
+                                    </span>
+                                    <div class="btn-group br-status-toggle">
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.projectStatus === 'active' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('project', 'active')"
+                                                title="Active projects">Active</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.projectStatus === 'inactive' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('project', 'inactive')"
+                                                title="Inactive projects">Inactive</button>
+                                        <button type="button" class="btn btn-xs"
+                                                ng-class="vm.filters.projectStatus === 'all' ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setStatusFilter('project', 'all')"
+                                                title="All projects">All</button>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control input-sm" placeholder="Search projects"
+                                       ng-model="vm.projectFilterText" style="margin-bottom: 8px;" />
+                                <div class="br-filter-list">
+                                    <div class="br-select-all" ng-if="vm.filteredProjects().length > 0">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.areAllSelected('project')"
+                                                   ng-click="vm.toggleSelectAll('project'); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{vm.projectFilterText ? 'Select all matching' : 'Select all'}}
+                                        </label>
+                                    </div>
+                                    <div ng-repeat="p in vm.filteredProjects()">
+                                        <label class="md-check">
+                                            <input type="checkbox"
+                                                   ng-checked="vm.isSelected(vm.filters.projectIds, p.id)"
+                                                   ng-click="vm.toggleProject(p.id); $event.preventDefault();">
+                                            <i class="indigo"></i>
+                                            {{p.name}}
+                                        </label>
+                                    </div>
+                                    <div class="text-muted" ng-if="!vm.optionsLoading && vm.filteredProjects().length === 0">
+                                        No matching projects
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chips -->
+                    <div class="br-chips"
+                         ng-if="vm.filters.userAccountIds.length || vm.filters.clientIds.length || vm.filters.projectIds.length">
+                        <span class="br-chip br-chip-user" ng-repeat="id in vm.filters.userAccountIds">
+                            {{vm.chipName(vm.optionUsers, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeUserChip(id)" title="Remove">×</a>
+                        </span>
+                        <span class="br-chip br-chip-client" ng-repeat="id in vm.filters.clientIds">
+                            {{vm.chipName(vm.optionClients, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeClientChip(id)" title="Remove">×</a>
+                        </span>
+                        <span class="br-chip br-chip-project" ng-repeat="id in vm.filters.projectIds">
+                            {{vm.chipName(vm.optionProjects, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeProjectChip(id)" title="Remove">×</a>
+                        </span>
+                    </div>
+
+                    <!-- Tabs, tab-specific filters and actions on one row -->
+                    <div class="br-results-bar">
+                        <div class="btn-group br-mode-toggle">
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.viewMode === 'periods' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setViewMode('periods')">Period</button>
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.viewMode === 'effective' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setViewMode('effective')">Effective On</button>
+                        </div>
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
+                            <label>Rate Type</label>
+                            <select class="form-control input-sm" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
+                                <option value="">All</option>
+                                <option value="Default">Employee</option>
+                                <option value="Client">Client</option>
+                                <option value="Project">Project</option>
+                            </select>
+                        </div>
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
+                            <label>
+                                Start Date
+                                <a href="" class="br-clear-date" ng-if="vm.filters.rangeStart"
+                                   ng-click="vm.clearDate('rangeStart'); $event.preventDefault()"
+                                   title="Clear start date">Clear</a>
+                            </label>
+                            <input type="text" class="form-control input-sm"
+                                   ng-model="vm.filters.rangeStart"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true"
+                                   name="rangeStart" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="(optional)" autocomplete="off"
+                                   ng-change="vm.markFiltersDirty()" />
+                        </div>
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
+                            <label>
+                                End Date
+                                <a href="" class="br-clear-date" ng-if="vm.filters.rangeEnd"
+                                   ng-click="vm.clearDate('rangeEnd'); $event.preventDefault()"
+                                   title="Clear end date">Clear</a>
+                            </label>
+                            <input type="text" class="form-control input-sm"
+                                   ng-model="vm.filters.rangeEnd"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true"
+                                   name="rangeEnd" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="(optional)" autocomplete="off"
+                                   ng-change="vm.markFiltersDirty()" />
+                        </div>
+                        <div class="br-toolbar-field" ng-if="vm.viewMode === 'effective'">
+                            <label>Effective On</label>
+                            <input type="text" class="form-control input-sm"
+                                   ng-model="vm.filters.activeOn"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true"
+                                   name="activeOn" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="Required" autocomplete="off"
+                                   ng-change="vm.onActiveOnChanged()" />
+                        </div>
+                        <span class="br-mode-hint" ng-if="vm.viewMode === 'effective'">
+                            Project, else Client, else Employee.
+                        </span>
+                        <div class="br-toolbar-actions">
+                            <button type="button" class="btn btn-sm btn-default"
+                                    ng-click="vm.clearAllFilters()">Clear</button>
+                            <button type="button" class="btn btn-sm btn-outline b-primary text-primary"
+                                    ng-click="vm.exportExcel()"
+                                    ng-disabled="vm.exporting">
+                                <i class="fa" ng-class="vm.exporting ? 'fa-spinner fa-spin' : 'fa-file-excel-o'"></i>
+                                {{vm.exporting ? 'Exporting…' : 'Export to Excel'}}
+                            </button>
+                            <span class="br-loading-hint" ng-if="vm.optionsLoading">
+                                <i class="fa fa-spinner fa-spin"></i> Updating lists…
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Shown instead of the grid until the new filter selection is loaded -->
+                    <div class="br-stale" ng-if="vm.filtersDirty">
+                        <i class="fa fa-filter br-stale-icon"></i>
+                        <div class="br-stale-title">Your filter selection has changed</div>
+                        <div class="br-stale-text">Click <strong>Refresh data</strong> to load the results for the new selection.</div>
+                        <button type="button" class="btn btn-sm btn-warning" ng-click="vm.applyFilters()">
+                            <i class="fa fa-refresh"></i> Refresh data
+                        </button>
+                    </div>
+
+                    <!-- Effective On -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'effective' && !vm.filtersDirty">
+                        <table class="table table-striped br-table">
+                            <thead>
+                            <tr>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'userName'}">
+                                    <a ng-click="vm.effectiveGrid.sort('userName')">User</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'userName',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'userName'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'clientName'}">
+                                    <a ng-click="vm.effectiveGrid.sort('clientName')">Client</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'clientName',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'clientName'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'projectName'}">
+                                    <a ng-click="vm.effectiveGrid.sort('projectName')">Project</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'projectName',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'projectName'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'effectiveRate'}">
+                                    <a ng-click="vm.effectiveGrid.sort('effectiveRate')">Effective Rate</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveRate',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveRate'}"></i>
+                                </th>
+                                <th ng-class="{'br-sorted': vm.effectiveGridModel.sortKeyOrder.key === 'effectiveScope'}">
+                                    <a ng-click="vm.effectiveGrid.sort('effectiveScope')">Source</a>
+                                    <i class="fa"
+                                       ng-class="{'fa-angle-double-up': vm.effectiveGridModel.sortKeyOrder.order === 'ASC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveScope',
+                                                  'fa-angle-double-down': vm.effectiveGridModel.sortKeyOrder.order === 'DESC' && vm.effectiveGridModel.sortKeyOrder.key === 'effectiveScope'}"></i>
+                                </th>
+                                <th style="width: 90px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-ng-repeat="i in vm.effectiveGridModel.data"
+                                    ng-class="{'br-row-flash': vm.highlightId === i.id}">
+                                <td>
+                                    <a class="text-primary"
+                                       title="Open billing rates for this user"
+                                       ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: i.userAccountId})">
+                                        {{i.userName}}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="text-primary" ng-if="i.clientId"
+                                       title="Open client rates"
+                                       ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId})">
+                                        {{i.clientName}}
+                                    </a>
+                                    <span ng-if="!i.clientId" class="text-muted">—</span>
+                                </td>
+                                <td>
+                                    <a class="text-primary" ng-if="i.projectId"
+                                       title="Open project rates"
+                                       ui-sref="mainState.maintenance.projectMaintenance.teamRates({id: i.projectId})">
+                                        {{i.projectName}}
+                                    </a>
+                                    <span ng-if="!i.projectId" class="text-muted">—</span>
+                                </td>
+                                <td class="br-rate">
+                                    <span ng-if="i.effectiveRate != null">{{i.effectiveRate}}</span>
+                                    <span class="text-muted" ng-if="i.effectiveRate == null">Not set</span>
+                                </td>
+                                <td>
+                                    <span class="br-scope" ng-if="i.effectiveScope"
+                                          ng-class="{'br-scope-default': i.effectiveScope === 'Default',
+                                                     'br-scope-client': i.effectiveScope === 'Client',
+                                                     'br-scope-project': i.effectiveScope === 'Project'}">
+                                        {{i.effectiveScope === 'Default' ? 'Employee' : i.effectiveScope}}
+                                    </span>
+                                    <span ng-if="!i.effectiveScope" class="text-muted">—</span>
+                                </td>
+                                <td>
+                                    <a href="" class="btn btn-xs btn-fw btn-outline b-primary text-primary" ng-if="i.id"
+                                       ng-click="vm.editRecord(i.id)"
+                                       title="Open the rate period that applies">
+                                        <i class="fa fa-external-link"></i> Open
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr ng-show="vm.effectiveGridModel.data.length == 0">
+                                <td colspan="6" class="br-empty">
+                                    No users match the selected filters.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="w-full m-b-2 center-container">
+                            <uib-pagination total-items="vm.effectiveGridModel.totalItems"
+                                            ng-model="vm.effectiveGridModel.currentPage"
+                                            max-size="vm.effectiveGridModel.maxSize"
+                                            class="pagination-sm m-b-sm m-t-sm white"
+                                            boundary-links="true"
+                                            previous-text="<" next-text=">"
+                                            rotate="false"
+                                            ng-change="vm.effectiveGrid.pageChanged()"
+                                            items-per-page="vm.effectiveGridModel.recordsPerPage">
+                            </uib-pagination>
+                        </div>
+                    </div>
+
+                    <!-- Period -->
+                    <div class="table-responsive" ng-if="vm.viewMode === 'periods' && !vm.filtersDirty">
+                            <table st-table="rowCollectionBasic" class="table table-striped br-table">
+                                <thead>
+                                <tr>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'userName'}">
+                                        <a ng-click="vm.pageGrid.sort('userName')">User</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'userName',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'userName'}"></i>
+                                    </th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'scope'}">
+                                        <a ng-click="vm.pageGrid.sort('scope')">Rate Type</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'scope',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'scope'}"></i>
+                                    </th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'clientName'}">
+                                        <a ng-click="vm.pageGrid.sort('clientName')">Client</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'clientName',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'clientName'}"></i>
+                                    </th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'projectName'}">
+                                        <a ng-click="vm.pageGrid.sort('projectName')">Project</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'projectName',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'projectName'}"></i>
+                                    </th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'Rate'}">
+                                        <a ng-click="vm.pageGrid.sort('Rate')">Rate</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'Rate',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'Rate'}"></i>
+                                    </th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'startDate'}">
+                                        <a ng-click="vm.pageGrid.sort('startDate')">Start</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'startDate',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'startDate'}"></i>
+                                    </th>
+                                    <th ng-class="{'br-sorted': vm.gridModel.sortKeyOrder.key === 'endDate'}">
+                                        <a ng-click="vm.pageGrid.sort('endDate')">End</a>
+                                        <i class="fa"
+                                           ng-class="{'fa-angle-double-up': vm.gridModel.sortKeyOrder.order === 'ASC' && vm.gridModel.sortKeyOrder.key === 'endDate',
+                                                      'fa-angle-double-down': vm.gridModel.sortKeyOrder.order === 'DESC' && vm.gridModel.sortKeyOrder.key === 'endDate'}"></i>
+                                    </th>
+                                    <th style="width: 90px;">
+                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newRecord()">
+                                            <i class="fa fa-plus"></i> New
+                                        </a>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row"
+                                    ng-class="{'br-row-locked': i.isLocked, 'br-row-flash': vm.highlightId === i.id}">
+                                    <td>
+                                        <a class="text-primary"
+                                           title="Open default rates for this user"
+                                           ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: i.userAccountId})">
+                                            {{i.userName}}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="br-scope"
+                                              ng-class="{'br-scope-default': i.scope === 'Default',
+                                                         'br-scope-client': i.scope === 'Client',
+                                                         'br-scope-project': i.scope === 'Project'}">
+                                            {{i.scope === 'Default' ? 'Employee' : i.scope}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a class="text-primary" ng-if="i.clientId || i.projectClientId"
+                                           title="Open client rates"
+                                           ui-sref="mainState.maintenance.clientMaintenance.teamRates({id: i.clientId || i.projectClientId})">
+                                            {{i.clientName || i.projectClientName}}
+                                        </a>
+                                        <span class="br-inactive-badge" ng-if="i.clientInactive"
+                                              title="Client is inactive. Reactivate it to edit this rate.">Inactive</span>
+                                        <span ng-if="!i.clientId && !i.projectClientId" class="text-muted">—</span>
+                                    </td>
+                                    <td>
+                                        <a class="text-primary" ng-if="i.projectId"
+                                           title="Open project rates"
+                                           ui-sref="mainState.maintenance.projectMaintenance.teamRates({id: i.projectId})">
+                                            {{i.projectName}}
+                                        </a>
+                                        <span class="br-inactive-badge" ng-if="i.projectInactive"
+                                              title="Project is inactive. Reactivate it to edit this rate.">Inactive</span>
+                                        <span class="br-inactive-badge" ng-if="!i.projectInactive && i.projectClientInactive"
+                                              title="This project's client is inactive. Reactivate the client to edit this rate.">Client inactive</span>
+                                        <span ng-if="!i.projectId" class="text-muted">—</span>
+                                    </td>
+                                    <td class="br-rate">{{i.rate}}</td>
+                                    <td>{{i.startDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
+                                    <td>
+                                        <a href="" class="btn btn-xs btn-fw btn-outline b-primary text-primary"
+                                           ng-click="vm.editRecord(i.id)"
+                                           title="{{i.isLocked ? 'Read-only: client or project is inactive' : 'Edit rate'}}">
+                                            <i class="fa" ng-class="i.isLocked ? 'fa-eye' : 'fa-edit'"></i> {{i.isLocked ? 'View' : 'Edit'}}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr ng-show="vm.gridModel.data.length == 0">
+                                    <td colspan="8" class="br-empty">
+                                        No billing rates match the selected filters.
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="w-full m-b-2 center-container">
+                                <uib-pagination total-items="vm.gridModel.totalItems"
+                                                ng-model="vm.gridModel.currentPage"
+                                                max-size="vm.gridModel.maxSize"
+                                                class="pagination-sm m-b-sm m-t-sm white"
+                                                boundary-links="true"
+                                                previous-text="<" next-text=">"
+                                                rotate="false"
+                                                ng-change="vm.pageGrid.pageChanged()"
+                                                items-per-page="vm.gridModel.recordsPerPage">
+                                </uib-pagination>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

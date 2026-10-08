@@ -17,6 +17,7 @@
                 || vm.isAllowed('BillingCycleMaintenance')
                 || vm.isAllowed('ActivityMaintenance') 
                 || vm.isAllowed('TeamMaintenance') 
+                || vm.isAllowed('UserBillingRatesMaintenance')
                 || vm.isAllowed('UserAssetRegisterMaintenance') 
                 ">
 
@@ -48,6 +49,9 @@
                     </a>
                     <a class="dropdown-item" ng-show="vm.isAllowed('ActivityMaintenance')" ui-sref="mainState.maintenance.activityMaintenance.grid">
                         <span class="nav-text">Activity Maintenance</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('UserBillingRatesMaintenance')" ui-sref="mainState.maintenance.billingRatesMaintenance.grid">
+                        <span class="nav-text">Billing Rates</span>
                     </a>
                     <a class="dropdown-item" ng-show="vm.isAllowed('TeamMaintenance')" ui-sref="mainState.maintenance.teamMaintenance.grid">
                         <span class="nav-text">Team Maintenance</span>

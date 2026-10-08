@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37301.10 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{01320281-981B-434D-8514-A1651D1AA423}"
 EndProject
@@ -28,6 +28,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRiZHub.BL", "BL\TRiZHub.BL\TRiZHub.BL.csproj", "{B7AFEB3E-A736-43DB-AE04-9C630D1F338A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRiZHub.ClientImport", "Tools\TRiZHub.ClientImport\TRiZHub.ClientImport.csproj", "{9E6B6C95-DB78-4C46-8385-1548C2038ECC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirements", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Item87.txt = Item87.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -731,5 +736,8 @@ Global
 		{3E801B5A-C2C2-42D6-BE7E-A21E6D9E7B36} = {29158E5E-4FCD-4458-93A2-5C6F14E8FE7C}
 		{B7AFEB3E-A736-43DB-AE04-9C630D1F338A} = {12B3747B-74AC-49F5-82E3-3681E4885FA9}
 		{9E6B6C95-DB78-4C46-8385-1548C2038ECC} = {29158E5E-4FCD-4458-93A2-5C6F14E8FE7C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D94EAEC-E982-41E5-A1AA-26C9D2A18713}
 	EndGlobalSection
 EndGlobal

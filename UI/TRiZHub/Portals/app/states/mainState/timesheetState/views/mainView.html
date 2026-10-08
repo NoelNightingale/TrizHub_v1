@@ -1,159 +1,2072 @@
-﻿<style>
-    .form-group {
-        margin-bottom: 0px;
+<style>
+    .ts-capture .form-group {
+        margin-bottom: 0;
     }
 
-    .summaryContainer th {
-        color: rgba(0, 0, 0, 0.5) !important;
-        background-color: rgba(0, 0, 0, 0.075) !important;
+    .ts-capture .ts-filter-bar {
+        padding: 0;
+    }
+
+    .ts-capture .ts-filter-bar label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: rgba(0, 0, 0, 0.45);
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .ts-capture .ts-top {
+        margin-bottom: 4px;
+    }
+
+    .ts-capture .ts-top-layout {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    .ts-capture .ts-top-left {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-top-heading {
+        flex-wrap: wrap;
+        min-height: 48px;
+        padding: 8px 14px;
+    }
+
+    .ts-capture .ts-panel-title.ts-screen-title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        text-transform: none;
+        color: #2f2f2f;
+    }
+
+    .ts-capture .ts-top-summary {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+
+    .ts-capture .ts-summary-toggle {
+        border: 1px solid rgba(106, 106, 106, 0.3);
+        background: #fff;
+        color: #3f3f3f;
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        outline: none;
+        line-height: 1.2;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .ts-capture .ts-summary-toggle:hover,
+    .ts-capture .ts-summary-toggle.is-active {
+        background: #6a6a6a;
+        border-color: #6a6a6a;
+        color: #fff;
+    }
+
+    .ts-capture .ts-summary-drawer-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.22);
+        z-index: 1045;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .ts-capture.is-summary-drawer-open .ts-summary-drawer-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .ts-capture .ts-summary-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 600px;
+        max-width: calc(100vw - 48px);
+        z-index: 1046;
+        background: #fafbfc;
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.14);
+        transform: translateX(105%);
+        transition: transform 0.2s ease;
+        padding: 14px 14px 16px;
+        overflow-y: auto;
+        pointer-events: none;
+    }
+
+    .ts-capture.is-summary-drawer-open .ts-summary-drawer {
+        transform: translateX(0);
+        pointer-events: auto;
+    }
+
+    .ts-capture .ts-summary-drawer .ts-totals {
+        margin-left: auto;
+    }
+
+    .ts-capture .ts-summary-hint {
+        margin-top: 8px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Shared section titles — charcoal accent from week tabs / grid headers */
+    .ts-capture .ts-panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 38px;
+        margin: 0 0 10px;
+        padding: 6px 12px;
+        background: rgba(106, 106, 106, 0.08);
+        border: 1px solid rgba(106, 106, 106, 0.16);
+        border-left: 3px solid #6a6a6a;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .ts-capture .ts-panel-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #3f3f3f;
+        margin: 0;
+        line-height: 1.2;
+        flex: 0 1 auto;
+    }
+
+    /* Left padding so the collapsed clipboard rail does not cover filters */
+    div.padding.ts-capture {
+        position: relative;
+        padding-left: 48px;
+    }
+
+    .ts-capture .ts-clip-rail {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        z-index: 1047;
+        width: 36px;
+        min-height: 88px;
+        padding: 10px 0 8px;
+        border: 1px solid rgba(26, 95, 122, 0.28);
+        border-left: none;
+        border-radius: 0 8px 8px 0;
+        background: #fff;
+        color: #1a5f7a;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.08);
+        outline: none;
+        transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .ts-capture.is-clip-drawer-open .ts-clip-rail {
+        /* Drawer has its own close control; hide the rail while open */
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .ts-capture .ts-clip-rail:hover {
+        background: #1a5f7a;
+        color: #fff;
+        border-color: #1a5f7a;
+        box-shadow: 2px 3px 10px rgba(26, 95, 122, 0.25);
+    }
+
+    .ts-capture .ts-clip-rail .ts-clip-rail-icon {
+        font-size: 15px;
+        line-height: 1;
+    }
+
+    .ts-capture .ts-clip-rail .ts-clip-rail-badge {
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        border-radius: 9px;
+        background: rgba(26, 95, 122, 0.12);
+        color: #1a5f7a;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+    }
+
+    .ts-capture .ts-clip-rail:hover .ts-clip-rail-badge {
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+    }
+
+    .ts-capture .ts-clip-rail .ts-clip-rail-chevron {
+        font-size: 11px;
+        opacity: 0.7;
+    }
+
+    .ts-capture .ts-clip-rail.is-just-copied {
+        background: #1a5f7a;
+        color: #fff;
+        border-color: #1a5f7a;
+        box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.28);
+        animation: ts-clip-rail-pulse 0.55s ease-out 1;
+    }
+
+    .ts-capture .ts-clip-rail.is-just-copied .ts-clip-rail-badge {
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+    }
+
+    @keyframes ts-clip-rail-pulse {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.06); }
+        100% { transform: scale(1); }
+    }
+
+    .ts-capture .ts-clip-toast {
+        position: absolute;
+        top: 18px;
+        left: 44px;
+        z-index: 1048;
+        max-width: 280px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: #1a5f7a;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.35;
+        box-shadow: 2px 4px 14px rgba(26, 95, 122, 0.35);
+        pointer-events: none;
+        animation: ts-clip-toast-in 0.2s ease-out;
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-clip-toast i {
+        margin-right: 6px;
+        opacity: 0.9;
+    }
+
+    .ts-capture.is-clip-drawer-open .ts-clip-toast {
+        left: 16px;
+        top: 12px;
+    }
+
+    @keyframes ts-clip-toast-in {
+        from {
+            opacity: 0;
+            transform: translateX(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .ts-capture .ts-clip-drawer-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.22);
+        z-index: 1045;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .ts-capture.is-clip-drawer-open .ts-clip-drawer-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .ts-capture .ts-clip-drawer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 400px;
+        max-width: calc(100vw - 48px);
+        z-index: 1046;
+        background: #fafbfc;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.14);
+        transform: translateX(-105%);
+        transition: transform 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        padding: 14px 14px 16px;
+        pointer-events: none;
+    }
+
+    .ts-capture.is-clip-drawer-open .ts-clip-drawer {
+        transform: translateX(0);
+        pointer-events: auto;
+    }
+
+    .ts-capture .ts-clip-drawer .ts-clipboard {
+        border: none;
+        background: transparent;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+    }
+
+    .ts-capture .ts-clip-drawer .ts-clipboard-header {
+        margin-bottom: 12px;
+    }
+
+    .ts-capture .ts-clip-drawer .ts-clipboard-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .ts-capture .ts-clip-drawer .ts-clipboard-list {
+        max-height: none;
+        flex: 1 1 auto;
+        overflow-y: auto;
+    }
+
+    .ts-capture .ts-clip-drawer .ts-clip-card .ts-clip-label {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ts-capture .ts-clipboard {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 6px;
+        background: #fafbfc;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .ts-capture .ts-clipboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-clipboard-header .fa-clipboard {
+        color: #1a5f7a;
+        margin-right: 2px;
+    }
+
+    .ts-capture .ts-clipboard-clear {
+        border: none;
+        background: none;
+        color: rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        font-size: 12px;
+        padding: 2px 4px;
+        border-radius: 3px;
+        line-height: 1;
+    }
+
+    .ts-capture .ts-clipboard-clear:hover {
+        color: #c62828;
+        background: rgba(198, 40, 40, 0.08);
+    }
+
+    .ts-capture .ts-clipboard-list {
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .ts-capture .ts-clipboard-section {
+        margin-bottom: 6px;
+    }
+
+    .ts-capture .ts-clipboard-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .ts-capture .ts-clipboard-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: rgba(0, 0, 0, 0.4);
+        margin: 0 0 4px 2px;
+    }
+
+    .ts-capture .ts-clip-card {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 6px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+        margin-bottom: 4px;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-clip-card:hover {
+        border-color: rgba(26, 95, 122, 0.35);
+        background: rgba(26, 95, 122, 0.03);
+    }
+
+    .ts-capture .ts-clip-card.is-detail {
+        border-color: #1a5f7a;
+        box-shadow: inset 0 0 0 1px rgba(26, 95, 122, 0.25);
+        background: rgba(26, 95, 122, 0.06);
+    }
+
+    .ts-capture .ts-clip-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-icon {
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 13px;
+        flex: 0 0 auto;
+        width: 16px;
+        text-align: center;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-info {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-label {
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.8);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.3;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-meta {
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 10px;
+        line-height: 1.3;
+        margin-top: 1px;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 2px;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions button {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        border-radius: 4px;
+        color: rgba(0, 0, 0, 0.45);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        outline: none;
+        line-height: 1;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions button:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-paste {
+        background: #1a5f7a;
+        color: #fff;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-paste:hover {
+        background: #13485c;
+        color: #fff;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-pin:hover,
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-rename:hover {
+        color: #1a5f7a;
+        background: rgba(26, 95, 122, 0.08);
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-unpin {
+        color: #1a5f7a;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-unpin:hover {
+        color: #c62828;
+        background: rgba(198, 40, 40, 0.08);
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-actions .ts-clip-remove:hover {
+        color: #c62828;
+        background: rgba(198, 40, 40, 0.08);
+    }
+
+    .ts-capture .ts-clip-card.is-saved {
+        border-color: rgba(26, 95, 122, 0.28);
+        background: rgba(26, 95, 122, 0.05);
+        box-shadow: inset 3px 0 0 #1a5f7a;
+        padding-left: 5px;
+    }
+
+    .ts-capture .ts-clip-card.is-saved .ts-clip-icon {
+        color: #1a5f7a;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-badge {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #1a5f7a;
+        background: rgba(26, 95, 122, 0.12);
+        box-shadow: 0 0 0 1px rgba(26, 95, 122, 0.2);
+        border-radius: 3px;
+        padding: 1px 4px;
+        margin-left: 5px;
+        vertical-align: 1px;
+        line-height: 1.2;
+    }
+
+    .ts-capture .ts-clip-card .ts-clip-label-edit {
+        width: 100%;
+        font-size: 12px;
+        line-height: 1.3;
+        padding: 1px 4px;
+        border: 1px solid rgba(26, 95, 122, 0.35);
+        border-radius: 3px;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(26, 95, 122, 0.12);
+    }
+
+    .ts-capture .ts-clipboard-empty {
+        color: rgba(0, 0, 0, 0.4);
+        font-style: italic;
+        padding: 12px 4px;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .ts-capture .ts-paste-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 1060;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ts-capture .ts-paste-dialog {
+        background: #fff;
+        border-radius: 6px;
+        padding: 20px;
+        min-width: 320px;
+        max-width: 420px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .ts-capture .ts-paste-dialog h4 {
+        margin: 0 0 12px;
+        color: rgba(0, 0, 0, 0.8);
+        font-weight: 600;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-days {
+        margin-bottom: 12px;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-days button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 7px 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        margin-bottom: 4px;
+        background: #fff;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 0.75);
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-days button:hover {
+        background: rgba(26, 95, 122, 0.08);
+        border-color: #1a5f7a;
+        color: #1a5f7a;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes button {
+        flex: 1;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes .btn-primary {
+        background: #1a5f7a;
+        color: #fff;
+        border-color: #1a5f7a;
+    }
+
+    .ts-capture .ts-paste-dialog .ts-paste-modes .btn-primary:hover {
+        background: #13485c;
+        border-color: #13485c;
+        color: #fff;
+    }
+
+    .ts-capture .ts-clip-detail-dialog {
+        background: #fff;
+        border-radius: 6px;
+        padding: 16px 18px 14px;
+        width: 92%;
+        max-width: 780px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .ts-capture .ts-clip-detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .ts-capture .ts-clip-detail-header h4 {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.8);
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .ts-capture .ts-clip-detail-close {
+        border: none;
+        background: transparent;
+        color: rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 16px;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-clip-detail-close:hover {
+        color: rgba(0, 0, 0, 0.75);
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .ts-capture .ts-clip-detail-meta {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 12px;
+        margin-bottom: 12px;
+        text-transform: capitalize;
+    }
+
+    .ts-capture .ts-clip-detail-table-wrap {
+        overflow: auto;
+        max-height: 52vh;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+        margin-bottom: 12px;
+    }
+
+    .ts-capture .ts-clip-detail-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .ts-capture .ts-clip-detail-table th,
+    .ts-capture .ts-clip-detail-table td {
+        padding: 7px 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .ts-capture .ts-clip-detail-table th {
+        background: rgba(0, 0, 0, 0.03);
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: rgba(0, 0, 0, 0.5);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .ts-capture .ts-clip-detail-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-empty {
+        color: rgba(0, 0, 0, 0.35);
+        font-style: italic;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-hours {
+        white-space: nowrap;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        margin-left: 4px;
+        padding: 0 4px;
+        border-radius: 3px;
+        vertical-align: middle;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill.is-billable {
+        background: rgba(27, 107, 69, 0.12);
+        color: #1b6b45;
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill.is-nonbillable {
+        background: rgba(0, 0, 0, 0.06);
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-clip-detail-table .ts-clip-detail-bill.is-noneligible {
+        background: #fff3cd;
+        color: #8a6d00;
+    }
+
+    .ts-capture .ts-clip-detail-footer {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .ts-capture .ts-clip-detail-footer .btn-primary {
+        background: #1a5f7a;
+        border-color: #1a5f7a;
+    }
+
+    .ts-capture .ts-clip-detail-footer .btn-primary:hover {
+        background: #13485c;
+        border-color: #13485c;
+    }
+
+    .ts-capture .ts-toolbar-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 8px 12px;
+    }
+
+    .ts-capture .ts-field {
+        flex: 1 1 160px;
+        min-width: 140px;
+        max-width: none;
+    }
+
+    .ts-capture .ts-field.ts-field-wide {
+        flex: 2 1 260px;
+    }
+
+    .ts-capture .ts-field.ts-field-period {
+        flex: 1.2 1 160px;
+    }
+
+    .ts-capture .ts-field.ts-field-billable {
+        flex: 0.6 1 100px;
+        min-width: 100px;
+    }
+
+    .ts-capture .ts-field.ts-field-project {
+        flex: 3.2 1 320px;
+    }
+
+    .ts-capture .ts-filter-project {
+        position: relative;
+    }
+
+    .ts-capture .ts-filter-project input {
+        padding-right: 28px;
+        cursor: pointer;
+        background: #fff;
+    }
+
+    .ts-capture .ts-filter-clear {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        padding: 2px 4px;
+    }
+
+    .ts-capture .ts-filter-clear:hover {
+        color: #c62828;
+    }
+
+    .ts-capture .ts-totals {
+        display: flex;
+        align-items: stretch;
+        gap: 4px;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-total {
+        min-width: 52px;
+        padding: 3px 8px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(106, 106, 106, 0.14);
+        text-align: center;
+    }
+
+    .ts-capture .ts-total .n {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #3f3f3f;
+    }
+
+    .ts-capture .ts-total .l {
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-total.is-bill {
+        background: #d4edda;
+        border-color: rgba(46, 125, 79, 0.28);
+    }
+
+    .ts-capture .ts-total.is-bill .n {
+        color: #2e7d4f;
+    }
+
+    .ts-capture .ts-total.is-nonbill {
+        background: #f8d7da;
+        border-color: rgba(198, 40, 40, 0.18);
+    }
+
+    .ts-capture .ts-total.is-nonbill .n {
+        color: #c62828;
+    }
+
+    .ts-capture .ts-total.is-noneligible {
+        background: #fff3cd;
+        border-color: rgba(138, 109, 0, 0.25);
+    }
+
+    .ts-capture .ts-total.is-noneligible .n {
+        color: #8a6d00;
+    }
+
+    .ts-capture .ts-heat {
+        overflow-x: auto;
+    }
+
+    .ts-capture .ts-heat-header {
+        /* inherits .ts-panel-heading */
+        flex-wrap: wrap;
+    }
+
+    .ts-capture .ts-heat-caption {
+        /* legacy alias — prefer .ts-panel-title */
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #3f3f3f;
+        margin: 0;
+    }
+
+    .ts-capture table.ts-heat-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        margin: 0;
+        background: #fff;
+    }
+
+    .ts-capture table.ts-heat-table th,
+    .ts-capture table.ts-heat-table td {
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        padding: 6px 4px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .ts-capture table.ts-heat-table thead th {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+    .ts-capture table.ts-heat-table th.ts-heat-week {
+        width: 14%;
+        text-align: left;
+        padding-left: 8px;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.02);
+        font-size: 11px;
+        text-transform: none;
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    .ts-capture table.ts-heat-table th.ts-heat-week.is-active,
+    .ts-capture table.ts-heat-table th.ts-heat-week:hover {
+        background: rgba(30, 41, 59, 0.06);
+        color: #1e293b;
+    }
+
+    .ts-capture table.ts-heat-table th.ts-heat-week .sub {
+        display: block;
+        font-size: 10px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.4);
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell {
+        cursor: pointer;
+        color: #111;
+        text-align: left;
+        vertical-align: top;
+        padding: 5px 6px 6px;
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell:hover {
+        box-shadow: inset 0 0 0 2px rgba(30, 41, 59, 0.25);
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell.out-of-period {
+        cursor: default;
+        background: rgba(0, 0, 0, 0.03);
+        color: transparent;
+    }
+
+    .ts-capture table.ts-heat-table td.ts-heat-cell.out-of-period:hover {
+        box-shadow: none;
+    }
+
+    .ts-capture .ts-heat-date {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.4);
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .ts-capture .ts-heat-body {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-heat-hours {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-heat-chips {
+        display: flex;
+        gap: 2px;
+        flex: 0 0 auto;
+    }
+
+    .ts-capture .ts-heat-chip {
+        min-width: 16px;
+        padding: 2px 3px;
+        border-radius: 3px;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .ts-capture .ts-heat-chip.is-bill {
+        color: #1b5e20;
+        background: rgba(46, 125, 79, 0.16);
+        box-shadow: 0 0 0 1px rgba(46, 125, 79, 0.22);
+    }
+
+    .ts-capture .ts-heat-chip.is-nonbill {
+        color: #616161;
+        background: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture .ts-heat-chip.is-noneligible {
+        color: #8a6d00;
+        background: #fff3cd;
+        box-shadow: 0 0 0 1px rgba(138, 109, 0, 0.25);
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-gap,
+    .ts-capture table.ts-heat-table td.hrs-low {
+        background: #f8d7da;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-ok {
+        background: #fff;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-gap .ts-heat-hours,
+    .ts-capture table.ts-heat-table td.hrs-low .ts-heat-hours {
+        color: #b71c1c;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-ok .ts-heat-hours {
+        color: #1b5e20;
+    }
+
+    .ts-capture table.ts-heat-table td.hrs-empty {
+        background: #f7f7f7;
+    }
+
+    .ts-capture .ts-heat-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 6px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-heat-legend span:before {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        border-radius: 2px;
+        vertical-align: -1px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-capture .ts-heat-legend .lg-gap:before,
+    .ts-capture .ts-heat-legend .lg-low:before {
+        background: #f8d7da;
+        border-color: rgba(183, 28, 28, 0.25);
+    }
+
+    .ts-capture .ts-heat-legend .lg-ok:before {
+        background: #1b5e20;
+        border-color: #1b5e20;
+    }
+
+    .ts-capture .ts-heat-legend .lg-bill:before {
+        background: rgba(46, 125, 79, 0.28);
+        border-color: rgba(46, 125, 79, 0.4);
+    }
+
+    .ts-capture .ts-heat-legend .lg-nonbill:before {
+        background: #e0e0e0;
+        border-color: #9e9e9e;
+    }
+
+    .ts-capture .ts-heat-legend .lg-noneligible:before {
+        background: #fff3cd;
+        border-color: rgba(138, 109, 0, 0.4);
+    }
+
+    .ts-capture .ts-week-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 8px 12px;
+        margin: 16px 0 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-capture .ts-week-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ts-capture .ts-week-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        padding-bottom: 8px;
+    }
+
+    .ts-capture .ts-week-actions .btn,
+    .ts-capture .ts-footer-actions .btn {
+        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+    .ts-capture .ts-btn-template {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.14);
+        color: #334155;
+    }
+
+    .ts-capture .ts-btn-template:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.28);
+        color: #1e293b;
+    }
+
+    .ts-capture .ts-footer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .ts-capture .ts-week-tabs > li {
+        margin: 0 0 -1px;
+    }
+
+    .ts-capture .ts-week-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        min-width: 170px;
+        padding: 10px 18px 8px;
+        border: 1px solid rgba(0, 0, 0, 0.14);
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        background: #fafafa;
+        color: rgba(0, 0, 0, 0.6);
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 13px;
+        text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .ts-capture .ts-week-tab:hover {
+        background: rgba(63, 63, 63, 0.08);
+        border-color: rgba(0, 0, 0, 0.3);
+        color: #3f3f3f;
+        text-decoration: none;
+    }
+
+    .ts-capture .ts-week-tab.active {
+        background: #6a6a6a;
+        border-color: #6a6a6a;
+        color: #fff;
+        box-shadow: none;
+    }
+
+    .ts-capture .ts-week-tab .ts-week-label {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-week-tab .ts-week-name {
+        font-weight: 700;
+    }
+
+    .ts-capture .ts-week-tab .ts-week-range {
+        font-size: 12px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-range {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .ts-capture .ts-week-tab .ts-week-hours {
+        display: block;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #3f3f3f;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-hours {
+        color: #fff;
+    }
+
+    .ts-capture .ts-week-breakdown {
+        display: flex;
+        gap: 4px;
+    }
+
+    .ts-capture .ts-week-chip {
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-week-chip.is-bill {
+        color: #1b5e20;
+        background: rgba(46, 125, 79, 0.16);
+        box-shadow: 0 0 0 1px rgba(46, 125, 79, 0.22);
+    }
+
+    .ts-capture .ts-week-chip.is-nonbill {
+        color: #616161;
+        background: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture .ts-week-chip.is-noneligible {
+        color: #8a6d00;
+        background: #fff3cd;
+        box-shadow: 0 0 0 1px rgba(138, 109, 0, 0.25);
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip {
+        box-shadow: none;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip.is-bill {
+        color: #1b5e20;
+        background: #d4edda;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip.is-nonbill {
+        color: #424242;
+        background: #eeeeee;
+    }
+
+    .ts-capture .ts-week-tab.active .ts-week-chip.is-noneligible {
+        color: #6d5600;
+        background: #fff3cd;
+    }
+
+    .ts-capture .ts-day-panel {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        margin-bottom: 10px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .ts-capture .ts-day-panel + .ts-day-panel {
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .ts-capture .ts-day-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 11px 16px;
+        border: none;
+        background: #fff;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease;
+    }
+
+    .ts-capture .ts-day-header:hover {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .ts-capture .ts-day-header .ts-day-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #3f3f3f;
+    }
+
+    .ts-capture .ts-day-header .ts-day-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    .ts-capture .ts-btn-add-line {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.4;
+        color: #3f3f3f;
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.14);
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .ts-capture .ts-btn-add-line:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.28);
+        color: #1a1a1a;
+    }
+
+    .ts-capture .ts-empty-link {
+        color: #3f3f3f;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(63, 63, 63, 0.45);
+    }
+
+    .ts-capture .ts-empty-link:hover {
+        color: #1a1a1a;
+        border-bottom-style: solid;
+    }
+
+    .ts-capture .ts-day-header .ts-hours-ok {
+        color: #2e7d4f;
+        font-weight: 600;
+    }
+
+    .ts-capture .ts-day-header .ts-hours-low {
+        color: #c62828;
+        font-weight: 600;
+    }
+
+    .ts-capture .ts-day-header .fa-chevron {
+        transition: transform 0.15s ease;
+        color: rgba(0, 0, 0, 0.35);
+    }
+
+    .ts-capture .ts-day-header .fa-chevron.open {
+        transform: rotate(90deg);
+    }
+
+    .ts-capture .ts-day-body {
+        padding: 0 0 4px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        background: #fff;
+    }
+
+    .ts-capture .ts-day-body .table-responsive {
+        margin: 0;
+        border: none;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table {
+        width: 100%;
+        margin: 0;
+        background: #fff;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table > thead > tr > th {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 600;
+        background: #6a6a6a;
+        border: none;
+        border-bottom: 1px solid #5a5a5a;
+        padding: 6px 8px;
+        vertical-align: middle;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table > tbody > tr > td {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        padding: 4px 8px;
+        vertical-align: middle;
+        background: #fff;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table > tbody > tr:last-child > td {
+        border-bottom: none;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table > tbody > tr:hover > td {
+        background: rgba(63, 63, 63, 0.03);
+    }
+
+    .ts-capture .ts-row-actions {
+        display: grid;
+        grid-template-columns: repeat(2, min-content);
+        gap: 4px;
+        justify-content: start;
+        align-items: center;
+        min-width: 58px;
+    }
+
+    .ts-capture .ts-row-actions > .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        line-height: 1;
+        box-sizing: border-box;
+    }
+
+    /* ng-hide leaves a grid hole — collapse empty tracks for new rows */
+    .ts-capture .ts-row-actions > .btn.ng-hide {
+        display: none !important;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table .form-group {
+        margin-bottom: 0;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table .form-control {
+        border-color: rgba(0, 0, 0, 0.12);
+        box-shadow: none;
+        border-radius: 4px;
+        height: 30px;
+        padding: 4px 8px;
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table textarea.form-control {
+        height: auto;
+        min-height: 30px;
+        max-height: 52px;
+        padding: 4px 8px;
+        resize: vertical;
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table .form-control:focus {
+        border-color: #626a7e;
+        box-shadow: 0 0 0 2px rgba(98, 106, 126, 0.18);
+    }
+
+    .ts-capture .ts-day-body .ts-entry-table .text-help {
+        margin-top: 2px;
+        font-size: 11px;
+        line-height: 1.2;
+    }
+
+    .ts-capture .ts-day-empty {
+        padding: 14px 16px;
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 13px;
+    }
+
+    .ts-capture .ts-no-period {
+        padding: 32px 16px;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.45);
+        border: 1px dashed rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+        margin-top: 16px;
+    }
+
+    .ts-capture .ts-project-cell {
+        min-width: 0;
+    }
+
+    .ts-capture .ts-project-pick {
+        display: block;
+        width: 100%;
+        padding: 3px 8px;
+        margin: 0;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .ts-capture .ts-project-pick:hover {
+        background: rgba(0, 0, 0, 0.03);
+        border-color: rgba(0, 0, 0, 0.14);
+    }
+
+    .ts-capture .ts-project-pick:hover .ts-project-name,
+    .ts-capture .ts-project-pick:hover .ts-project-placeholder {
+        text-decoration: underline;
+        text-decoration-color: rgba(0, 0, 0, 0.35);
+    }
+
+    .ts-capture .ts-project-pick.has-warning {
+        background: rgba(240, 173, 78, 0.08);
+        border-color: rgba(240, 173, 78, 0.55);
+    }
+
+    .ts-capture .ts-project-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        margin-bottom: 2px;
+    }
+
+    .ts-capture .ts-client-name {
+        flex: 1;
+        min-width: 0;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.45);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ts-capture .ts-project-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.82);
+        line-height: 1.3;
+        padding-right: 16px;
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20h9'/><path d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/></svg>") no-repeat right 2px;
+        background-size: 11px 11px;
+    }
+
+    .ts-capture .ts-project-placeholder {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.4);
+        font-style: italic;
+        line-height: 1.3;
+    }
+
+    /* Billable flag — sized to match row action icons */
+    .ts-capture .ts-bill-flag {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        padding: 0;
+        border-radius: 3px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        line-height: 1;
+        user-select: none;
+        box-sizing: border-box;
+    }
+
+    .ts-capture .ts-bill-flag.is-billable {
+        color: #1b6b45;
+        background: rgba(46, 125, 79, 0.12);
+        border: 1px solid rgba(46, 125, 79, 0.28);
+    }
+
+    .ts-capture .ts-bill-flag.is-nonbillable {
+        color: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture tr.ts-row-billable > td:first-child {
+        box-shadow: inset 3px 0 0 #2e7d4f;
+    }
+
+    .ts-capture tr.ts-row-nonbillable > td:first-child {
+        box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .ts-capture .ts-bill-flag.is-noneligible {
+        color: #8a6d00;
+        background: #fff3cd;
+        border: 1px solid rgba(138, 109, 0, 0.3);
+    }
+
+    .ts-capture tr.ts-row-noneligible > td:first-child {
+        box-shadow: inset 3px 0 0 #d4a72c;
+    }
+
+    .ts-capture .readOnlyLight {
+        cursor: pointer;
     }
 </style>
 
-<div class="padding">
-    <div class="box">
-        <div class="box-header b-b">
-            <h2>
-                Timesheet Capture
-            </h2>
-        </div>
-        <div class="box-body">
-            <div class="row">
-                <div class="col-sm-8">
-                    <form role="form" name="EditForm">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <label class="form-control-label">Billing Period</label>
-                            </div>
-                            <div class="col-md-2">
-                                <select class="form-control" ng-options="s.description for s in vm.filterOptions.billingCycles"
-                                        ng-model="vm.viewModel.billingCycle" ng-change="vm.checkDateDisable()"></select>
-                            </div>
+<div class="padding ts-capture" ng-class="{'is-clip-drawer-open': vm.clipboardDrawerOpen, 'is-summary-drawer-open': vm.summaryDrawerOpen}">
+    <button type="button" class="ts-clip-rail"
+            ng-class="{'is-just-copied': vm.clipboardToast}"
+            ng-click="vm.toggleClipboardDrawer()"
+            title="{{vm.clipboardDrawerOpen ? 'Close clipboard' : 'Open clipboard'}}">
+        <i class="fa fa-clipboard ts-clip-rail-icon"></i>
+        <span class="ts-clip-rail-badge" ng-if="vm.clipboard.length">{{vm.clipboard.length}}</span>
+        <i class="fa fa-chevron-right ts-clip-rail-chevron"></i>
+    </button>
+    <div class="ts-clip-toast" ng-if="vm.clipboardToast" role="status" aria-live="polite">
+        <i class="fa fa-check"></i>{{vm.clipboardToast}}
+    </div>
 
-                            <div class="col-sm-2">
-                                <label class="form-control-label">Project</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input name="projectGridId{{i.id}}" readonly type="text" data-ng-click="vm.openProjectListModal(vm.filterModel)" data-ng-model="vm.filterModel.projectDescription" class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
-                                <!--<ui-select ng-model="vm.filterModel.project" ng-change="vm.projectSelected(vm.filterModel.project)">
-                            <ui-select-match placeholder="Choose a Project">{{$select.selected.description}}</ui-select-match>
-                            <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
-                                <div ng-if="!project.isTag" ng-bind-html="project.description | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>-->
-                            </div>
-
-                        </div>
-                        <div class="row m-t-1">
-                            <div class="col-md-2">
-                                <label class="form-control-label">From Date</label>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" class="form-control"
-                                       ng-model="vm.filterModel.startDate"
-                                       ng-disabled="vm.disableDateSelection"
-                                       data-icon-left="fa fa-chevron-left"
-                                       data-icon-right="fa fa-chevron-right"
-                                       autoclose="true"
-                                       name="date" data-date-format="yyyy/MM/dd"
-                                       bs-datepicker placeholder="Start Date" autocomplete="off">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-control-label">Billable</label>
-                            </div>
-                            <div class="col-md-2">
-                                <select class="form-control" ng-options="s.description for s in vm.filterOptions.billingOptions"
-                                        ng-model="vm.filterModel.billingOption"></select>
-                            </div>
-                        </div>
-
-                        <div class="row m-t-1">
-                            <div class="col-md-2">
-                                <label class="form-control-label">To Date</label>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" class="form-control"
-                                       ng-model="vm.filterModel.endDate"
-                                       ng-disabled="vm.disableDateSelection"
-                                       data-icon-left="fa fa-chevron-left"
-                                       autoclose="true"
-                                       data-icon-right="fa fa-chevron-right"
-                                       name="date" data-date-format="yyyy/MM/dd"
-                                       bs-datepicker placeholder="End Date" autocomplete="off">
-                            </div>
-                            <div class="col-md-2">
-                            </div>
-                            <div class="col-md-6">
-                                <a class="btn btn-primary b-{{app.setting.theme.primary}}" ng-click="vm.reloadGrid()">
-                                    <i class="fa fa-check-square-o"></i>&nbsp;Apply&nbsp;Filter
-                                </a>
-                                <a class="btn btn-danger b-{{app.setting.theme.danger}}" ng-click="vm.resetFilters()">
-                                    <i class="fa fa-times"></i>&nbsp;Reset&nbsp;Filter
-                                </a>
-                            </div>
-                        </div>
-
-                        <hr />
-
-                        <div class="row">
-
-                            <div class="col-sm-2">
-                                <label class="form-control-label">User</label>
-                            </div>
-                            <div class="col-md-4">
-                                <select name="user" class="form-control" ng-change="vm.userSelectChange()" ng-options="s.id as s.description for s in vm.filterOptions.users"
-                                        ng-model="vm.filterModel.userId" ng-required="true" placeholder="Account"></select>
-                            </div>
-                        </div>
-                    </form>
+    <div class="ts-clip-drawer-backdrop" ng-click="vm.closeClipboardDrawer()"></div>
+    <aside class="ts-clip-drawer" aria-hidden="{{!vm.clipboardDrawerOpen}}">
+        <div class="ts-clipboard">
+            <div class="ts-clipboard-header">
+                <span><i class="fa fa-clipboard"></i> Clipboard</span>
+                <div class="ts-clipboard-header-actions">
+                    <button type="button" class="ts-clipboard-clear"
+                            ng-if="vm.localClips.length"
+                            ng-click="vm.clearClipboard()"
+                            title="Clear local clipboard items">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                    <button type="button" class="ts-clipboard-clear"
+                            ng-click="vm.closeClipboardDrawer()"
+                            title="Close clipboard">
+                        <i class="fa fa-times"></i>
+                    </button>
                 </div>
-
-                <div class="col-sm-4">
-                    <div class="box summaryContainer">
-                        <div class="box-header teal">
-                            <div class="row-col">
-                                SUMMARY
+            </div>
+            <div class="ts-clipboard-list" ng-if="vm.clipboard.length">
+                <div class="ts-clipboard-section"
+                     ng-if="(vm.clipboard | filter:{isSaved:true}).length">
+                    <div class="ts-clipboard-section-label">Saved</div>
+                    <div class="ts-clip-card is-saved"
+                         ng-repeat="clip in vm.clipboard | filter:{isSaved:true}"
+                         ng-class="{'is-detail': vm.clipboardDetailItem === clip}"
+                         ng-click="vm.showClipboardDetails(clip)"
+                         title="View contents">
+                        <span class="ts-clip-icon">
+                            <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : (clip.rowCount === 1 ? 'fa fa-file-o' : 'fa fa-calendar-o')"></i>
+                        </span>
+                        <div class="ts-clip-info">
+                            <div class="ts-clip-label" title="{{clip.label}}"
+                                 ng-if="vm.clipboardEditingLabel !== clip">
+                                {{clip.label}}
+                                <span class="ts-clip-badge">saved</span>
                             </div>
+                            <div ng-if="vm.clipboardEditingLabel === clip">
+                                <input type="text" class="ts-clip-label-edit"
+                                       ng-model="clip._editLabel"
+                                       ng-keydown="$event.keyCode === 13 && vm.commitRenameClipboardItem(clip, $event); $event.keyCode === 27 && vm.cancelRenameClipboardItem($event)"
+                                       ng-blur="vm.commitRenameClipboardItem(clip)"
+                                       ng-click="$event.stopPropagation()" />
+                            </div>
+                            <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
                         </div>
-                        <div class="light">
-                            <div class="row-body scrollable hover" style="height: 150px;">
-                                <table st-table="rowCollectionBasic" class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                Date
-                                            </th>
-                                            <th>
-                                                Hours ({{vm.summary.totalHours}})
-                                            </th>
-                                            <th>
-                                                Billable ({{vm.summary.totalBillableHours}})
-                                            </th>
-                                            <th>
-                                                Non-Billable ({{vm.summary.totalHours - vm.summary.totalBillableHours}})
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="i in vm.summary.days | orderBy:'date':true" st-select-row="row">
-                                            <td>{{i.date}}</td>
-                                            <td ng-style="i.hours < 8 && {'color' : 'red'} || i.hours >= 8 && {'color' : 'green'}">{{i.hours}}</td>
-                                            <td>{{i.billhours}}</td>
-                                            <td>{{i.hours-i.billhours}}</td>
-                                        </tr>
-                                        <tr ng-show="vm.summary.days == 0 || !vm.summary.days">
-                                            <td colspan="2">
-                                                No Records
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                    <tfoot>
-                                    </tfoot>
-                                </table>
+                        <div class="ts-clip-actions" ng-click="$event.stopPropagation()">
+                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip, $event)" title="Paste">
+                                <i class="fa fa-paste"></i>
+                            </button>
+                            <button type="button" class="ts-clip-rename"
+                                    ng-if="vm.clipboardEditingLabel !== clip"
+                                    ng-click="vm.startRenameClipboardItem(clip, $event)"
+                                    title="Rename">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button type="button" class="ts-clip-unpin"
+                                    ng-click="vm.unpinClipboardItem(clip, $event)"
+                                    title="Remove saved template">
+                                <i class="fa fa-thumb-tack"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ts-clipboard-section"
+                     ng-if="(vm.clipboard | filter:{isSaved:false}).length">
+                    <div class="ts-clipboard-section-label">Local</div>
+                    <div class="ts-clip-card"
+                         ng-repeat="clip in vm.clipboard | filter:{isSaved:false}"
+                         ng-class="{'is-detail': vm.clipboardDetailItem === clip}"
+                         ng-click="vm.showClipboardDetails(clip)"
+                         title="View contents">
+                        <span class="ts-clip-icon">
+                            <i ng-class="clip.type === 'week' ? 'fa fa-calendar' : (clip.rowCount === 1 ? 'fa fa-file-o' : 'fa fa-calendar-o')"></i>
+                        </span>
+                        <div class="ts-clip-info">
+                            <div class="ts-clip-label" title="{{clip.label}}"
+                                 ng-if="vm.clipboardEditingLabel !== clip">
+                                {{clip.label}}
                             </div>
+                            <div ng-if="vm.clipboardEditingLabel === clip">
+                                <input type="text" class="ts-clip-label-edit"
+                                       ng-model="clip._editLabel"
+                                       ng-keydown="$event.keyCode === 13 && vm.commitRenameClipboardItem(clip, $event); $event.keyCode === 27 && vm.cancelRenameClipboardItem($event)"
+                                       ng-blur="vm.commitRenameClipboardItem(clip)"
+                                       ng-click="$event.stopPropagation()" />
+                            </div>
+                            <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
+                        </div>
+                        <div class="ts-clip-actions" ng-click="$event.stopPropagation()">
+                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip, $event)" title="Paste">
+                                <i class="fa fa-paste"></i>
+                            </button>
+                            <button type="button" class="ts-clip-rename"
+                                    ng-if="vm.clipboardEditingLabel !== clip"
+                                    ng-click="vm.startRenameClipboardItem(clip, $event)"
+                                    title="Rename">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button type="button" class="ts-clip-pin"
+                                    ng-click="vm.saveClipboardItemAsTemplate(clip, $event)"
+                                    title="Save as template">
+                                <i class="fa fa-thumb-tack"></i>
+                            </button>
+                            <button type="button" class="ts-clip-remove"
+                                    ng-click="vm.removeClipboardItem(clip, $event)"
+                                    title="Remove">
+                                <i class="fa fa-times"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="ts-clipboard-empty" ng-if="!vm.clipboard.length">
+                Copy a day, week, or entry to start
+            </div>
+        </div>
+    </aside>
+
+    <div class="ts-summary-drawer-backdrop" ng-click="vm.closeSummaryDrawer()"></div>
+    <aside class="ts-summary-drawer" aria-hidden="{{!vm.summaryDrawerOpen}}">
+        <div class="ts-heat" ng-if="vm.weeks.length">
+            <div class="ts-panel-heading ts-heat-header">
+                <span class="ts-panel-title">Period summary</span>
+                <div class="ts-totals">
+                    <div class="ts-total">
+                        <span class="n">{{vm.summary.totalHours || 0}}</span>
+                        <span class="l">Hours</span>
+                    </div>
+                    <div class="ts-total is-bill">
+                        <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
+                        <span class="l">Billable</span>
+                    </div>
+                    <div class="ts-total is-nonbill">
+                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0) - (vm.summary.totalNonEligibleHours || 0)}}</span>
+                        <span class="l">Non-bill</span>
+                    </div>
+                    <div class="ts-total is-noneligible">
+                        <span class="n">{{vm.summary.totalNonEligibleHours || 0}}</span>
+                        <span class="l">Non-elig</span>
+                    </div>
+                </div>
+                <button type="button" class="ts-clipboard-clear ts-summary-close"
+                        ng-click="vm.closeSummaryDrawer()"
+                        title="Close period summary">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <table class="ts-heat-table">
+                <thead>
+                    <tr>
+                        <th class="ts-heat-week">Wk</th>
+                        <th>M</th>
+                        <th>T</th>
+                        <th>W</th>
+                        <th>T</th>
+                        <th>F</th>
+                        <th>S</th>
+                        <th>S</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="week in vm.weeks">
+                        <th class="ts-heat-week"
+                            ng-class="{'is-active': vm.selectedWeekIndex === week.index}"
+                            ng-click="vm.selectWeekFromSummary(week.index)">
+                            {{week.weekNum}}
+                            <span class="sub">{{week.label.split('·')[1]}}</span>
+                        </th>
+                        <td ng-repeat="day in week.daysByCol track by $index"
+                            class="ts-heat-cell"
+                            ng-class="vm.heatClassFor(week, $index)"
+                            ng-click="vm.jumpToColFromSummary(week, $index)"
+                            title="{{day ? ((day.date | date:'d MMM') + ' — ' + (day.hours || 0) + 'h total, ' + (day.billhours || 0) + ' billable, ' + ((day.hours || 0) - (day.billhours || 0) - (day.nehours || 0)) + ' non-billable, ' + (day.nehours || 0) + ' non-eligible') : ''}}">
+                            <span class="ts-heat-date" ng-if="day">{{day.dayOfMonth || (day.date | date:'d')}}</span>
+                            <span class="ts-heat-body" ng-if="day">
+                                <span class="ts-heat-hours">{{day.hours || 0}}</span>
+                                <span class="ts-heat-chips">
+                                    <span class="ts-heat-chip is-bill" title="Billable">{{day.billhours || 0}}</span>
+                                    <span class="ts-heat-chip is-nonbill" title="Non-billable">{{(day.hours || 0) - (day.billhours || 0) - (day.nehours || 0)}}</span>
+                                    <span class="ts-heat-chip is-noneligible" title="Non-eligible">{{day.nehours || 0}}</span>
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="ts-heat-legend">
+                <span class="lg-gap">No time</span>
+                <span class="lg-low">Under 8h</span>
+                <span class="lg-ok">8h+</span>
+                <span class="lg-bill">Billable</span>
+                <span class="lg-nonbill">Non-bill</span>
+                <span class="lg-noneligible">Non-elig</span>
+            </div>
+            <div class="ts-summary-hint">Click a day to jump to it in the grid.</div>
+        </div>
+        <div class="ts-clipboard-empty" ng-if="!vm.weeks.length">
+            Select a billing period to see the summary.
+        </div>
+    </aside>
+
+    <div class="box">
+        <div class="box-body">
+            <div class="ts-top">
+                <div class="ts-top-layout">
+                    <div class="ts-top-left">
+                        <div class="ts-panel-heading ts-top-heading">
+                            <h3 class="ts-panel-title ts-screen-title">Timesheet Capture</h3>
+                            <div class="ts-top-summary" ng-if="vm.weeks.length">
+                                <div class="ts-totals">
+                                    <div class="ts-total">
+                                        <span class="n">{{vm.summary.totalHours || 0}}</span>
+                                        <span class="l">Hours</span>
+                                    </div>
+                                    <div class="ts-total is-bill">
+                                        <span class="n">{{vm.summary.totalBillableHours || 0}}</span>
+                                        <span class="l">Billable</span>
+                                    </div>
+                                    <div class="ts-total is-nonbill">
+                                        <span class="n">{{(vm.summary.totalHours || 0) - (vm.summary.totalBillableHours || 0) - (vm.summary.totalNonEligibleHours || 0)}}</span>
+                                        <span class="l">Non-bill</span>
+                                    </div>
+                                    <div class="ts-total is-noneligible">
+                                        <span class="n">{{vm.summary.totalNonEligibleHours || 0}}</span>
+                                        <span class="l">Non-elig</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="ts-summary-toggle"
+                                        ng-class="{'is-active': vm.summaryDrawerOpen}"
+                                        ng-click="vm.toggleSummaryDrawer()"
+                                        title="Open the period calendar">
+                                    <i class="fa fa-calendar"></i> Period summary
+                                </button>
+                            </div>
+                        </div>
+                        <form role="form" name="EditForm" class="ts-filter-bar ts-toolbar-filters">
+                            <div class="ts-field ts-field-period">
+                                <label>Period</label>
+                                <select class="form-control"
+                                        ng-options="s.id as s.optionLabel for s in vm.filterOptions.billingCycles"
+                                        ng-model="vm.filterModel.billingCycleId"
+                                        ng-change="vm.applyBillingPeriod()"></select>
+                            </div>
+                            <div class="ts-field">
+                                <label>User</label>
+                                <select name="user" class="form-control"
+                                        ng-change="vm.userSelectChange()"
+                                        ng-options="s.id as s.description for s in vm.filterOptions.users"
+                                        ng-model="vm.filterModel.userId"
+                                        ng-required="true"></select>
+                            </div>
+                            <div class="ts-field ts-field-project">
+                                <label>Project</label>
+                                <div class="ts-filter-project">
+                                    <input name="projectFilter" readonly type="text"
+                                           data-ng-click="vm.openProjectListModal(vm.filterModel)"
+                                           data-ng-model="vm.filterModel.projectDescription"
+                                           class="readOnlyLight form-control"
+                                           placeholder="All projects" />
+                                    <a class="ts-filter-clear" ng-if="vm.filterModel.projectDescription"
+                                       title="Clear project filter"
+                                       ng-click="vm.clearProjectFilter($event)">×</a>
+                                </div>
+                            </div>
+                            <div class="ts-field ts-field-billable">
+                                <label>Billable</label>
+                                <select class="form-control"
+                                        ng-options="s.description for s in vm.filterOptions.billingOptions"
+                                        ng-model="vm.filterModel.billingOption"
+                                        ng-change="vm.reloadGrid()"></select>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Clipboard detail overlay -->
+                    <div class="ts-paste-overlay" ng-if="vm.clipboardDetailItem"
+                         ng-click="vm.closeClipboardDetails()">
+                        <div class="ts-clip-detail-dialog" ng-click="$event.stopPropagation()">
+                            <div class="ts-clip-detail-header">
+                                <h4>{{vm.clipboardDetailItem.label}}</h4>
+                                <button type="button" class="ts-clip-detail-close"
+                                        ng-click="vm.closeClipboardDetails()"
+                                        title="Close">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="ts-clip-detail-meta">
+                                {{vm.clipboardDetailItem.type}}
+                                &middot; {{vm.clipboardDetailItem.rowCount}} line{{vm.clipboardDetailItem.rowCount === 1 ? '' : 's'}}
+                                &middot; {{vm.clipboardRelativeTime(vm.clipboardDetailItem.copiedAt)}}
+                                <span ng-if="vm.clipboardDetailItem.isSaved"> &middot; saved</span>
+                            </div>
+                            <div class="ts-clip-detail-table-wrap" ng-if="vm.clipboardDetailItem.rows.length">
+                                <table class="ts-clip-detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th ng-if="vm.clipboardDetailItem.type === 'week'">Day</th>
+                                            <th>Project</th>
+                                            <th>Team</th>
+                                            <th>Activity</th>
+                                            <th>Comments</th>
+                                            <th style="text-align:right">Hours</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="row in vm.clipboardDetailItem.rows">
+                                            <td ng-if="vm.clipboardDetailItem.type === 'week'">
+                                                {{vm.clipboardDayLabel(row.dayOffset) || '—'}}
+                                            </td>
+                                            <td>
+                                                <span ng-if="vm.clipboardProjectLabel(row)">
+                                                    {{vm.clipboardProjectLabel(row)}}
+                                                    <span class="ts-clip-detail-bill"
+                                                          ng-class="{'is-billable': vm.clipboardRowBucket(row) === 'bill', 'is-nonbillable': vm.clipboardRowBucket(row) === 'nonbill', 'is-noneligible': vm.clipboardRowBucket(row) === 'ne'}">
+                                                        {{vm.clipboardRowBucket(row) === 'bill' ? 'B' : (vm.clipboardRowBucket(row) === 'ne' ? 'NE' : 'NB')}}
+                                                    </span>
+                                                </span>
+                                                <span class="ts-clip-detail-empty" ng-if="!vm.clipboardProjectLabel(row)">—</span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="vm.clipboardTeamName(row.teamId)">{{vm.clipboardTeamName(row.teamId)}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="!vm.clipboardTeamName(row.teamId)">—</span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="vm.clipboardActivityName(row.activityId)">{{vm.clipboardActivityName(row.activityId)}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="!vm.clipboardActivityName(row.activityId)">—</span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="row.comments">{{row.comments}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="!row.comments">—</span>
+                                            </td>
+                                            <td class="ts-clip-detail-hours">
+                                                <span ng-if="row.hours != null && row.hours !== ''">{{row.hours}}</span>
+                                                <span class="ts-clip-detail-empty" ng-if="row.hours == null || row.hours === ''">—</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="ts-clipboard-empty" ng-if="!vm.clipboardDetailItem.rows.length">
+                                This clipboard item has no lines.
+                            </div>
+                            <div class="ts-clip-detail-footer">
+                                <button type="button" class="btn btn-default" ng-click="vm.closeClipboardDetails()">Close</button>
+                                <button type="button" class="btn btn-primary"
+                                        ng-click="vm.pasteFromClipboardDetails()"
+                                        ng-disabled="!vm.clipboardDetailItem.rows.length">
+                                    <i class="fa fa-paste"></i> Paste
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paste dialog overlay -->
+                    <div class="ts-paste-overlay" ng-if="vm.clipboardPasteItem">
+                        <div class="ts-paste-dialog">
+                            <h4>Paste "{{vm.clipboardPasteItem.label}}"</h4>
+
+                            <div ng-if="vm.clipboardPasteItem.type === 'day' && !vm.clipboardPasteTarget">
+                                <p>Select target day:</p>
+                                <div class="ts-paste-days">
+                                    <button type="button" ng-repeat="day in vm.selectedWeek.days"
+                                            ng-click="vm.clipboardPasteTarget = day">
+                                        {{day.label}}
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-default btn-sm" ng-click="vm.cancelPaste()">Cancel</button>
+                            </div>
+
+                            <div ng-if="vm.clipboardPasteItem.type === 'week' || vm.clipboardPasteTarget">
+                                <p ng-if="vm.clipboardPasteTarget">Into: <strong>{{vm.clipboardPasteTarget.label}}</strong></p>
+                                <p ng-if="vm.clipboardPasteItem.type === 'week'">Into: <strong>{{vm.selectedWeek.label}}</strong></p>
+                                <div class="ts-paste-modes">
+                                    <button type="button" class="btn btn-primary" ng-click="vm.confirmPaste('append', vm.clipboardPasteTarget)">
+                                        <i class="fa fa-plus"></i> Append
+                                    </button>
+                                    <button type="button" class="btn btn-default" ng-click="vm.confirmPaste('replace', vm.clipboardPasteTarget)">
+                                        <i class="fa fa-refresh"></i> Replace
+                                    </button>
+                                    <button type="button" class="btn btn-default" ng-click="vm.cancelPaste()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
             <div class="container">
                 <div class="col-md-6 col-md-offset-3">
                     <div class="alert alert-success m-t-1" ng-if="vm.saveSuccess">
@@ -161,248 +2074,210 @@
                     </div>
                 </div>
             </div>
-            <div class="row m-b-1">
-                <div class="col-md-6">
-                    <button class="btn btn-xs btn-primary" ng-show="vm.displayOptions.show" ng-click="vm.submitnewRecords()">
-                        <i class="fa fa-plus"></i> Create new records (Template)
-                    </button>
-                </div>
 
-                <div class="col-md-6">
-                    <button class="btn btn-xs btn-primary pull-right" ng-show="vm.displayOptions.show" ng-click="vm.submitForm()" ng-disabled="vm.filterModel.userId == null">
-                        <i class="fa fa-save"></i> Save Changes
-                    </button>
-                    <button class="btn btn-xs btn-primary pull-right m-r-1" ng-show="vm.displayOptions.show" ng-click="vm.submitNewRecord()">
-                        <i class="fa fa-plus"></i> Create New Record
-                    </button>
-                </div>
+            <div ng-if="!vm.filterModel.billingCycleId" class="ts-no-period">
+                Select a billing period to capture time.
             </div>
-            <div class="row">
-                <form role="form" name="AddForm" novalidate>
-                    <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
-                        <tr st-select-row="row">
-                            <td style="width:42%">
-                                <div class="form-group">
-                                    <input readonly name="projectId" type="text" data-ng-click="vm.openProjectListModal(vm.addRowRecord)" data-ng-model="vm.addRowRecord.projectDescription" class="readOnlyLight form-control {{vm.addRowRecord.valid['projectId'] == false ? 'form-control-warning':''}}" />
 
-                                    <!--<ui-select title="{{vm.addRowRecord.project.description}}" name="projectId" ng-model="vm.addRowRecord.project" ng-change="vm.projectRowSelected(vm.addRowRecord)" class="{{vm.addRowRecord.valid['projectId'] == false ? 'form-control-warning':''}}">
-                                <ui-select-match placeholder="Choose a Project">{{$select.selected.description}}</ui-select-match>
-                                <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
-                                    <div ng-if="!project.isTag" ng-bind-html="project.description | highlight: $select.search" title="{{project.description}}"></div>
-                                </ui-select-choices>
-                            </ui-select>-->
-                                </div>
-                            </td>
-                            <td style="width:12%">
-                                <div class="form-group {{vm.addRowRecord.valid['dateEntry'] == false ? 'has-warning':''}}">
-                                    <input type="text" class="form-control {{vm.addRowRecord.valid['dateEntry'] == false ? 'form-control-warning':''}}"
-                                           ng-model="vm.addRowRecord.dateEntry"
-                                           data-icon-left="fa fa-chevron-left"
-                                           data-icon-right="fa fa-chevron-right"
-                                           autoclose="true"
-                                           useCurrent="day"
-                                           name="dateEntry" data-date-format="yyyy/MM/dd"
-                                           bs-datepicker autocomplete="off">
-                                    <span class="text-help" ng-show="AddForm['dateEntry'].$error.date">Invalid date</span>
-                                </div>
-                            </td>
-                            <td style="width:12%">
-                                <div class="form-group {{vm.addRowRecord.valid['teamId'] == false ? 'has-warning':''}}">
-                                    <select name="teamId" class="form-control {{vm.addRowRecord.valid['teamId'] == false ? 'form-control-warning':''}}"
-                                            ng-options="s.id as s.description for s in vm.filterOptions.teams"
-                                            ng-model="vm.addRowRecord.teamId"></select>
-                                    <span class="text-help" ng-show="AddForm['teamId'].$invalid">Required</span>
-                                </div>
-                            </td>
-                            <td style="width:14%">
-                                <div class="form-group {{vm.addRowRecord.valid['activityId'] == false ? 'has-warning':''}}" show-errors>
-                                    <select name="activityId" class="form-control {{vm.addRowRecord.valid['activityId'] == false ? 'form-control-warning':''}}"
-                                            ng-options="s.id as s.description for s in vm.filterOptions.activities"
-                                            ng-model="vm.addRowRecord.activityId"></select>
-                                </div>
-                            </td>
-                            <td style="width:12%">
-                                <div class="form-group {{vm.addRowRecord.valid['comments'] == false ? 'has-warning':''}}" show-errors>
-                                    <textarea name="comments{{i.id}}" type="text"
-                                              class="form-control {{vm.addRowRecord.valid['comments'] == false ? 'form-control-warning':''}}"
-                                              placeholder="comments" ng-model="vm.addRowRecord.comments"></textarea>
-                                </div>
-                            </td>
-                            <td style="width:8%">
-                                <div class="form-group {{vm.addRowRecord.valid['hours'] == false ? 'has-warning':''}}" show-errors>
-                                    <input name="hours" type="number"
-                                           class="form-control {{vm.addRowRecord.valid['hours'] == false ? 'form-control-warning':''}}"
-                                           placeholder="hr" ng-model="vm.addRowRecord.hours"
-                                           ng-blur="vm.validateHours('hours',vm.addRowRecord)">
-                                </div>
-                            </td>
-                            <td>
-                                <a class="btn btn-xs-2 btn-xs btn-primary b-{{app.setting.theme.info}}" ng-click="vm.submitAddRow()">
-                                    <i class="fa fa-plus"></i> Add Record
-                                </a>
-                            </td>
-                        </tr>
-
-                    </table>
-                </form>
-            </div>
-            <div class="row">
-                <div class="box">
-                    <div class="table-responsive" ng-show="vm.displayOptions.show">
-                        <form role="form" name="RecordForm" novalidate>
-                            <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th style="width:32%">
-                                            <a ng-click="vm.pageGrid.sort('project')">Project</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='project'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='project'}"></i>
-                                        </th>
-                                        <th style="width:8%">
-                                            <a ng-click="vm.pageGrid.sort('client')">Client</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='client'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='client'}"></i>
-                                        </th>
-                                        <th title="Billable">
-                                            <a ng-click="vm.pageGrid.sort('billable')">Bill</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='billable'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='billable'}"></i>
-                                        </th>
-                                        <th style="width:8%">
-                                            <a ng-click="vm.pageGrid.sort('date')">Date</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='date'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='date'}"></i>
-                                        </th>
-                                        <th style="width:12%">
-                                            <a ng-click="vm.pageGrid.sort('team')">Team</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='team'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='team'}"></i>
-                                        </th>
-                                        <th style="width:14%">
-                                            <a ng-click="vm.pageGrid.sort('activity')">Activity</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='activity'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='activity'}"></i>
-                                        </th>
-                                        <th style="width:12%">
-                                            <a ng-click="vm.pageGrid.sort('comments')">Comments</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='comments'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='comments'}"></i>
-                                        </th>
-                                        <th style="width:9%">
-                                            <a ng-click="vm.pageGrid.sort('hours')">Hours</a>
-                                            <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='hours'}"></i>
-                                            <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='hours'}"></i>
-                                        </th>
-                                        <th>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="i in vm.gridModel.data" st-select-row="row">
-                                        <td>
-                                            <div class="form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}" show-errors>
-                                                <input readonly name="projectGridId{{i.id}}" ng-required="true" ng-change="vm.validateOriginal('projectGridId',i)" type="text" title="{{i.projectDescription}}" data-ng-click="vm.openProjectListModal(i)" data-ng-model="i.projectDescription" class="readOnlyLight form-control {{i.valid['projectGridId'] == false ? 'form-control-warning':''}}" />
-                                                <!--<ui-select title="{{i.project.description}}" name="projectGridId{{i.id}}" ng-required="true" ng-model="i.project" ng-change="vm.projectRowSelected(i)" class="form-control" style="padding:0 0 1px 0">
-                                            <ui-select-match placeholder="Choose a Project" class="form-control-warning">{{$select.selected.description}}</ui-select-match>
-                                            <ui-select-choices repeat="project in vm.filterOptions.projects | filter: $select.search">
-                                                <div ng-bind-html="project.description | highlight: $select.search" title="{{project.description}}"></div>
-                                            </ui-select-choices>
-                                        </ui-select>-->
-                                                <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group" ng-class="{'has-warning':RecordForm['projectGridId'+i.id].$dirty}">
-                                                <span>{{i.clientEntityName}}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group" ng-class="{'has-warning':RecordForm['projectGridId'+i.id].$dirty}">
-                                                <span>{{i.billable == 1 ? 'Yes' : 'No'}}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group {{i.valid['dateEntry'] == false ? 'has-warning':''}}" show-errors>
-                                                <input type="text" class="form-control {{i.valid['dateEntry'] == false ? 'form-control-warning':''}}"
-                                                       ng-model="i.dateEntry" ng-required="true"
-                                                       style="width: 130px;"
-                                                       data-icon-left="fa fa-chevron-left"
-                                                       data-icon-right="fa fa-chevron-right"
-                                                       autoclose="true"
-                                                       name="dateEntry{{i.id}}" data-date-format="yyyy/MM/dd"
-                                                       ng-change="vm.validateOriginal('dateEntry',i)"
-                                                       bs-datepicker autocomplete="off">
-                                                <span class="text-help" ng-show="RecordForm['dateEntry'+i.id].$invalid">Required</span>
-                                                <span class="text-help" ng-show="RecordForm['dateEntry'+i.id].$error.date">Invalid date</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group {{i.valid['teamId'] == false ? 'has-warning':''}}" show-errors>
-                                                <select name="teamId{{i.id}}" class="form-control {{i.valid['teamId'] == false ? 'form-control-warning':''}}"
-                                                        ng-options="s.id as s.description for s in vm.filterOptions.teams"
-                                                        ng-model="i.teamId" ng-required="true"
-                                                        ng-change="vm.validateOriginal('teamId',i)"></select>
-                                                <span class="text-help" ng-show="RecordForm['teamId'+i.id].$invalid">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group {{i.valid['activityId'] == false ? 'has-warning':''}}" show-errors>
-                                                <select name="activityId{{i.id}}" class="form-control {{i.valid['activityId'] == false ? 'form-control-warning':''}}"
-                                                        ng-options="s.id as s.description for s in vm.filterOptions.activities"
-                                                        ng-model="i.activityId" ng-required="true"
-                                                        ng-change="vm.validateOriginal('activityId',i)"></select>
-                                                <span class="text-help" ng-show="RecordForm['activityId'+i.id].$invalid">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group {{i.valid['comments'] == false ? 'has-warning':''}}" show-errors>
-                                                <textarea ng-required="true" name="comments{{i.id}}" type="text"
-                                                          class="form-control {{i.valid['comments'] == false ? 'form-control-warning':''}}"
-                                                          placeholder="comments" ng-model="i.comments"
-                                                          ng-change="vm.validateOriginal('comments',i)"></textarea>
-                                                <span class="text-help" ng-show="RecordForm['comments'+i.id].$invalid">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group {{i.valid['hours'] == false ? 'has-warning':''}}" show-errors>
-                                                <input ng-required="true" name="hours{{i.id}}" type="number"
-                                                       class="form-control {{i.valid['hours'] == false ? 'form-control-warning':''}}"
-                                                       placeholder="hr" ng-model="i.hours"
-                                                       ng-change="vm.validateOriginal('hours',i)"
-                                                       ng-blur="vm.validateHours('hours',i)">
-                                                <span class="text-help" ng-show="RecordForm['hours'+i.id].$invalid">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
-                                               ng-click="vm.resetRecord(i)" ng-hide="i.new">
-                                                <i class="fa fa-refresh"></i>
-                                            </a>
-                                            <a class="btn btn-xs btn-outline b-{{app.setting.theme.danger}}" ng-click="vm.deleteRecord(i)">
-                                                <i class="fa fa-close"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr ng-show="vm.gridModel.data.length == 0">
-                                        <td colspan="8">
-                                            No Records
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                </tfoot>
-                            </table>
-                        </form>
+            <div ng-if="vm.filterModel.billingCycleId && vm.displayOptions.show">
+                <div class="ts-week-bar" ng-if="vm.weeks.length">
+                    <ul class="ts-week-tabs">
+                        <li ng-repeat="week in vm.weeks">
+                            <a class="ts-week-tab"
+                               ng-class="{'active': vm.selectedWeekIndex === week.index}"
+                               ng-click="vm.selectWeek(week.index)">
+                                <span class="ts-week-label">
+                                    <span class="ts-week-name">Week {{week.weekNum}}</span>
+                                    <span class="ts-week-range">{{week.label.split('·')[1]}}</span>
+                                </span>
+                                <span class="ts-week-hours">{{week.totalHours || 0}}h</span>
+                                <span class="ts-week-breakdown">
+                                    <span class="ts-week-chip is-bill" title="Billable">B {{week.totalBillableHours || 0}}</span>
+                                    <span class="ts-week-chip is-nonbill" title="Non-billable">NB {{(week.totalHours || 0) - (week.totalBillableHours || 0) - (week.totalNonEligibleHours || 0)}}</span>
+                                    <span class="ts-week-chip is-noneligible" title="Non-eligible">NE {{week.totalNonEligibleHours || 0}}</span>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="ts-week-actions">
+                        <button type="button" class="btn ts-btn-template"
+                                ng-click="vm.copyWeekToClipboard()"
+                                title="Copy this week to clipboard">
+                            <i class="fa fa-copy"></i> Copy Week
+                        </button>
+                        <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
+                            <i class="fa fa-th"></i> Bulk Populate
+                        </button>
+                        <button type="button" class="btn ts-btn-template"
+                                ng-click="vm.revertSelectedWeek()"
+                                title="Discard unsaved changes for the selected week">
+                            <i class="fa fa-undo"></i> Revert Week
+                        </button>
+                        <button type="button" class="btn ts-btn-template"
+                                ng-click="vm.revertAllWeeks()"
+                                title="Discard unsaved changes across all loaded weeks in this billing period">
+                            <i class="fa fa-undo"></i> Revert All
+                        </button>
+                        <button type="button" class="btn btn-primary"
+                                ng-click="vm.submitForm()"
+                                ng-disabled="vm.filterModel.userId == null">
+                            <i class="fa fa-save"></i> Save Changes
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <button class="btn btn-xs btn-primary pull-right" ng-show="vm.displayOptions.show" ng-click="vm.submitForm()" ng-disabled="vm.filterModel.userId == null">
-                        <i class="fa fa-save"></i> Save Changes
+
+                <div class="ts-no-period" ng-if="!vm.weeks.length">
+                    No weeks could be built for this billing period. Try selecting the period again, or check that it has start and end dates.
+                </div>
+
+                <form role="form" name="RecordForm" novalidate ng-if="vm.selectedWeek && vm.selectedWeek.days.length">
+                    <div class="ts-day-panel" ng-repeat="day in vm.selectedWeek.days">
+                        <div class="ts-day-header" ng-click="vm.toggleDay(day)">
+                            <span class="ts-day-title">
+                                <i class="fa fa-chevron-right fa-chevron" ng-class="{'open': day.expanded}"></i>
+                                &nbsp;{{day.label}}
+                            </span>
+                            <span class="ts-day-meta">
+                                <span ng-class="day.hours >= 8 ? 'ts-hours-ok' : 'ts-hours-low'">
+                                    {{day.hours || 0}}h
+                                </span>
+                                <span class="ts-week-breakdown">
+                                    <span class="ts-week-chip is-bill" title="Billable">B {{day.billhours || 0}}</span>
+                                    <span class="ts-week-chip is-nonbill" title="Non-billable">NB {{(day.hours || 0) - (day.billhours || 0) - (day.nehours || 0)}}</span>
+                                    <span class="ts-week-chip is-noneligible" title="Non-eligible">NE {{day.nehours || 0}}</span>
+                                </span>
+                                <span ng-if="day.records.length">{{day.records.length}} line{{day.records.length === 1 ? '' : 's'}}</span>
+                                <button type="button" class="ts-btn-add-line"
+                                        title="Add a line for this day"
+                                        ng-click="vm.addRowForDay(day); $event.stopPropagation()">
+                                    <i class="fa fa-plus"></i> Add line
+                                </button>
+                                <button type="button" class="ts-btn-add-line"
+                                        title="Copy this day to clipboard"
+                                        ng-if="day.records.length"
+                                        ng-click="vm.copyDayToClipboard(day); $event.stopPropagation()">
+                                    <i class="fa fa-copy"></i> Copy
+                                </button>
+                            </span>
+                        </div>
+
+                        <div class="ts-day-body" ng-show="day.expanded">
+                            <div class="table-responsive" ng-if="day.records.length">
+                                <table class="table ts-entry-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:34%">Project</th>
+                                            <th style="width:18%">Team</th>
+                                            <th style="width:18%">Activity</th>
+                                            <th style="width:20%">Comments</th>
+                                            <th style="width:6%">Hours</th>
+                                            <th class="ts-row-actions-col" style="width:10%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="i in day.records"
+                                            ng-class="{'ts-row-billable': vm.hoursBucket(i) === 'bill', 'ts-row-nonbillable': vm.hoursBucket(i) === 'nonbill', 'ts-row-noneligible': vm.hoursBucket(i) === 'ne'}">
+                                            <td>
+                                                <div class="ts-project-cell form-group {{i.valid['projectGridId'] == false ? 'has-warning':''}}">
+                                                    <input type="hidden" name="projectGridId{{i.id}}"
+                                                           ng-model="i.projectGridId" ng-required="true" />
+                                                    <button type="button" class="ts-project-pick"
+                                                            ng-class="{'has-warning': i.valid['projectGridId'] == false}"
+                                                            title="{{i.projectDescription ? (i.clientEntityName ? i.clientEntityName + ' — ' : '') + i.projectDescription : 'Choose a project'}}"
+                                                            ng-click="vm.openProjectListModal(i)">
+                                                        <span class="ts-project-meta" ng-if="i.projectDescription || i.clientEntityName">
+                                                            <span class="ts-client-name">{{i.clientEntityName || '—'}}</span>
+                                                        </span>
+                                                        <span class="ts-project-name" ng-if="i.projectDescription">{{i.projectDescription}}</span>
+                                                        <span class="ts-project-placeholder" ng-if="!i.projectDescription">Choose a project</span>
+                                                    </button>
+                                                    <span class="text-help" ng-show="RecordForm['projectGridId'+i.id].$invalid">Required</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group {{i.valid['teamId'] == false ? 'has-warning':''}}" show-errors>
+                                                    <select name="teamId{{i.id}}"
+                                                            class="form-control {{i.valid['teamId'] == false ? 'form-control-warning':''}}"
+                                                            ng-options="s.id as s.description for s in vm.filterOptions.teams"
+                                                            ng-model="i.teamId" ng-required="true"
+                                                            ng-change="vm.validateOriginal('teamId',i)"></select>
+                                                    <span class="text-help" ng-show="RecordForm['teamId'+i.id].$invalid">Required</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group {{i.valid['activityId'] == false ? 'has-warning':''}}" show-errors>
+                                                    <select name="activityId{{i.id}}"
+                                                            class="form-control {{i.valid['activityId'] == false ? 'form-control-warning':''}}"
+                                                            ng-options="s.id as s.description for s in vm.filterOptions.activities"
+                                                            ng-model="i.activityId" ng-required="true"
+                                                            ng-change="vm.validateOriginal('activityId',i)"></select>
+                                                    <span class="text-help" ng-show="RecordForm['activityId'+i.id].$invalid">Required</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group {{i.valid['comments'] == false ? 'has-warning':''}}" show-errors>
+                                                    <textarea ng-required="true" name="comments{{i.id}}" type="text"
+                                                              class="form-control {{i.valid['comments'] == false ? 'form-control-warning':''}}"
+                                                              placeholder="comments" ng-model="i.comments"
+                                                              ng-change="vm.validateOriginal('comments',i)"></textarea>
+                                                    <span class="text-help" ng-show="RecordForm['comments'+i.id].$invalid">Required</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group {{i.valid['hours'] == false ? 'has-warning':''}}" show-errors>
+                                                    <input ng-required="true" name="hours{{i.id}}" type="number"
+                                                           class="form-control {{i.valid['hours'] == false ? 'form-control-warning':''}}"
+                                                           placeholder="hr" ng-model="i.hours"
+                                                           ng-change="vm.validateOriginal('hours',i)"
+                                                           ng-blur="vm.validateHours('hours',i)">
+                                                    <span class="text-help" ng-show="RecordForm['hours'+i.id].$invalid">Required</span>
+                                                </div>
+                                            </td>
+                                            <td class="ts-row-actions-col">
+                                                <div class="ts-row-actions">
+                                                    <span class="ts-bill-flag"
+                                                          ng-class="{'is-billable': vm.hoursBucket(i) === 'bill', 'is-nonbillable': vm.hoursBucket(i) === 'nonbill', 'is-noneligible': vm.hoursBucket(i) === 'ne'}"
+                                                          title="{{vm.hoursBucket(i) === 'bill' ? 'Billable' : (vm.hoursBucket(i) === 'ne' ? 'Non-eligible' : 'Non-billable')}}">
+                                                        {{vm.hoursBucket(i) === 'bill' ? 'B' : (vm.hoursBucket(i) === 'ne' ? 'NE' : 'NB')}}
+                                                    </span>
+                                                    <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
+                                                       ng-click="vm.copyEntryToClipboard(i)"
+                                                       title="Copy this entry to clipboard">
+                                                        <i class="fa fa-copy"></i>
+                                                    </a>
+                                                    <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
+                                                       ng-click="vm.resetRecord(i)" ng-hide="i.new"
+                                                       title="Reset this entry">
+                                                        <i class="fa fa-refresh"></i>
+                                                    </a>
+                                                    <a class="btn btn-xs btn-outline b-{{app.setting.theme.danger}}"
+                                                       ng-click="vm.deleteRecord(i)"
+                                                       title="Delete this entry">
+                                                        <i class="fa fa-close"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="ts-day-empty" ng-if="!day.records.length">
+                                No time entered for this day.
+                                <a class="ts-empty-link" ng-click="vm.addRowForDay(day)">Add a line</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="ts-footer-actions" ng-if="vm.weeks.length">
+                    <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
+                        <i class="fa fa-th"></i> Bulk Populate
                     </button>
-                    <button class="btn btn-xs btn-primary pull-right m-r-1" ng-show="vm.displayOptions.show" ng-click="vm.submitNewRecord()">
-                        <i class="fa fa-plus"></i> Create New Record
+                    <button type="button" class="btn btn-primary"
+                            ng-click="vm.submitForm()"
+                            ng-disabled="vm.filterModel.userId == null">
+                        <i class="fa fa-save"></i> Save Changes
                     </button>
                 </div>
             </div>
