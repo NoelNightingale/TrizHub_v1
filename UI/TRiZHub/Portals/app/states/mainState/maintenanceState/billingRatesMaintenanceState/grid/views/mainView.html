@@ -173,8 +173,33 @@
                         </div>
                     </div>
 
-                    <!-- Toolbar -->
-                    <div class="br-toolbar">
+                    <!-- Chips -->
+                    <div class="br-chips"
+                         ng-if="vm.filters.userAccountIds.length || vm.filters.clientIds.length || vm.filters.projectIds.length">
+                        <span class="br-chip br-chip-user" ng-repeat="id in vm.filters.userAccountIds">
+                            {{vm.chipName(vm.optionUsers, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeUserChip(id)" title="Remove">×</a>
+                        </span>
+                        <span class="br-chip br-chip-client" ng-repeat="id in vm.filters.clientIds">
+                            {{vm.chipName(vm.optionClients, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeClientChip(id)" title="Remove">×</a>
+                        </span>
+                        <span class="br-chip br-chip-project" ng-repeat="id in vm.filters.projectIds">
+                            {{vm.chipName(vm.optionProjects, id)}}
+                            <a href="" class="br-chip-remove" ng-click="vm.removeProjectChip(id)" title="Remove">×</a>
+                        </span>
+                    </div>
+
+                    <!-- Tabs, tab-specific filters and actions on one row -->
+                    <div class="br-results-bar">
+                        <div class="btn-group br-mode-toggle">
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.viewMode === 'periods' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setViewMode('periods')">Period</button>
+                            <button type="button" class="btn btn-sm"
+                                    ng-class="vm.viewMode === 'effective' ? 'btn-primary' : 'btn-default'"
+                                    ng-click="vm.setViewMode('effective')">Effective On</button>
+                        </div>
                         <div class="br-toolbar-field" ng-if="vm.viewMode === 'periods'">
                             <label>Rate Type</label>
                             <select class="form-control input-sm" ng-model="vm.filters.scope" ng-change="vm.markFiltersDirty()">
@@ -227,6 +252,9 @@
                                    bs-datepicker placeholder="Required" autocomplete="off"
                                    ng-change="vm.onActiveOnChanged()" />
                         </div>
+                        <span class="br-mode-hint" ng-if="vm.viewMode === 'effective'">
+                            Project, else Client, else Employee.
+                        </span>
                         <div class="br-toolbar-actions">
                             <button type="button" class="btn btn-sm btn-default"
                                     ng-click="vm.clearAllFilters()">Clear</button>
@@ -240,40 +268,6 @@
                                 <i class="fa fa-spinner fa-spin"></i> Updating lists…
                             </span>
                         </div>
-                    </div>
-
-                    <!-- Chips -->
-                    <div class="br-chips"
-                         ng-if="vm.filters.userAccountIds.length || vm.filters.clientIds.length || vm.filters.projectIds.length">
-                        <span class="br-chip br-chip-user" ng-repeat="id in vm.filters.userAccountIds">
-                            {{vm.chipName(vm.optionUsers, id)}}
-                            <a href="" class="br-chip-remove" ng-click="vm.removeUserChip(id)" title="Remove">×</a>
-                        </span>
-                        <span class="br-chip br-chip-client" ng-repeat="id in vm.filters.clientIds">
-                            {{vm.chipName(vm.optionClients, id)}}
-                            <a href="" class="br-chip-remove" ng-click="vm.removeClientChip(id)" title="Remove">×</a>
-                        </span>
-                        <span class="br-chip br-chip-project" ng-repeat="id in vm.filters.projectIds">
-                            {{vm.chipName(vm.optionProjects, id)}}
-                            <a href="" class="br-chip-remove" ng-click="vm.removeProjectChip(id)" title="Remove">×</a>
-                        </span>
-                    </div>
-
-                    <div class="br-results-bar">
-                        <div class="btn-group br-mode-toggle">
-                            <button type="button" class="btn btn-sm"
-                                    ng-class="vm.viewMode === 'periods' ? 'btn-primary' : 'btn-default'"
-                                    ng-click="vm.setViewMode('periods')">Period</button>
-                            <button type="button" class="btn btn-sm"
-                                    ng-class="vm.viewMode === 'effective' ? 'btn-primary' : 'btn-default'"
-                                    ng-click="vm.setViewMode('effective')">Effective On</button>
-                        </div>
-                        <span class="br-mode-hint" ng-if="vm.viewMode === 'periods'">
-                            Rate periods that overlap the Start Date to End Date range.
-                        </span>
-                        <span class="br-mode-hint" ng-if="vm.viewMode === 'effective'">
-                            The rate that applies on {{vm.filters.activeOn | date: 'yyyy/MM/dd'}}: Project, else Client, else Employee.
-                        </span>
                     </div>
 
                     <!-- Shown instead of the grid until the new filter selection is loaded -->

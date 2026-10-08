@@ -357,20 +357,8 @@ hr {
     top: 2px;
 }
 
-.br-workbench .br-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 12px 16px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    background: #f7f9fb;
-    border: 1px solid #e8ecf0;
-    border-radius: 4px;
-}
-
 .br-workbench .br-toolbar-field {
-    min-width: 140px;
+    min-width: 130px;
 }
 
 .br-workbench .br-toolbar-field label {
@@ -498,12 +486,15 @@ hr {
 .br-workbench .br-results-bar {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 10px 14px;
     margin-bottom: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #eceff1;
+}
+
+.br-workbench .br-mode-toggle {
+    margin-right: 10px;
 }
 
 .br-workbench .br-mode-toggle .btn {
@@ -513,6 +504,7 @@ hr {
 .br-workbench .br-mode-hint {
     font-size: 12px;
     color: #90a4ae;
+    padding-bottom: 6px;
 }
 
 .br-workbench .br-table {
