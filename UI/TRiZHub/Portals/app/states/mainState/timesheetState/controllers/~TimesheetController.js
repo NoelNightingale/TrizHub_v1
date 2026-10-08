@@ -17,7 +17,7 @@ var TimesheetController = /** @class */ (function (_super) {
     __extends(TimesheetController, _super);
     //#endregion
     //#region Ctor
-    function TimesheetController($stateParams, $timeout, $window, $state, $scope, $uibModal, $log, $filter, ActivityService, TeamService, UserService, ProjectService, BillingCycleService, ClientService, TimesheetService, TimesheetTemplateService, SecurityService, Popups) {
+    function TimesheetController($stateParams, $timeout, $window, $state, $scope, $uibModal, $log, $filter, ActivityService, TeamService, UserService, ProjectService, BillingCycleService, ClientService, TimesheetService, TimesheetTemplateService, SecurityService, Popups, WorkTeamService) {
         var _this = _super.call(this, $scope, Popups, $state) || this;
         _this.$stateParams = $stateParams;
         _this.$timeout = $timeout;
@@ -37,6 +37,7 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.TimesheetTemplateService = TimesheetTemplateService;
         _this.SecurityService = SecurityService;
         _this.Popups = Popups;
+        _this.WorkTeamService = WorkTeamService;
         //#region Members
         _this.successMessage = "Saved Successfully";
         _this.saveSuccess = false;
@@ -44,6 +45,7 @@ var TimesheetController = /** @class */ (function (_super) {
         _this.onDataLoaded = function (event) { _this.onLoadEvent(event); };
         _this.show = String();
         _this.rowId = 1;
+        _this.userProjectsKey = null;
         /** Week tabs derived from the selected billing period (Mon–Sun, clamped to period). */
         _this.weeks = [];
         _this.selectedWeekIndex = 0;
@@ -73,6 +75,11 @@ var TimesheetController = /** @class */ (function (_super) {
             if (selectedStillValid) {
                 return;
             }
+            var requested = me.$stateParams["userId"];
+            if (requested && users.some(function (u) { return u.id === requested; })) {
+                me.filterModel.userId = requested;
+                return;
+            }
             me.filterModel.userId = me.SecurityService.getCurrentUserDetails().id;
         };
         /** Run applyBillingPeriod only when both user and billing period are ready. */
@@ -86,6 +93,41 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             me.initialTimesheetLoadDone = true;
             me.applyBillingPeriod();
+        };
+        /** Team memberships for the billing period, used to pre-select a row's team type. */
+        _this.loadUserTeamTypes = function () {
+            var me = _this;
+            var start = me.dateToKey(me.filterModel.startDate);
+            var end = me.dateToKey(me.filterModel.endDate);
+            if (!me.filterModel.userId || !start || !end) {
+                me.filterOptions.userTeamTypePeriods = [];
+                return;
+            }
+            var userId = me.filterModel.userId;
+            me.WorkTeamService.teamTypesForUser(userId, start, end)
+                .then(function (result) {
+                if (me.filterModel.userId === userId)
+                    me.filterOptions.userTeamTypePeriods = result || [];
+            }, function () {
+                me.filterOptions.userTeamTypePeriods = [];
+            });
+        };
+        /** The team type to pre-select for a row on `date`: only when exactly one team type covers that day. */
+        _this.defaultTeamTypeFor = function (date) {
+            var key = _this.dateToKey(date);
+            if (!key) {
+                return null;
+            }
+            var typeIds = [];
+            var periods = _this.filterOptions.userTeamTypePeriods || [];
+            for (var i = 0; i < periods.length; i++) {
+                var startKey = _this.parseDateKey(periods[i].startDate);
+                var endKey = periods[i].endDate ? _this.parseDateKey(periods[i].endDate) : null;
+                if (startKey <= key && (!endKey || endKey >= key) && typeIds.indexOf(periods[i].teamTypeId) < 0) {
+                    typeIds.push(periods[i].teamTypeId);
+                }
+            }
+            return typeIds.length === 1 ? typeIds[0] : null;
         };
         _this.userSelectChange = function () {
             _this.cancelPaste();
@@ -356,6 +398,7 @@ var TimesheetController = /** @class */ (function (_super) {
             }
             me.filterModel.startDate = periodStart;
             me.filterModel.endDate = periodEnd;
+            me.getUserProjects();
             me.buildWeeksFromPeriod(periodStart, periodEnd);
             if (!me.weeks.length) {
                 me.handleError("Could not build weeks for billing period "
@@ -771,7 +814,7 @@ var TimesheetController = /** @class */ (function (_super) {
                 clientEntityName: null,
                 billable: null,
                 subProjectId: null,
-                teamId: null,
+                teamId: me.defaultTeamTypeFor(entryDate),
                 activityId: null,
                 comments: null,
                 hours: null,
@@ -1798,7 +1841,8 @@ var TimesheetController = /** @class */ (function (_super) {
                 { val: 1, description: "Yes" },
                 { val: 2, description: "No" },
             ],
-            userTeams: []
+            userTeams: [],
+            userTeamTypePeriods: []
         };
         me.gridModel = { data: [], originalData: [], totalItems: 0 };
         me.summary = { days: [], totalHours: 0, totalBillableHours: 0, totalNonEligibleHours: 0 };
@@ -1886,11 +1930,17 @@ var TimesheetController = /** @class */ (function (_super) {
         var _this = this;
         if (!this.filterModel.userId) {
             this.filterOptions.userProjects = [];
+            this.filterOptions.userTeamTypePeriods = [];
             return;
         }
-        this.ProjectService.getUserAllocatedProjects(this.filterModel.userId, false)
+        this.loadUserTeamTypes();
+        // Team allocations depend on membership dates, so the list is loaded for the whole billing period.
+        var requestKey = this.filterModel.userId + "|" + this.dateToKey(this.filterModel.startDate) + "|" + this.dateToKey(this.filterModel.endDate);
+        this.userProjectsKey = requestKey;
+        this.ProjectService.getUserAllocatedProjects(this.filterModel.userId, false, this.dateToKey(this.filterModel.startDate), this.dateToKey(this.filterModel.endDate))
             .then(function (result) {
-            _this.filterOptions.userProjects = result;
+            if (_this.userProjectsKey === requestKey)
+                _this.filterOptions.userProjects = result;
         }, function (error) {
             _this.handleError(error);
         });
@@ -2049,6 +2099,7 @@ angular.module("AngularApp")
     "TimesheetTemplateService",
     "SecurityService",
     "Popups",
+    "WorkTeamService",
     TimesheetController
 ]);
 //# sourceMappingURL=~TimesheetController.js.map

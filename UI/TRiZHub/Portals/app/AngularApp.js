@@ -143,7 +143,10 @@ angular.module("AngularApp",
                     /// Timesheet
                     .state("mainState.timesheet",
                         {
-                            url: "/timesheet",
+                            url: "/timesheet?userId",
+                            params: {
+                                userId: { value: null, squash: true }
+                            },
                             views: {
                                 'timesheet': {
                                     templateUrl: "Portals/app/states/mainState/timesheetState/views/mainView.html?" + APP_CACHE_VER,
@@ -342,6 +345,59 @@ angular.module("AngularApp",
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
                                             .load("Portals/app/states/mainState/maintenanceState/teamMaintenanceState/detail/controllers/~TeamMaintenanceDetailController.js?" + APP_CACHE_VER);
+                                    }
+                                ]
+                            }
+                        })
+                    // Work Team Maintenance
+                    .state("mainState.maintenance.workTeamMaintenance",
+                        {
+                            url: "/workteam",
+                            abstract: true,
+                            views: {
+                                'view': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/stateView.html?" + APP_CACHE_VER
+                                }
+                            }
+                        })
+                    // Work Team Maintenance Grid
+                    .state("mainState.maintenance.workTeamMaintenance.grid",
+                        {
+                            url: "/grid",
+                            views: {
+                                'grid': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "WorkTeamMaintenanceGridController as vm"
+                                }
+                            },
+                            resolve: {
+                                loadMainCtrl: [
+                                    "$ocLazyLoad", function ($ocLazyLoad) {
+                                        return $ocLazyLoad
+                                            .load("Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/grid/controllers/~WorkTeamMaintenanceGridController.js?" + APP_CACHE_VER);
+                                    }
+                                ]
+                            }
+                        })
+                    // Work Team Maintenance Detail
+                    .state("mainState.maintenance.workTeamMaintenance.detail",
+                        {
+                            url: "/detail/:id?tab&ratesFor",
+                            params: {
+                                tab: { value: null, squash: true },
+                                ratesFor: { value: null, squash: true }
+                            },
+                            views: {
+                                'detail': {
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "WorkTeamMaintenanceDetailController as vm"
+                                }
+                            },
+                            resolve: {
+                                loadMainCtrl: [
+                                    "$ocLazyLoad", function ($ocLazyLoad) {
+                                        return $ocLazyLoad
+                                            .load("Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/detail/controllers/~WorkTeamMaintenanceDetailController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }
@@ -553,11 +609,12 @@ angular.module("AngularApp",
                     // User Maintenance Billing Rates Detail
                     .state("mainState.maintenance.userMaintenance.billingRatesDetail",
                         {
-                            url: "/billingRatesDetail/:userid/:id?scope&clientId&projectId",
+                            url: "/billingRatesDetail/:userid/:id?scope&clientId&projectId&workTeamId",
                             params: {
                                 scope: { value: null, squash: true },
                                 clientId: { value: null, squash: true },
-                                projectId: { value: null, squash: true }
+                                projectId: { value: null, squash: true },
+                                workTeamId: { value: null, squash: true }
                             },
                             views: {
                                 'detail': {

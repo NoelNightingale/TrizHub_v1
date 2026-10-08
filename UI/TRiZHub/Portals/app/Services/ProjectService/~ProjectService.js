@@ -94,9 +94,15 @@ var ProjectServiceModule;
                 });
                 return deferred.promise;
             };
-            _this.getUserAllocatedProjects = function (id, includeInactive) {
+            /** start/end are optional yyyy-MM-dd keys; the server defaults to today and adds team allocations for that range. */
+            _this.getUserAllocatedProjects = function (id, includeInactive, start, end) {
                 var deferred = _this.$q.defer();
-                _this.$http.get(_this.urlRoot + "GetUserAllocatedProjects/" + id + "?includeInactive=" + includeInactive)
+                var url = _this.urlRoot + "GetUserAllocatedProjects/" + id + "?includeInactive=" + includeInactive;
+                if (start)
+                    url += "&start=" + start;
+                if (end)
+                    url += "&end=" + end;
+                _this.$http.get(url)
                     .then(function (result) {
                     deferred.resolve(result.data);
                 }, function (error) {

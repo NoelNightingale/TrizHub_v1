@@ -48,6 +48,9 @@ var AdminHeaderController = /** @class */ (function (_super) {
             else
                 self.$state.go("root.login");
         };
+        _this.hasTeamCapability = function (capability) {
+            return _this.SecurityService.hasTeamCapability(capability);
+        };
         _this.logout = function () {
             var self = _this;
             self.Popups.confirmationDialog(self.$scope, "Logout", "Are you sure you want to logout?")

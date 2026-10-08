@@ -9,6 +9,7 @@ using TRiZHub.BL.Context;
 using TRiZHub.BL.Provider.Email;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.Settings;
+using TRiZHub.BL.Provider.WorkTeamData;
 using TRiZHub.Controllers.Filters;
 using TRiZHub.Models.Account;
 using System.Security.Principal;
@@ -50,13 +51,14 @@ namespace TRiZHub.Controllers.Security
         /// </summary>
         public CurrentUserModel GetCurrentUser()
         {
+            CurrentUserModel model;
             if (CurrentUser == null)
             {
                 try
                 {
                     var localAccount = HttpContext.Current.User.Identity;
                     var account = SecurityProvider.UserLogin(localAccount.Name);
-                    return new CurrentUserModel(account);
+                    model = new CurrentUserModel(account);
                 }
                 catch (Exception)
                 {
@@ -64,7 +66,13 @@ namespace TRiZHub.Controllers.Security
                         "Your connecting account is not valid..."));
                 }
             }
-            return CurrentUser;
+            else
+            {
+                model = CurrentUser;
+            }
+
+            model.TeamCapabilities = new WorkTeamAccessProvider(Context, model).CapabilitySummary(model.Id);
+            return model;
         }
 
         /// <summary>

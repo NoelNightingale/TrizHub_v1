@@ -65,6 +65,10 @@
                     </div>
 
                 </form>
+                <p class="text-muted">
+                    <i class="fa fa-users"></i> <em>via team</em> marks items this person currently receives through a work team.
+                    Those are read-only here and maintained on the Work Teams screen; the switches only change direct allocations.
+                </p>
 <!--
                 <a class="text-success" style="margin-right: 5px" ng-click="vm.setCollapsedValue(vm.treeData, false)">Expand</a>/
                 <a class="text-success" style="margin-left: 5px" ng-click="vm.setCollapsedValue(vm.treeData, true)">Collapse</a>
@@ -92,6 +96,7 @@
                 <i class="indigo"></i>
             </label>
             {{ node.name }}
+            <small class="text-muted" ng-if="node.inheritedFrom" title="Read-only: allocated through work team membership"><i class="fa fa-users"></i> via team {{node.inheritedFrom}}</small>
         </div>
         <div class="col-lg-4" ng-show="node.selected">Entire Client Selected</div>
         <div class="col-lg-2" ng-show="!node.selected">Projects : {{vm.getClientCounts(node,"Project")}}</div>
@@ -127,12 +132,14 @@
             </label>
 
             <span><b>{{ child.code }} {{ child.name }}</b></span>
+            <small class="text-muted" ng-if="child.inheritedFrom" title="Read-only: allocated through work team membership"><i class="fa fa-users"></i> via team {{child.inheritedFrom}}</small>
         </div>
 
         <div class="col-lg-6" ng-if="node.selected">
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span><b>{{ child.code }} {{ child.name }}</b></span>
+            <small class="text-muted" ng-if="child.inheritedFrom" title="Read-only: allocated through work team membership"><i class="fa fa-users"></i> via team {{child.inheritedFrom}}</small>
         </div>
 
 
@@ -162,6 +169,7 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;
                 </label>
                 <span>{{ grandchild.code }} {{ grandchild.name }}</span>
+                <small class="text-muted" ng-if="grandchild.inheritedFrom" title="Read-only: allocated through work team membership"><i class="fa fa-users"></i> via team {{grandchild.inheritedFrom}}</small>
             </li>
         </ul>
     </script>

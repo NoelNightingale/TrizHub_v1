@@ -4,6 +4,9 @@
         <name>TRiZHub</name>
     </assembly>
     <members>
+        <member name="P:TRiZHub.Models.Account.CurrentUserModel.TeamCapabilities">
+            <summary>Only filled by <c>Account/GetCurrentUser</c>; null on per-request instances.</summary>
+        </member>
         <member name="T:TRiZHub.Models.BillingRatesModels.BillingRatesEffectiveGridModel">
             <summary>
             Effective rate row for the Billing Rates workbench (Active On date).
@@ -73,6 +76,28 @@
             <summary>
             "active" (default), "inactive", or "all".
             </summary>
+        </member>
+        <member name="P:TRiZHub.Models.ProjectModels.UserIdentityProjectModel.InheritedFrom">
+            <summary>Names of the teams this item is inherited through, for read-only display; null when not inherited.</summary>
+        </member>
+        <member name="T:TRiZHub.Models.ProjectModels.ClientTreeSelection">
+            <summary>
+            Builds the client / project / subproject selection tree shared by user and team allocation screens.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.ProjectModels.ClientTreeSelection.ProjectIds">
+            <summary>Whole-project selections.</summary>
+        </member>
+        <member name="M:TRiZHub.Models.ProjectModels.ClientTreeBuilder.SplitSelection(System.Collections.Generic.IEnumerable{TRiZHub.Models.ProjectModels.UserIdentityProjectModel},System.Collections.Generic.List{System.Guid}@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{System.Guid,System.Nullable{System.Guid}}}@)">
+            <summary>
+            Flattens a posted tree selection: an empty ProjectId is a whole client, an empty SubProjectId is a whole project.
+            </summary>
+        </member>
+        <member name="P:TRiZHub.Models.WorkTeamModels.WorkTeamAllocationSaveModel.Selection">
+            <summary>Selected tree nodes: no ProjectId means the whole client, no SubProjectId means the whole project.</summary>
+        </member>
+        <member name="P:TRiZHub.Models.WorkTeamModels.WorkTeamEditModel.Permissions">
+            <summary>Output only: what the current user may do on this team.</summary>
         </member>
         <member name="M:TRiZHub.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
             <summary>
@@ -643,6 +668,11 @@
             Delete Billing Rate based on id
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.BillingRatesController.WorkTeamMemberRates(System.Guid,System.Guid)">
+            <summary>
+            A person's Client/Project rates inside a work team's allocations, for team managers and leads.
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.BillingRatesController.ProjectTeamRates(TRiZHub.Models.BillingRatesModels.ProjectTeamRatesRequest)">
             <summary>
             Team roster with Project / Client / Default rates as of a date for a project.
@@ -883,6 +913,57 @@
             Retrieve list of all Teams based on filter and sort input values
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.WorkTeamDropdown">
+            <summary>
+            Active teams the current user can maintain
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.WorkTeamGrid(TRiZHub.Models.IdGridModel)">
+            <summary>
+            Teams the current user can maintain, filtered and sorted
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.GetWorkTeam(System.Guid)">
+            <summary>
+            Single team with the current user's permissions on it
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.SaveWorkTeam(TRiZHub.Models.WorkTeamModels.WorkTeamEditModel)">
+            <summary>
+            Create or update a team. Administrators edit everything; managers only the lead flags.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.WorkTeamMembers(System.Guid,System.Boolean)">
+            <summary>
+            Memberships of a team; ended memberships only when requested
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.SaveWorkTeamMember(TRiZHub.Models.WorkTeamModels.WorkTeamMemberModel)">
+            <summary>
+            Add or change a dated membership
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.DeleteWorkTeamMember(System.Guid)">
+            <summary>
+            Remove a membership row entirely. Ending a membership (setting an end date) keeps history.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.TeamTypesForUser(System.Guid,System.DateTime,System.DateTime)">
+            <summary>
+            The user's team memberships (any role) overlapping [start, end] with each team's team type, so the timesheet
+            can pre-select a team type when exactly one covers a row's date.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.WorkTeamAllocationTree(System.Guid,System.Boolean)">
+            <summary>
+            Client / project / subproject tree with this team's allocations selected
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.SaveWorkTeamAllocations(TRiZHub.Models.WorkTeamModels.WorkTeamAllocationSaveModel)">
+            <summary>
+            Replace the team's allocations with the posted selection
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.TimesheetController.TimesheetGrid(TRiZHub.Models.TimesheetSearchModel)">
             <summary>
             Retrieve list of Timesheets based on filter and sort input values
@@ -961,6 +1042,12 @@
             Retrieve combined list of Project and Subprojects sorted by Description
             </summary>
             
+        </member>
+        <member name="M:TRiZHub.Controllers.ProjectController.GetUserAllocatedProjects(System.String,System.Boolean,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Projects the user can log time on between start and end (default: today): direct allocations plus the
+            allocations of teams the user belongs to during that range. Saves are re-checked per day on the server.
+            </summary>
         </member>
         <member name="M:TRiZHub.Controllers.ProjectController.ProjectDropdown">
             <summary>

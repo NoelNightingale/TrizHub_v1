@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security;
 using System.Web.Http;
+using TCR.Lib.BL;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.BillingRatesData;
 using TRiZHub.BL.Provider.BillingRatesData;
@@ -85,6 +86,10 @@ namespace TRiZHub.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
             }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
+            }
         }
 
         /// <summary>
@@ -96,6 +101,8 @@ namespace TRiZHub.Controllers
             try
             {
                 var billingRates = BillingRatesProvider.GetBillingRates(id);
+                if (billingRates == null)
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Billing rate not found."));
                 var lockReason = BillingRatesProvider.GetLockReason(billingRates.Client, billingRates.Project);
                 var projectClient = billingRates.Project != null ? billingRates.Project.Client : null;
 
@@ -120,6 +127,10 @@ namespace TRiZHub.Controllers
             catch (SecurityException e)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
             }
         }
 
@@ -463,6 +474,63 @@ namespace TRiZHub.Controllers
             catch (BillingRatesException e)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
+            }
+        }
+
+        /// <summary>
+        /// A person's Client/Project rates inside a work team's allocations, for team managers and leads.
+        /// </summary>
+        [HttpGet]
+        public WorkTeamMemberRatesModel WorkTeamMemberRates(Guid workTeamId, Guid userId)
+        {
+            try
+            {
+                var result = BillingRatesProvider.GetWorkTeamMemberRates(workTeamId, userId);
+                return new WorkTeamMemberRatesModel
+                {
+                    WorkTeamId = result.WorkTeamId,
+                    WorkTeamName = result.WorkTeamName,
+                    UserAccountId = result.UserAccountId,
+                    UserName = result.UserName,
+                    Rates = result.Rates.Select(r => new WorkTeamMemberRateRowModel
+                    {
+                        Id = r.Id,
+                        Scope = r.Scope,
+                        ClientId = r.ClientId,
+                        ClientName = r.ClientName,
+                        ProjectId = r.ProjectId,
+                        ProjectName = r.ProjectName,
+                        Rate = r.Rate,
+                        StartDate = r.StartDate,
+                        EndDate = r.EndDate,
+                        IsLocked = r.IsLocked,
+                        CanEdit = r.CanEdit
+                    }).ToList(),
+                    Clients = result.Clients.Select(c => new BillingRatesFilterOptionModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name
+                    }).ToList(),
+                    Projects = result.Projects.Select(p => new WorkTeamRateProjectOptionModel
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        ClientId = p.ClientId,
+                        ClientName = p.ClientName
+                    }).ToList()
+                };
+            }
+            catch (BillingRatesException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
             }
         }
 

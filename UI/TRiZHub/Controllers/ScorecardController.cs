@@ -13,6 +13,7 @@ using TRiZHub.BL.Provider.ScorecardTemplateData;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.Settings;
 using TRiZHub.BL.Provider.TeamJobDesignationData;
+using TRiZHub.BL.Provider.WorkTeamData;
 using TRiZHub.Controllers.Filters;
 using TRiZHub.Models;
 using TRiZHub.Models.ScorecardModels;
@@ -740,9 +741,30 @@ namespace TRiZHub.Controllers
 
             var teamJobDesignationids = TeamJobDesignationProvider.TeamJobDesignationtLineLeadFilterList(CurrentUser.Id).Where(a => a.StartDate < DateTime.Now && (a.EndDate == null || a.EndDate > DateTime.Now)).Select(a => a.UserAccountId).ToList();
 
+            // Work-team reach (scorecards flag): any status, but only scorecards whose period the membership overlaps.
+            var workTeamIds = ScorecardProvider.TeamScorecardEmployeeIds().ToList();
+            var workTeamAccess = new WorkTeamAccessProvider(Context, CurrentUser);
+            var reachablePeriods = workTeamIds.ToDictionary(
+                employeeId => employeeId,
+                employeeId => workTeamAccess.ReachablePeriods(CurrentUser.Id, employeeId, WorkTeamCapability.Scorecards,
+                    new DateTime(1753, 1, 1), DateTime.MaxValue.Date));
+
+            Func<BL.Entities.ScorecardData.Scorecard, bool> reachedThroughTeam = a =>
+            {
+                List<WorkTeamTypePeriod> periods;
+                if (!reachablePeriods.TryGetValue(a.EmployeeId, out periods))
+                    return false;
+                var useVariable = a.ScorecardTemplatePeriod.IsVariable && a.VariableStart != null;
+                var from = useVariable ? a.VariableStart.Value : a.ScorecardTemplatePeriod.StartDate;
+                var to = useVariable ? (a.VariableEnd ?? a.VariableStart).Value : a.ScorecardTemplatePeriod.EndDate;
+                return periods.Any(p => WorkTeamAccessRules.Overlaps(p.StartDate, p.EndDate, from, to));
+            };
+
             var filteredQuery = ScorecardProvider.ScorecardList()
-                                .Where(a => teamJobDesignationids.Contains(a.EmployeeId) && a.Completed == true)
+                                .Where(a => (teamJobDesignationids.Contains(a.EmployeeId) && a.Completed == true)
+                                            || workTeamIds.Contains(a.EmployeeId))
                                 .ToList()
+                                .Where(a => (teamJobDesignationids.Contains(a.EmployeeId) && a.Completed) || reachedThroughTeam(a))
                                 .Select(a => new ScorecardGridModel
                                 {
                                     ScorecardPeriodId = a.Id,
@@ -1145,6 +1167,10 @@ namespace TRiZHub.Controllers
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
             }
+            catch (ScorecardException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
         }
 
         /// <summary>
@@ -1244,6 +1270,12 @@ namespace TRiZHub.Controllers
             }
             catch (ScorecardTemplateException e)
             {
+                Context.RollbackTransaction();
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (ScorecardException e)
+            {
+                Context.RollbackTransaction();
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
             }
         }

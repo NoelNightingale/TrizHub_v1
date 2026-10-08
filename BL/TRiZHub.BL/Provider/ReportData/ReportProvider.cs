@@ -947,6 +947,7 @@ namespace TRiZHub.BL.Provider.ReportData
                 sheetMain.Cells[lineCount, 10].Value = "Sub Project Code";
                 sheetMain.Cells[lineCount, 11].Value = "Sub Project";
                 sheetMain.Cells[lineCount, 12].Value = "Sub Project Active";
+                sheetMain.Cells[lineCount, 13].Value = "Source";
                 lineCount++;
 
                 var lines = sheetMain.Cells.Rows;
@@ -992,6 +993,7 @@ namespace TRiZHub.BL.Provider.ReportData
                         }
 
                     }
+                    sheetMain.Cells[lineCount, 13].Value = data[i].Source;
                     lineCount++;
                 }
 

@@ -3,7 +3,7 @@
         <div class="box">
             <div class="box-header b-b">
                 <h2>
-                    <a class="text-success" ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: vm.viewModel.userAccountId})">Billing Rates</a>
+                    <a class="text-success" href="" ng-click="vm.goBack()">{{vm.workTeamId ? 'Team Rates' : 'Billing Rates'}}</a>
                 </h2>
             </div>
             <div class="box-body">
@@ -16,7 +16,7 @@
                         <label for="scope" class="col-sm-2 form-control-label">Rate Type:</label>
                         <div class="col-sm-9">
                             <select name="scope" class="form-control" ng-model="vm.scopeType" ng-change="vm.onScopeChanged()" required>
-                                <option value="Default">Employee</option>
+                                <option value="Default" ng-if="!vm.workTeamId">Employee</option>
                                 <option value="Client">Client</option>
                                 <option value="Project">Project</option>
                             </select>
@@ -54,7 +54,7 @@
                         <label for="projectClientFilter" class="col-sm-2 form-control-label">Client:</label>
                         <div class="col-sm-9">
                             <select name="projectClientFilter" class="form-control"
-                                    ng-options="s.id as s.entityName for s in vm.clientDropdown"
+                                    ng-options="s.id as s.entityName for s in vm.projectClientDropdown"
                                     ng-model="vm.projectClientFilterId"
                                     ng-change="vm.applyProjectClientFilter()"
                                     ng-required="vm.scopeType === 'Project'"></select>
@@ -110,7 +110,7 @@
                     <hr />
                     <div class="form-group row">
                         <div class="col-md-12 pull-right text-right">
-                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.userMaintenance.billingRatesGrid({id: vm.viewModel.userAccountId})">
+                            <button class="btn btn-outline b-primary text-primary" ng-click="vm.goBack()">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> {{vm.viewModel.isLocked ? 'Back' : 'Cancel'}}
                             </button>
                             <button class="btn btn-fw primary" ng-click="vm.submitForm()" ng-if="!vm.viewModel.isLocked">

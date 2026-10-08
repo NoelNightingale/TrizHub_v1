@@ -35,6 +35,36 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         _this.filteredProjectDropdown = [];
         // UI-only: Project-scope rates are saved with ClientId null.
         _this.projectClientFilterId = null;
+        // Set when opened from a work team: only that team's clients/projects, and no employee (default) rates.
+        _this.workTeamId = null;
+        /** Team mode: the client/project options come from the team's allocations. */
+        _this.loadTeamOptions = function () {
+            var self = _this;
+            self.BillingRatesService.workTeamMemberRates(self.workTeamId, self.viewModel.userAccountId)
+                .then(function (result) {
+                self.clientDropdown = (result.clients || []).map(function (c) { return ({ id: c.id, entityName: c.name }); });
+                self.projectDropdown = (result.projects || []).map(function (p) { return ({ id: p.id, description: p.name, clientId: p.clientId }); });
+                var seen = {};
+                self.projectClientDropdown = [];
+                (result.projects || []).forEach(function (p) {
+                    if (!seen[p.clientId]) {
+                        seen[p.clientId] = true;
+                        self.projectClientDropdown.push({ id: p.clientId, entityName: p.clientName });
+                    }
+                });
+                self.projectClientDropdown.sort(function (a, b) { return (a.entityName || "").localeCompare(b.entityName || ""); });
+                self.syncProjectClientFilter();
+            }, function (error) {
+                self.handleError(error);
+            });
+        };
+        _this.goBack = function () {
+            if (_this.workTeamId) {
+                _this.$state.go("mainState.maintenance.workTeamMaintenance.detail", { id: _this.workTeamId, tab: "people", ratesFor: _this.viewModel.userAccountId });
+                return;
+            }
+            _this.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid", { id: _this.viewModel.userAccountId });
+        };
         _this.applyNewPrefill = function () {
             var scope = _this.$stateParams["scope"];
             var clientId = _this.$stateParams["clientId"];
@@ -48,6 +78,11 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 _this.scopeType = "Project";
                 _this.viewModel.projectId = projectId || null;
                 _this.viewModel.clientId = null;
+            }
+            else if (_this.workTeamId) {
+                _this.scopeType = "Client";
+                _this.viewModel.clientId = null;
+                _this.viewModel.projectId = null;
             }
             else {
                 _this.scopeType = "Default";
@@ -119,7 +154,7 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
                 .then(function (result) {
                 self.saveSuccess = true;
                 self.$timeout(function () {
-                    self.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid", { "id": result.userAccountId });
+                    self.goBack();
                 }, 1000);
             }, function (error) {
                 self.handleError(error);
@@ -129,19 +164,26 @@ var BillingRatesDetailController = /** @class */ (function (_super) {
         _this.viewModel = {};
         _this.viewModel.userAccountId = _this.$stateParams["userid"];
         _this.viewModel.id = _this.$stateParams["id"];
-        ClientService.clientDropdownList()
-            .then(function (result) {
-            self.clientDropdown = result;
-        }, function (error) {
-            self.handleError(error);
-        });
-        ProjectService.projectDropdownList()
-            .then(function (result) {
-            self.projectDropdown = result;
-            self.syncProjectClientFilter();
-        }, function (error) {
-            self.handleError(error);
-        });
+        _this.workTeamId = _this.$stateParams["workTeamId"] || null;
+        if (_this.workTeamId) {
+            _this.loadTeamOptions();
+        }
+        else {
+            ClientService.clientDropdownList()
+                .then(function (result) {
+                self.clientDropdown = result;
+                self.projectClientDropdown = result;
+            }, function (error) {
+                self.handleError(error);
+            });
+            ProjectService.projectDropdownList()
+                .then(function (result) {
+                self.projectDropdown = result;
+                self.syncProjectClientFilter();
+            }, function (error) {
+                self.handleError(error);
+            });
+        }
         if (_this.viewModel.id !== "new") {
             _this.BillingRatesService.billingRatesGet(_this.viewModel.id)
                 .then(function (result) {

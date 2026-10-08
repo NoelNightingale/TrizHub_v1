@@ -15,7 +15,14 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         IQueryable<Scorecard> ScorecardList();
 
+        /// <summary>Throws ScorecardException unless the current user may view it.</summary>
         Scorecard GetScorecard(Guid id);
+
+        /// <summary>People the current user reaches for scorecards through a team (any period).</summary>
+        IQueryable<Guid> TeamScorecardEmployeeIds();
+
+        /// <summary>PerformanceManagementCreateScoreCards, or team reach over the scorecard period.</summary>
+        bool CanManageScorecardFor(Guid employeeId, Guid scoreCardTemplatePeriodId, DateTime? variableStart, DateTime? variableEnd);
 
         Scorecard SaveScorecard(Guid? id, Guid scorecardTemplateId, Guid evaluatorId, Guid employeeId, Guid scoreCardTemplatePeriodId, bool rated, bool completed, Guid createdBy, DateTime dateCreated, string evaluatorMessage, string employeeMessage, DateTime? variableStart, DateTime? variableEnd, int? variableYear);
         Scorecard SaveEmployeeComment(Guid? id, string employeeMessage);

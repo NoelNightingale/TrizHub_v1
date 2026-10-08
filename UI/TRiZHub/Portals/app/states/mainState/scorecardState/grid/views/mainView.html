@@ -8,13 +8,13 @@
                 <div class="box-body">
                     <div class="b-b b-primary nav-active-primary">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item" ng-if="vm.isAllowed('PerformanceManagementCreateScoreCards')">
+                            <li class="nav-item" ng-if="vm.canCreateScorecards()">
                                 <a class="nav-link {{vm.cscActive}}" data-toggle="tab" data-target="#csc">Create Score Cards</a>
                             </li>
                             <li class="nav-item" ng-if="vm.isAllowed('PerformanceManagementViewMyScoreCards')">
                                 <a class="nav-link {{vm.pscActive}}" data-toggle="tab" data-target="#psc">View My Score Cards</a>
                             </li>
-                            <li class="nav-item" ng-if="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards')">
+                            <li class="nav-item" ng-if="vm.canViewTeamScorecards()">
                                 <a class="nav-link {{vm.yscActive}}" data-toggle="tab" data-target="#ysc">View My Team Score Cards</a>
                             </li>
                             <li class="nav-item" ng-if="vm.isAdmin === true">
@@ -23,7 +23,7 @@
                         </ul>
                     </div>
                     <div class="tab-content m-t-1 m-b-1">
-                        <div ng-if="vm.isAllowed('PerformanceManagementCreateScoreCards')" class="tab-pane animated fadeIn text-muted {{vm.cscActive}}" id="csc">
+                        <div ng-if="vm.canCreateScorecards()" class="tab-pane animated fadeIn text-muted {{vm.cscActive}}" id="csc">
                             <div class="row">
                                 <div class="col-sm-12 col-md-12">
                                     <form class="form-inline v-m m-b-1" role="search" novalidate>
@@ -259,7 +259,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div ng-if="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards')" class="tab-pane animated fadeIn text-muted {{vm.yscActive}}" id="ysc">
+                        <div ng-if="vm.canViewTeamScorecards()" class="tab-pane animated fadeIn text-muted {{vm.yscActive}}" id="ysc">
                             <div class="row">
                                 <div class="col-sm-12 col-md-12">
                                     <form class="form-inline v-m m-b-1" role="search" novalidate>

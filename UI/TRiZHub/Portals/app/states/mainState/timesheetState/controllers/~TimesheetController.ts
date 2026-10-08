@@ -20,6 +20,7 @@ class TimesheetController extends CHControllerBase {
     templateProject: any;
     show = String();
     rowId = 1;
+    private userProjectsKey: string = null;
 
     /** Week tabs derived from the selected billing period (Mon–Sun, clamped to period). */
     weeks: any[] = [];
@@ -59,7 +60,8 @@ class TimesheetController extends CHControllerBase {
         private TimesheetService: TimesheetServiceModule.TimesheetService,
         private TimesheetTemplateService: TimesheetTemplateServiceModule.TimesheetTemplateService,
         private SecurityService: SecurityServiceModule.SecurityService,
-        private Popups: any) {
+        private Popups: any,
+        private WorkTeamService: WorkTeamServiceModule.WorkTeamService) {
         super($scope, Popups, $state);
         const me = this;
         me.displayOptions = { show: false };
@@ -78,7 +80,8 @@ class TimesheetController extends CHControllerBase {
                 { val: 1, description: "Yes" },
                 { val: 2, description: "No" },
             ],
-            userTeams: []
+            userTeams: [],
+            userTeamTypePeriods: []
         };
 
         me.gridModel = { data: [], originalData: [], totalItems: 0 } as any;
@@ -200,6 +203,11 @@ class TimesheetController extends CHControllerBase {
         if (selectedStillValid) {
             return;
         }
+        const requested = me.$stateParams["userId"];
+        if (requested && users.some((u: any) => u.id === requested)) {
+            me.filterModel.userId = requested;
+            return;
+        }
         me.filterModel.userId = me.SecurityService.getCurrentUserDetails().id;
     };
 
@@ -219,17 +227,63 @@ class TimesheetController extends CHControllerBase {
     getUserProjects() {
         if (!this.filterModel.userId) {
             this.filterOptions.userProjects = [];
+            this.filterOptions.userTeamTypePeriods = [];
             return;
         }
-        this.ProjectService.getUserAllocatedProjects(this.filterModel.userId, false)
+        this.loadUserTeamTypes();
+        // Team allocations depend on membership dates, so the list is loaded for the whole billing period.
+        const requestKey = this.filterModel.userId + "|" + this.dateToKey(this.filterModel.startDate) + "|" + this.dateToKey(this.filterModel.endDate);
+        this.userProjectsKey = requestKey;
+        this.ProjectService.getUserAllocatedProjects(this.filterModel.userId, false,
+                this.dateToKey(this.filterModel.startDate), this.dateToKey(this.filterModel.endDate))
             .then(
                 result => {
-                    this.filterOptions.userProjects = result;
+                    if (this.userProjectsKey === requestKey)
+                        this.filterOptions.userProjects = result;
                 },
                 error => {
                     this.handleError(error);
                 });
     }
+
+    /** Team memberships for the billing period, used to pre-select a row's team type. */
+    loadUserTeamTypes = (): void => {
+        const me = this;
+        const start = me.dateToKey(me.filterModel.startDate);
+        const end = me.dateToKey(me.filterModel.endDate);
+        if (!me.filterModel.userId || !start || !end) {
+            me.filterOptions.userTeamTypePeriods = [];
+            return;
+        }
+        const userId = me.filterModel.userId;
+        me.WorkTeamService.teamTypesForUser(userId, start, end)
+            .then(
+                result => {
+                    if (me.filterModel.userId === userId)
+                        me.filterOptions.userTeamTypePeriods = result || [];
+                },
+                () => {
+                    me.filterOptions.userTeamTypePeriods = [];
+                });
+    };
+
+    /** The team type to pre-select for a row on `date`: only when exactly one team type covers that day. */
+    defaultTeamTypeFor = (date: Date): any => {
+        const key = this.dateToKey(date);
+        if (!key) {
+            return null;
+        }
+        const typeIds = [];
+        const periods = this.filterOptions.userTeamTypePeriods || [];
+        for (let i = 0; i < periods.length; i++) {
+            const startKey = this.parseDateKey(periods[i].startDate);
+            const endKey = periods[i].endDate ? this.parseDateKey(periods[i].endDate) : null;
+            if (startKey <= key && (!endKey || endKey >= key) && typeIds.indexOf(periods[i].teamTypeId) < 0) {
+                typeIds.push(periods[i].teamTypeId);
+            }
+        }
+        return typeIds.length === 1 ? typeIds[0] : null;
+    };
 
     userSelectChange = (): void => {
         this.cancelPaste();
@@ -517,6 +571,7 @@ class TimesheetController extends CHControllerBase {
 
         me.filterModel.startDate = periodStart;
         me.filterModel.endDate = periodEnd;
+        me.getUserProjects();
         me.buildWeeksFromPeriod(periodStart, periodEnd);
 
         if (!me.weeks.length) {
@@ -1018,7 +1073,7 @@ class TimesheetController extends CHControllerBase {
             clientEntityName: null,
             billable: null,
             subProjectId: null,
-            teamId: null,
+            teamId: me.defaultTeamTypeFor(entryDate),
             activityId: null,
             comments: null,
             hours: null,
@@ -2297,5 +2352,6 @@ angular.module("AngularApp")
             "TimesheetTemplateService",
             "SecurityService",
             "Popups",
+            "WorkTeamService",
             TimesheetController
         ]);

@@ -134,6 +134,10 @@
             self.$state.go("root.login");
     };
 
+    hasTeamCapability = (capability: string): boolean => {
+        return this.SecurityService.hasTeamCapability(capability);
+    };
+
     logout = (): void => {
         const self = this;
         self.Popups.confirmationDialog(self.$scope, "Logout", "Are you sure you want to logout?")

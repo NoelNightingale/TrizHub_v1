@@ -7,7 +7,9 @@ using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.ScorecardData;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Provider.Security;
+using TRiZHub.BL.Provider.WorkTeamData;
 using System.Collections.Generic;
+using TCR.Lib.BL;
 
 #endregion
 
@@ -30,6 +32,102 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         #endregion
 
+        #region Ownership
+
+        private Guid CurrentUserId
+        {
+            get
+            {
+                if (CurrentUser == null)
+                    throw new GenericSecurityException("Not Allowed!");
+                return CurrentUser.Id;
+            }
+        }
+
+        /// <summary>The dates a scorecard covers: the variable dates when set, else the template period's.</summary>
+        private void ScorecardRange(Guid scoreCardTemplatePeriodId, DateTime? variableStart, DateTime? variableEnd,
+            out DateTime from, out DateTime to)
+        {
+            var period = DataContext.ScorecardTemplatePeriodSet
+                .Where(p => p.Id == scoreCardTemplatePeriodId)
+                .Select(p => new { p.StartDate, p.EndDate, p.IsVariable })
+                .FirstOrDefault();
+            if (period == null)
+                throw new ScorecardException("The scorecard period could not be found.");
+
+            if (period.IsVariable && variableStart.HasValue)
+            {
+                from = variableStart.Value.Date;
+                to = (variableEnd ?? variableStart).Value.Date;
+            }
+            else
+            {
+                from = period.StartDate.Date;
+                to = period.EndDate.Date;
+            }
+        }
+
+        /// <summary>A current team lead/manager with the scorecards flag whose reach covers part of the period.</summary>
+        private bool TeamReaches(Guid employeeId, Guid scoreCardTemplatePeriodId, DateTime? variableStart, DateTime? variableEnd)
+        {
+            DateTime from, to;
+            ScorecardRange(scoreCardTemplatePeriodId, variableStart, variableEnd, out from, out to);
+            return new WorkTeamAccessProvider(DataContext, CurrentUser)
+                .CanActOn(CurrentUserId, employeeId, WorkTeamCapability.Scorecards, from, to);
+        }
+
+        private bool TeamReaches(Scorecard scorecard)
+        {
+            return TeamReaches(scorecard.EmployeeId, scorecard.ScorecardTemplatePeriodId, scorecard.VariableStart, scorecard.VariableEnd);
+        }
+
+        private bool IsLineLeaderOf(Guid employeeId)
+        {
+            var now = DateTime.Now;
+            var userId = CurrentUserId;
+            return UserIsAllowed(PrivilegeType.PerformanceManagementViewMyTeamScoreCards)
+                   && DataContext.TeamJobDesignationSet.Any(a => a.LineLeaderId == userId
+                                                                 && a.UserAccountId == employeeId
+                                                                 && a.StartDate < now
+                                                                 && (a.EndDate == null || a.EndDate > now));
+        }
+
+        /// <summary>Evaluator, creator, performance admin, or team reach over the scorecard period.</summary>
+        private void EnsureCanManage(Scorecard scorecard)
+        {
+            var userId = CurrentUserId;
+            if (scorecard.EvaluatorId == userId
+                || scorecard.CreatedBy == userId
+                || UserIsAllowed(PrivilegeType.PerformanceManagementAdmin)
+                || TeamReaches(scorecard))
+                return;
+            throw new ScorecardException("You are not allowed to change this scorecard.");
+        }
+
+        /// <summary>Anyone who may manage it, the employee, or their line leader.</summary>
+        private void EnsureCanView(Scorecard scorecard)
+        {
+            var userId = CurrentUserId;
+            if (scorecard.EmployeeId == userId || IsLineLeaderOf(scorecard.EmployeeId))
+                return;
+            EnsureCanManage(scorecard);
+        }
+
+        private Scorecard LoadScorecard(Guid id)
+        {
+            var scorecard = DataContext.ScorecardSet
+                .Include(a => a.ScorecardRecords)
+                .Include(a => a.Employee)
+                .Include(a => a.Evaluator)
+                .Include(a => a.ScorecardTemplatePeriod)
+                .FirstOrDefault(a => a.Id == id);
+            if (scorecard == null)
+                throw new ScorecardException("The scorecard could not be found.");
+            return scorecard;
+        }
+
+        #endregion
+
         #region Scorecard
 
         public IQueryable<Scorecard> ScorecardList()
@@ -37,14 +135,23 @@ namespace TRiZHub.BL.Provider.ScorecardData
             return DataContext.ScorecardSet;
         }
 
+        public IQueryable<Guid> TeamScorecardEmployeeIds()
+        {
+            return new WorkTeamAccessProvider(DataContext, CurrentUser)
+                .ManagedUserIds(CurrentUserId, WorkTeamCapability.Scorecards, new DateTime(1753, 1, 1), DateTime.MaxValue.Date);
+        }
+
+        public bool CanManageScorecardFor(Guid employeeId, Guid scoreCardTemplatePeriodId, DateTime? variableStart, DateTime? variableEnd)
+        {
+            return UserIsAllowed(PrivilegeType.PerformanceManagementCreateScoreCards)
+                   || TeamReaches(employeeId, scoreCardTemplatePeriodId, variableStart, variableEnd);
+        }
+
         public Scorecard GetScorecard(Guid id)
         {
-            return DataContext.ScorecardSet
-                .Include(a => a.ScorecardRecords)
-                .Include(a => a.Employee)
-                .Include(a => a.Evaluator)
-                .Include(a => a.ScorecardTemplatePeriod)
-                .FirstOrDefault(a => a.Id == id);
+            var scorecard = LoadScorecard(id);
+            EnsureCanView(scorecard);
+            return scorecard;
         }
 
         public Scorecard SaveEmployeeComment(Guid? id, string employeeMessage)
@@ -70,13 +177,15 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         public Scorecard SaveScorecard(Guid? id, Guid scorecardTemplateId, Guid evaluatorId, Guid employeeId, Guid scoreCardTemplatePeriodId, bool rated, bool completed, Guid createdBy, DateTime dateCreated, string evaluatorMessage, string employeeMessage, DateTime? variableStart, DateTime? variableEnd, int? variableYear)
         {
-            Authenticate(PrivilegeType.PerformanceManagementCreateScoreCards);
-
             if (variableStart >= variableEnd)
                 throw new ScorecardException("The Start Date cannot be on or after the End Date");
 
+            if (!CanManageScorecardFor(employeeId, scoreCardTemplatePeriodId, variableStart, variableEnd))
+                throw new GenericSecurityException("Not Allowed!");
 
             var record = DataContext.ScorecardSet.FirstOrDefault(a => a.Id == id);
+            if (record != null && !UserIsAllowed(PrivilegeType.PerformanceManagementCreateScoreCards))
+                EnsureCanManage(record);
 
             if (record == null)
             {
@@ -109,7 +218,8 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         public void DeleteScoreCard(Guid id)
         {
-            var scoreCard = GetScorecard(id);
+            var scoreCard = LoadScorecard(id);
+            EnsureCanManage(scoreCard);
 
             //delete records first
             foreach(var record in DataContext.ScorecardRecordSet.Where(a => a.ScorecardId == scoreCard.Id).ToList())
@@ -123,7 +233,8 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         public void LockScoreCard(Guid id)
         {
-            var scoreCard = GetScorecard(id);
+            var scoreCard = LoadScorecard(id);
+            EnsureCanManage(scoreCard);
 
             if (scoreCard.locked == true)
             {
@@ -140,7 +251,8 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         public void UnsubmitScoreCard(Guid id)
         {
-            var scoreCard = GetScorecard(id);
+            var scoreCard = LoadScorecard(id);
+            EnsureCanManage(scoreCard);
             scoreCard.Completed = false;
 
             // delete records for that score card
@@ -152,19 +264,24 @@ namespace TRiZHub.BL.Provider.ScorecardData
 
         public void SubmitScoreCard(Guid id)
         {
-            var scoreCard = GetScorecard(id);
+            var scoreCard = LoadScorecard(id);
+            EnsureCanManage(scoreCard);
             scoreCard.Completed = true;
             DataContext.SaveChanges();
         }
 
         public void ReassignScorecard(Guid? id, Guid evaluatorId)
         {
-            Authenticate(PrivilegeType.PerformanceManagementCreateScoreCards);
-
             var record = DataContext.ScorecardSet.FirstOrDefault(a => a.Id == id);
 
             if (record != null)
             {
+                if (!UserIsAllowed(PrivilegeType.PerformanceManagementCreateScoreCards))
+                {
+                    if (!TeamReaches(record))
+                        throw new GenericSecurityException("Not Allowed!");
+                }
+
                 record.EvaluatorId = evaluatorId;
                 DataContextSaveChanges();
             }
@@ -199,7 +316,8 @@ namespace TRiZHub.BL.Provider.ScorecardData
         public ScorecardRecord SaveScorecardRecord(Guid? id, Guid scorecardId, Guid scorecardTemplateItemId,
             ScorecardScoreType? rating, decimal? value, bool completed, string evaluatorHtmlComment, string employeeHtmlComment)
         {
-            Authenticate(PrivilegeType.PerformanceManagementCreateScoreCards);
+            if (!UserIsAllowed(PrivilegeType.PerformanceManagementCreateScoreCards))
+                EnsureCanManage(LoadScorecard(scorecardId));
 
             var record = DataContext.ScorecardRecordSet.FirstOrDefault(a => a.Id == id);
             if (record == null)

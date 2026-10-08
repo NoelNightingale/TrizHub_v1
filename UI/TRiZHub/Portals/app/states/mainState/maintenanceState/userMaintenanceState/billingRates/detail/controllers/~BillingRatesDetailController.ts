@@ -11,6 +11,10 @@
     filteredProjectDropdown: any[] = [];
     // UI-only: Project-scope rates are saved with ClientId null.
     projectClientFilterId: string = null;
+    // Clients offered as the Project-scope filter; the full client list outside team mode.
+    projectClientDropdown: any;
+    // Set when opened from a work team: only that team's clients/projects, and no employee (default) rates.
+    workTeamId: string = null;
 
     //#endregion
 
@@ -31,25 +35,31 @@
         this.viewModel = {};
         this.viewModel.userAccountId = this.$stateParams["userid"];
         this.viewModel.id = this.$stateParams["id"];
+        this.workTeamId = this.$stateParams["workTeamId"] || null;
 
-        ClientService.clientDropdownList()
-            .then(
-                result => {
-                    self.clientDropdown = result;
-                },
-                error => {
-                    self.handleError(error);
-                });
+        if (this.workTeamId) {
+            this.loadTeamOptions();
+        } else {
+            ClientService.clientDropdownList()
+                .then(
+                    result => {
+                        self.clientDropdown = result;
+                        self.projectClientDropdown = result;
+                    },
+                    error => {
+                        self.handleError(error);
+                    });
 
-        ProjectService.projectDropdownList()
-            .then(
-                result => {
-                    self.projectDropdown = result;
-                    self.syncProjectClientFilter();
-                },
-                error => {
-                    self.handleError(error);
-                });
+            ProjectService.projectDropdownList()
+                .then(
+                    result => {
+                        self.projectDropdown = result;
+                        self.syncProjectClientFilter();
+                    },
+                    error => {
+                        self.handleError(error);
+                    });
+        }
 
         if (this.viewModel.id !== "new") {
             this.BillingRatesService.billingRatesGet(this.viewModel.id)
@@ -68,6 +78,39 @@
         }
     }
 
+    /** Team mode: the client/project options come from the team's allocations. */
+    loadTeamOptions = () => {
+        const self = this;
+        self.BillingRatesService.workTeamMemberRates(self.workTeamId, self.viewModel.userAccountId)
+            .then(
+                result => {
+                    self.clientDropdown = (result.clients || []).map(c => ({ id: c.id, entityName: c.name }));
+                    self.projectDropdown = (result.projects || []).map(p => ({ id: p.id, description: p.name, clientId: p.clientId }));
+                    const seen = {};
+                    self.projectClientDropdown = [];
+                    (result.projects || []).forEach(p => {
+                        if (!seen[p.clientId]) {
+                            seen[p.clientId] = true;
+                            self.projectClientDropdown.push({ id: p.clientId, entityName: p.clientName });
+                        }
+                    });
+                    self.projectClientDropdown.sort((a, b) => (a.entityName || "").localeCompare(b.entityName || ""));
+                    self.syncProjectClientFilter();
+                },
+                error => {
+                    self.handleError(error);
+                });
+    };
+
+    goBack = () => {
+        if (this.workTeamId) {
+            this.$state.go("mainState.maintenance.workTeamMaintenance.detail",
+                { id: this.workTeamId, tab: "people", ratesFor: this.viewModel.userAccountId });
+            return;
+        }
+        this.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid", { id: this.viewModel.userAccountId });
+    };
+
     applyNewPrefill = () => {
         const scope = this.$stateParams["scope"];
         const clientId = this.$stateParams["clientId"];
@@ -81,6 +124,10 @@
             this.scopeType = "Project";
             this.viewModel.projectId = projectId || null;
             this.viewModel.clientId = null;
+        } else if (this.workTeamId) {
+            this.scopeType = "Client";
+            this.viewModel.clientId = null;
+            this.viewModel.projectId = null;
         } else {
             this.scopeType = "Default";
             this.viewModel.clientId = null;
@@ -160,8 +207,7 @@
                 result => {
                     self.saveSuccess = true;
                     self.$timeout(function() {
-                            self.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid",
-                            { "id": result.userAccountId });
+                            self.goBack();
                         },
                         1000);
                 },

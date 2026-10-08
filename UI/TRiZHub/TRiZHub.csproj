@@ -241,6 +241,7 @@
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\TCRRepControllerBase.cs" />
     <Compile Include="Controllers\TeamController.cs" />
+    <Compile Include="Controllers\WorkTeamController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
     <Compile Include="Controllers\TimesheetTemplateController.cs" />
     <Compile Include="Controllers\ProjectController.cs" />
@@ -290,6 +291,7 @@
     <Compile Include="Enums\ClientTypeModel.cs" />
     <Compile Include="Models\ProjectModels\UserProjectGridModel.cs" />
     <Compile Include="Models\ProjectModels\UserIdentityProjectModel.cs" />
+    <Compile Include="Models\ProjectModels\ClientTreeBuilder.cs" />
     <Compile Include="Models\ProjectModels\ProjectTypeDropdownModel.cs" />
     <Compile Include="Models\ReportModels\ScorecardReportModel.cs" />
     <Compile Include="Models\ReportModels\DateBetweenGridModel.cs" />
@@ -350,6 +352,11 @@
     <Compile Include="Models\TeamModels\TeamDropdownModel.cs" />
     <Compile Include="Models\TeamModels\TeamEditModel.cs" />
     <Compile Include="Models\TeamModels\TeamGridModel.cs" />
+    <Compile Include="Models\WorkTeamModels\WorkTeamAllocationSaveModel.cs" />
+    <Compile Include="Models\WorkTeamModels\WorkTeamDropdownModel.cs" />
+    <Compile Include="Models\WorkTeamModels\WorkTeamEditModel.cs" />
+    <Compile Include="Models\WorkTeamModels\WorkTeamGridModel.cs" />
+    <Compile Include="Models\WorkTeamModels\WorkTeamMemberModel.cs" />
     <Compile Include="Models\TimesheetModels\Project.cs" />
     <Compile Include="Models\TimesheetModels\TimesheetGridModel.cs" />
     <Compile Include="Models\TimesheetModels\TimesheetModel.cs" />
@@ -546,6 +553,9 @@
     <Content Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\grid\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\stateView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\workTeamMaintenanceState\detail\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\workTeamMaintenanceState\grid\views\mainView.html" />
+    <Content Include="Portals\app\states\mainState\maintenanceState\workTeamMaintenanceState\stateView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\grid\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\stateView.html" />
@@ -1799,6 +1809,8 @@
     <TypeScriptCompile Include="Portals\app\services\ScorecardTemplateService\~ScorecardTemplateService.ts" />
     <TypeScriptCompile Include="Portals\app\services\TeamService\~TeamService.ts" />
     <TypeScriptCompile Include="Portals\app\services\TeamService\~Models.ts" />
+    <TypeScriptCompile Include="Portals\app\services\WorkTeamService\~WorkTeamService.ts" />
+    <TypeScriptCompile Include="Portals\app\services\WorkTeamService\~Models.ts" />
     <TypeScriptCompile Include="Portals\app\services\ActivityService\~Models.ts" />
     <TypeScriptCompile Include="Portals\app\services\ActivityService\~ActivityService.ts" />
     <TypeScriptCompile Include="Portals\app\services\ReportService\~Models.ts" />
@@ -1851,6 +1863,8 @@
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\settingsMaintenanceState\controllers\~AdminMaintenanceSettingsController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\detail\controllers\~TeamMaintenanceDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\teamMaintenanceState\grid\controllers\~TeamMaintenanceGridController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\workTeamMaintenanceState\detail\controllers\~WorkTeamMaintenanceDetailController.ts" />
+    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\workTeamMaintenanceState\grid\controllers\~WorkTeamMaintenanceGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\detail\controllers\~BillingRatesDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\userMaintenanceState\billingRates\grid\controllers\~BillingRatesGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\billingRatesMaintenanceState\grid\controllers\~BillingRatesMaintenanceGridController.ts" />

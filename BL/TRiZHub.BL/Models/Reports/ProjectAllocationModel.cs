@@ -20,5 +20,8 @@ namespace TRiZHub.BL.Models.Reports
         public string SubProjectNumber { get; set; }
         public string SubProjectName { get; set; }
         public bool? SubProjectActive { get; set; }
+
+        /// <summary>"Direct", or the work team the allocation comes through.</summary>
+        public string Source { get; set; }
     }
 }

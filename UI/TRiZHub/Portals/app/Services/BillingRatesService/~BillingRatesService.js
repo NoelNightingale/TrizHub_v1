@@ -124,6 +124,16 @@ var BillingRatesServiceModule;
                 });
                 return deferred.promise;
             };
+            _this.workTeamMemberRates = function (workTeamId, userId) {
+                var deferred = _this.$q.defer();
+                _this.$http.get(_this.urlRoot + "WorkTeamMemberRates?workTeamId=" + workTeamId + "&userId=" + userId)
+                    .then(function (result) {
+                    deferred.resolve(result.data);
+                }, function (error) {
+                    deferred.reject(error.data.message);
+                });
+                return deferred.promise;
+            };
             _this.userRatesAsOf = function (userAccountId, asOfDate) {
                 var deferred = _this.$q.defer();
                 _this.$http.post(_this.urlRoot + "UserRatesAsOf", { userAccountId: userAccountId, asOfDate: asOfDate })

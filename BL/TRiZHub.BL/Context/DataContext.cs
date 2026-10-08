@@ -43,6 +43,7 @@ using TCR.Lib.SQL;
 using TRiZHub.BL.Scripts.TimesheetReportProcedure;
 using TRiZHub.BL.Scripts.ScorecardProcedure;
 using TRiZHub.BL.Entities.EmployerData;
+using TRiZHub.BL.Entities.WorkTeamData;
 using System.Data.Entity.Migrations;
 
 #endregion Usings
@@ -100,6 +101,12 @@ namespace TRiZHub.BL.Context
         public DbSet<UserIdentityProject> UserIdentityProjectSet { get; set; }
         
         public DbSet<UserIdentityClient> UserIdentityClientSet { get; set; }
+
+        // Work Teams
+        public DbSet<WorkTeam> WorkTeamSet { get; set; }
+        public DbSet<WorkTeamMember> WorkTeamMemberSet { get; set; }
+        public DbSet<WorkTeamClient> WorkTeamClientSet { get; set; }
+        public DbSet<WorkTeamProject> WorkTeamProjectSet { get; set; }
 
         // Timesheet
         public DbSet<TimesheetEntry> TimesheetEntrySet { get; set; }
@@ -410,6 +417,22 @@ namespace TRiZHub.BL.Context
             else
             {
                 throw new GenericSecurityException("No transaction is started...");
+            }
+        }
+
+        public void RollbackTransaction()
+        {
+            if (!IsTransactionActive())
+                return;
+
+            try
+            {
+                ContextTransaction.Rollback();
+            }
+            finally
+            {
+                ContextTransaction.Dispose();
+                ContextTransaction = null;
             }
         }
 

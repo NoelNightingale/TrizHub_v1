@@ -34,6 +34,9 @@ namespace TRiZHub.Models.ProjectModels
 
         public bool Selected { get; set; }
 
+        /// <summary>Names of the teams this item is inherited through, for read-only display; null when not inherited.</summary>
+        public string InheritedFrom { get; set; }
+
         public List<UserIdentityProjectModel> ListOfProjects { get; set; }
 
     }

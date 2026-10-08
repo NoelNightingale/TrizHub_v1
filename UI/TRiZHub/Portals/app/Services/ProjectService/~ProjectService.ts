@@ -18,7 +18,7 @@ module ProjectServiceModule {
         userIdentityProjects: (id: string, includeInactive: boolean) => ng.IPromise<UserIdentityProjectModel>;
         saveUserIdentityProjects: (userId: string, projects: Array<any>) => ng.IPromise<any>;
 
-        getUserAllocatedProjects: (id: string, includeInactive: boolean) => ng.IPromise<ProjectDropdownModel>;
+        getUserAllocatedProjects: (id: string, includeInactive: boolean, start?: string, end?: string) => ng.IPromise<ProjectDropdownModel>;
     }
 
     export class ProjectService extends CHServiceBase implements IProjectService {
@@ -131,9 +131,15 @@ module ProjectServiceModule {
             return deferred.promise;
         };
 
-        getUserAllocatedProjects = (id: string, includeInactive: boolean): ng.IPromise<ProjectAndSubProjectDropdownModel> => {
+        /** start/end are optional yyyy-MM-dd keys; the server defaults to today and adds team allocations for that range. */
+        getUserAllocatedProjects = (id: string, includeInactive: boolean, start?: string, end?: string): ng.IPromise<ProjectAndSubProjectDropdownModel> => {
             const deferred = this.$q.defer();
-            this.$http.get(this.urlRoot + "GetUserAllocatedProjects/" + id + "?includeInactive=" + includeInactive)
+            let url = this.urlRoot + "GetUserAllocatedProjects/" + id + "?includeInactive=" + includeInactive;
+            if (start)
+                url += "&start=" + start;
+            if (end)
+                url += "&end=" + end;
+            this.$http.get(url)
                 .then(
                     result => {
                         deferred.resolve(result.data);

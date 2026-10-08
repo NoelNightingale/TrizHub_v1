@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using TCR.Lib.BL;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.BillingRatesData;
 using TRiZHub.BL.Entities.ClientEntityData;
@@ -12,6 +13,7 @@ using TRiZHub.BL.Entities.ProjectData;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Extensions;
 using TRiZHub.BL.Provider.Security;
+using TRiZHub.BL.Provider.WorkTeamData;
 
 #endregion
 
@@ -24,6 +26,18 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         public BillingRatesProvider(DataContext context, ICurrentUser currentUser)
             : base(context, currentUser)
         {
+        }
+
+        private EffectiveAllocationProvider allocations;
+
+        /// <summary>Rosters include people allocated through a work team, membership current as of the rate date.</summary>
+        private EffectiveAllocationProvider Allocations
+        {
+            get
+            {
+                return allocations ??
+                       (allocations = new EffectiveAllocationProvider(DataContext, CurrentUser));
+            }
         }
 
         #endregion
@@ -165,18 +179,21 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             HashSet<Guid> allowedUsers = null;
             HashSet<Guid> allowedClients = null;
             HashSet<Guid> allowedProjects = null;
+            var today = DateTime.Today;
 
             if (selectedUsers.Count > 0)
             {
                 var clientFromAssign = DataContext.UserIdentityClientSet
                     .Where(a => selectedUsers.Contains(a.UserAccountId) && a.ClientId != null)
                     .Select(a => a.ClientId.Value)
+                    .Union(Allocations.TeamClientIdsForUsers(selectedUsers, today, today))
                     .Distinct()
                     .ToList();
 
                 var projectFromAssign = DataContext.UserIdentityProjectSet
                     .Where(a => selectedUsers.Contains(a.UserAccountId) && a.ProjectId != null)
                     .Select(a => a.ProjectId.Value)
+                    .Union(Allocations.TeamProjectIdsForUsers(selectedUsers, today, today))
                     .Distinct()
                     .ToList();
 
@@ -213,7 +230,9 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     .Where(a => a.ProjectId != null && clientProjectIds.Contains(a.ProjectId.Value))
                     .Select(a => a.UserAccountId);
 
-                IntersectIds(ref allowedUsers, usersFromClient.Union(usersFromProjects));
+                IntersectIds(ref allowedUsers, usersFromClient.Union(usersFromProjects)
+                    .Union(Allocations.TeamUserIdsForClients(selectedClients, today, today))
+                    .Union(Allocations.TeamUserIdsForProjects(clientProjectIds, today, today)));
                 IntersectIds(ref allowedProjects, clientProjectIds);
             }
 
@@ -233,7 +252,9 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     .Where(a => a.ClientId != null && owningClientIds.Contains(a.ClientId.Value))
                     .Select(a => a.UserAccountId);
 
-                IntersectIds(ref allowedUsers, usersFromProject.Union(usersFromOwningClient));
+                IntersectIds(ref allowedUsers, usersFromProject.Union(usersFromOwningClient)
+                    .Union(Allocations.TeamUserIdsForProjects(selectedProjects, today, today))
+                    .Union(Allocations.TeamUserIdsForClients(owningClientIds, today, today)));
                 IntersectIds(ref allowedClients, owningClientIds);
             }
 
@@ -390,7 +411,10 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     .Where(a => a.ClientId != null && owningClientIds.Contains(a.ClientId.Value))
                     .Select(a => a.UserAccountId);
 
-                userIds = fromProject.Union(fromClient).Distinct().ToList();
+                userIds = fromProject.Union(fromClient)
+                    .Union(Allocations.TeamUserIdsForProjects(selectedProjects, asOf, asOf))
+                    .Union(Allocations.TeamUserIdsForClients(owningClientIds, asOf, asOf))
+                    .Distinct().ToList();
             }
             else if (selectedClients.Count > 0)
             {
@@ -408,7 +432,10 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                     .Where(a => a.ProjectId != null && clientProjectIds.Contains(a.ProjectId.Value))
                     .Select(a => a.UserAccountId);
 
-                userIds = fromClient.Union(fromProjects).Distinct().ToList();
+                userIds = fromClient.Union(fromProjects)
+                    .Union(Allocations.TeamUserIdsForClients(selectedClients, asOf, asOf))
+                    .Union(Allocations.TeamUserIdsForProjects(clientProjectIds, asOf, asOf))
+                    .Distinct().ToList();
             }
             else
             {
@@ -756,8 +783,6 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         public void DeleteBillingRatesEntry(Guid id)
         {
-            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
-
             var record = GetBillingRates(id);
 
             if (record != null)
@@ -773,8 +798,16 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         public BillingRates GetBillingRates(Guid id)
         {
-            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
-            return DataContext.BillingRatesSet.FirstOrDefault(a => a.Id == id);
+            var record = DataContext.BillingRatesSet.FirstOrDefault(a => a.Id == id);
+            if (record == null)
+            {
+                if (!UserIsAllowed(PrivilegeType.UserBillingRatesMaintenance) && !HasAnyTeamRateReach())
+                    throw new GenericSecurityException("You are not allowed to manage billing rates.");
+                return null;
+            }
+
+            EnsureCanManageRates(record.UserAccountId, record.ClientId, record.ProjectId, record.StartDate, record.EndDate);
+            return record;
         }
 
         /// <summary>
@@ -829,8 +862,6 @@ namespace TRiZHub.BL.Provider.BillingRatesData
         public BillingRates SaveBillingRates(Guid? id, Guid userAccountId, decimal rate, DateTime startDate,
             DateTime endDate, Guid? clientId, Guid? projectId)
         {
-            Authenticate(PrivilegeType.UserBillingRatesMaintenance);
-
             if (id == Guid.Empty)
                 id = null;
 
@@ -846,11 +877,16 @@ namespace TRiZHub.BL.Provider.BillingRatesData
             if (clientId.HasValue && projectId.HasValue)
                 throw new BillingRatesException("A billing rate cannot be scoped to both a Client and a Project!");
 
+            EnsureCanManageRates(userAccountId, clientId, projectId, startDate, endDate);
+
             if (id.HasValue)
             {
                 var existing = DataContext.BillingRatesSet.FirstOrDefault(a => a.Id == id.Value);
                 if (existing != null)
                 {
+                    EnsureCanManageRates(existing.UserAccountId, existing.ClientId, existing.ProjectId,
+                        existing.StartDate, existing.EndDate);
+
                     var existingLockReason = GetLockReason(existing.Client, existing.Project);
                     if (existingLockReason != null)
                         throw new BillingRatesException(existingLockReason);
@@ -950,7 +986,10 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 .Where(a => a.ClientId == clientId)
                 .Select(a => a.UserAccountId);
 
-            var teamUserIds = projectUserIds.Union(clientUserIds).Distinct().ToList();
+            var teamUserIds = projectUserIds.Union(clientUserIds)
+                .Union(Allocations.TeamUserIdsForProjects(new[] { projectId }, asOf, asOf))
+                .Union(Allocations.TeamUserIdsForClients(new[] { clientId }, asOf, asOf))
+                .Distinct().ToList();
 
             var users = DataContext.UserAccountSet
                 .Where(u => teamUserIds.Contains(u.Id))
@@ -1097,7 +1136,10 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 .Where(a => a.ProjectId != null && clientProjectIds.Contains(a.ProjectId.Value))
                 .Select(a => a.UserAccountId);
 
-            var teamUserIds = clientUserIds.Union(projectUserIds).Distinct().ToList();
+            var teamUserIds = clientUserIds.Union(projectUserIds)
+                .Union(Allocations.TeamUserIdsForClients(new[] { clientId }, asOf, asOf))
+                .Union(Allocations.TeamUserIdsForProjects(clientProjectIds, asOf, asOf))
+                .Distinct().ToList();
 
             var users = DataContext.UserAccountSet
                 .Where(u => teamUserIds.Contains(u.Id))
@@ -1280,16 +1322,19 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 .Distinct()
                 .ToList();
 
-            // Also include clients/projects the user is assigned to (As-of clarity only).
+            // Also include clients/projects the user is assigned to, directly or through a team on asOf (As-of clarity only).
+            var userOnly = new[] { userAccountId };
             var clientIdsFromAssignment = DataContext.UserIdentityClientSet
                 .Where(a => a.UserAccountId == userAccountId && a.ClientId != null)
                 .Select(a => a.ClientId.Value)
+                .Union(Allocations.TeamClientIdsForUsers(userOnly, asOf, asOf))
                 .Distinct()
                 .ToList();
 
             var projectIdsFromAssignment = DataContext.UserIdentityProjectSet
                 .Where(a => a.UserAccountId == userAccountId && a.ProjectId != null)
                 .Select(a => a.ProjectId.Value)
+                .Union(Allocations.TeamProjectIdsForUsers(userOnly, asOf, asOf))
                 .Distinct()
                 .ToList();
 
@@ -1455,6 +1500,176 @@ namespace TRiZHub.BL.Provider.BillingRatesData
                 && r.ProjectId == null
                 && r.StartDate.Date <= asOf
                 && r.EndDate.Date >= asOf);
+        }
+
+        #endregion
+
+        #region Work team rate reach
+
+        private static readonly DateTime SqlMinDate = new DateTime(1753, 1, 1);
+        private static readonly DateTime SqlMaxDate = DateTime.MaxValue.Date;
+
+        /// <summary>The target's periods the current user reaches for Rates, and each reaching team's allocations.</summary>
+        private class TeamRateReach
+        {
+            public List<WorkTeamTypePeriod> Periods { get; set; }
+            public Dictionary<Guid, WorkTeamScope> Scopes { get; set; }
+        }
+
+        private TeamRateReach LoadTeamRateReach(Guid userAccountId)
+        {
+            var reach = new TeamRateReach
+            {
+                Periods = new List<WorkTeamTypePeriod>(),
+                Scopes = new Dictionary<Guid, WorkTeamScope>()
+            };
+            if (CurrentUser == null)
+                return reach;
+
+            var access = new WorkTeamAccessProvider(DataContext, CurrentUser);
+            reach.Periods = access.ReachablePeriods(CurrentUser.Id, userAccountId, WorkTeamCapability.Rates,
+                SqlMinDate, SqlMaxDate);
+            foreach (var teamId in reach.Periods.Select(p => p.WorkTeamId).Distinct())
+                reach.Scopes[teamId] = access.TeamScope(new[] { teamId });
+            return reach;
+        }
+
+        private static bool TeamReachAllows(TeamRateReach reach, Guid? clientId, Guid? projectId,
+            Guid? projectClientId, DateTime start, DateTime end)
+        {
+            return TeamRateScope.Allows(reach.Periods, reach.Scopes, clientId, projectId, projectClientId, start, end);
+        }
+
+        private bool HasAnyTeamRateReach()
+        {
+            return CurrentUser != null
+                   && new WorkTeamAccessProvider(DataContext, CurrentUser)
+                       .EditableTeamIds(CurrentUser.Id, WorkTeamCapability.Rates).Any();
+        }
+
+        /// <summary>
+        /// UserBillingRatesMaintenance, or a team manager/lead with Rates reach over the rate period whose team
+        /// allocations cover the rate's client or project. Default (employee) rates stay with the global privilege.
+        /// </summary>
+        public void EnsureCanManageRates(Guid userAccountId, Guid? clientId, Guid? projectId, DateTime start, DateTime end)
+        {
+            if (UserIsAllowed(PrivilegeType.UserBillingRatesMaintenance))
+                return;
+
+            if (clientId.HasValue || projectId.HasValue)
+            {
+                Guid? projectClientId = null;
+                if (projectId.HasValue)
+                {
+                    var pid = projectId.Value;
+                    projectClientId = DataContext.ProjectSet
+                        .Where(p => p.Id == pid)
+                        .Select(p => (Guid?)p.ClientId)
+                        .FirstOrDefault();
+                }
+
+                if (TeamReachAllows(LoadTeamRateReach(userAccountId), clientId, projectId, projectClientId, start, end))
+                    return;
+            }
+
+            throw new GenericSecurityException("You are not allowed to manage this billing rate.");
+        }
+
+        public WorkTeamMemberRatesResult GetWorkTeamMemberRates(Guid workTeamId, Guid userAccountId)
+        {
+            var team = DataContext.WorkTeamSet.FirstOrDefault(t => t.Id == workTeamId);
+            if (team == null)
+                throw new BillingRatesException("Selected Work Team was not found!");
+
+            var user = DataContext.UserAccountSet.FirstOrDefault(u => u.Id == userAccountId);
+            if (user == null)
+                throw new BillingRatesException("Selected User was not found!");
+
+            var global = UserIsAllowed(PrivilegeType.UserBillingRatesMaintenance);
+            var reach = LoadTeamRateReach(userAccountId);
+            if (!global && reach.Periods.All(p => p.WorkTeamId != workTeamId))
+                throw new GenericSecurityException("You are not allowed to view rates for this person on this team.");
+
+            var scope = new WorkTeamAccessProvider(DataContext, CurrentUser).TeamScope(new[] { workTeamId });
+            var scopeClientIds = scope.ClientIds.ToList();
+            var scopeProjectIds = scope.ProjectIds.ToList();
+
+            var rows = DataContext.BillingRatesSet
+                .Where(r => r.UserAccountId == userAccountId
+                            && ((r.ClientId != null && r.ProjectId == null && scopeClientIds.Contains(r.ClientId.Value))
+                                || (r.ProjectId != null && r.ClientId == null
+                                    && (scopeProjectIds.Contains(r.ProjectId.Value)
+                                        || scopeClientIds.Contains(r.Project.ClientId)))))
+                .Select(r => new
+                {
+                    r.Id,
+                    r.ClientId,
+                    ClientName = r.Client != null ? r.Client.EntityName : r.Project.Client.EntityName,
+                    r.ProjectId,
+                    ProjectClientId = r.Project != null ? (Guid?)r.Project.ClientId : null,
+                    ProjectName = r.Project != null
+                        ? ((r.Project.ProjectNumber == null || r.Project.ProjectNumber == "")
+                            ? r.Project.ProjectName
+                            : ("[" + r.Project.ProjectNumber + "] " + r.Project.ProjectName))
+                        : null,
+                    r.Rate,
+                    r.StartDate,
+                    r.EndDate,
+                    IsLocked = (r.Client != null && (!r.Client.IsActive || r.Client.IsDeleted))
+                               || (r.Project != null && (!r.Project.IsActive || r.Project.IsDeleted
+                                                         || !r.Project.Client.IsActive || r.Project.Client.IsDeleted))
+                })
+                .OrderBy(r => r.ClientName)
+                .ThenBy(r => r.ProjectName)
+                .ThenBy(r => r.StartDate)
+                .ToList();
+
+            var clients = DataContext.ClientEntitySet
+                .Where(c => scopeClientIds.Contains(c.Id) && c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.EntityName)
+                .Select(c => new BillingRatesFilterOption { Id = c.Id, Name = c.EntityName })
+                .ToList();
+
+            var projects = DataContext.ProjectSet
+                .Where(p => (scopeProjectIds.Contains(p.Id) || scopeClientIds.Contains(p.ClientId))
+                            && p.IsActive && !p.IsDeleted && p.Client.IsActive && !p.Client.IsDeleted)
+                .OrderBy(p => p.ProjectName)
+                .Select(p => new WorkTeamRateProjectOption
+                {
+                    Id = p.Id,
+                    Name = (p.ProjectNumber == null || p.ProjectNumber == "")
+                        ? p.ProjectName
+                        : ("[" + p.ProjectNumber + "] " + p.ProjectName),
+                    ClientId = p.ClientId,
+                    ClientName = p.Client.EntityName
+                })
+                .ToList();
+
+            return new WorkTeamMemberRatesResult
+            {
+                WorkTeamId = team.Id,
+                WorkTeamName = team.Name,
+                UserAccountId = user.Id,
+                UserName = (user.FirstName + " " + user.Surname).Trim(),
+                Rates = rows.Select(r => new WorkTeamMemberRateRow
+                {
+                    Id = r.Id,
+                    Scope = r.ProjectId != null ? "Project" : "Client",
+                    ClientId = r.ClientId,
+                    ClientName = r.ClientName,
+                    ProjectId = r.ProjectId,
+                    ProjectName = r.ProjectName,
+                    Rate = r.Rate,
+                    StartDate = r.StartDate,
+                    EndDate = r.EndDate,
+                    IsLocked = r.IsLocked,
+                    CanEdit = !r.IsLocked
+                              && (global || TeamReachAllows(reach, r.ClientId, r.ProjectId, r.ProjectClientId,
+                                  r.StartDate, r.EndDate))
+                }).ToList(),
+                Clients = clients,
+                Projects = projects
+            };
         }
 
         #endregion

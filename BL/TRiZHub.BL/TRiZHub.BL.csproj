@@ -146,6 +146,12 @@
     <Compile Include="Entities\Types\StatusType.cs" />
     <Compile Include="Entities\UserIdentityProjectData\UserIdentiryClient.cs" />
     <Compile Include="Entities\UserIdentityProjectData\UserIdentityProject.cs" />
+    <Compile Include="Entities\Types\WorkTeamCapability.cs" />
+    <Compile Include="Entities\Types\WorkTeamRoleType.cs" />
+    <Compile Include="Entities\WorkTeamData\WorkTeam.cs" />
+    <Compile Include="Entities\WorkTeamData\WorkTeamClient.cs" />
+    <Compile Include="Entities\WorkTeamData\WorkTeamMember.cs" />
+    <Compile Include="Entities\WorkTeamData\WorkTeamProject.cs" />
     <Compile Include="Extensions\DateExtensions.cs" />
     <Compile Include="Migrations\201609151430327_InitialCreate15092016.cs" />
     <Compile Include="Migrations\201609151430327_InitialCreate15092016.Designer.cs">
@@ -291,6 +297,10 @@
     <Compile Include="Migrations\202608211357048_BillingRatesClientProjectScope.Designer.cs">
       <DependentUpon>202608211357048_BillingRatesClientProjectScope.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202610081300000_AddWorkTeams.cs" />
+    <Compile Include="Migrations\202610081300000_AddWorkTeams.Designer.cs">
+      <DependentUpon>202610081300000_AddWorkTeams.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Reports\ProjectAllocationModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -304,6 +314,7 @@
     <Compile Include="Provider\BillingRatesData\IBillingRatesProvider.cs" />
     <Compile Include="Provider\BillingRatesData\BillingRatesProvider.cs" />
     <Compile Include="Provider\BillingRatesData\BillingRatesTeamModels.cs" />
+    <Compile Include="Provider\BillingRatesData\TeamRateScope.cs" />
     <Compile Include="Provider\EmployerEntityData\EmployerProvider.cs" />
     <Compile Include="Provider\EmployerEntityData\IEmployerProvider.cs" />
     <Compile Include="Provider\ClientEntityData\ClientProvider.cs" />
@@ -360,6 +371,16 @@
     <Compile Include="Provider\TeamData\TeamException.cs" />
     <Compile Include="Provider\TeamData\TeamProvider.cs" />
     <Compile Include="Provider\TeamData\ITeamProvider.cs" />
+    <Compile Include="Provider\WorkTeamData\IWorkTeamAccessProvider.cs" />
+    <Compile Include="Provider\WorkTeamData\WorkTeamAccessModels.cs" />
+    <Compile Include="Provider\WorkTeamData\WorkTeamAccessProvider.cs" />
+    <Compile Include="Provider\WorkTeamData\WorkTeamAccessRules.cs" />
+    <Compile Include="Provider\WorkTeamData\IWorkTeamProvider.cs" />
+    <Compile Include="Provider\WorkTeamData\EffectiveAllocations.cs" />
+    <Compile Include="Provider\WorkTeamData\EffectiveAllocationProvider.cs" />
+    <Compile Include="Provider\WorkTeamData\IEffectiveAllocationProvider.cs" />
+    <Compile Include="Provider\WorkTeamData\WorkTeamException.cs" />
+    <Compile Include="Provider\WorkTeamData\WorkTeamProvider.cs" />
     <Compile Include="Provider\TeamJobDesignationData\ITeamJobDesignationProvider.cs" />
     <Compile Include="Provider\TeamJobDesignationData\TeamJobDesignationProvider.cs" />
     <Compile Include="Provider\TeamJobDesignationData\TeamJobDesignationException.cs" />
@@ -483,6 +504,9 @@
     <EmbeddedResource Include="Migrations\202608211357048_BillingRatesClientProjectScope.resx">
       <DependentUpon>202608211357048_BillingRatesClientProjectScope.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202610081300000_AddWorkTeams.resx">
+      <DependentUpon>202610081300000_AddWorkTeams.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedure.sql" />
     <Compile Include="Scripts\ScorecardProcedure\ScorecardProcedureModel.cs" />
     <Compile Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedureModel.cs" />
@@ -565,6 +589,7 @@
     <Content Include="Scripts\lsp_getTimesheetReportDetail.sql" />
     <Content Include="Scripts\ScorecardProcedure\lsp_getScoreCardSummary.sql" />
     <Content Include="Scripts\StoredProcedures\lsp_getProjectAllocationReport.sql" />
+    <Content Include="Scripts\WorkTeams\lsp_getProjectAllocationReport.sql" />
     <Content Include="Scripts\Updates\ScoreCardTemplatePeriod.sql" />
     <Content Include="Scripts\StoredProcedures\lsp_getProjectBillableHours.sql" />
     <Content Include="Scripts\StoredProcedures\lsp_getTimesheetReportData.sql" />

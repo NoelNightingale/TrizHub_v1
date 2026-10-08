@@ -32,6 +32,7 @@ using TRiZHub.BL.Provider.Settings;
 using TRiZHub.BL.Provider.TeamData;
 using TRiZHub.BL.Provider.TeamJobDesignationData;
 using TRiZHub.BL.Provider.TravelInformationData;
+using TRiZHub.BL.Provider.WorkTeamData;
 using TRiZHub.Controllers.Filters;
 using TRiZHub.Models;
 using TRiZHub.Models.ClientModels;
@@ -55,6 +56,27 @@ namespace TRiZHub.Controllers.Security
         [HttpGet]
         public List<UserDropdownModel> UserScorecardEmployeeFilterDropdown()
         {
+            var canCreateForAnyone = CurrentUser.IsSystemAdmin
+                                     || (CurrentUser.AllowedPrivileges != null
+                                         && CurrentUser.AllowedPrivileges.Contains(PrivilegeType.PerformanceManagementCreateScoreCards));
+            if (!canCreateForAnyone)
+            {
+                // Team leads/managers with the scorecards flag only pick from the people their teams reach.
+                var teamUserIds = ScorecardProvider.TeamScorecardEmployeeIds().ToList();
+                if (teamUserIds.Any())
+                    return SecurityProvider.GetUserAccountList()
+                        .Where(a => a.Active && teamUserIds.Contains(a.Id))
+                        .Select(a =>
+                            new UserDropdownModel
+                            {
+                                Id = a.Id,
+                                Firstname = a.FirstName,
+                                Surname = a.Surname,
+                                AccountName = a.AccountName
+                            }).OrderBy(a => a.Firstname).ThenBy(a => a.Surname)
+                        .ToList();
+            }
+
             return SecurityProvider.GetUserAccountList()
                 .Where(a => a.Id != CurrentUser.Id && a.Active)
                 .Select(a =>
@@ -1271,6 +1293,26 @@ namespace TRiZHub.Controllers.Security
                 .OrderBy(a => a.Firstname)
                 .ThenBy(a => a.Surname)
                 .ToList();
+
+            // Team leads and managers: themselves plus anyone they reach for timesheets in any period;
+            // the grid and saves then restrict to the dates the membership covers.
+            var teamUserIds = new WorkTeamAccessProvider(Context, CurrentUser)
+                .ManagedUserIds(CurrentUser.Id, WorkTeamCapability.Timesheets, new DateTime(1753, 1, 1), DateTime.MaxValue.Date)
+                .ToList();
+            if (teamUserIds.Any())
+                return SecurityProvider.GetUserAccountList()
+                    .Where(a => a.Id == CurrentUser.Id || (a.Active && teamUserIds.Contains(a.Id)))
+                    .Select(a =>
+                        new UserDropdownModel
+                        {
+                            Id = a.Id,
+                            Firstname = a.FirstName,
+                            Surname = a.Surname,
+                            AccountName = a.AccountName
+                        })
+                    .OrderBy(a => a.Firstname)
+                    .ThenBy(a => a.Surname)
+                    .ToList();
 
             return SecurityProvider.GetUserAccountList()
                 .Where(a => a.Id == CurrentUser.Id)

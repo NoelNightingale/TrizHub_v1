@@ -13,6 +13,7 @@
         isUserProfileComplete: boolean;
         isUserApproved: boolean;
         isSystemAdmin: boolean;
+        teamCapabilities: any;
 
         //#endregion
 
@@ -26,6 +27,7 @@
             this.displayName = "";
             this.allowedPrivileges = [];
             this.isSystemAdmin = false;
+            this.teamCapabilities = {};
         }
 
         //#endregion
@@ -44,11 +46,13 @@
             allowedPrivileges: string,
             isSystemAdmin: boolean,
             isUserProfileComplete: boolean,
-            isUserApproved: boolean) => void;
+            isUserApproved: boolean,
+            teamCapabilities?: any) => void;
         setAccount: (username: string, isSystemAdmin: boolean) => void;
         getToken: () => string;
         userHasPrivileges: () => boolean;
         isAllowed: (privilegeType: string) => boolean;
+        hasTeamCapability: (capability: string) => boolean;
     }
 
     export class SecurityService implements ISecurityService {
@@ -107,13 +111,15 @@
             allowedPrivileges: any,
             isSystemAdmin: boolean,
             isUserProfileComplete: boolean,
-            isUserApproved: boolean): void => {
+            isUserApproved: boolean,
+            teamCapabilities?: any): void => {
             SecurityService.currentUser.id = id;
             SecurityService.currentUser.displayName = displayName;
             SecurityService.currentUser.allowedPrivileges = allowedPrivileges;
             SecurityService.currentUser.isSystemAdmin = isSystemAdmin;
             SecurityService.currentUser.isUserProfileComplete = isUserProfileComplete;
             SecurityService.currentUser.isUserApproved = isUserApproved;
+            SecurityService.currentUser.teamCapabilities = teamCapabilities || {};
             this.$rootScope.$emit(this.scopeUpdateEvent, SecurityService.currentUser);
         };
 
@@ -162,6 +168,12 @@
 
             var result = SecurityService.currentUser.allowedPrivileges.indexOf(myEnum) > -1;
             return result;
+        };
+
+        /** capability: isTeamManager, isTeamLead, timesheets, scorecards, teamAllocations, rates or manageTeam. */
+        hasTeamCapability = (capability: string): boolean => {
+            const caps = SecurityService.currentUser && SecurityService.currentUser.teamCapabilities;
+            return !!(caps && caps[capability]);
         };
     }
 

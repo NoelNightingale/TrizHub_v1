@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Provider.Security;
+using TRiZHub.BL.Provider.WorkTeamData;
 
 #endregion
 
@@ -38,5 +39,8 @@ namespace TRiZHub.Models.Account
         public bool IsUserApproved { get; }
 
         public bool IsUserProfileComplete { get; }
+
+        /// <summary>Only filled by <c>Account/GetCurrentUser</c>; null on per-request instances.</summary>
+        public WorkTeamCapabilitySummary TeamCapabilities { get; set; }
     }
 }

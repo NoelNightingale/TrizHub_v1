@@ -8,6 +8,7 @@ using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.TimesheetData;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Provider.Security;
+using TRiZHub.BL.Provider.WorkTeamData;
 
 #endregion
 
@@ -149,7 +150,13 @@ namespace TRiZHub.BL.Provider.TimesheetData
             if (CurrentUser.Id == userAccountId)
                 return;
 
-            if (!UserIsAllowed(PrivilegeType.TimesheetCaptureForOtherAccounts))
+            if (UserIsAllowed(PrivilegeType.TimesheetCaptureForOtherAccounts))
+                return;
+
+            // Templates are undated, so team access is judged on today's membership.
+            var today = DateTime.Today;
+            if (!new WorkTeamAccessProvider(DataContext, CurrentUser)
+                    .CanActOn(CurrentUser.Id, userAccountId, WorkTeamCapability.Timesheets, today, today))
                 throw new TimesheetTemplateException("You cannot manage templates for other users.");
         }
     }

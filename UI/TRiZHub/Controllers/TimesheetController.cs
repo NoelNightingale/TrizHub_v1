@@ -63,8 +63,17 @@ namespace TRiZHub.Controllers
             if (model.EndDate == null) model.EndDate = DateTime.MaxValue;
 
 
-            var filteredQuery = TimesheetProvider.TimesheetFilterList(model.StartDate.Value, model.EndDate.Value)
-                .Where(a => a.UserAccountId == model.UserId).Select(a => new TimesheetGridModel
+            IQueryable<BL.Entities.TimesheetData.TimesheetEntry> entries;
+            try
+            {
+                entries = TimesheetProvider.TimesheetFilterList(model.UserId.Value, model.StartDate.Value, model.EndDate.Value);
+            }
+            catch (TimesheetException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+
+            var filteredQuery = entries.Select(a => new TimesheetGridModel
                 {
                     Id = a.Id,
                     UserAccountId = a.UserAccountId,
@@ -309,16 +318,36 @@ namespace TRiZHub.Controllers
 
                 CheckModelState();
 
-                if (!Context.IsTransactionActive())
+                var rejected = model
+                    .Select(t => TimesheetProvider.ProjectNotAllowedReason(t.Id, t.UserAccountId,
+                        t.ProjectId.Value, t.SubProjectId, t.DateEntry))
+                    .Where(reason => reason != null)
+                    .Distinct()
+                    .ToList();
+                if (rejected.Any())
+                    throw new TimesheetException("Nothing was saved. These rows are not allowed: " + string.Join("; ", rejected));
+
+                var ownsTransaction = !Context.IsTransactionActive();
+                if (ownsTransaction)
                     Context.BeginTransaction();
-                foreach (var timesheetModel in model)
+                try
                 {
-                    TimesheetProvider.SaveTimesheetEntry(timesheetModel.Id, timesheetModel.UserAccountId,
-                        timesheetModel.ProjectId.Value, timesheetModel.SubProjectId, timesheetModel.TeamId,
-                        timesheetModel.ActivityId, timesheetModel.Comments, timesheetModel.Hours,
-                        timesheetModel.DateEntry);
+                    foreach (var timesheetModel in model)
+                    {
+                        TimesheetProvider.SaveTimesheetEntry(timesheetModel.Id, timesheetModel.UserAccountId,
+                            timesheetModel.ProjectId.Value, timesheetModel.SubProjectId, timesheetModel.TeamId,
+                            timesheetModel.ActivityId, timesheetModel.Comments, timesheetModel.Hours,
+                            timesheetModel.DateEntry);
+                    }
+                    if (ownsTransaction)
+                        Context.CommitTransaction();
                 }
-                Context.CommitTransaction();
+                catch
+                {
+                    if (ownsTransaction)
+                        Context.RollbackTransaction();
+                    throw;
+                }
             }
             catch (TimesheetException e)
             {

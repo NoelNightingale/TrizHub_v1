@@ -11,6 +11,7 @@ var SecurityServiceModule;
             this.displayName = "";
             this.allowedPrivileges = [];
             this.isSystemAdmin = false;
+            this.teamCapabilities = {};
         }
         return CurrentUser;
     }());
@@ -50,13 +51,14 @@ var SecurityServiceModule;
             this.getCurrentUserDetails = function () {
                 return SecurityService.currentUser;
             };
-            this.setCurrentUserDetails = function (id, displayName, allowedPrivileges, isSystemAdmin, isUserProfileComplete, isUserApproved) {
+            this.setCurrentUserDetails = function (id, displayName, allowedPrivileges, isSystemAdmin, isUserProfileComplete, isUserApproved, teamCapabilities) {
                 SecurityService.currentUser.id = id;
                 SecurityService.currentUser.displayName = displayName;
                 SecurityService.currentUser.allowedPrivileges = allowedPrivileges;
                 SecurityService.currentUser.isSystemAdmin = isSystemAdmin;
                 SecurityService.currentUser.isUserProfileComplete = isUserProfileComplete;
                 SecurityService.currentUser.isUserApproved = isUserApproved;
+                SecurityService.currentUser.teamCapabilities = teamCapabilities || {};
                 _this.$rootScope.$emit(_this.scopeUpdateEvent, SecurityService.currentUser);
             };
             this.setAccount = function (username, isSystemAdmin) {
@@ -95,6 +97,11 @@ var SecurityServiceModule;
                     return false;
                 var result = SecurityService.currentUser.allowedPrivileges.indexOf(myEnum) > -1;
                 return result;
+            };
+            /** capability: isTeamManager, isTeamLead, timesheets, scorecards, teamAllocations, rates or manageTeam. */
+            this.hasTeamCapability = function (capability) {
+                var caps = SecurityService.currentUser && SecurityService.currentUser.teamCapabilities;
+                return !!(caps && caps[capability]);
             };
             this.scopeUpdateEvent = "current-user-updated";
         }

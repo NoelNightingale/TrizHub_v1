@@ -156,6 +156,14 @@ var ScorecardGridController = /** @class */ (function (_super) {
         _this.isAllowed = function (privilegeType) {
             return _this.SecurityService.isAllowed(privilegeType);
         };
+        /** Create tab: the global privilege, or a work-team lead/manager with the scorecards flag. */
+        _this.canCreateScorecards = function () {
+            return _this.isAllowed("PerformanceManagementCreateScoreCards") || _this.SecurityService.hasTeamCapability("scorecards");
+        };
+        /** Team tab: line leaders, or a work-team lead/manager with the scorecards flag. */
+        _this.canViewTeamScorecards = function () {
+            return _this.isAllowed("PerformanceManagementViewMyTeamScoreCards") || _this.SecurityService.hasTeamCapability("scorecards");
+        };
         _this.searchValueChange = function () {
             var self = _this;
             self.filterModel.employeeName = self.gridScorecards.searchFor;
@@ -369,11 +377,11 @@ var ScorecardGridController = /** @class */ (function (_super) {
         // Setup initial filter options
         self.setupFilters();
         // Do security checks
-        if (_this.SecurityService.isAllowed("PerformanceManagementCreateScoreCards"))
+        if (self.canCreateScorecards())
             _this.cscActive = "active";
         else if (self.isAllowed("PerformanceManagementViewMyScoreCards"))
             self.pscActive = "active";
-        else if (self.isAllowed("PerformanceManagementViewMyTeamScoreCards"))
+        else if (self.canViewTeamScorecards())
             self.yscActive = "active";
         else if (self.isAllowed("PerformanceManagementAdmin"))
             self.ascActive = "active";

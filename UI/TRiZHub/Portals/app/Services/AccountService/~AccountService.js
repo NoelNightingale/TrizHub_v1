@@ -49,7 +49,7 @@ var AccountServiceModule;
                 _this.$http.get(_this.urlRoot + "GetCurrentUser")
                     .then(function (result) {
                     _this.SecurityService
-                        .setCurrentUserDetails(result.data.id, result.data.displayName, result.data.allowedPrivileges, result.data.isSystemAdmin, result.data.isUserProfileComplete, result.data.isUserApproved);
+                        .setCurrentUserDetails(result.data.id, result.data.displayName, result.data.allowedPrivileges, result.data.isSystemAdmin, result.data.isUserProfileComplete, result.data.isUserApproved, result.data.teamCapabilities);
                     deferred.resolve(result.data);
                 }, function (error) {
                     deferred.reject(error.data.message);

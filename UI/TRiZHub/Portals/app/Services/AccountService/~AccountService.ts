@@ -56,7 +56,8 @@
                                 result.data.allowedPrivileges,
                                 result.data.isSystemAdmin,
                                 result.data.isUserProfileComplete,
-                                result.data.isUserApproved);
+                                result.data.isUserApproved,
+                                result.data.teamCapabilities);
                         deferred.resolve(result.data);
                     },
                     error => {

@@ -28,6 +28,15 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         void DeleteBillingRatesEntry(Guid id);
 
+        /// <summary>
+        /// UserBillingRatesMaintenance, or work-team Rates reach over [start, end] whose team allocations cover the
+        /// rate's client or project. Default-scope rates need the global privilege.
+        /// </summary>
+        void EnsureCanManageRates(Guid userAccountId, Guid? clientId, Guid? projectId, DateTime start, DateTime end);
+
+        /// <summary>One person's Client/Project rates inside a work team's allocations, with the options to add more.</summary>
+        WorkTeamMemberRatesResult GetWorkTeamMemberRates(Guid workTeamId, Guid userAccountId);
+
         ProjectTeamRatesResult GetProjectTeamRates(Guid projectId, DateTime asOfDate);
 
         UserRatesForProjectContextResult GetUserRatesForProjectContext(Guid userAccountId, Guid projectId);

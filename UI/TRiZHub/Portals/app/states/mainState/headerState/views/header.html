@@ -54,7 +54,10 @@
                         <span class="nav-text">Billing Rates</span>
                     </a>
                     <a class="dropdown-item" ng-show="vm.isAllowed('TeamMaintenance')" ui-sref="mainState.maintenance.teamMaintenance.grid">
-                        <span class="nav-text">Team Maintenance</span>
+                        <span class="nav-text">Team Types</span>
+                    </a>
+                    <a class="dropdown-item" ng-show="vm.isAllowed('TeamMaintenance')" ui-sref="mainState.maintenance.workTeamMaintenance.grid">
+                        <span class="nav-text">Work Teams</span>
                     </a>
                     <a class="dropdown-item dropdown-toggle" ng-show="vm.isAllowed('UserAssetRegisterMaintenance')">
                         <span class="nav-text" ng-mouseenter="vm.showImpExp = true">Import/Export</span>
@@ -67,12 +70,17 @@
                     </a>
                 </div>
             </li>
+            <li class="nav-item" ng-show="!vm.isAllowed('TeamMaintenance') && (vm.hasTeamCapability('isTeamManager') || vm.hasTeamCapability('isTeamLead'))">
+                <a class="nav-link" ui-sref="mainState.maintenance.workTeamMaintenance.grid">
+                    <span class="nav-text">My Teams</span>
+                </a>
+            </li>
             <li class="nav-item" ng-show="vm.isAllowed('TimesheetCapture')">
                 <a class="nav-link" ui-sref="mainState.timesheet">
                     <span class="nav-text">Timesheet Capture</span>
                 </a>
             </li>
-            <li class="nav-item" ng-show="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards') || vm.isAllowed('PerformanceManagementCreateScoreCards') || vm.isAllowed('PerformanceManagementViewMyScoreCards') || vm.isAllowed('PerformanceManagementAdmin')">
+            <li class="nav-item" ng-show="vm.isAllowed('PerformanceManagementViewMyTeamScoreCards') || vm.isAllowed('PerformanceManagementCreateScoreCards') || vm.isAllowed('PerformanceManagementViewMyScoreCards') || vm.isAllowed('PerformanceManagementAdmin') || vm.hasTeamCapability('scorecards')">
                 <a class="nav-link" ui-sref="mainState.scorecard.grid">
                     <span class="nav-text">Performance Management</span>
                 </a>

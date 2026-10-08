@@ -60,11 +60,11 @@ class ScorecardGridController extends CHControllerBase {
         self.setupFilters();
 
         // Do security checks
-        if (this.SecurityService.isAllowed("PerformanceManagementCreateScoreCards"))
+        if (self.canCreateScorecards())
             this.cscActive = "active";
         else if (self.isAllowed("PerformanceManagementViewMyScoreCards"))
             self.pscActive = "active";
-        else if (self.isAllowed("PerformanceManagementViewMyTeamScoreCards"))
+        else if (self.canViewTeamScorecards())
             self.yscActive = "active";
         else if (self.isAllowed("PerformanceManagementAdmin"))
             self.ascActive = "active";
@@ -284,6 +284,16 @@ class ScorecardGridController extends CHControllerBase {
 
     isAllowed = (privilegeType: string): boolean => {
         return this.SecurityService.isAllowed(privilegeType);
+    };
+
+    /** Create tab: the global privilege, or a work-team lead/manager with the scorecards flag. */
+    canCreateScorecards = (): boolean => {
+        return this.isAllowed("PerformanceManagementCreateScoreCards") || this.SecurityService.hasTeamCapability("scorecards");
+    };
+
+    /** Team tab: line leaders, or a work-team lead/manager with the scorecards flag. */
+    canViewTeamScorecards = (): boolean => {
+        return this.isAllowed("PerformanceManagementViewMyTeamScoreCards") || this.SecurityService.hasTeamCapability("scorecards");
     };
 
     searchValueChange = () => {

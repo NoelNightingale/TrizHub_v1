@@ -102,6 +102,7 @@ namespace TRiZHub
                 .IncludeDirectory("~/Portals/app/services/TimesheetTemplateService", "*.js")
                 .IncludeDirectory("~/Portals/app/services/ActivityService", "*.js")
                 .IncludeDirectory("~/Portals/app/services/TeamService", "*.js")
+                .IncludeDirectory("~/Portals/app/services/WorkTeamService", "*.js")
                 .IncludeDirectory("~/Portals/app/services/ReportService", "*.js")
                 .IncludeDirectory("~/Portals/app/services/BillingCycleService", "*.js")
                 .IncludeDirectory("~/Portals/app/services/ScorecardTemplateService", "*.js")

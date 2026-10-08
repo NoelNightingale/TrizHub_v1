@@ -13,6 +13,7 @@
         clientTeamRates: (clientId: string, asOfDate: any) => ng.IPromise<any>;
         userRatesForClientContext: (userId: string, clientId: string) => ng.IPromise<any>;
         userRatesAsOf: (userAccountId: string, asOfDate: any) => ng.IPromise<any>;
+        workTeamMemberRates: (workTeamId: string, userId: string) => ng.IPromise<any>;
         filterOptions: (req: any) => ng.IPromise<any>;
         exportExcel: (req: any) => ng.IPromise<any>;
 
@@ -158,6 +159,20 @@
         userRatesForClientContext = (userId: string, clientId: string): ng.IPromise<any> => {
             const deferred = this.$q.defer();
             this.$http.get(this.urlRoot + "UserRatesForClientContext?userId=" + userId + "&clientId=" + clientId)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        workTeamMemberRates = (workTeamId: string, userId: string): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "WorkTeamMemberRates?workTeamId=" + workTeamId + "&userId=" + userId)
                 .then(
                     result => {
                         deferred.resolve(result.data);

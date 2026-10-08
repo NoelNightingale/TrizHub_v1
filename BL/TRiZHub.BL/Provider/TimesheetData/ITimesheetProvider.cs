@@ -18,11 +18,18 @@ namespace TRiZHub.BL.Provider.TimesheetData
             Guid? subProjectId, Guid teamId, Guid activityId,
             string comments, decimal hours, DateTime dateEntry);
 
+        /// <summary>
+        /// Null when the user may log the project line on the entry's date, otherwise the reason. Existing entries are
+        /// only checked when the user, project, subproject or date changes.
+        /// </summary>
+        string ProjectNotAllowedReason(Guid? id, Guid userAccountId, Guid projectId, Guid? subProjectId, DateTime dateEntry);
+
         void DeleteTimesheetEntry(Guid id);
 
         TimesheetEntry GetTimesheetEntry(Guid id);
 
-        IQueryable<TimesheetEntry> TimesheetFilterList(DateTime startDate, DateTime endDate);
+        /// <summary>One user's entries; team leads and managers only see dates their team reach covers.</summary>
+        IQueryable<TimesheetEntry> TimesheetFilterList(Guid userAccountId, DateTime startDate, DateTime endDate);
 
         #endregion
 

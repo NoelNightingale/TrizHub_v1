@@ -142,4 +142,38 @@ namespace TRiZHub.Models.BillingRatesModels
         public Guid? DefaultRateId { get; set; }
         public List<UserRatesAsOfClientRowModel> Clients { get; set; }
     }
+
+    public class WorkTeamMemberRateRowModel
+    {
+        public Guid Id { get; set; }
+        public string Scope { get; set; }
+        public Guid? ClientId { get; set; }
+        public string ClientName { get; set; }
+        public Guid? ProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public decimal Rate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public bool IsLocked { get; set; }
+        public bool CanEdit { get; set; }
+    }
+
+    public class WorkTeamRateProjectOptionModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public Guid ClientId { get; set; }
+        public string ClientName { get; set; }
+    }
+
+    public class WorkTeamMemberRatesModel
+    {
+        public Guid WorkTeamId { get; set; }
+        public string WorkTeamName { get; set; }
+        public Guid UserAccountId { get; set; }
+        public string UserName { get; set; }
+        public List<WorkTeamMemberRateRowModel> Rates { get; set; }
+        public List<BillingRatesFilterOptionModel> Clients { get; set; }
+        public List<WorkTeamRateProjectOptionModel> Projects { get; set; }
+    }
 }

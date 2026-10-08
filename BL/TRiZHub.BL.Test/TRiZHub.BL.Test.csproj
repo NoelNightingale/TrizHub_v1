@@ -75,6 +75,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\SettingsProviderTest.cs" />
     <Compile Include="Providers\SecurityProviderTest.cs" />
+    <Compile Include="Providers\WorkTeamAccessRulesTest.cs" />
+    <Compile Include="Providers\EffectiveAllocationsTest.cs" />
+    <Compile Include="Providers\TeamRateScopeTest.cs" />
     <Compile Include="ProviderTestBase.cs" />
     <Compile Include="Resources\TestResourceManager.cs" />
     <Compile Include="SeedData.cs" />

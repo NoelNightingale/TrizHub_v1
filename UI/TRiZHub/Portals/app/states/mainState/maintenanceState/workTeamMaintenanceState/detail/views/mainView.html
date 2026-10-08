@@ -1,0 +1,381 @@
+<style>
+    #workTeamAllocations ul {
+        padding-inline-start: 12px !important;
+        margin-bottom: 8px !important;
+        margin-top: 8px !important;
+        padding-left: 0px;
+        list-style: none;
+    }
+
+    #workTeamAllocations #workTeamTree button {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    #workTeamAllocations #workTeamTree li {
+        border: none !important;
+        list-style: none;
+    }
+
+    #workTeamAllocations #workTeamTree .fa {
+        color: grey;
+    }
+</style>
+
+<div class="padding">
+    <div class="container">
+        <div class="box">
+            <div class="box-header b-b">
+                <h2>
+                    <a class="text-success" ui-sref="mainState.maintenance.workTeamMaintenance.grid">{{vm.permissions.isAdmin ? 'Work Teams' : 'My Teams'}}</a> / {{vm.viewModel.name || 'New Team'}}
+                </h2>
+            </div>
+
+            <div class="box-body">
+                <ul class="nav nav-tabs m-b-1">
+                    <li class="nav-item">
+                        <a class="nav-link" ng-class="{'active': vm.tab == 'details'}" ng-click="vm.selectTab('details')">Details</a>
+                    </li>
+                    <li class="nav-item" ng-show="vm.teamId">
+                        <a class="nav-link" ng-class="{'active': vm.tab == 'people'}" ng-click="vm.selectTab('people')">People</a>
+                    </li>
+                    <li class="nav-item" ng-show="vm.teamId">
+                        <a class="nav-link" ng-class="{'active': vm.tab == 'allocations'}" ng-click="vm.selectTab('allocations')">Allocations</a>
+                    </li>
+                </ul>
+
+                <!-- Details -->
+                <form role="form" name="EditForm" novalidate ng-show="vm.tab == 'details'">
+                    <div class="form-group row" show-errors>
+                        <label for="name" class="col-sm-3 form-control-label">Team Name:</label>
+                        <div class="col-sm-8">
+                            <input name="name" type="text" ng-model="vm.viewModel.name" class="form-control" maxlength="500" required ng-disabled="!vm.permissions.canEditHeader" />
+                            <span class="text-help" ng-show="EditForm.name.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="description" class="col-sm-3 form-control-label">Description:</label>
+                        <div class="col-sm-8">
+                            <textarea name="description" ng-model="vm.viewModel.description" class="form-control" rows="2" maxlength="2000" ng-disabled="!vm.permissions.canEditHeader"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row" show-errors>
+                        <label for="teamType" class="col-sm-3 form-control-label">Team Type:</label>
+                        <div class="col-sm-8">
+                            <select name="teamType" class="form-control" ng-options="t.id as t.teamName for t in vm.teamTypes"
+                                    ng-model="vm.viewModel.teamTypeId" required ng-disabled="!vm.permissions.canEditHeader"></select>
+                            <span class="text-help" ng-show="EditForm.teamType.$invalid">Required</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 form-control-label">Is Active</label>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.isActive" ng-disabled="!vm.permissions.canEditHeader">
+                                <i class="indigo"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <h6 class="text-muted">Team access (administrators)</h6>
+                    <div class="form-group row">
+                        <label class="col-sm-3 form-control-label">Team timesheets</label>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.allowTeamTimesheets" ng-disabled="!vm.permissions.canEditAdminFlags">
+                                <i class="indigo"></i>
+                                Managers and leads can view and capture timesheets for their people
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 form-control-label">Team scorecards</label>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.allowTeamScorecards" ng-disabled="!vm.permissions.canEditAdminFlags">
+                                <i class="indigo"></i>
+                                Managers and leads can view and manage scorecards for their people
+                            </label>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted">Lead delegation (administrators and managers)</h6>
+                    <div class="form-group row">
+                        <label class="col-sm-3 form-control-label">Leads manage allocations</label>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.leadsManageAllocations" ng-disabled="!vm.permissions.canEditLeadFlags">
+                                <i class="indigo"></i>
+                                Leads can change this team's client and project allocations
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 form-control-label">Leads manage rates</label>
+                        <div class="col-sm-8">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.viewModel.leadsManageRates" ng-disabled="!vm.permissions.canEditLeadFlags">
+                                <i class="indigo"></i>
+                                Leads can view and edit rates for their members on this team's clients and projects
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="form-group row">
+                        <div class="col-md-12 pull-right text-right">
+                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.workTeamMaintenance.grid">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Back
+                            </button>
+                            <button class="btn btn-fw primary" ng-click="vm.submitForm()" ng-show="vm.permissions.canEditLeadFlags">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- People -->
+                <div ng-show="vm.tab == 'people'">
+                    <div class="row m-b-1">
+                        <div class="col-md-6" style="line-height: 32px;">
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.includeEnded" ng-click="vm.toggleIncludeEnded()">
+                                <i class="indigo"></i>
+                                Show ended memberships
+                            </label>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newMember()" ng-show="vm.permissions.canManagePeople && !vm.memberEdit">
+                                <i class="fa fa-plus"></i> Add person
+                            </a>
+                        </div>
+                    </div>
+
+                    <form role="form" name="MemberForm" novalidate ng-if="vm.memberEdit" class="box p-a m-b-1">
+                        <div class="form-group row" show-errors>
+                            <label class="col-sm-2 form-control-label">Person:</label>
+                            <div class="col-sm-4">
+                                <select name="person" class="form-control" ng-options="u.id as u.description for u in vm.users"
+                                        ng-model="vm.memberEdit.userAccountId" required></select>
+                            </div>
+                            <label class="col-sm-2 form-control-label">Role:</label>
+                            <div class="col-sm-4">
+                                <select name="role" class="form-control" ng-options="r.id as r.name for r in vm.editableRoles()"
+                                        ng-model="vm.memberEdit.role" required></select>
+                            </div>
+                        </div>
+                        <div class="form-group row" show-errors>
+                            <label class="col-sm-2 form-control-label">Start Date:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" ng-model="vm.memberEdit.startDate"
+                                       data-icon-left="fa fa-chevron-left" data-icon-right="fa fa-chevron-right"
+                                       name="startDate" data-date-format="yyyy/MM/dd" autoclose="true"
+                                       bs-datepicker placeholder="Start Date" required autocomplete="off">
+                            </div>
+                            <label class="col-sm-2 form-control-label">End Date:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" ng-model="vm.memberEdit.endDate"
+                                       data-icon-left="fa fa-chevron-left" data-icon-right="fa fa-chevron-right"
+                                       name="endDate" data-date-format="yyyy/MM/dd" autoclose="true"
+                                       bs-datepicker placeholder="Open ended" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelMember()">Cancel</button>
+                            <button class="btn btn-fw primary" ng-click="vm.saveMember()">Save</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Person</th>
+                                <th>Role</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Current</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="m in vm.members">
+                                <td>{{m.userName}}</td>
+                                <td>{{m.roleName}}</td>
+                                <td>{{m.startDate | date:'yyyy/MM/dd'}}</td>
+                                <td>{{m.endDate ? (m.endDate | date:'yyyy/MM/dd') : 'Open'}}</td>
+                                <td ng-style="m.isCurrent && {'color' : 'green'} || {'color' : 'grey'}">{{m.isCurrent ? 'Yes' : 'No'}}</td>
+                                <td class="text-nowrap">
+                                    <a class="btn btn-xs btn-outline b-info text-info" ng-click="vm.openTimesheets(m)" ng-show="vm.canActOn(m, 'canTimesheets')"><i class="fa fa-clock-o"></i> Timesheets</a>
+                                    <a class="btn btn-xs btn-outline b-info text-info" ng-click="vm.openScorecards()" ng-show="vm.canActOn(m, 'canScorecards')"><i class="fa fa-line-chart"></i> Scorecards</a>
+                                    <a class="btn btn-xs btn-outline b-info text-info" ng-click="vm.loadMemberRates(m.userAccountId)" ng-show="vm.canActOn(m, 'canRates')"><i class="fa fa-money"></i> Rates</a>
+                                    <span ng-show="vm.canEditMember(m)">
+                                        <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.editMember(m)"><i class="fa fa-edit"></i> Edit</a>
+                                        <a class="btn btn-xs btn-outline b-warning text-warning" ng-click="vm.endMemberToday(m)" ng-show="!m.endDate"><i class="fa fa-calendar-times-o"></i> End</a>
+                                        <a class="btn btn-xs btn-outline b-danger text-danger" ng-click="vm.deleteMember(m)"><i class="fa fa-trash"></i></a>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr ng-show="vm.members.length == 0">
+                                <td colspan="6">No people</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="box p-a m-t-1" ng-if="vm.memberRates">
+                        <div class="row m-b-1">
+                            <div class="col-md-8">
+                                <h6>Rates for {{vm.memberRates.userName}} on {{vm.memberRates.workTeamName}}'s clients and projects</h6>
+                                <small class="text-muted">Employee (default) rates are maintained by billing-rate administrators.</small>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.addRate()"
+                                   ng-show="vm.memberRates.clients.length || vm.memberRates.projects.length"><i class="fa fa-plus"></i> Add rate</a>
+                                <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.closeMemberRates()">Close</a>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Project</th>
+                                    <th class="text-right">Rate</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="r in vm.memberRates.rates">
+                                    <td>{{r.scope}}</td>
+                                    <td>{{r.clientName}}</td>
+                                    <td>{{r.projectName}}</td>
+                                    <td class="text-right">{{r.rate | number:2}}</td>
+                                    <td>{{r.startDate | date:'yyyy/MM/dd'}}</td>
+                                    <td>{{r.endDate | date:'yyyy/MM/dd'}}</td>
+                                    <td class="text-nowrap">
+                                        <span ng-show="r.canEdit">
+                                            <a class="btn btn-xs btn-outline b-primary text-primary" ng-click="vm.editRate(r)"><i class="fa fa-edit"></i> Edit</a>
+                                            <a class="btn btn-xs btn-outline b-danger text-danger" ng-click="vm.deleteRate(r)"><i class="fa fa-trash"></i></a>
+                                        </span>
+                                        <span class="text-muted" ng-show="r.isLocked"><i class="fa fa-lock"></i> Locked</span>
+                                        <span class="text-muted" ng-show="!r.canEdit && !r.isLocked">Outside your team period</span>
+                                    </td>
+                                </tr>
+                                <tr ng-show="vm.memberRates.rates.length == 0">
+                                    <td colspan="7">No client or project rates in this team's scope</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Allocations -->
+                <div id="workTeamAllocations" ng-show="vm.tab == 'allocations'">
+                    <p class="text-muted">
+                        People in this team (any role) can log time on these clients and projects while their membership is current,
+                        in addition to their own allocations.
+                    </p>
+                    <form class="m-b-2 row">
+                        <div class="col-md-6">
+                            <div class="input-group-sm m-b-1">
+                                <input type="text" class="form-control p-x b-a rounded" ng-model="vm.treeFilter" placeholder="Filter">
+                            </div>
+                            <label class="md-switch">
+                                <input type="checkbox" ng-model="vm.includeInactive" ng-click="vm.toggleInactiveProjectShow()">
+                                <i class="indigo"></i>
+                                Show Inactive Projects
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="pull-right" ng-show="vm.permissions.canEditAllocations">
+                                <button class="btn btn-outline b-primary text-primary" ng-click="vm.loadTree()">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Reset
+                                </button>
+                                <button class="btn btn-fw primary" ng-click="vm.saveAllocations()">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                                </button>
+                            </div>
+                            <div class="pull-right text-muted" ng-show="!vm.permissions.canEditAllocations">Read only</div>
+                        </div>
+                    </form>
+
+                    <ul id="workTeamTree">
+                        <li ng-repeat="node in vm.treeData | filter:vm.treeFilter" ng-include="'workTeamNode.html'"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-success" ng-if="vm.saveSuccess">
+                    <strong>Success!</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="workTeamNode.html">
+    <div class="box row d-flex m-b-0">
+        <div class="col-lg-4">
+            <label class="md-switch">
+                <input type="checkbox" ng-model="node.selected" ng-disabled="!vm.permissions.canEditAllocations">
+                <i class="indigo"></i>
+            </label>
+            {{ node.name }}
+        </div>
+        <div class="col-lg-4" ng-show="node.selected">Entire Client Selected</div>
+        <div class="col-lg-2" ng-show="!node.selected">Projects : {{vm.getClientCounts(node,"Project")}}</div>
+        <div class="col-lg-2" ng-show="!node.selected">Sub-Projects : {{vm.getClientCounts(node,"SubProject")}}</div>
+        <div class="col-lg-4">
+            <div class="pull-right">
+                <span ng-show="vm.permissions.canEditAllocations">
+                    <a class="btn btn-xs btn-fw btn-outline b-success text-success" ng-click="vm.selectAllNone(node,true)">All</a>
+                    <a class="btn btn-xs btn-fw btn-outline b-danger text-danger" ng-click="vm.selectAllNone(node,false)">None</a>
+                </span>
+                <button class="btn btn-link" ng-click="node.collapsed = !node.collapsed">
+                    <span ng-class="{'fa-caret-down': !node.collapsed, 'fa-caret-up': node.collapsed}" class="fa"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <ul ng-if="!node.collapsed && node.listOfProjects">
+        <li ng-repeat="child in node.listOfProjects | filter:vm.treeFilter" ng-include="'workTeamChild.html'"></li>
+    </ul>
+</script>
+
+<script type="text/ng-template" id="workTeamChild.html">
+    <div class="row d-flex m-b-0">
+        <div class="col-lg-6">
+            <label class="md-switch" ng-if="!node.selected">
+                <input type="checkbox" ng-model="child.selected" ng-change="vm.selectChange(child)" ng-disabled="!vm.permissions.canEditAllocations">
+                <i class="indigo"></i>
+            </label>
+            <span ng-if="node.selected">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span><b>{{ child.code }} {{ child.name }}</b></span>
+        </div>
+        <div class="col-lg-4"><div ng-if="!node.selected">{{vm.getProjectCounts(child)}}</div></div>
+        <div class="col-lg-2">
+            <button class="btn btn-link pull-right" ng-click="child.collapsed = !child.collapsed" ng-if="child.listOfProjects.length > 0">
+                <span ng-class="{'fa-caret-down': !child.collapsed, 'fa-caret-up': child.collapsed}" class="fa"></span>
+            </button>
+        </div>
+    </div>
+    <ul class="list-group" ng-if="!child.collapsed && child.listOfProjects">
+        <li ng-repeat="grandchild in child.listOfProjects | filter:vm.treeFilter | orderBy:['code', 'name']" class="m-b-0">
+            <label class="md-switch" ng-if="!node.selected && !child.selected">
+                <input type="checkbox" ng-model="grandchild.selected" ng-disabled="!vm.permissions.canEditAllocations">
+                <i class="indigo"></i>
+            </label>
+            <label class="md-switch" ng-if="node.selected || child.selected">&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <span>{{ grandchild.code }} {{ grandchild.name }}</span>
+        </li>
+    </ul>
+</script>

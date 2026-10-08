@@ -11,6 +11,7 @@ using TRiZHub.BL.Provider.ProjectData;
 using TRiZHub.BL.Provider.ClientEntityData;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.Settings;
+using TRiZHub.BL.Provider.WorkTeamData;
 using TRiZHub.BL.Entities.UserIdentityProject;
 using TRiZHub.Controllers.Filters;
 using TRiZHub.Models;
@@ -453,69 +454,37 @@ namespace TRiZHub.Controllers
 
         private List<UserIdentityProjectModel> GetClientTree(Guid userId, bool includeInactive)
         {
-
-            var clients = ClientProvider.ClientEntityList().ToList();
-            var projects = ProjectProvider.ProjectList();
-            var subProjects = ProjectProvider.SubProjectList().ToList();
             var userProjects = ProjectProvider.GetUserAllocatedProjects(userId).ToList();
             var userClients = ClientProvider.GetUserAllocatedClients(userId).ToList();
 
-            var results = new List<UserIdentityProjectModel>();
-
-            if (!includeInactive) {
-                clients = clients.Where(c => c.IsActive).ToList();
-                projects = projects.Where(c => c.IsActive);
-                subProjects = subProjects.Where(c => c.IsActive).ToList();
-            }
-
-            // Build full tree            
-            foreach (var client in clients)
+            var selection = new ClientTreeSelection();
+            foreach (var clientId in userClients.Where(c => c.ClientId.HasValue).Select(c => c.ClientId.Value))
+                selection.ClientIds.Add(clientId);
+            foreach (var up in userProjects.Where(p => p.ProjectId.HasValue))
             {
-                var clientResult = new UserIdentityProjectModel
-                {
-                    ClientId = client.Id,
-                    Name = client.EntityName,
-                    Selected = userClients.FindIndex(uc => uc.ClientId == client.Id) > -1 ? true : false,
-
-                    ListOfProjects = projects.Where(p => p.ClientId == client.Id).ToList().Select(p => new UserIdentityProjectModel
-                    {
-                        ClientId = client.Id,
-                        ProjectId = p.Id,                        
-                        Name = p.ProjectName,
-                        Code = p.ProjectNumber,
-                        isActive = p.IsActive,
-                        ListOfProjects = subProjects.Where(sp => sp.ProjectId == p.Id).Select(sp => new UserIdentityProjectModel
-                        {
-                            ClientId = client.Id,
-                            ProjectId = p.Id,
-                            SubProjectId = sp.Id,
-                            Name = sp.ProjectName,
-                            Code = sp.SubProjectNumber,
-                            isActive = sp.IsActive
-                        }).OrderBy(c => c.Name).ToList()
-                    }).OrderBy(c => c.Name).ToList()
-                };
-
-                results.Add(clientResult);
+                if (up.SubProjectId.HasValue)
+                    selection.SubProjectIds.Add(up.SubProjectId.Value);
+                else
+                    selection.ProjectIds.Add(up.ProjectId.Value);
             }
 
+            var today = DateTime.Today;
+            var inheritedFrom = new EffectiveAllocationProvider(Context, CurrentUser)
+                .For(userId, today, today)
+                .TeamGrants
+                .Select(g => new { Id = g.SubProjectId ?? g.ProjectId ?? g.ClientId, g.WorkTeamName })
+                .Where(g => g.Id.HasValue)
+                .GroupBy(g => g.Id.Value)
+                .ToDictionary(g => g.Key,
+                    g => string.Join(", ", g.Select(x => x.WorkTeamName).Distinct().OrderBy(n => n)));
 
-            foreach (var client in results)
-            {
-                foreach (var project in client.ListOfProjects)
-                {
-                    project.Selected = userProjects.FindIndex(up => up.ProjectId == project.ProjectId && up.SubProjectId == null) > -1 ? true : false;
-
-                    foreach (var subProject in project.ListOfProjects)
-                    {
-                        subProject.Selected = userProjects.FindIndex(up => up.SubProjectId == subProject.SubProjectId) > -1 ? true : false;
-                    }
-                }
-            }
-
-            results = results.OrderBy(r => r.Name).ToList();
-
-            return results;
+            return ClientTreeBuilder.Build(
+                ClientProvider.ClientEntityList().ToList(),
+                ProjectProvider.ProjectList().ToList(),
+                ProjectProvider.SubProjectList().ToList(),
+                selection,
+                includeInactive,
+                inheritedFrom);
         }
 
 
@@ -590,14 +559,22 @@ namespace TRiZHub.Controllers
 
 
 
-        public List<UserProjectGridModel> GetUserAllocatedProjects(string id, bool includeInactive = false)
+        /// <summary>
+        /// Projects the user can log time on between start and end (default: today): direct allocations plus the
+        /// allocations of teams the user belongs to during that range. Saves are re-checked per day on the server.
+        /// </summary>
+        public List<UserProjectGridModel> GetUserAllocatedProjects(string id, bool includeInactive = false,
+            DateTime? start = null, DateTime? end = null)
         {
+            var from = (start ?? DateTime.Today).Date;
+            var to = (end ?? start ?? DateTime.Today).Date;
+            if (to < from)
+                to = from;
 
             var clients = ClientProvider.ClientEntityList().ToList();
             var projects = ProjectProvider.ProjectList();
             var subProjects = ProjectProvider.SubProjectList().ToList();
-            var userProjects = ProjectProvider.GetUserAllocatedProjects(new Guid(id)).ToList();
-            var userClients = ClientProvider.GetUserAllocatedClients(new Guid(id)).ToList();
+            var allocations = new EffectiveAllocationProvider(Context, CurrentUser).For(new Guid(id), from, to);
 
             var results = new List<UserProjectGridModel>();
 
@@ -611,11 +588,11 @@ namespace TRiZHub.Controllers
             // Build full tree            
             foreach (var client in clients)
             {
-                var clientSelected = userClients.FindIndex(uc => uc.ClientId == client.Id) > -1 ? true : false;
+                var clientSelected = allocations.ClientCovered(client.Id);
 
                 foreach (var project in projects.Where(p => p.ClientId == client.Id).ToList())
                 {
-                   var projectSelected = userProjects.FindIndex(up => up.ProjectId == project.Id && up.SubProjectId == null) > -1 ? true : false;
+                   var projectSelected = allocations.WholeProjectCovered(project.Id);
                    if ((projectSelected || clientSelected) && (project.ExcludeTimeCapture == false || project.ExcludeTimeCapture == null))
                    {
                         results.Add(new UserProjectGridModel
@@ -634,7 +611,7 @@ namespace TRiZHub.Controllers
 
                     foreach (var subProject in subProjects.Where(sp => sp.ProjectId == project.Id).ToList())
                     {
-                        var subProjectSelected = userProjects.FindIndex(up => up.ProjectId == project.Id && up.SubProjectId == subProject.Id) > -1 ? true : false;
+                        var subProjectSelected = allocations.SubProjectCovered(subProject.Id);
                         if (projectSelected || clientSelected || subProjectSelected)
                         {
                             results.Add(new UserProjectGridModel
