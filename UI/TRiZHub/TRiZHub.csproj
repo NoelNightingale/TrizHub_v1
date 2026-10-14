@@ -275,9 +275,12 @@
     <Compile Include="Models\AdminModels\ProfileViewModel.cs" />
     <Compile Include="Models\AdminModels\requiredAttribute.cs" />
     <Compile Include="Models\AdminModels\settings\SettingsModel.cs" />
+    <Compile Include="Models\BillingCycleModels\BillingCycleAccessModel.cs" />
     <Compile Include="Models\BillingCycleModels\BillingCycleDropdownModel.cs" />
+    <Compile Include="Models\BillingCycleModels\BillingCycleExemptUserModel.cs" />
     <Compile Include="Models\BillingCycleModels\BillingCycleGridModel.cs" />
     <Compile Include="Models\BillingCycleModels\BillingCycleModel.cs" />
+    <Compile Include="Models\BillingCycleModels\BillingCycleStatusModel.cs" />
     <Compile Include="Models\BillingRatesModels\BillingRatesGridModel.cs" />
     <Compile Include="Models\BillingRatesModels\BillingRatesEditModel.cs" />
     <Compile Include="Models\BillingRatesModels\BillingRatesSearchModel.cs" />
@@ -533,7 +536,6 @@
     <Content Include="Portals\app\states\mainState\maintenanceState\scorecardTemplatePeriodMaintenanceState\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\scorecardTemplatePeriodMaintenanceState\grid\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\scorecardTemplatePeriodMaintenanceState\stateView.html" />
-    <Content Include="Portals\app\states\mainState\maintenanceState\billingCycleMaintenanceState\detail\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\billingCycleMaintenanceState\stateView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\scorecardTemplateItemMaintenanceState\grid\views\mainView.html" />
     <Content Include="Portals\app\states\mainState\maintenanceState\scorecardTemplateItemMaintenanceState\stateView.html" />
@@ -603,6 +605,7 @@
     <Content Include="Portals\app\states\stateView.html" />
     <Content Include="Portals\app\states\rootState\login\views\mainView.html" />
     <Content Include="Portals\app\states\rootState\stateView.html" />
+    <Content Include="Portals\app\popups\ActionDialog.html" />
     <Content Include="Portals\app\popups\Confirmation.html" />
     <Content Include="Portals\app\popups\ConfirmationReason.html" />
     <Content Include="Portals\app\popups\Error.html" />
@@ -1847,7 +1850,6 @@
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\projectMaintenanceState\subProjectDetail\controllers\~SubProjectGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\scorecardTemplatePeriodMaintenanceState\detail\controllers\~ScorecardTemplatePeriodMaintenanceDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\scorecardTemplatePeriodMaintenanceState\grid\controllers\~ScorecardTemplatePeriodMaintenanceGridController.ts" />
-    <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\billingCycleMaintenanceState\detail\controllers\~BillingCycleMaintenanceDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\scorecardTemplateItemMaintenanceState\grid\controllers\~ScorecardTemplateItemMaintenanceGridController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\scorecardTemplateMaintenanceState\detail\controllers\~ScorecardTemplateMaintenanceDetailController.ts" />
     <TypeScriptCompile Include="Portals\app\states\mainState\maintenanceState\scorecardTemplateMaintenanceState\grid\controllers\~ScorecardTemplateMaintenanceGridController.ts" />

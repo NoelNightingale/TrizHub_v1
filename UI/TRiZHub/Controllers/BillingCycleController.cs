@@ -132,7 +132,55 @@ namespace TRiZHub.Controllers
 
             var returnList = filteredQuery.ToList();
 
+            var cycleIds = returnList.Select(a => a.Id).ToList();
+            var exemptions = BillingCycleProvider.ExemptionList()
+                .Where(e => cycleIds.Contains(e.BillingCycleEntryId))
+                .Select(e => new { e.BillingCycleEntryId, Name = e.UserAccount.FirstName + " " + e.UserAccount.Surname })
+                .ToList();
+            foreach (var row in returnList)
+            {
+                row.ExemptUserNames = exemptions.Where(e => e.BillingCycleEntryId == row.Id)
+                    .Select(e => e.Name).OrderBy(n => n).ToList();
+                row.ExemptUserCount = row.ExemptUserNames.Count;
+            }
+
             return new GridResultModel<BillingCycleGridModel>(returnList, totalNumberOfRecords);
+        }
+
+        private BillingCycleModel BuildBillingCycleModel(Guid id)
+        {
+            var record = BillingCycleProvider.GetBillingCycleEntry(id);
+            if (record == null)
+                throw new BillingCyleException("The billing cycle could not be found.");
+
+            var exemptUsers = BillingCycleProvider.ExemptionList()
+                .Where(e => e.BillingCycleEntryId == id)
+                .Select(e => new BillingCycleExemptUserModel
+                {
+                    Id = e.UserAccountId,
+                    Name = e.UserAccount.FirstName + " " + e.UserAccount.Surname,
+                    Active = e.UserAccount.Active
+                })
+                .OrderBy(e => e.Name)
+                .ToList();
+
+            return new BillingCycleModel
+            {
+                Id = record.Id,
+                Cycle = record.Cycle,
+                Year = record.Year,
+                StartDate = record.StartDate,
+                EndDate = record.EndDate,
+                Weekdays = record.Weekdays,
+                PublicHolidays = record.PublicHolidays,
+                WorkDays = record.WorkDays,
+                CreatedByAccountId = record.CreatedByAccountId,
+                DateCreated = record.DateCreated,
+                IsClosed = record.IsClosed,
+                IsActive = record.IsActive,
+                ExemptUsers = exemptUsers,
+                ExemptUserAccountIds = exemptUsers.Select(e => e.Id).ToList()
+            };
         }
 
         /// <summary>
@@ -143,25 +191,7 @@ namespace TRiZHub.Controllers
         {
             try
             {
-                var record = BillingCycleProvider.GetBillingCycleEntry(id.Value);
-
-                var model = new BillingCycleModel
-                {
-                    Id = record.Id,
-                    Cycle = record.Cycle,
-                    Year = record.Year,
-                    StartDate = record.StartDate,
-                    EndDate = record.EndDate,
-                    Weekdays = record.Weekdays,
-                    PublicHolidays = record.PublicHolidays,
-                    WorkDays = record.WorkDays,
-                    CreatedByAccountId = record.CreatedByAccountId,
-                    DateCreated = record.DateCreated,
-                    IsClosed = record.IsClosed,
-                    IsActive = record.IsActive
-                };
-
-                return model;
+                return BuildBillingCycleModel(id.Value);
             }
             catch (BillingCyleException e)
             {
@@ -186,29 +216,31 @@ namespace TRiZHub.Controllers
 
                 CheckModelState();
 
-                var record = BillingCycleProvider.SaveBillingCycleEntry(model.Id, model.Cycle,
-                    model.Year, model.StartDate, model.EndDate, model.Weekdays,
-                    model.PublicHolidays, model.WorkDays, model.IsClosed);
-
-                var result = BillingCycleProvider.GetBillingCycleEntry(record.Id);
-
-                var returnResult = new BillingCycleModel
+                var ownsTransaction = !Context.IsTransactionActive();
+                if (ownsTransaction)
+                    Context.BeginTransaction();
+                Guid savedId;
+                try
                 {
-                    Id = result.Id,
-                    Cycle = result.Cycle,
-                    Year = result.Year,
-                    StartDate = result.StartDate,
-                    EndDate = result.EndDate,
-                    Weekdays = result.Weekdays,
-                    PublicHolidays = result.PublicHolidays,
-                    WorkDays = result.WorkDays,
-                    CreatedByAccountId = result.CreatedByAccountId,
-                    DateCreated = result.DateCreated,
-                    IsClosed = result.IsClosed,
-                    IsActive = result.IsActive
-                };
+                    var record = BillingCycleProvider.SaveBillingCycleEntry(model.Id, model.Cycle,
+                        model.Year, model.StartDate, model.EndDate, model.Weekdays,
+                        model.PublicHolidays, model.WorkDays, model.IsClosed);
 
-                return returnResult;
+                    if (model.ExemptUserAccountIds != null)
+                        BillingCycleProvider.SaveExemptions(record.Id, model.ExemptUserAccountIds);
+
+                    if (ownsTransaction)
+                        Context.CommitTransaction();
+                    savedId = record.Id;
+                }
+                catch
+                {
+                    if (ownsTransaction)
+                        Context.RollbackTransaction();
+                    throw;
+                }
+
+                return BuildBillingCycleModel(savedId);
             }
             catch (BillingCyleException e)
             {
@@ -270,8 +302,76 @@ namespace TRiZHub.Controllers
             }
         }
 
+        /// <summary>
+        /// Close or reopen a Billingcycle
+        /// </summary>
+        [HttpPost]
+        public BillingCycleModel BillingCycleSetStatus(BillingCycleStatusModel model)
+        {
+            try
+            {
+                BillingCycleProvider.SetClosed(model.Id, model.IsClosed);
+                return BuildBillingCycleModel(model.Id);
+            }
+            catch (BillingCyleException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
 
+        /// <summary>
+        /// Whether the user's timesheet is read-only in the Billingcycle (closed and the user is not exempt)
+        /// </summary>
+        [HttpGet]
+        public BillingCycleAccessModel BillingCycleAccess(Guid? id, Guid? userId)
+        {
+            if (id == null || userId == null)
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                    "A billing cycle and user are required."));
 
+            var model = new BillingCycleAccessModel { BillingCycleId = id.Value, UserAccountId = userId.Value };
+
+            // Inactive cycles do not block capture, so they are reported as open.
+            var record = BillingCycleProvider.GetBillingCycleEntry(id.Value);
+            if (record == null)
+                return model;
+
+            model.StartDate = record.StartDate;
+            model.EndDate = record.EndDate;
+            model.IsClosed = record.IsClosed;
+            model.IsExempt = BillingCycleProvider.IsUserExempt(record.Id, userId.Value);
+            model.IsReadOnly = model.IsClosed && !model.IsExempt;
+
+            var range = record.StartDate.ToString("yyyy/MM/dd") + " – " + record.EndDate.ToString("yyyy/MM/dd");
+            if (model.IsReadOnly)
+                model.Message = "Billing period " + range + " is closed. This timesheet is read-only.";
+            else if (model.IsClosed)
+                model.Message = "Billing period " + range + " is closed, but this user is exempt and can still capture time.";
+
+            return model;
+        }
+
+        #endregion
+
+        #region Exemptions
+
+        /// <summary>
+        /// Active users that can be exempted from a closed Billingcycle
+        /// </summary>
+        [HttpGet]
+        public List<BillingCycleExemptUserModel> BillingCycleExemptionCandidates()
+        {
+            return BillingCycleProvider.ExemptionCandidates()
+                .Where(a => !a.FirstName.Equals("Importer"))
+                .Select(a => new BillingCycleExemptUserModel
+                {
+                    Id = a.Id,
+                    Name = a.FirstName + " " + a.Surname,
+                    Active = a.Active
+                })
+                .OrderBy(a => a.Name)
+                .ToList();
+        }
 
         #endregion
 
@@ -291,7 +391,8 @@ namespace TRiZHub.Controllers
                         Cycle = a.Cycle,
                         Enddate = a.EndDate,
                         Startdate = a.StartDate,
-                        Year = a.Year
+                        Year = a.Year,
+                        IsClosed = a.IsClosed
                     }).OrderByDescending(b => b.Startdate)
                 .ToList();
         }

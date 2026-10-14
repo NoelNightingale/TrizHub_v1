@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System;
+using System.Collections.Generic;
 
 #endregion
 
@@ -24,5 +25,8 @@ namespace TRiZHub.Models.BillingCycleModels
 
         public bool IsClosed { get; set; }
         public bool IsActive { get; set; }
+
+        public int ExemptUserCount { get; set; }
+        public List<string> ExemptUserNames { get; set; }
     }
 }

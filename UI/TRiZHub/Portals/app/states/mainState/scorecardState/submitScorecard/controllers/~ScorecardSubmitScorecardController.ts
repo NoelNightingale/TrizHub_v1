@@ -114,7 +114,6 @@ class ScorecardSubmitScorecardController extends CHControllerBase {
                     self.$timeout(() => { self.$state.transitionTo("mainState.scorecard.grid"); }, 1000);
                 },
                 error => {
-                    self.Popups.showError(self.$scope, error, "Error");
                     self.handleError(error);
                 });
     };
@@ -135,7 +134,6 @@ class ScorecardSubmitScorecardController extends CHControllerBase {
                                 self.$timeout(() => { self.$state.transitionTo("mainState.scorecard.grid"); }, 1000);
                             },
                             error => {
-                                self.Popups.showError(self.$scope, error, "Error");
                                 self.handleError(error);
                             });
                 },

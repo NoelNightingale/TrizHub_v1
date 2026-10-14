@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TCR.Lib.BL;
@@ -39,5 +40,7 @@ namespace TRiZHub.BL.Entities.BillingCycleData
         public virtual bool IsClosed { get; set; }
 
         public virtual bool IsActive { get; set; }
+
+        public virtual ICollection<BillingCycleExemption> Exemptions { get; set; }
     }
 }

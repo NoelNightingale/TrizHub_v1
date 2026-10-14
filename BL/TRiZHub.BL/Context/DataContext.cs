@@ -129,6 +129,7 @@ namespace TRiZHub.BL.Context
 
         //Billing Cycle
         public DbSet<BillingCycleEntry> BillingCycleEntrySet { get; set; }
+        public DbSet<BillingCycleExemption> BillingCycleExemptionSet { get; set; }
 
         //Billing Rates
         public DbSet<BillingRates> BillingRatesSet { get; set; }

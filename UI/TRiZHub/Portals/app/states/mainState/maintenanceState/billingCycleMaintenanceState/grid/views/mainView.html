@@ -1,114 +1,313 @@
-﻿<div class="col-sm-12 col-md-12 col-lg-12">
-    <div class="padding">
-        <div class="box">
-            <div class="box-header b-b">
-                <h2>Billing Cycle Maintenance</h2>
-            </div>
-            <div class="box-body">
-                <div class="row">
-                    <div class="col-sm-4 navbar-form">
-                        <div class="input-group sm m-b-1">
-                            <span class="input-group-addon">
-                                Year
-                            </span>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default btn-sm " ng-click="vm.decYear()">&lt;</button>
-                            </span>
-                            <input type="number" class="form-control form-control-sm text-center" ng-model="vm.viewModel">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default btn-sm" ng-click="vm.incYear()">&gt;</button>
-                            </span>
+﻿<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box br-workbench bp-workbench">
+                <div class="box-header b-b">
+                    <div class="br-header">
+                        <div>
+                            <h2>Billing Periods</h2>
+                            <p class="br-header-note">
+                                Closing a period makes its timesheets read-only. Exempt users can still capture time in a closed period.
+                            </p>
+                        </div>
+                        <div class="bp-header-tools">
+                            <div class="bp-year-stepper" title="Year the periods start in">
+                                <button type="button" class="bp-year-btn" ng-click="vm.decYear()" title="Previous year">
+                                    <i class="fa fa-chevron-left"></i>
+                                </button>
+                                <span class="bp-year">{{vm.year}}</span>
+                                <button type="button" class="bp-year-btn" ng-click="vm.incYear()" title="Next year">
+                                    <i class="fa fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <a href="" class="br-clear-date bp-today-link" ng-if="vm.year !== vm.currentYear"
+                               ng-click="vm.goToCurrentYear()">Back to {{vm.currentYear}}</a>
+                            <button type="button" class="btn btn-sm btn-primary" ng-click="vm.openNew()">
+                                <i class="fa fa-plus"></i> New period
+                            </button>
                         </div>
                     </div>
                 </div>
-                <form role="form" name="RecordForm" novalidate>
-                    <div class="table-responsive">
-                        <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>
 
-                                        <a ng-click="vm.pageGrid.sort('cycle')"> Cycle</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='cycle'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='cycle'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('year')"> Year</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='year'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='year'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('startDate')">Start Date</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='startDate'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='startDate'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('endDate')">End Date</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='endDate'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='endDate'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('weekdays')">Weekdays</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='weekdays'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='weekdays'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('publicHolidays')">Public Holidays</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='publicHolidays'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='publicHolidays'}"></i>
-                                    </th>
-                                    <th>
-
-                                        <a ng-click="vm.pageGrid.sort('workDays')">Work Days</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='workDays'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='workDays'}"></i>
-
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('isclosed')">Is Closed</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='isclosed'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='isclosed'}"></i>
-                                    </th>
-                                    <th>
-                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newBillingCycle()">
-                                            <i class="fa fa-plus"></i> New
-                                        </a>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr data-ng-repeat="i in vm.gridModel.data" st-select-row="row">
-                                    <td>{{i.cycle}}</td>
-                                    <td>{{i.year}}</td>
-                                    <td>{{i.startDate | date: 'yyyy/MM/dd'}}</td>
-                                    <td>{{i.endDate | date: 'yyyy/MM/dd'}}</td>
-                                    <td>{{i.weekdays}}</td>
-                                    <td>{{i.publicHolidays}}</td>
-                                    <td>{{i.workDays}}</td>
-                                    <td ng-style="i.isClosed === true &&{'color' : 'red'} || i.isClosed === false &&{'color' : 'green'}">{{i.isClosed}}</td>
-                                    <td>
-                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
-                                           ui-sref="mainState.maintenance.billingCycleMaintenance.detail({id: i.id})">
-                                            <i class="fa fa-edit"></i> Edit
-                                        </a>
-                                        <!--<a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.danger}} text-{{app.setting.theme.danger}}"
-                                            ng-click="vm.deleteRecord(i)">
-                                            <i class="fa fa-delete"></i> Delete
-                                        </a>-->
-                                    </td>
-                                </tr>
-                                <tr ng-show="vm.gridModel.data.length == 0">
-                                    <td colspan="9">
-                                        No Records
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                            </tfoot>
-                        </table>
+                <div class="box-body">
+                    <div class="bp-summary">
+                        <span class="bp-stat">
+                            <span class="bp-stat-n">{{vm.summary.total}}</span>
+                            <span class="bp-stat-l">Periods</span>
+                        </span>
+                        <span class="bp-stat is-open">
+                            <span class="bp-stat-n">{{vm.summary.open}}</span>
+                            <span class="bp-stat-l"><i class="fa fa-unlock-alt"></i> Open</span>
+                        </span>
+                        <span class="bp-stat is-closed">
+                            <span class="bp-stat-n">{{vm.summary.closed}}</span>
+                            <span class="bp-stat-l"><i class="fa fa-lock"></i> Closed</span>
+                        </span>
+                        <span class="bp-stat is-exempt">
+                            <span class="bp-stat-n">{{vm.summary.exemptions}}</span>
+                            <span class="bp-stat-l"><i class="fa fa-user-plus"></i> Exemptions</span>
+                        </span>
+                        <span class="br-loading-hint" ng-if="vm.loading">
+                            <i class="fa fa-spinner fa-spin"></i> Loading…
+                        </span>
                     </div>
-                </form>
+
+                    <div class="bp-list">
+                        <div class="bp-period" ng-repeat="p in vm.periods track by p.id"
+                             role="button" tabindex="0"
+                             ng-class="{'is-closed': p.isClosed, 'is-current': vm.isCurrent(p), 'is-selected': vm.drawer.open && vm.drawer.requestedId === p.id, 'bp-flash': vm.highlightId === p.id}"
+                             ng-click="vm.openEdit(p)"
+                             ng-keydown="$event.keyCode === 13 && vm.openEdit(p)">
+                            <div class="bp-period-cycle">
+                                <span class="bp-cycle-label">Cycle</span>
+                                <span class="bp-cycle-num">{{p.cycle}}</span>
+                            </div>
+                            <div class="bp-period-main">
+                                <div class="bp-period-range">
+                                    {{vm.rangeLabel(p)}}
+                                    <span class="bp-current-tag" ng-if="vm.isCurrent(p)">Current</span>
+                                </div>
+                                <div class="bp-period-meta">
+                                    <strong>{{p.workDays}}</strong> work days
+                                    <span class="bp-dot">&middot;</span> {{p.weekdays}} weekdays
+                                    <span class="bp-dot">&middot;</span> {{p.publicHolidays}} public holiday{{p.publicHolidays === 1 ? '' : 's'}}
+                                </div>
+                            </div>
+                            <div class="bp-period-exempt">
+                                <span class="bp-exempt-badge" ng-if="p.exemptUserCount" title="{{vm.exemptTooltip(p)}}"
+                                      ng-class="{'is-dormant': !p.isClosed}">
+                                    <i class="fa fa-user-plus"></i> {{p.exemptUserCount}} exempt
+                                </span>
+                                <span class="bp-exempt-none" ng-if="!p.exemptUserCount">No exemptions</span>
+                            </div>
+                            <div class="bp-period-status">
+                                <span class="bp-status" ng-class="p.isClosed ? 'is-closed' : 'is-open'">
+                                    <i class="fa" ng-class="p.isClosed ? 'fa-lock' : 'fa-unlock-alt'"></i>
+                                    {{p.isClosed ? 'Closed' : 'Open'}}
+                                </span>
+                            </div>
+                            <div class="bp-period-actions" ng-click="$event.stopPropagation()">
+                                <button type="button" class="btn btn-xs bp-toggle-btn"
+                                        ng-class="p.isClosed ? 'is-reopen' : 'is-close'"
+                                        ng-click="vm.toggleClosed(p, $event)"
+                                        ng-disabled="vm.statusBusyId === p.id"
+                                        title="{{p.isClosed ? 'Reopen this period for capture' : 'Close this period for capture'}}">
+                                    <i class="fa" ng-class="vm.statusBusyId === p.id ? 'fa-spinner fa-spin' : (p.isClosed ? 'fa-unlock-alt' : 'fa-lock')"></i>
+                                    {{p.isClosed ? 'Reopen' : 'Close'}}
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline b-primary text-primary"
+                                        ng-click="vm.openEdit(p)" title="Edit period and exemptions">
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="br-empty bp-empty" ng-if="!vm.loading && !vm.periods.length">
+                            <i class="fa fa-calendar-o bp-empty-icon"></i>
+                            <div>No billing periods start in {{vm.year}}.</div>
+                            <a href="" ng-click="vm.openNew()">Create the first one</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Period editor drawer -->
+<div class="bp-drawer-backdrop" ng-class="{'is-open': vm.drawer.open}" ng-click="vm.closeDrawer()"></div>
+<aside class="bp-drawer br-workbench" ng-class="{'is-open': vm.drawer.open}" aria-hidden="{{!vm.drawer.open}}">
+    <form name="vm.editForm" novalidate class="bp-drawer-form" ng-submit="vm.saveDrawer()">
+        <div class="bp-drawer-header">
+            <div class="bp-drawer-heading">
+                <div class="bp-drawer-kicker">{{vm.drawer.isNew ? 'New billing period' : 'Billing period'}}</div>
+                <h3 class="bp-drawer-title" ng-if="vm.drawer.record">
+                    Cycle {{vm.drawer.record.cycle || '–'}} &middot; {{vm.drawer.record.year || '–'}}
+                </h3>
+                <h3 class="bp-drawer-title" ng-if="!vm.drawer.record">Loading…</h3>
+            </div>
+            <span class="bp-status" ng-if="vm.drawer.record" ng-class="vm.drawer.record.isClosed ? 'is-closed' : 'is-open'">
+                <i class="fa" ng-class="vm.drawer.record.isClosed ? 'fa-lock' : 'fa-unlock-alt'"></i>
+                {{vm.drawer.record.isClosed ? 'Closed' : 'Open'}}
+            </span>
+            <button type="button" class="bp-drawer-close" ng-click="vm.closeDrawer()" title="Close (Esc)">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+
+        <div class="bp-drawer-body">
+            <div class="bp-drawer-loading" ng-if="vm.drawer.loading">
+                <i class="fa fa-spinner fa-spin"></i> Loading period…
+            </div>
+
+            <div ng-if="vm.drawer.record && !vm.drawer.loading">
+
+                <!-- Status -->
+                <section class="bp-section">
+                    <div class="bp-section-title">Status</div>
+                    <div class="btn-group bp-segmented">
+                        <button type="button" class="btn btn-sm"
+                                ng-class="!vm.drawer.record.isClosed ? 'btn-primary' : 'btn-default'"
+                                ng-click="vm.setDrawerClosed(false)">
+                            <i class="fa fa-unlock-alt"></i> Open
+                        </button>
+                        <button type="button" class="btn btn-sm"
+                                ng-class="vm.drawer.record.isClosed ? 'btn-primary' : 'btn-default'"
+                                ng-click="vm.setDrawerClosed(true)">
+                            <i class="fa fa-lock"></i> Closed
+                        </button>
+                    </div>
+                    <p class="bp-help" ng-if="!vm.drawer.record.isClosed">
+                        Everyone can capture and edit time in this period.
+                    </p>
+                    <p class="bp-help" ng-if="vm.drawer.record.isClosed">
+                        Timesheets in this period are read-only, except for the exempt users below.
+                    </p>
+                </section>
+
+                <!-- Details -->
+                <section class="bp-section">
+                    <div class="bp-section-title">Period details</div>
+                    <div class="bp-field-grid bp-cols-2">
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && vm.editForm.cycle.$invalid}">
+                            <label for="bpCycle">Cycle</label>
+                            <input id="bpCycle" name="cycle" type="number" min="1" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.cycle" required />
+                        </div>
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && vm.editForm.year.$invalid}">
+                            <label for="bpYear">Year</label>
+                            <input id="bpYear" name="year" type="number" min="2000" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.year" required />
+                        </div>
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && !vm.drawer.record.startDate}">
+                            <label>Start date</label>
+                            <input type="text" class="form-control input-sm" name="startDate"
+                                   ng-model="vm.drawer.record.startDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="yyyy/mm/dd" autocomplete="off"
+                                   ng-change="vm.onDatesChanged()" />
+                        </div>
+                        <div class="bp-field" ng-class="{'has-danger': (vm.drawer.submitted && !vm.drawer.record.endDate) || vm.datesInvalid()}">
+                            <label>End date</label>
+                            <input type="text" class="form-control input-sm" name="endDate"
+                                   ng-model="vm.drawer.record.endDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="yyyy/mm/dd" autocomplete="off"
+                                   ng-change="vm.onDatesChanged()" />
+                        </div>
+                    </div>
+                    <div class="bp-field-error" ng-if="vm.datesInvalid()">End date must be on or after the start date.</div>
+
+                    <div class="bp-field-grid bp-cols-3">
+                        <div class="bp-field">
+                            <label for="bpWeekdays">Weekdays</label>
+                            <input id="bpWeekdays" name="weekdays" type="number" min="0" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.weekdays" ng-change="vm.recalcWorkDays()" />
+                        </div>
+                        <div class="bp-field">
+                            <label for="bpHolidays">Public holidays</label>
+                            <input id="bpHolidays" name="publicHolidays" type="number" min="0" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.publicHolidays" ng-change="vm.recalcWorkDays()" />
+                        </div>
+                        <div class="bp-field">
+                            <label for="bpWorkDays">Work days</label>
+                            <input id="bpWorkDays" name="workDays" type="number" min="0" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.workDays" />
+                        </div>
+                    </div>
+                    <p class="bp-help">Weekdays and work days are calculated from the dates and public holidays. You can still override them.</p>
+                </section>
+
+                <!-- Exempt users -->
+                <section class="bp-section">
+                    <div class="bp-section-title">
+                        <span>
+                            Exempt users
+                            <span class="br-filter-count" ng-class="{'is-zero': !vm.drawer.record.exemptUserAccountIds.length}">
+                                {{vm.drawer.record.exemptUserAccountIds.length}}
+                            </span>
+                        </span>
+                        <a href="" class="br-clear-date" ng-if="vm.drawer.record.exemptUserAccountIds.length"
+                           ng-click="vm.clearExempt()">Clear all</a>
+                    </div>
+                    <p class="bp-help bp-help-top">
+                        These users can still capture and edit time while the period is closed.
+                        <span ng-if="!vm.drawer.record.isClosed">The period is open, so this list has no effect until it is closed.</span>
+                    </p>
+
+                    <div class="br-chips bp-chips" ng-if="vm.drawer.record.exemptUserAccountIds.length">
+                        <span class="br-chip br-chip-user" ng-repeat="id in vm.drawer.record.exemptUserAccountIds">
+                            <span class="bp-avatar">{{vm.initials(vm.exemptName(id))}}</span>
+                            {{vm.exemptName(id)}}
+                            <span class="br-inactive-badge" ng-if="vm.candidateFor(id) && !vm.candidateFor(id).active">Inactive</span>
+                            <a href="" class="br-chip-remove" ng-click="vm.removeExempt(id)" title="Remove exemption">×</a>
+                        </span>
+                    </div>
+
+                    <div class="br-filter-panel bp-picker">
+                        <div class="bp-picker-tools">
+                            <div class="bp-search">
+                                <i class="fa fa-search"></i>
+                                <input type="text" class="form-control input-sm" placeholder="Search users"
+                                       ng-model="vm.exemptFilterText" />
+                            </div>
+                            <div class="btn-group br-status-toggle">
+                                <button type="button" class="btn btn-xs"
+                                        ng-class="!vm.exemptShowSelectedOnly ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.exemptShowSelectedOnly = false">All</button>
+                                <button type="button" class="btn btn-xs"
+                                        ng-class="vm.exemptShowSelectedOnly ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.exemptShowSelectedOnly = true">Exempt</button>
+                            </div>
+                        </div>
+                        <div class="br-filter-list">
+                            <div class="br-select-all" ng-if="vm.filteredCandidates().length > 0">
+                                <label class="md-check">
+                                    <input type="checkbox"
+                                           ng-checked="vm.areAllVisibleExempt()"
+                                           ng-click="vm.toggleAllVisibleExempt()">
+                                    <i class="indigo"></i>
+                                    {{vm.exemptFilterText ? 'Select all matching' : 'Select all'}}
+                                </label>
+                            </div>
+                            <div ng-repeat="u in vm.filteredCandidates() track by u.id">
+                                <label class="md-check">
+                                    <input type="checkbox"
+                                           ng-checked="vm.isExempt(u.id)"
+                                           ng-click="vm.toggleExempt(u.id)">
+                                    <i class="indigo"></i>
+                                    {{u.name}}
+                                    <span class="br-inactive-badge" ng-if="!u.active">Inactive</span>
+                                </label>
+                            </div>
+                            <div class="text-muted" ng-if="vm.candidatesLoaded && vm.filteredCandidates().length === 0">
+                                {{vm.exemptShowSelectedOnly ? 'No exempt users yet' : 'No matching users'}}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="bp-drawer-footer">
+            <div class="bp-drawer-error" ng-if="vm.drawer.error">
+                <i class="fa fa-exclamation-circle"></i> {{vm.drawer.error}}
+            </div>
+            <div class="bp-drawer-actions">
+                <span class="bp-dirty-hint" ng-if="vm.isDrawerDirty() && !vm.drawer.saving">Unsaved changes</span>
+                <button type="button" class="btn btn-sm btn-default" ng-click="vm.closeDrawer()" ng-disabled="vm.drawer.saving">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-sm btn-primary"
+                        ng-disabled="vm.drawer.saving || vm.drawer.loading || !vm.drawer.record">
+                    <i class="fa" ng-class="vm.drawer.saving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+                    {{vm.drawer.saving ? 'Saving…' : 'Save'}}
+                </button>
+            </div>
+        </div>
+    </form>
+</aside>

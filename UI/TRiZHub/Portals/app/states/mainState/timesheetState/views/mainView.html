@@ -1663,9 +1663,108 @@
     .ts-capture .readOnlyLight {
         cursor: pointer;
     }
+
+    /* Closed billing period */
+    .ts-capture .ts-lock-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-left: 10px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #8a4b00;
+        background: #fff4e5;
+        border: 1px solid rgba(240, 145, 0, 0.45);
+        white-space: nowrap;
+    }
+
+    .ts-capture .ts-lock-pill.is-exempt {
+        color: #1565c0;
+        background: #e3f2fd;
+        border-color: rgba(21, 101, 192, 0.35);
+    }
+
+    .ts-capture .ts-lock-pill.is-checking {
+        color: rgba(0, 0, 0, 0.45);
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ts-capture .ts-closed-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 14px 0 0;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(240, 145, 0, 0.4);
+        border-left: 4px solid #f09100;
+        background: #fff8ee;
+    }
+
+    .ts-capture .ts-closed-banner > .fa {
+        font-size: 20px;
+        line-height: 1;
+        margin-top: 2px;
+        color: #c77400;
+    }
+
+    .ts-capture .ts-closed-banner.is-exempt {
+        border-color: rgba(21, 101, 192, 0.3);
+        border-left-color: #1565c0;
+        background: #f2f8fe;
+    }
+
+    .ts-capture .ts-closed-banner.is-exempt > .fa {
+        color: #1565c0;
+    }
+
+    .ts-capture .ts-closed-title {
+        font-weight: 700;
+        font-size: 13px;
+        color: #3f3f3f;
+    }
+
+    .ts-capture .ts-closed-text {
+        margin-top: 2px;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+    }
+
+    .ts-capture fieldset.ts-entry-fieldset {
+        border: 0;
+        margin: 0;
+        padding: 0;
+        min-width: 0;
+    }
+
+    .ts-capture.is-readonly .ts-day-body .ts-entry-table .form-control[disabled] {
+        background: #fafafa;
+        color: rgba(0, 0, 0, 0.7);
+        cursor: default;
+    }
+
+    .ts-capture.is-readonly .ts-project-pick[disabled] {
+        cursor: default;
+    }
+
+    .ts-capture.is-readonly .ts-project-pick[disabled]:hover {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    .ts-capture.is-readonly .ts-project-pick[disabled] .ts-project-name {
+        background: none;
+        padding-right: 0;
+        text-decoration: none;
+    }
 </style>
 
-<div class="padding ts-capture" ng-class="{'is-clip-drawer-open': vm.clipboardDrawerOpen, 'is-summary-drawer-open': vm.summaryDrawerOpen}">
+<div class="padding ts-capture" ng-class="{'is-clip-drawer-open': vm.clipboardDrawerOpen, 'is-summary-drawer-open': vm.summaryDrawerOpen, 'is-readonly': vm.isReadOnly}">
     <button type="button" class="ts-clip-rail"
             ng-class="{'is-just-copied': vm.clipboardToast}"
             ng-click="vm.toggleClipboardDrawer()"
@@ -1725,7 +1824,7 @@
                             <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
                         </div>
                         <div class="ts-clip-actions" ng-click="$event.stopPropagation()">
-                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip, $event)" title="Paste">
+                            <button type="button" class="ts-clip-paste" ng-if="!vm.isReadOnly" ng-click="vm.beginPaste(clip, $event)" title="Paste">
                                 <i class="fa fa-paste"></i>
                             </button>
                             <button type="button" class="ts-clip-rename"
@@ -1768,7 +1867,7 @@
                             <div class="ts-clip-meta">{{clip.rowCount}} line{{clip.rowCount === 1 ? '' : 's'}} &middot; {{vm.clipboardRelativeTime(clip.copiedAt)}}</div>
                         </div>
                         <div class="ts-clip-actions" ng-click="$event.stopPropagation()">
-                            <button type="button" class="ts-clip-paste" ng-click="vm.beginPaste(clip, $event)" title="Paste">
+                            <button type="button" class="ts-clip-paste" ng-if="!vm.isReadOnly" ng-click="vm.beginPaste(clip, $event)" title="Paste">
                                 <i class="fa fa-paste"></i>
                             </button>
                             <button type="button" class="ts-clip-rename"
@@ -1887,6 +1986,15 @@
                     <div class="ts-top-left">
                         <div class="ts-panel-heading ts-top-heading">
                             <h3 class="ts-panel-title ts-screen-title">Timesheet Capture</h3>
+                            <span class="ts-lock-pill is-checking" ng-if="vm.periodAccessLoading && vm.filterModel.billingCycleId">
+                                <i class="fa fa-spinner fa-spin"></i> Checking period
+                            </span>
+                            <span class="ts-lock-pill" ng-if="!vm.periodAccessLoading && vm.periodAccess.isClosed"
+                                  ng-class="{'is-exempt': !vm.isReadOnly}"
+                                  title="{{vm.isReadOnly ? vm.periodAccess.message : vm.selectedUserName() + ' is exempt from this closed period'}}">
+                                <i class="fa" ng-class="vm.isReadOnly ? 'fa-lock' : 'fa-unlock-alt'"></i>
+                                {{vm.isReadOnly ? 'Period closed · Read-only' : 'Period closed · Exempt'}}
+                            </span>
                             <div class="ts-top-summary" ng-if="vm.weeks.length">
                                 <div class="ts-totals">
                                     <div class="ts-total">
@@ -2024,6 +2132,7 @@
                             <div class="ts-clip-detail-footer">
                                 <button type="button" class="btn btn-default" ng-click="vm.closeClipboardDetails()">Close</button>
                                 <button type="button" class="btn btn-primary"
+                                        ng-if="!vm.isReadOnly"
                                         ng-click="vm.pasteFromClipboardDetails()"
                                         ng-disabled="!vm.clipboardDetailItem.rows.length">
                                     <i class="fa fa-paste"></i> Paste
@@ -2080,6 +2189,23 @@
             </div>
 
             <div ng-if="vm.filterModel.billingCycleId && vm.displayOptions.show">
+                <div class="ts-closed-banner" role="status"
+                     ng-if="!vm.periodAccessLoading && vm.periodAccess.isClosed"
+                     ng-class="{'is-exempt': !vm.isReadOnly}">
+                    <i class="fa" ng-class="vm.isReadOnly ? 'fa-lock' : 'fa-unlock-alt'"></i>
+                    <div>
+                        <div class="ts-closed-title" ng-if="vm.isReadOnly">This billing period is closed</div>
+                        <div class="ts-closed-text" ng-if="vm.isReadOnly">
+                            {{vm.periodAccess.startDate | date:'yyyy/MM/dd'}} – {{vm.periodAccess.endDate | date:'yyyy/MM/dd'}} has been closed for billing, so this timesheet is read-only.
+                            You can still view and copy entries. Ask an administrator for an exemption if changes are needed.
+                        </div>
+                        <div class="ts-closed-title" ng-if="!vm.isReadOnly">Period closed: {{vm.selectedUserName()}} is exempt</div>
+                        <div class="ts-closed-text" ng-if="!vm.isReadOnly">
+                            {{vm.periodAccess.startDate | date:'yyyy/MM/dd'}} – {{vm.periodAccess.endDate | date:'yyyy/MM/dd'}} is closed for billing, but {{vm.selectedUserName()}} has an exemption and can still capture time.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="ts-week-bar" ng-if="vm.weeks.length">
                     <ul class="ts-week-tabs">
                         <li ng-repeat="week in vm.weeks">
@@ -2105,22 +2231,25 @@
                                 title="Copy this week to clipboard">
                             <i class="fa fa-copy"></i> Copy Week
                         </button>
-                        <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
+                        <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()" ng-if="!vm.isReadOnly">
                             <i class="fa fa-th"></i> Bulk Populate
                         </button>
                         <button type="button" class="btn ts-btn-template"
+                                ng-if="!vm.isReadOnly"
                                 ng-click="vm.revertSelectedWeek()"
                                 title="Discard unsaved changes for the selected week">
                             <i class="fa fa-undo"></i> Revert Week
                         </button>
                         <button type="button" class="btn ts-btn-template"
+                                ng-if="!vm.isReadOnly"
                                 ng-click="vm.revertAllWeeks()"
                                 title="Discard unsaved changes across all loaded weeks in this billing period">
                             <i class="fa fa-undo"></i> Revert All
                         </button>
                         <button type="button" class="btn btn-primary"
+                                ng-if="!vm.isReadOnly"
                                 ng-click="vm.submitForm()"
-                                ng-disabled="vm.filterModel.userId == null">
+                                ng-disabled="vm.filterModel.userId == null || vm.periodAccessLoading">
                             <i class="fa fa-save"></i> Save Changes
                         </button>
                     </div>
@@ -2149,6 +2278,7 @@
                                 <span ng-if="day.records.length">{{day.records.length}} line{{day.records.length === 1 ? '' : 's'}}</span>
                                 <button type="button" class="ts-btn-add-line"
                                         title="Add a line for this day"
+                                        ng-if="!vm.isReadOnly"
                                         ng-click="vm.addRowForDay(day); $event.stopPropagation()">
                                     <i class="fa fa-plus"></i> Add line
                                 </button>
@@ -2163,6 +2293,7 @@
 
                         <div class="ts-day-body" ng-show="day.expanded">
                             <div class="table-responsive" ng-if="day.records.length">
+                                <fieldset class="ts-entry-fieldset" ng-disabled="vm.isReadOnly">
                                 <table class="table ts-entry-table">
                                     <thead>
                                         <tr>
@@ -2246,12 +2377,12 @@
                                                         <i class="fa fa-copy"></i>
                                                     </a>
                                                     <a class="btn btn-xs btn-outline b-{{app.setting.theme.accent}}"
-                                                       ng-click="vm.resetRecord(i)" ng-hide="i.new"
+                                                       ng-click="vm.resetRecord(i)" ng-hide="i.new || vm.isReadOnly"
                                                        title="Reset this entry">
                                                         <i class="fa fa-refresh"></i>
                                                     </a>
                                                     <a class="btn btn-xs btn-outline b-{{app.setting.theme.danger}}"
-                                                       ng-click="vm.deleteRecord(i)"
+                                                       ng-click="vm.deleteRecord(i)" ng-hide="vm.isReadOnly"
                                                        title="Delete this entry">
                                                         <i class="fa fa-close"></i>
                                                     </a>
@@ -2260,23 +2391,24 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                </fieldset>
                             </div>
 
                             <div class="ts-day-empty" ng-if="!day.records.length">
                                 No time entered for this day.
-                                <a class="ts-empty-link" ng-click="vm.addRowForDay(day)">Add a line</a>
+                                <a class="ts-empty-link" ng-if="!vm.isReadOnly" ng-click="vm.addRowForDay(day)">Add a line</a>
                             </div>
                         </div>
                     </div>
                 </form>
 
-                <div class="ts-footer-actions" ng-if="vm.weeks.length">
+                <div class="ts-footer-actions" ng-if="vm.weeks.length && !vm.isReadOnly">
                     <button type="button" class="btn ts-btn-template" ng-click="vm.submitnewRecords()">
                         <i class="fa fa-th"></i> Bulk Populate
                     </button>
                     <button type="button" class="btn btn-primary"
                             ng-click="vm.submitForm()"
-                            ng-disabled="vm.filterModel.userId == null">
+                            ng-disabled="vm.filterModel.userId == null || vm.periodAccessLoading">
                         <i class="fa fa-save"></i> Save Changes
                     </button>
                 </div>

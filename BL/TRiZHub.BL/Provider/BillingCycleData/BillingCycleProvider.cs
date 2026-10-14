@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Linq;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.BillingCycleData;
+using TRiZHub.BL.Entities.SecurityData;
 using TRiZHub.BL.Entities.TimesheetData;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Provider.Security;
@@ -190,7 +191,88 @@ namespace TRiZHub.BL.Provider.BillingCycleData
 
                 return record;
             }
-            #endregion
         }
+
+        public BillingCycleEntry SetClosed(Guid id, bool isClosed)
+        {
+            Authenticate(PrivilegeType.BillingCycleMaintenance);
+            var record = DataContext.BillingCycleEntrySet.FirstOrDefault(a => a.Id == id && a.IsActive);
+            if (record == null)
+                throw new BillingCyleException("The billing cycle could not be found.");
+
+            if (record.IsClosed != isClosed)
+            {
+                record.IsClosed = isClosed;
+                DataContextSaveChanges();
+            }
+            return record;
+        }
+
+        #endregion
+
+        #region Exemptions
+
+        public BillingCycleEntry ClosingCycleFor(Guid userAccountId, DateTime day)
+        {
+            AuthenticateList(getTokens);
+            var date = day.Date;
+            var nextDay = date.AddDays(1);
+            return DataContext.BillingCycleEntrySet
+                .Where(a => a.IsActive && a.IsClosed
+                            && a.StartDate < nextDay && a.EndDate >= date
+                            && !a.Exemptions.Any(e => e.UserAccountId == userAccountId))
+                .OrderBy(a => a.StartDate)
+                .FirstOrDefault();
+        }
+
+        public bool IsUserExempt(Guid billingCycleId, Guid userAccountId)
+        {
+            AuthenticateList(getTokens);
+            return DataContext.BillingCycleExemptionSet
+                .Any(e => e.BillingCycleEntryId == billingCycleId && e.UserAccountId == userAccountId);
+        }
+
+        public IQueryable<BillingCycleExemption> ExemptionList()
+        {
+            AuthenticateList(getTokens);
+            return DataContext.BillingCycleExemptionSet;
+        }
+
+        public void SaveExemptions(Guid billingCycleId, IList<Guid> userAccountIds)
+        {
+            Authenticate(PrivilegeType.BillingCycleMaintenance);
+            if (!DataContext.BillingCycleEntrySet.Any(a => a.Id == billingCycleId && a.IsActive))
+                throw new BillingCyleException("The billing cycle could not be found.");
+
+            var wanted = new HashSet<Guid>(userAccountIds ?? new List<Guid>());
+            var existing = DataContext.BillingCycleExemptionSet
+                .Where(e => e.BillingCycleEntryId == billingCycleId)
+                .ToList();
+
+            foreach (var exemption in existing.Where(e => !wanted.Contains(e.UserAccountId)))
+                DataContext.BillingCycleExemptionSet.Remove(exemption);
+
+            var existingUserIds = new HashSet<Guid>(existing.Select(e => e.UserAccountId));
+            foreach (var userAccountId in wanted.Where(u => !existingUserIds.Contains(u)))
+            {
+                DataContext.BillingCycleExemptionSet.Add(new BillingCycleExemption
+                {
+                    BillingCycleEntryId = billingCycleId,
+                    UserAccountId = userAccountId,
+                    CreatedByAccountId = CurrentUser.Id,
+                    DateCreated = DateTime.UtcNow
+                });
+            }
+
+            DataContextSaveChanges();
+        }
+
+        public IQueryable<UserAccount> ExemptionCandidates()
+        {
+            Authenticate(PrivilegeType.BillingCycleMaintenance);
+            return DataContext.UserAccountSet.Where(a => a.Active);
+        }
+
+        #endregion
     }
 }

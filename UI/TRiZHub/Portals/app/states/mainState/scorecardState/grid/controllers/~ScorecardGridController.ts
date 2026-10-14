@@ -525,7 +525,6 @@ class ScorecardGridController extends CHControllerBase {
                                     }
                                 },
                                 error => {
-                                    self.Popups.showError(self.$scope, error, "Error");
                                     self.handleError(error);
                                 });
                     }
@@ -555,7 +554,6 @@ class ScorecardGridController extends CHControllerBase {
                                     self.pageGridAdminScorecards.search();
                                 },
                                 error => {
-                                    self.Popups.showError(self.$scope, error, "Error");
                                     self.handleError(error);
                                 });
                     }

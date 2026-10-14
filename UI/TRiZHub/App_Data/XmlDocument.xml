@@ -7,6 +7,12 @@
         <member name="P:TRiZHub.Models.Account.CurrentUserModel.TeamCapabilities">
             <summary>Only filled by <c>Account/GetCurrentUser</c>; null on per-request instances.</summary>
         </member>
+        <member name="T:TRiZHub.Models.BillingCycleModels.BillingCycleAccessModel">
+            <summary>Whether a user's timesheet may be edited within a billing cycle.</summary>
+        </member>
+        <member name="P:TRiZHub.Models.BillingCycleModels.BillingCycleModel.ExemptUserAccountIds">
+            <summary>Users who may still capture while the cycle is closed. Null on save leaves the list unchanged.</summary>
+        </member>
         <member name="T:TRiZHub.Models.BillingRatesModels.BillingRatesEffectiveGridModel">
             <summary>
             Effective rate row for the Billing Rates workbench (Active On date).
@@ -619,6 +625,21 @@
         <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleDelete(TRiZHub.Models.BillingCycleModels.BillingCycleModel)">
             <summary>
             Delete Billingcycle based on id
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleSetStatus(TRiZHub.Models.BillingCycleModels.BillingCycleStatusModel)">
+            <summary>
+            Close or reopen a Billingcycle
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleAccess(System.Nullable{System.Guid},System.Nullable{System.Guid})">
+            <summary>
+            Whether the user's timesheet is read-only in the Billingcycle (closed and the user is not exempt)
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleExemptionCandidates">
+            <summary>
+            Active users that can be exempted from a closed Billingcycle
             </summary>
         </member>
         <member name="M:TRiZHub.Controllers.BillingCycleController.BillingCycleDropdown">

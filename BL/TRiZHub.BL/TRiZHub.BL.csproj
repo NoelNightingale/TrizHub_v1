@@ -106,6 +106,7 @@
     <Compile Include="Context\DataContext.cs" />
     <Compile Include="Entities\ActivityData\Activity.cs" />
     <Compile Include="Entities\BillingCycleData\BillingCycleEntry.cs" />
+    <Compile Include="Entities\BillingCycleData\BillingCycleExemption.cs" />
     <Compile Include="Entities\BillingRatesData\BillingRates.cs" />
     <Compile Include="Entities\ClientEntityData\ClientEntity.cs" />
     <Compile Include="Entities\ClientReporterData\ClientReporter.cs" />
@@ -300,6 +301,10 @@
     <Compile Include="Migrations\202610081300000_AddWorkTeams.cs" />
     <Compile Include="Migrations\202610081300000_AddWorkTeams.Designer.cs">
       <DependentUpon>202610081300000_AddWorkTeams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202610140927474_UserExcludeClosedBP.cs" />
+    <Compile Include="Migrations\202610140927474_UserExcludeClosedBP.Designer.cs">
+      <DependentUpon>202610140927474_UserExcludeClosedBP.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Reports\ProjectAllocationModel.cs" />
@@ -506,6 +511,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202610081300000_AddWorkTeams.resx">
       <DependentUpon>202610081300000_AddWorkTeams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202610140927474_UserExcludeClosedBP.resx">
+      <DependentUpon>202610140927474_UserExcludeClosedBP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedure.sql" />
     <Compile Include="Scripts\ScorecardProcedure\ScorecardProcedureModel.cs" />

@@ -103,8 +103,15 @@ class ScorecardTemplateItemMaintenanceDetailController extends CHControllerBase 
 
         if (self.viewModel.weight > 0) {
             self.$scope.$broadcast("show-errors-check-validity");
-            if (self.$scope["EditForm"].$invalid)
+            const form = self.$scope["EditForm"];
+            if (form.$invalid) {
+                const labels = { description: "Performance Measure", order: "Order" };
+                const missing = (form.$error.required || []).map(c => labels[c.$name] || c.$name).filter(n => !!n);
+                self.handleError(missing.length
+                    ? "Please complete the required fields: " + missing.join(", ") + "."
+                    : "Please correct the highlighted fields.");
                 return;
+            }
             self.viewModel.scorecardTemplateId = self.scorecardTemplateId;
             self.ScorecardTemplateService.scorecardTemplateItemSave(self.viewModel)
                 .then(
@@ -121,7 +128,6 @@ class ScorecardTemplateItemMaintenanceDetailController extends CHControllerBase 
                     });
         } else {
 
-            self.Popups.showError(self.$scope, "Cannot add item with 0% weight", "Error");
             self.handleError("Cannot add item with 0% weight");
         }
 

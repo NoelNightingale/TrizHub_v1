@@ -1,10 +1,17 @@
 ﻿angular.module("AngularApp")
     .factory("Popups",
         [
-            "$uibModal", "$q",
-            function ($uibModal, $q) {
+            "$uibModal", "$q", "$rootScope",
+            function ($uibModal, $q, $rootScope) {
 
                 var _root = "Portals/app/popups/";
+
+                // A request can finish after its screen was left. A modal on a destroyed scope never renders,
+                // but its backdrop still covers the page and blocks every click.
+                const _liveScope = function ($scope) {
+                    return $scope && !$scope.$$destroyed ? $scope : $rootScope;
+                };
+
                 const _confirmationDialog = function ($scope, header, question, yesButton, noButton) {
                     if (!header)
                         header = "Confirmation";
@@ -15,6 +22,7 @@
                     if (!noButton)
                         noButton = "No";
 
+                    $scope = _liveScope($scope);
                     var deferred = $q.defer();
                     $scope.popupModel = {
                         question: question,
@@ -43,6 +51,55 @@
                         },
                         function (e) {
                             deferred.reject(e);
+                        });
+
+                    return deferred.promise;
+                };
+                // options: { title, message, confirmText, cancelText, tone: "primary" | "warning" | "success" | "danger",
+                //            icon (font-awesome class), detailLabel, details: string[], note }
+                // Resolves true on confirm and false on cancel, Esc or backdrop click.
+                const _actionDialog = function ($scope, options) {
+                    const opts = options || {};
+                    const deferred = $q.defer();
+                    const dialogScope = _liveScope($scope).$new();
+                    const tone = opts.tone || "primary";
+
+                    dialogScope.dialog = {
+                        title: opts.title || "Are you sure?",
+                        message: opts.message || "",
+                        confirmText: opts.confirmText || "Confirm",
+                        cancelText: opts.cancelText || "Cancel",
+                        tone: tone,
+                        icon: opts.icon || "fa-question",
+                        detailLabel: opts.detailLabel || "",
+                        details: opts.details || [],
+                        note: opts.note || ""
+                    };
+
+                    const modalInstance = $uibModal.open({
+                        animation: false,
+                        templateUrl: _root + "ActionDialog.html",
+                        scope: dialogScope,
+                        windowClass: "tc-action-modal tone-" + tone,
+                        backdropClass: "tc-action-backdrop"
+                    });
+
+                    dialogScope.dialog.confirm = function () {
+                        modalInstance.close(true);
+                    };
+                    dialogScope.dialog.cancel = function () {
+                        modalInstance.close(false);
+                    };
+
+                    modalInstance.result.then(
+                        function (result) {
+                            deferred.resolve(result === true);
+                        },
+                        function () {
+                            deferred.resolve(false);
+                        })
+                        .finally(function () {
+                            dialogScope.$destroy();
                         });
 
                     return deferred.promise;
@@ -636,6 +693,7 @@
                     if (!okButton)
                         okButton = "Ok";
 
+                    $scope = _liveScope($scope);
                     var deferred = $q.defer();
                     $scope.popupModel = {
                         text: text,
@@ -670,7 +728,9 @@
 
 
                     var deferred = $q.defer();
-                    $scope.popupModel = {
+                    // Own scope per popup: when several errors stack, each Ok must close its own modal.
+                    const errorScope = _liveScope($scope).$new();
+                    errorScope.popupModel = {
                         notification: error.toString(),
                         header: header,
                         okButton: okButton,
@@ -678,7 +738,7 @@
                             $uibModal.open({
                                 animation: false,
                                 templateUrl: _root + "Error.html",
-                                scope: $scope,
+                                scope: errorScope,
                                 size: "lg"
                             }),
                         okClick: function () {
@@ -686,11 +746,14 @@
                             deferred.resolve(true);
                         }
                     };
-                    $scope.popupModel.modalInstance.result.then(
+                    errorScope.popupModel.modalInstance.result.then(
                         function (e) {
                         },
                         function (e) {
                             deferred.reject(e);
+                        })
+                        .finally(function () {
+                            errorScope.$destroy();
                         });
                     return deferred.promise;
                 };
@@ -822,6 +885,7 @@
 
                 return {
                     confirmationDialog: _confirmationDialog,
+                    actionDialog: _actionDialog,
                     confirmationReasonDialog: _confirmationReasonDialog,
                     notificationDialog: _notificationDialog,
                     showError: _showError,

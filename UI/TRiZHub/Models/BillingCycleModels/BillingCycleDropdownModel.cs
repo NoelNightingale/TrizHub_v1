@@ -21,5 +21,7 @@ namespace TRiZHub.Models.BillingCycleModels
         public short Cycle { get; set; }
 
         public short Year { get; set; }
+
+        public bool IsClosed { get; set; }
     }
 }

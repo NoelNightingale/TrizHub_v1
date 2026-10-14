@@ -6,6 +6,7 @@ using System.Data.Entity;
 using System.Linq;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.TimesheetData;
+using TRiZHub.BL.Provider.BillingCycleData;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.WorkTeamData;
 using TRiZHub.BL.Entities.Types;
@@ -97,6 +98,19 @@ namespace TRiZHub.BL.Provider.TimesheetData
 
         #endregion
 
+        #region Billing cycle check
+
+        /// <summary>Blocks writes on a day inside a closed billing cycle, unless the timesheet owner is exempt from it.</summary>
+        private void EnsureBillingCycleOpen(Guid userAccountId, DateTime day)
+        {
+            var cycle = new BillingCycleProvider(DataContext, CurrentUser).ClosingCycleFor(userAccountId, day);
+            if (cycle != null)
+                throw new TimesheetException("Billing Cycle Period for: " + cycle.StartDate.ToShortDateString() + " - " +
+                                             cycle.EndDate.ToShortDateString() + " is closed");
+        }
+
+        #endregion
+
         #region User access
 
         private static readonly DateTime SqlMinDate = new DateTime(1753, 1, 1);
@@ -170,15 +184,7 @@ namespace TRiZHub.BL.Provider.TimesheetData
             var record = GetTimesheetEntry(id);
             if (record == null)
                 throw new TimesheetException("The timesheet entry could not be found.");
-            var billingCycleList = DataContext.BillingCycleEntrySet;
-            foreach (var a in billingCycleList)
-            {
-                if (record.DateEntry >= a.StartDate.Date && record.DateEntry <= a.EndDate.Date && a.IsClosed)
-                {
-                    throw new TimesheetException("Billing Cycle Period for: " + a.StartDate.ToShortDateString() + " - " + a.EndDate.ToShortDateString() +
-                                                 " is closed");
-                }
-            }
+            EnsureBillingCycleOpen(record.UserAccountId, record.DateEntry);
             //record.IsActive = false;
             DataContext.TimesheetEntrySet.Remove(record);
             DataContextSaveChanges();
@@ -215,6 +221,8 @@ namespace TRiZHub.BL.Provider.TimesheetData
             dateEntry = NormalizeEntryDate(dateEntry);
 
             EnsureCanAccessUser(userAccountId, dateEntry.Date);
+            Guid storedUserAccountId = Guid.Empty;
+            DateTime storedDateEntry = DateTime.MinValue;
             if (id != null)
             {
                 var stored = DataContext.TimesheetEntrySet
@@ -224,6 +232,8 @@ namespace TRiZHub.BL.Provider.TimesheetData
                 if (stored == null)
                     throw new TimesheetException("The timesheet entry could not be found.");
                 EnsureCanAccessUser(stored.UserAccountId, stored.DateEntry.Date);
+                storedUserAccountId = stored.UserAccountId;
+                storedDateEntry = stored.DateEntry;
             }
 
             // for existing entry
@@ -246,25 +256,9 @@ namespace TRiZHub.BL.Provider.TimesheetData
 
                 // check if existing record changes already exists TODO
 
-
-                var billingCycleList = DataContext.BillingCycleEntrySet;
-
-                //if (billingCycleList == null)
-                //{
-                //    throw new TimesheetException("No Billing Cycles defined please create billing cycle to continue");
-                //}
-
-                //if changes to existing enrty then check if billing cycle is closed
-                foreach (var a in billingCycleList)
-                {
-                    if (dateEntry.Date >= a.StartDate.Date && dateEntry.Date <= a.EndDate.Date && a.IsClosed)
-                    {
-                        throw new TimesheetException("Billing Cycle Period for: " + a.StartDate.ToShortDateString() + " - " +
-                                                     a.EndDate.ToShortDateString() +
-                                                     " is closed");
-                    }
-                }
-
+                // the entry must not leave a closed cycle, nor move into one
+                EnsureBillingCycleOpen(storedUserAccountId, storedDateEntry);
+                EnsureBillingCycleOpen(userAccountId, dateEntry);
 
                 EnsureProjectAllowedOnDate(id, userAccountId, projectId, subProjectId, originalDateEntry);
 
@@ -288,23 +282,7 @@ namespace TRiZHub.BL.Provider.TimesheetData
             else
             {
 
-                // check if billing cycle is closed
-                var billingCycleList = DataContext.BillingCycleEntrySet;
-
-                //if (billingCycleList == null)
-                //{
-                //    throw new TimesheetException("No Billing Cycles defined please create billing cycle to continue");
-                //}
-
-                foreach (var a in billingCycleList)
-                {
-                    if (dateEntry.Date >= a.StartDate.Date && dateEntry.Date <= a.EndDate.Date && a.IsClosed)
-                    {
-                        throw new TimesheetException("Billing Cycle Period for: " + a.StartDate.ToShortDateString() + " - " + a.EndDate.ToShortDateString() +
-                                                     " is closed");
-                    }
-                }
-
+                EnsureBillingCycleOpen(userAccountId, dateEntry);
 
                 EnsureProjectAllowedOnDate(null, userAccountId, projectId, subProjectId, originalDateEntry);
 

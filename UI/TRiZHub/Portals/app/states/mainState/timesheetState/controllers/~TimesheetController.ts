@@ -27,6 +27,13 @@ class TimesheetController extends CHControllerBase {
     selectedWeekIndex = 0;
     selectedWeek: any = null;
 
+    /** Closed/exempt state of the selected period for the selected user (BillingCycleAccessModel). */
+    periodAccess: any = null;
+    periodAccessLoading = false;
+    /** True when the selected period is closed and the selected user is not exempt. */
+    isReadOnly = false;
+    private periodAccessKey: string = null;
+
     private dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     private monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     weekDayHeaders = [
@@ -285,11 +292,75 @@ class TimesheetController extends CHControllerBase {
         return typeIds.length === 1 ? typeIds[0] : null;
     };
 
+    /** Ask the server whether the selected period is closed for the selected user. */
+    loadPeriodAccess = (): void => {
+        const me = this;
+        const cycleId = me.filterModel.billingCycleId;
+        const userId = me.filterModel.userId;
+        if (!cycleId || !userId) {
+            me.periodAccessKey = null;
+            me.periodAccess = null;
+            me.periodAccessLoading = false;
+            me.isReadOnly = false;
+            return;
+        }
+        const key = cycleId + "|" + userId;
+        me.periodAccessKey = key;
+        me.periodAccess = null;
+        me.periodAccessLoading = true;
+        me.BillingCycleService.billingCycleAccess(cycleId, userId)
+            .then(
+                result => {
+                    if (me.periodAccessKey !== key) {
+                        return;
+                    }
+                    me.periodAccess = result;
+                    me.isReadOnly = !!(result && result.isReadOnly);
+                    me.periodAccessLoading = false;
+                },
+                error => {
+                    if (me.periodAccessKey !== key) {
+                        return;
+                    }
+                    // Fall back to the dropdown's closed flag; the server still rejects writes either way.
+                    const cycle = me.getSelectedBillingCycle();
+                    me.periodAccess = null;
+                    me.isReadOnly = !!(cycle && cycle.isClosed);
+                    me.periodAccessLoading = false;
+                    me.handleError(error);
+                });
+    };
+
+    /** Shows why editing is blocked and returns true when the timesheet cannot be changed right now. */
+    private blockIfReadOnly = (): boolean => {
+        if (this.periodAccessLoading) {
+            this.Popups.showError(this.$scope, "Still checking whether this billing period is open. Please try again in a moment.");
+            return true;
+        }
+        if (!this.isReadOnly) {
+            return false;
+        }
+        this.Popups.showError(this.$scope,
+            (this.periodAccess && this.periodAccess.message) || "This billing period is closed. The timesheet is read-only.");
+        return true;
+    };
+
+    selectedUserName = (): string => {
+        const users = this.filterOptions.users || [];
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].id === this.filterModel.userId) {
+                return users[i].description || "This user";
+            }
+        }
+        return "This user";
+    };
+
     userSelectChange = (): void => {
         this.cancelPaste();
         this.closeClipboardDetails();
         this.closeClipboardDrawer();
         this.clipboardEditingLabel = null;
+        this.loadPeriodAccess();
         this.getUserProjects();
         this.loadClipboard();
         this.loadSavedTemplates();
@@ -522,10 +593,11 @@ class TimesheetController extends CHControllerBase {
         const desc = (cycle && cycle.description) ? String(cycle.description) : "";
         const start = this.readCycleDate(cycle, "start");
         const end = this.readCycleDate(cycle, "end");
+        const closed = cycle && cycle.isClosed ? " · Closed" : "";
         if (!start || !end) {
-            return desc;
+            return desc + closed;
         }
-        return desc + "  (" + this.dateToKey(start).replace(/-/g, "/") + " – " + this.dateToKey(end).replace(/-/g, "/") + ")";
+        return desc + "  (" + this.dateToKey(start).replace(/-/g, "/") + " – " + this.dateToKey(end).replace(/-/g, "/") + ")" + closed;
     };
 
     /**
@@ -536,6 +608,7 @@ class TimesheetController extends CHControllerBase {
         const me = this;
         const cycle = me.getSelectedBillingCycle();
         me.viewModel.billingCycle = cycle;
+        me.loadPeriodAccess();
 
         if (!cycle) {
             me.weeks = [];
@@ -1059,6 +1132,10 @@ class TimesheetController extends CHControllerBase {
             return;
         }
 
+        if (me.blockIfReadOnly()) {
+            return;
+        }
+
         if (!me.gridModel || !me.gridModel.data) {
             me.gridModel = { data: [], originalData: [], totalItems: 0 } as any;
         }
@@ -1098,6 +1175,9 @@ class TimesheetController extends CHControllerBase {
             return;
         }
         if (me.gridModel.data == me.gridModel.originalData) {
+            return;
+        }
+        if (me.blockIfReadOnly()) {
             return;
         }
 
@@ -1154,6 +1234,9 @@ class TimesheetController extends CHControllerBase {
 
     deleteRecord = (record) => {
         const me = this;
+        if (me.blockIfReadOnly()) {
+            return;
+        }
         me.Popups.confirmationDialog(me.$scope,
             "Are you sure you want to delete?",
             "You are about to delete this record...")
@@ -1203,6 +1286,10 @@ class TimesheetController extends CHControllerBase {
 
         if (!me.weeks || !me.weeks.length) {
             me.handleError("Please select a billing period with valid weeks first.");
+            return;
+        }
+
+        if (me.blockIfReadOnly()) {
             return;
         }
 
@@ -1480,6 +1567,9 @@ class TimesheetController extends CHControllerBase {
 
     resetRecord = (object) => {
         const me = this;
+        if (me.blockIfReadOnly()) {
+            return;
+        }
         me.Popups.confirmationDialog(me.$scope,
             "Load original values?",
             "You are about to reset the values back to the orignal...")
@@ -1618,6 +1708,9 @@ class TimesheetController extends CHControllerBase {
 
     openProjectListModal = (item) => {
         const me = this;
+        if (item !== me.filterModel && me.blockIfReadOnly()) {
+            return;
+        }
         me.Popups.filteredDropDownModal(me.$scope, me.filterOptions.userProjects)
             .then(function (project) {
 
@@ -1905,6 +1998,9 @@ class TimesheetController extends CHControllerBase {
         if ($event) {
             $event.stopPropagation();
         }
+        if (this.blockIfReadOnly()) {
+            return;
+        }
         this.closeClipboardDetails();
         this.clipboardPasteItem = item;
         this.clipboardPasteTarget = null;
@@ -2015,6 +2111,10 @@ class TimesheetController extends CHControllerBase {
         const me = this;
         const item = me.clipboardPasteItem;
         if (!item) {
+            return;
+        }
+        if (me.blockIfReadOnly()) {
+            me.cancelPaste();
             return;
         }
 

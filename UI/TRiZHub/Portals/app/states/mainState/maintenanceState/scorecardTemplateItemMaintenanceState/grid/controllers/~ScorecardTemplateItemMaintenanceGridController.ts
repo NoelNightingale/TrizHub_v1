@@ -53,7 +53,6 @@ class ScorecardTemplateItemMaintenanceGridController extends CHControllerBase {
                         this.$state.transitionTo("mainState.maintenance.scorecardTemplateItemMaintenance.detail",
                         { "id": "new", "scorecardTemplateId": this.scorecardTemplateId });
                     } else {
-                        self.Popups.showError(self.$scope, "Cannot add more items, weight would exceed 100%", "Error");
                         self.handleError("Cannot add more items, weight would exceed 100%");
                     }
                 },
@@ -82,14 +81,6 @@ class ScorecardTemplateItemMaintenanceGridController extends CHControllerBase {
                                     }
                                 },
                                 error => {
-
-                                    self.Popups.showError(self.$scope, error, "Error")
-                                        .then(action => {
-                                            console.log("Error completed");
-                                        },
-                                            error => {
-                                                // No need for action
-                                            });
                                     self.handleError(error);
                                 });
                     }

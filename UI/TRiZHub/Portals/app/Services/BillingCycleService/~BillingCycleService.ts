@@ -7,6 +7,9 @@
         billingCycleGrid: (req: GridModel) => ng.IPromise<GridResultModel<BillingCycleGridModel>>;
         billingCycleDelete: (viewModel: BillingCycleModel) => ng.IPromise<BillingCycleModel>;
         billingCycleDropdownList: () => ng.IPromise<BillingCycleDropdownModel>;
+        billingCycleSetStatus: (id: string, isClosed: boolean) => ng.IPromise<BillingCycleModel>;
+        billingCycleExemptionCandidates: () => ng.IPromise<BillingCycleExemptUserModel[]>;
+        billingCycleAccess: (id: string, userId: string) => ng.IPromise<BillingCycleAccessModel>;
     }
 
     export class BillingCycleService extends CHServiceBase implements IBillingCycleService1 {
@@ -106,6 +109,48 @@
                 error => {
                     deferred.reject(error.data.message);
                 }
+                );
+            return deferred.promise;
+        };
+
+        billingCycleSetStatus = (id: string, isClosed: boolean): ng.IPromise<BillingCycleModel> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "BillingCycleSetStatus", { id: id, isClosed: isClosed })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        billingCycleExemptionCandidates = (): ng.IPromise<Array<BillingCycleExemptUserModel>> => {
+            const deferred = this.$q.defer<any>();
+            this.$http.get(this.urlRoot + "BillingCycleExemptionCandidates/")
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        billingCycleAccess = (id: string, userId: string): ng.IPromise<BillingCycleAccessModel> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "BillingCycleAccess/" + id, { params: { userId: userId } })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
                 );
             return deferred.promise;
         };

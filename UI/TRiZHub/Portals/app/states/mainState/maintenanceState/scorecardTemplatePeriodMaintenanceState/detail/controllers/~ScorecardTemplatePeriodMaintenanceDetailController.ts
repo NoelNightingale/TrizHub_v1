@@ -112,7 +112,6 @@ class ScorecardTemplatePeriodMaintenanceDetailController extends CHControllerBas
                         1000);
                 },
                 error => {
-                    self.Popups.showError(self.$scope, error, "Error");
                     self.handleError(error);
                 });
     };

@@ -1309,25 +1309,6 @@ angular.module("AngularApp",
                                     }
                                 ]
                             }
-                        })
-                    // Billing Cycle Maintenance Detail
-                    .state("mainState.maintenance.billingCycleMaintenance.detail",
-                        {
-                            url: "/detail/:id",
-                            views: {
-                                'detail': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "BillingCycleMaintenanceDetailController as vm"
-                                }
-                            },
-                            resolve: {
-                                loadMainCtrl: [
-                                    "$ocLazyLoad", function ($ocLazyLoad) {
-                                        return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/billingCycleMaintenanceState/detail/controllers/~BillingCycleMaintenanceDetailController.js?" + APP_CACHE_VER);
-                                    }
-                                ]
-                            }
                         });
 
                 $locationProvider.html5Mode(false);
