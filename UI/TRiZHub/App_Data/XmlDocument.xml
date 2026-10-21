@@ -7,6 +7,12 @@
         <member name="P:TRiZHub.Models.Account.CurrentUserModel.TeamCapabilities">
             <summary>Only filled by <c>Account/GetCurrentUser</c>; null on per-request instances.</summary>
         </member>
+        <member name="P:TRiZHub.Models.Account.CurrentUserModel.CanImpersonate">
+            <summary>True on a Debug build answering a localhost request.</summary>
+        </member>
+        <member name="P:TRiZHub.Models.Account.CurrentUserModel.Impersonating">
+            <summary>True when this request is running as the account named by the local impersonation cookie.</summary>
+        </member>
         <member name="T:TRiZHub.Models.BillingCycleModels.BillingCycleAccessModel">
             <summary>Whether a user's timesheet may be edited within a billing cycle.</summary>
         </member>
@@ -1154,6 +1160,16 @@
             Get full user information bases on current windows logged in user
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.Security.AccountController.ImpersonationCandidates">
+            <summary>
+            Active users for the localhost Debug user picker. Compiled out of Release.
+            </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.Security.AccountController.Impersonate(TRiZHub.Models.Account.ImpersonateModel)">
+            <summary>
+            Stores the selected account in a session cookie. An empty name clears it.
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.Security.AccountController.GetMyProfile">
             <summary>
             Retrieve profile information based on windows logged in user 
@@ -1322,6 +1338,13 @@
         <member name="M:TRiZHub.Controllers.Security.UserController.UserTimesheetFilterDropdown">
             <summary>
             Retrieve list of users, as used in Timesheet view's user dropdown
+            </summary>
+        </member>
+        <member name="T:TRiZHub.Controllers.Auth.LocalImpersonation">
+            <summary>
+            Local Debug-only stand-in for the signed-in Windows account.
+            Release builds compile the cookie read out, and a Debug build ignores it
+            unless the request is local.
             </summary>
         </member>
         <member name="M:TRiZHub.Controllers.EnumsController.SecurityEnum">

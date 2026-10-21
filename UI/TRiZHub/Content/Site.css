@@ -2495,3 +2495,36 @@ tr.br-row-flash > td {
         justify-content: flex-start;
     }
 }
+
+.impersonate-bar {
+    background: #fff3cd;
+    color: #856404;
+    padding: 8px 16px;
+}
+
+.impersonate-bar label,
+.impersonate-bar input,
+.impersonate-bar select,
+.impersonate-bar span {
+    margin-right: 8px;
+    margin-bottom: 0;
+}
+
+.impersonate-bar input,
+.impersonate-bar select,
+.impersonate-picker input,
+.impersonate-picker select {
+    color: #333;
+    display: inline-block;
+    width: auto;
+    max-width: 420px;
+}
+
+.impersonate-picker {
+    margin-bottom: 12px;
+}
+
+.impersonate-label {
+    display: block;
+    margin-bottom: 4px;
+}

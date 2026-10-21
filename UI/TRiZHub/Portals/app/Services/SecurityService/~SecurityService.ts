@@ -14,6 +14,8 @@
         isUserApproved: boolean;
         isSystemAdmin: boolean;
         teamCapabilities: any;
+        canImpersonate: boolean;
+        impersonating: boolean;
 
         //#endregion
 
@@ -28,6 +30,8 @@
             this.allowedPrivileges = [];
             this.isSystemAdmin = false;
             this.teamCapabilities = {};
+            this.canImpersonate = false;
+            this.impersonating = false;
         }
 
         //#endregion
@@ -47,7 +51,9 @@
             isSystemAdmin: boolean,
             isUserProfileComplete: boolean,
             isUserApproved: boolean,
-            teamCapabilities?: any) => void;
+            teamCapabilities?: any,
+            canImpersonate?: boolean,
+            impersonating?: boolean) => void;
         setAccount: (username: string, isSystemAdmin: boolean) => void;
         getToken: () => string;
         userHasPrivileges: () => boolean;
@@ -112,7 +118,11 @@
             isSystemAdmin: boolean,
             isUserProfileComplete: boolean,
             isUserApproved: boolean,
-            teamCapabilities?: any): void => {
+            teamCapabilities?: any,
+            canImpersonate?: boolean,
+            impersonating?: boolean): void => {
+            SecurityService.currentUser.canImpersonate = !!canImpersonate;
+            SecurityService.currentUser.impersonating = !!impersonating;
             SecurityService.currentUser.id = id;
             SecurityService.currentUser.displayName = displayName;
             SecurityService.currentUser.allowedPrivileges = allowedPrivileges;

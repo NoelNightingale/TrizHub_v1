@@ -31,6 +31,87 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 </head>
 <body class="{{app.setting.bg}}" style="background-color:white" ng-class="{'container': app.setting.boxed, 'ie': isIE,'smart': isSmart}">
+    <div id="impersonate-bar" style="display:none;background:#fff3cd;color:#856404;padding:10px 16px;border-bottom:1px solid #ffe08a;">
+        <label for="impersonate-user" style="margin-right:8px;">View as</label>
+        <input id="impersonate-filter" type="text" placeholder="Filter by name" autocomplete="off" style="color:#333;margin-right:8px;" />
+        <select id="impersonate-user" style="color:#333;max-width:480px;"></select>
+        <span id="impersonate-note" style="margin-left:8px;"></span>
+    </div>
+    <script type="text/javascript">
+        (function () {
+            function request(method, url, body, done) {
+                var xhr = new XMLHttpRequest();
+                xhr.open(method, url, true);
+                xhr.withCredentials = true;
+                if (body) xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        var parsed = null;
+                        if (xhr.responseText) {
+                            try { parsed = JSON.parse(xhr.responseText); } catch (e) { parsed = null; }
+                        }
+                        done(null, parsed);
+                    } else {
+                        done(xhr.status);
+                    }
+                };
+                xhr.onerror = function () { done("network"); };
+                xhr.send(body ? JSON.stringify(body) : null);
+            }
+
+            request("GET", "api/Account/GetCurrentUser", null, function (err, user) {
+                if (err || !user || !user.canImpersonate) return;
+                var bar = document.getElementById("impersonate-bar");
+                var select = document.getElementById("impersonate-user");
+                var filter = document.getElementById("impersonate-filter");
+                var note = document.getElementById("impersonate-note");
+                bar.style.display = "block";
+                if (user.impersonating) note.textContent = "Saves are stored against this account.";
+
+                request("GET", "api/Account/ImpersonationCandidates", null, function (listErr, users) {
+                    if (listErr || !users) {
+                        note.textContent = "Could not load users.";
+                        return;
+                    }
+                    var selected = user.impersonating ? user.userName : "";
+                    function fill() {
+                        var q = (filter.value || "").toLowerCase();
+                        select.innerHTML = "";
+                        var mine = document.createElement("option");
+                        mine.value = "";
+                        mine.textContent = "My Windows account";
+                        select.appendChild(mine);
+                        for (var i = 0; i < users.length; i++) {
+                            var person = users[i];
+                            var label = (person.firstname || "") + " " + (person.surname || "") + " (" + person.accountName + ")";
+                            if (q && label.toLowerCase().indexOf(q) === -1 && person.accountName !== selected) continue;
+                            var option = document.createElement("option");
+                            option.value = person.accountName;
+                            option.textContent = label;
+                            select.appendChild(option);
+                        }
+                        select.value = selected;
+                    }
+                    fill();
+                    filter.oninput = fill;
+                    select.onchange = function () {
+                        var next = select.value || "";
+                        if (next === selected) return;
+                        select.disabled = true;
+                        request("POST", "api/Account/Impersonate", { accountName: next }, function (postErr) {
+                            if (postErr) {
+                                select.disabled = false;
+                                select.value = selected;
+                                note.textContent = "Could not switch user.";
+                                return;
+                            }
+                            window.location.reload();
+                        });
+                    };
+                });
+            });
+        })();
+    </script>
     <div class="col-sm-3">
         <toaster-container toaster-options="{'time-out':7000}"></toaster-container>
     </div>
@@ -50,6 +131,9 @@
     <script type="text/javascript">
         var baseUrl = '@Url.Content("~/")';
     </script>
+    @{
+        Scripts.DefaultTagFormat = "<script src=\"{0}?v=2026102112\"></script>";
+    }
     @Scripts.Render("~/bundles/AngularApp")
     @Scripts.Render("~/bundles/lib")
     @Scripts.Render("~/bundles/Portal")

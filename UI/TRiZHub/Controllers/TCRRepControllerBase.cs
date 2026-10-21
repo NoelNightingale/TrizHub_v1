@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.Http;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Provider.Security;
+using TRiZHub.Controllers.Auth;
 using TRiZHub.Controllers.Filters;
 using TRiZHub.Models;
 using TRiZHub.Models.Account;
@@ -26,6 +27,7 @@ namespace TRiZHub.Controllers
         private ICurrentUser _injectedUser;
         private string _ThreadUserName;
         private bool _UseTokens = true;
+        private bool _impersonationResolved;
 
 
         public TCRRepControllerBase()
@@ -75,13 +77,24 @@ namespace TRiZHub.Controllers
                 }
                 else
                 {
-                    if (ThreadUserName != null)
+                    if (!_impersonationResolved)
                     {
-                        if (_CurrentUser == null || _CurrentUser.UserName != ThreadUserName)
+                        _impersonationResolved = true;
+                        var impersonated = LocalImpersonation.TryImpersonate(Context);
+                        if (impersonated != null)
+                            _CurrentUser = impersonated;
+                    }
+
+                    if (_CurrentUser == null || !_CurrentUser.Impersonating)
+                    {
+                        if (ThreadUserName != null)
                         {
-                            var securityProvider = new SecurityProvider(Context);
-                            var aUser = securityProvider.GetCurrentUser(ThreadUserName);
-                            _CurrentUser = new CurrentUserModel(aUser);
+                            if (_CurrentUser == null || _CurrentUser.UserName != ThreadUserName)
+                            {
+                                var securityProvider = new SecurityProvider(Context);
+                                var aUser = securityProvider.GetCurrentUser(ThreadUserName);
+                                _CurrentUser = new CurrentUserModel(aUser);
+                            }
                         }
                     }
                 }

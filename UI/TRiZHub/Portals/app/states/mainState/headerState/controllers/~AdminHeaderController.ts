@@ -17,6 +17,16 @@
     csvFile: any;
     apiUrl: string;
     files: any;
+    canImpersonate = false;
+    impersonating = false;
+    usersLoaded = false;
+    switchingUser = false;
+    pickerReady = false;
+    users: any[] = [];
+    visibleUsers: any[] = [];
+    userFilter = "";
+    selectedAccount = "";
+    appliedAccount = "";
 
 
     //#region Ctor
@@ -136,6 +146,68 @@
 
     hasTeamCapability = (capability: string): boolean => {
         return this.SecurityService.hasTeamCapability(capability);
+    };
+
+    prepareImpersonation = (): void => {
+        const me = this;
+        const current = me.SecurityService.getCurrentUserDetails();
+        if (!current || !current.canImpersonate) {
+            me.canImpersonate = false;
+            return;
+        }
+        me.canImpersonate = true;
+        me.impersonating = !!current.impersonating;
+        me.appliedAccount = current.impersonating ? current.userName : "";
+        me.selectedAccount = me.appliedAccount;
+        me.AccountService.impersonationCandidates()
+            .then(
+                users => {
+                    me.users = users || [];
+                    me.applyUserFilter();
+                    me.usersLoaded = true;
+                    me.$timeout(() => { me.pickerReady = true; }, 0);
+                },
+                error => {
+                    me.handleError(error);
+                });
+    };
+
+    applyUserFilter = (): void => {
+        const q = (this.userFilter || "").toLowerCase();
+        const selected = this.selectedAccount || "";
+        const matches = (this.users || []).filter(user => {
+            if (selected && user.accountName === selected)
+                return true;
+            if (!q)
+                return true;
+            const haystack = ((user.firstname || "") + " " + (user.surname || "") + " " + (user.accountName || "")).toLowerCase();
+            return haystack.indexOf(q) !== -1;
+        }).map(user => ({
+            accountName: user.accountName,
+            label: (user.firstname || "") + " " + (user.surname || "") + " (" + user.accountName + ")"
+        }));
+        this.visibleUsers = matches;
+    };
+
+    switchUser = (): void => {
+        const me = this;
+        if (!me.pickerReady)
+            return;
+        const selected = me.selectedAccount || "";
+        if (selected === (me.appliedAccount || "") || me.switchingUser)
+            return;
+        me.switchingUser = true;
+        me.AccountService.impersonate(selected)
+            .then(
+                () => {
+                    me.$window.location.reload();
+                },
+                error => {
+                    me.switchingUser = false;
+                    me.selectedAccount = me.appliedAccount;
+                    me.applyUserFilter();
+                    me.handleError(error);
+                });
     };
 
     logout = (): void => {

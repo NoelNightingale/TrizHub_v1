@@ -42,5 +42,11 @@ namespace TRiZHub.Models.Account
 
         /// <summary>Only filled by <c>Account/GetCurrentUser</c>; null on per-request instances.</summary>
         public WorkTeamCapabilitySummary TeamCapabilities { get; set; }
+
+        /// <summary>True on a Debug build answering a localhost request.</summary>
+        public bool CanImpersonate { get; set; }
+
+        /// <summary>True when this request is running as the account named by the local impersonation cookie.</summary>
+        public bool Impersonating { get; set; }
     }
 }

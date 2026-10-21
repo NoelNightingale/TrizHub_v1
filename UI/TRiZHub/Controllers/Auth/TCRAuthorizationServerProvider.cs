@@ -46,7 +46,6 @@ namespace TRiZHub.Controllers.Auth
                 ISecurityProvider securityProviderBase = new SecurityProvider(db);
                 try
                 {
-//                    var account = securityProviderBase.UserLogin(@"GVWHOLDINGS\adsmit");
                     var account = securityProviderBase.UserLogin(localAccount.Name);
 
                     var identity = new ClaimsIdentity(context.Options.AuthenticationType);

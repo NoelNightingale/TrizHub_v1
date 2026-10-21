@@ -1,4 +1,4 @@
-﻿var APP_CACHE_VER = "v=2026100802";
+﻿var APP_CACHE_VER = "v=2026102112";
 
 angular.module("AngularApp",
     [

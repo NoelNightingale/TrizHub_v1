@@ -249,6 +249,7 @@
     <Compile Include="Controllers\MasterDataController.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\Security\AccountController.cs" />
+    <Compile Include="Controllers\Auth\LocalImpersonation.cs" />
     <Compile Include="Controllers\Auth\TCRAuthorizationServerProvider.cs" />
     <Compile Include="Controllers\EnumsController.cs" />
     <Compile Include="Controllers\Filters\AllowCrossDomain.cs" />
@@ -264,6 +265,7 @@
     <Compile Include="Models\Account\SubscriberRegisterModel.cs" />
     <Compile Include="Models\Account\ChangePasswordModel.cs" />
     <Compile Include="Models\Account\CurrentUserModel.cs" />
+    <Compile Include="Models\Account\ImpersonateModel.cs" />
     <Compile Include="Models\Account\EditProfileModel.cs" />
     <Compile Include="Models\Account\LoginViewModel.cs" />
     <Compile Include="Models\Account\ProfilePic.cs" />

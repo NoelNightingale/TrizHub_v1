@@ -9,6 +9,8 @@
         getMyProfile: () => ng.IPromise<ProfileViewModel>;
         saveMyProfile: (viewModel: any) => ng.IPromise<any>;
         subscriberSignup: (viewModel: any) => ng.IPromise<any>;
+        impersonationCandidates: () => ng.IPromise<any>;
+        impersonate: (accountName: string) => ng.IPromise<any>;
     }
 
     export class AccountService extends CHServiceBase implements IAccountService {
@@ -57,7 +59,10 @@
                                 result.data.isSystemAdmin,
                                 result.data.isUserProfileComplete,
                                 result.data.isUserApproved,
-                                result.data.teamCapabilities);
+                                result.data.teamCapabilities,
+                                result.data.canImpersonate,
+                                result.data.impersonating);
+                        this.SecurityService.setAccount(result.data.userName, result.data.isSystemAdmin);
                         deferred.resolve(result.data);
                     },
                     error => {
@@ -148,6 +153,36 @@
                         deferred.reject(error.data.message);
                     });
 
+            return deferred.promise;
+        };
+
+        impersonationCandidates = (): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.get(this.urlRoot + "ImpersonationCandidates")
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data && error.data.message
+                            ? error.data.message
+                            : "Could not load users.");
+                    });
+            return deferred.promise;
+        };
+
+        impersonate = (accountName: string): ng.IPromise<any> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "Impersonate", { accountName: accountName || "" })
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data && error.data.message
+                            ? error.data.message
+                            : "Could not switch user.");
+                    });
             return deferred.promise;
         };
     }
