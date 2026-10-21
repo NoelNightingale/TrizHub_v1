@@ -148,11 +148,14 @@
     <Compile Include="Entities\UserIdentityProjectData\UserIdentiryClient.cs" />
     <Compile Include="Entities\UserIdentityProjectData\UserIdentityProject.cs" />
     <Compile Include="Entities\Types\WorkTeamCapability.cs" />
+    <Compile Include="Entities\Types\WorkTeamPrivilege.cs" />
     <Compile Include="Entities\Types\WorkTeamRoleType.cs" />
     <Compile Include="Entities\WorkTeamData\WorkTeam.cs" />
     <Compile Include="Entities\WorkTeamData\WorkTeamClient.cs" />
     <Compile Include="Entities\WorkTeamData\WorkTeamMember.cs" />
+    <Compile Include="Entities\WorkTeamData\WorkTeamMemberPrivilege.cs" />
     <Compile Include="Entities\WorkTeamData\WorkTeamProject.cs" />
+    <Compile Include="Entities\WorkTeamData\WorkTeamRolePrivilege.cs" />
     <Compile Include="Extensions\DateExtensions.cs" />
     <Compile Include="Migrations\201609151430327_InitialCreate15092016.cs" />
     <Compile Include="Migrations\201609151430327_InitialCreate15092016.Designer.cs">
@@ -305,6 +308,10 @@
     <Compile Include="Migrations\202610140927474_UserExcludeClosedBP.cs" />
     <Compile Include="Migrations\202610140927474_UserExcludeClosedBP.Designer.cs">
       <DependentUpon>202610140927474_UserExcludeClosedBP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202610201250589_AddWorkTeamPrivileges.cs" />
+    <Compile Include="Migrations\202610201250589_AddWorkTeamPrivileges.Designer.cs">
+      <DependentUpon>202610201250589_AddWorkTeamPrivileges.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Reports\ProjectAllocationModel.cs" />
@@ -514,6 +521,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202610140927474_UserExcludeClosedBP.resx">
       <DependentUpon>202610140927474_UserExcludeClosedBP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202610201250589_AddWorkTeamPrivileges.resx">
+      <DependentUpon>202610201250589_AddWorkTeamPrivileges.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Scripts\TimesheetReportProcedure\TimesheetReportProcedure.sql" />
     <Compile Include="Scripts\ScorecardProcedure\ScorecardProcedureModel.cs" />

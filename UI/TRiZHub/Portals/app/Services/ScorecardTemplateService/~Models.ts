@@ -1,5 +1,6 @@
 ﻿type ScorecardTemplateGridModel = any;
 type ScorecardTemplateModel = any;
+type ScorecardTemplateDuplicateModel = { sourceId: string; scorecardName: string };
 
 type ScorecardTemplateItemGridModel = any;
 type ScorecardTemplateItemModel = any;

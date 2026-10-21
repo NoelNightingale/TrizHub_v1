@@ -24,6 +24,12 @@ namespace TRiZHub.Models.ScorecardModels
 
         public string ScorecardPeriodName { get; set; }
 
+        public decimal ExcellentWeight { get; set; }
+
+        public decimal AdequateWeight { get; set; }
+
+        public decimal InadequateWeight { get; set; }
+
         public DateTime DateCreated { get; set; }
 
         public Guid createdBy { get; set; }

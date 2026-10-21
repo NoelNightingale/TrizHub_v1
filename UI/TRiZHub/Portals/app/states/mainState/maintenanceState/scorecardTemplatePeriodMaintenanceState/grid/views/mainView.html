@@ -1,108 +1,258 @@
 ﻿<div class="row center-container">
     <div class="col-sm-12 col-md-12 col-lg-11">
         <div class="padding">
-            <div class="box">
+            <div class="box br-workbench bp-workbench st-workbench st-workbook">
                 <div class="box-header b-b">
-                    <h2>
-                        <a class="text-success" ui-sref="mainState.maintenance.scorecardTemplateMaintenance.grid">Scorecard Template Maintenance</a> / {{vm.viewModel.scorecardName}}
-                    </h2>
-
-                </div>
-                <div class="box-body">
-                    <div class="form-group row">
-                        <div class="col-sm-12 col-md-4">
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control p-x b-a rounded" placeholder="Search" ng-model="vm.gridModel.searchFor">
-                                <span class="input-group-btn">
-                                    <button class="btn white b-a rounded no-shadow" ng-click="vm.pageGrid.search()"><i class="fa fa-search"></i></button>
+                    <div class="br-header">
+                        <div class="st-wb-heading">
+                            <div class="st-crumb">
+                                <a ui-sref="mainState.maintenance.scorecardTemplateMaintenance.grid">Scorecard Templates</a>
+                                <span class="st-crumb-sep">/</span>
+                                <a ui-sref="mainState.maintenance.scorecardTemplateMaintenance.detail({id: vm.scorecardTemplateId})">
+                                    <i class="fa fa-chevron-left"></i> {{vm.template.scorecardName || 'Template'}}
+                                </a>
+                            </div>
+                            <h2>
+                                Review periods
+                                <span class="bp-status" ng-if="vm.template" ng-class="vm.template.isActive ? 'is-open' : 'is-closed'">
+                                    <i class="fa" ng-class="vm.template.isActive ? 'fa-check-circle' : 'fa-pause-circle'"></i>
+                                    {{vm.template.isActive ? 'Active' : 'Inactive'}}
                                 </span>
+                            </h2>
+                            <p class="br-header-note">
+                                Scorecards are created against these periods. Fixed periods cannot overlap each other; with a variable period each scorecard sets its own dates.
+                            </p>
+                        </div>
+                        <div class="bp-header-tools">
+                            <button type="button" class="btn btn-sm btn-primary" ng-click="vm.openNew()">
+                                <i class="fa fa-plus"></i> New period
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-body">
+                    <div class="bp-summary">
+                        <span class="bp-stat">
+                            <span class="bp-stat-n">{{vm.summary.total}}</span>
+                            <span class="bp-stat-l">Periods</span>
+                        </span>
+                        <span class="bp-stat is-open">
+                            <span class="bp-stat-n">{{vm.summary.fixed}}</span>
+                            <span class="bp-stat-l"><i class="fa fa-calendar"></i> Fixed</span>
+                        </span>
+                        <span class="bp-stat st-stat-variable">
+                            <span class="bp-stat-n">{{vm.summary.variable}}</span>
+                            <span class="bp-stat-l"><i class="fa fa-arrows-h"></i> Variable</span>
+                        </span>
+                        <span class="bp-stat is-exempt">
+                            <span class="bp-stat-n">{{vm.summary.scorecards}}</span>
+                            <span class="bp-stat-l"><i class="fa fa-id-card-o"></i> Scorecards</span>
+                        </span>
+                        <span class="br-loading-hint" ng-if="vm.loading">
+                            <i class="fa fa-spinner fa-spin"></i> Loading…
+                        </span>
+                    </div>
+
+                    <div class="st-period-group" ng-repeat="g in vm.groups track by g.key">
+                        <div class="st-group-header">
+                            <span class="st-group-label">{{g.label}}</span>
+                            <span class="br-filter-count">{{g.periods.length}}</span>
+                            <span class="st-group-hint" ng-if="g.hint">{{g.hint}}</span>
+                        </div>
+                        <div class="bp-list">
+                            <div class="bp-period st-period-card" ng-repeat="p in g.periods track by p.id"
+                                 role="button" tabindex="0"
+                                 ng-class="{'is-variable': p.isVariable, 'is-current': vm.isCurrent(p), 'is-selected': vm.drawer.open && vm.drawer.requestedId === p.id, 'bp-flash': vm.highlightId === p.id}"
+                                 ng-click="vm.openEdit(p)"
+                                 ng-keydown="$event.keyCode === 13 && vm.openEdit(p)">
+                                <div class="bp-period-cycle" title="Report sort order">
+                                    <span class="bp-cycle-label">Order</span>
+                                    <span class="bp-cycle-num">{{p.reportSortOrder}}</span>
+                                </div>
+                                <div class="bp-period-main">
+                                    <div class="bp-period-range">
+                                        {{p.description}}
+                                        <span class="bp-current-tag" ng-if="vm.isCurrent(p)">Current</span>
+                                    </div>
+                                    <div class="bp-period-meta">
+                                        <span ng-if="!p.isVariable">
+                                            {{vm.rangeLabel(p)}}
+                                            <span class="bp-dot">&middot;</span> review year <strong>{{p.reviewYear}}</strong>
+                                        </span>
+                                        <span ng-if="p.isVariable">Dates are set on each scorecard</span>
+                                    </div>
+                                </div>
+                                <div class="bp-period-exempt">
+                                    <span class="bp-exempt-badge" ng-if="p.scorecardCount"
+                                          title="{{p.scorecardCount}} scorecard{{p.scorecardCount === 1 ? '' : 's'}} use this period">
+                                        <i class="fa fa-id-card-o"></i> {{p.scorecardCount}} scorecard{{p.scorecardCount === 1 ? '' : 's'}}
+                                    </span>
+                                    <span class="bp-exempt-none" ng-if="!p.scorecardCount">Not used yet</span>
+                                </div>
+                                <div class="bp-period-status">
+                                    <span class="bp-status" ng-class="p.isVariable ? 'st-is-variable' : 'is-open'">
+                                        <i class="fa" ng-class="p.isVariable ? 'fa-arrows-h' : 'fa-calendar'"></i>
+                                        {{p.isVariable ? 'Variable' : 'Fixed'}}
+                                    </span>
+                                </div>
+                                <div class="bp-period-actions" ng-click="$event.stopPropagation()">
+                                    <button type="button" class="btn btn-xs btn-outline b-primary text-primary"
+                                            ng-click="vm.openEdit(p)" title="Edit this period">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <span title="{{p.scorecardCount ? 'Used by ' + p.scorecardCount + ' scorecard' + (p.scorecardCount === 1 ? '' : 's') + ', so it cannot be deleted' : 'Delete this period'}}">
+                                        <button type="button" class="btn btn-xs st-action-btn is-danger"
+                                                ng-click="vm.deletePeriod(p, $event)"
+                                                ng-disabled="p.scorecardCount > 0 || vm.deleteBusyId === p.id">
+                                            <i class="fa" ng-class="vm.deleteBusyId === p.id ? 'fa-spinner fa-spin' : 'fa-trash'"></i>
+                                        </button>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table st-table="rowCollectionBasic" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('description')">Description</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='description'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='description'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('variable')">Is Variable</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='variable'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='variable'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('startdate')">Start Date</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='startdate'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='startdate'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('enddate')">End Date</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='enddate'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='enddate'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('reviewyear')">Review Year</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='reviewyear'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='reviewyear'}"></i>
-                                    </th>
-                                    <th>
-                                        <a ng-click="vm.pageGrid.sort('reportsortorder')">Report Sort Order</a>
-                                        <i ng-class="{'fa fa-angle-double-up':vm.gridModel.sortKeyOrder.order=='ASC' && vm.gridModel.sortKeyOrder.key=='reportsortorder'}"></i>
-                                        <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='reportsortorder'}"></i>
-                                    </th>
-                                    <th>
-                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newScorecardTemplatePeriod()">
-                                            <i class="fa fa-plus"></i> New
-                                        </a>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="i in vm.gridModel.data" st-select-row="row">
-                                    <td>{{i.description}}</td>
-                                    <td>{{i.isVariable ? 'Yes': 'No'}}</td>
-
-                                    <td ng-if="i.isVariable">-</td>
-                                    <td ng-if="i.isVariable">-</td>
-                                    <td ng-if="i.isVariable">-</td>
-
-                                    <td ng-if="!i.isVariable">{{i.startDate | date: 'yyyy/MM/dd'}}</td>
-                                    <td ng-if="!i.isVariable">{{i.endDate | date: 'yyyy/MM/dd'}}</td>
-                                    <td ng-if="!i.isVariable">{{i.reviewYear}}</td>
-
-                                    <td>{{i.reportSortOrder}}</td>
-
-                                    <td>
-                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.primary}} text-{{app.setting.theme.primary}}"
-                                           ui-sref="mainState.maintenance.scorecardTemplatePeriodMaintenance.detail({id: i.id, scorecardTemplateId: vm.scorecardTemplateId})">
-                                            <i class="fa fa-edit"></i> Edit
-                                        </a>
-                                        <a class="btn btn-xs btn-fw btn-outline b-{{app.setting.theme.danger}} text-{{app.setting.theme.danger}}" ng-click="vm.deleteTemplatePeriod(i)">
-                                            <i class="fa fa-remove"></i> Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr ng-show="vm.gridModel.data.length == 0">
-                                    <td colspan="4">
-                                        No Records
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                            </tfoot>
-                        </table>
-                        <div class="w-full m-b-2 center-container">
-                            <uib-pagination total-items="vm.gridModel.totalItems" ng-model="vm.gridModel.currentPage" max-size="vm.gridModel.maxSize"
-                                            class="pagination-sm m-b-sm m-t-sm white" boundary-links="true" previous-text="<" next-text=">" rotate="false" ng-change="vm.pageGrid.pageChanged()" items-per-page="vm.gridModel.recordsPerPage">
-                            </uib-pagination>
-                        </div>
+                    <div class="br-empty bp-empty" ng-if="vm.loaded && !vm.periods.length">
+                        <i class="fa fa-calendar-o bp-empty-icon"></i>
+                        <div>This template has no review periods yet.</div>
+                        <a href="" ng-click="vm.openNew()">Create the first one</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Period editor drawer -->
+<div class="bp-drawer-backdrop" ng-class="{'is-open': vm.drawer.open}" ng-click="vm.closeDrawer()"></div>
+<aside class="bp-drawer br-workbench" ng-class="{'is-open': vm.drawer.open}" aria-hidden="{{!vm.drawer.open}}">
+    <form name="vm.editForm" novalidate class="bp-drawer-form" ng-submit="vm.saveDrawer()">
+        <div class="bp-drawer-header">
+            <div class="bp-drawer-heading">
+                <div class="bp-drawer-kicker">{{vm.drawer.isNew ? 'New review period' : 'Review period'}}</div>
+                <h3 class="bp-drawer-title" ng-if="vm.drawer.record">{{vm.drawer.record.description || 'Untitled period'}}</h3>
+                <h3 class="bp-drawer-title" ng-if="!vm.drawer.record">Loading…</h3>
+            </div>
+            <span class="bp-status" ng-if="vm.drawer.record" ng-class="vm.drawer.record.isVariable ? 'st-is-variable' : 'is-open'">
+                <i class="fa" ng-class="vm.drawer.record.isVariable ? 'fa-arrows-h' : 'fa-calendar'"></i>
+                {{vm.drawer.record.isVariable ? 'Variable' : 'Fixed'}}
+            </span>
+            <button type="button" class="bp-drawer-close" ng-click="vm.closeDrawer()" title="Close (Esc)">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+
+        <div class="bp-drawer-body">
+            <div class="bp-drawer-loading" ng-if="vm.drawer.loading">
+                <i class="fa fa-spinner fa-spin"></i> Loading period…
+            </div>
+
+            <div ng-if="vm.drawer.record && !vm.drawer.loading">
+
+                <div class="st-drawer-note" ng-if="vm.drawer.record.scorecardCount">
+                    <i class="fa fa-info-circle"></i>
+                    Used by {{vm.drawer.record.scorecardCount}} scorecard{{vm.drawer.record.scorecardCount === 1 ? '' : 's'}}, so it cannot be deleted. Changes here apply to those scorecards too.
+                </div>
+
+                <!-- Type -->
+                <section class="bp-section">
+                    <div class="bp-section-title">Period type</div>
+                    <div class="btn-group bp-segmented">
+                        <button type="button" class="btn btn-sm"
+                                ng-class="!vm.drawer.record.isVariable ? 'btn-primary' : 'btn-default'"
+                                ng-click="vm.setVariable(false)">
+                            <i class="fa fa-calendar"></i> Fixed dates
+                        </button>
+                        <button type="button" class="btn btn-sm"
+                                ng-class="vm.drawer.record.isVariable ? 'btn-primary' : 'btn-default'"
+                                ng-click="vm.setVariable(true)">
+                            <i class="fa fa-arrows-h"></i> Variable
+                        </button>
+                    </div>
+                    <p class="bp-help" ng-if="!vm.drawer.record.isVariable">
+                        All scorecards in this period cover the same dates. Fixed periods of a template cannot overlap.
+                    </p>
+                    <p class="bp-help" ng-if="vm.drawer.record.isVariable">
+                        The start and end dates are chosen on each scorecard, so this period has no dates of its own.
+                    </p>
+                </section>
+
+                <!-- Details -->
+                <section class="bp-section">
+                    <div class="bp-section-title">Period details</div>
+                    <div class="bp-field-grid st-cols-period">
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && !vm.drawer.record.description}">
+                            <label for="stPeriodDescription">Description</label>
+                            <input id="stPeriodDescription" type="text" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.description" placeholder="For example: Mid-year review" />
+                        </div>
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && vm.drawer.record.reportSortOrder == null}">
+                            <label for="stPeriodSort">Report sort order</label>
+                            <input id="stPeriodSort" type="number" min="0" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.reportSortOrder" />
+                        </div>
+                    </div>
+                    <p class="bp-help">The report sort order sets the order of periods in scorecard reports.</p>
+                </section>
+
+                <!-- Dates -->
+                <section class="bp-section" ng-if="!vm.drawer.record.isVariable">
+                    <div class="bp-section-title">Dates</div>
+                    <div class="bp-field-grid bp-cols-3">
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && !vm.drawer.record.startDate}">
+                            <label>Start date</label>
+                            <input type="text" class="form-control input-sm" name="startDate"
+                                   ng-model="vm.drawer.record.startDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="yyyy/mm/dd" autocomplete="off"
+                                   ng-change="vm.onStartDateChanged()" />
+                        </div>
+                        <div class="bp-field" ng-class="{'has-danger': (vm.drawer.submitted && !vm.drawer.record.endDate) || vm.datesInvalid()}">
+                            <label>End date</label>
+                            <input type="text" class="form-control input-sm" name="endDate"
+                                   ng-model="vm.drawer.record.endDate"
+                                   data-icon-left="fa fa-chevron-left"
+                                   data-icon-right="fa fa-chevron-right"
+                                   autoclose="true" data-date-format="yyyy/MM/dd"
+                                   bs-datepicker placeholder="yyyy/mm/dd" autocomplete="off" />
+                        </div>
+                        <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && !vm.drawer.record.reviewYear}">
+                            <label for="stPeriodYear">Review year</label>
+                            <input id="stPeriodYear" type="number" min="2000" class="form-control input-sm"
+                                   ng-model="vm.drawer.record.reviewYear" ng-change="vm.onReviewYearChanged()" />
+                        </div>
+                    </div>
+                    <div class="bp-field-error" ng-if="vm.datesInvalid()">End date must be on or after the start date.</div>
+                    <p class="bp-help">The review year follows the start date for new periods. You can still override it.</p>
+                </section>
+            </div>
+        </div>
+
+        <div class="bp-drawer-footer">
+            <div class="bp-drawer-error" ng-if="vm.drawer.error">
+                <i class="fa fa-exclamation-circle"></i> {{vm.drawer.error}}
+            </div>
+            <div class="bp-drawer-actions">
+                <button type="button" class="btn btn-sm st-drawer-delete"
+                        ng-if="vm.drawer.record && vm.drawer.record.id"
+                        ng-click="vm.deleteFromDrawer()"
+                        ng-disabled="vm.drawer.saving || vm.drawer.record.scorecardCount > 0"
+                        title="{{vm.drawer.record.scorecardCount ? 'Used by scorecards, so it cannot be deleted' : 'Delete this period'}}">
+                    <i class="fa fa-trash"></i> Delete
+                </button>
+                <span class="bp-dirty-hint" ng-if="vm.isDrawerDirty() && !vm.drawer.saving">Unsaved changes</span>
+                <button type="button" class="btn btn-sm btn-default" ng-click="vm.closeDrawer()" ng-disabled="vm.drawer.saving">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-sm btn-primary"
+                        ng-disabled="vm.drawer.saving || vm.drawer.loading || !vm.drawer.record">
+                    <i class="fa" ng-class="vm.drawer.saving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+                    {{vm.drawer.saving ? 'Saving…' : 'Save'}}
+                </button>
+            </div>
+        </div>
+    </form>
+</aside>

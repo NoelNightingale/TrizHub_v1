@@ -170,7 +170,7 @@
             return result;
         };
 
-        /** capability: isTeamManager, isTeamLead, timesheets, scorecards, teamAllocations, rates or manageTeam. */
+        /** capability: isTeamManager, isTeamLead, timesheets, scorecards, teamAllocations, rates, manageTeam or maintainClient. */
         hasTeamCapability = (capability: string): boolean => {
             const caps = SecurityService.currentUser && SecurityService.currentUser.teamCapabilities;
             return !!(caps && caps[capability]);

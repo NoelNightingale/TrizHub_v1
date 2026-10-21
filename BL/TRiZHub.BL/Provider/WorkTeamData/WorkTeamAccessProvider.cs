@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.Types;
+using TRiZHub.BL.Entities.WorkTeamData;
 using TRiZHub.BL.Provider.Security;
 
 #endregion
@@ -28,7 +29,9 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
         public IQueryable<Guid> ManagedUserIds(Guid actorId, WorkTeamCapability cap, DateTime from, DateTime to)
         {
-            return WorkTeamAccessRules.ReachableUserIds(DataContext.WorkTeamMemberSet, actorId, cap, DateTime.Today, from, to);
+            return WorkTeamAccessRules.ReachableUserIds(DataContext.WorkTeamMemberSet,
+                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet,
+                actorId, cap, DateTime.Today, from, to);
         }
 
         public bool CanActOn(Guid actorId, Guid targetUserId, WorkTeamCapability cap, DateTime from, DateTime to)
@@ -38,7 +41,9 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
         public List<WorkTeamTypePeriod> ReachablePeriods(Guid actorId, Guid targetUserId, WorkTeamCapability cap, DateTime from, DateTime to)
         {
-            return WorkTeamAccessRules.ReachableRows(DataContext.WorkTeamMemberSet, actorId, cap, DateTime.Today, from, to)
+            return WorkTeamAccessRules.ReachableRows(DataContext.WorkTeamMemberSet,
+                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet,
+                actorId, cap, DateTime.Today, from, to)
                 .Where(t => t.UserAccountId == targetUserId)
                 .Select(t => new WorkTeamTypePeriod
                 {
@@ -53,7 +58,9 @@ namespace TRiZHub.BL.Provider.WorkTeamData
         public WorkTeamScope TeamScopeFor(Guid actorId, Guid targetUserId, WorkTeamCapability cap, DateTime from, DateTime to)
         {
             var teamIds = WorkTeamAccessRules
-                .ReachingTeamIds(DataContext.WorkTeamMemberSet, actorId, targetUserId, cap, DateTime.Today, from, to)
+                .ReachingTeamIds(DataContext.WorkTeamMemberSet,
+                    DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet,
+                    actorId, targetUserId, cap, DateTime.Today, from, to)
                 .ToList();
             return TeamScope(teamIds);
         }
@@ -81,7 +88,9 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
         public IQueryable<Guid> EditableTeamIds(Guid actorId, WorkTeamCapability cap)
         {
-            return WorkTeamAccessRules.QualifyingActorRows(DataContext.WorkTeamMemberSet, actorId, cap, DateTime.Today)
+            return WorkTeamAccessRules.QualifyingActorRows(DataContext.WorkTeamMemberSet,
+                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet,
+                actorId, cap, DateTime.Today)
                 .Select(m => m.WorkTeamId)
                 .Distinct();
         }
@@ -102,32 +111,55 @@ namespace TRiZHub.BL.Provider.WorkTeamData
         public WorkTeamCapabilitySummary CapabilitySummary(Guid actorId)
         {
             var today = DateTime.Today;
-            var rows = DataContext.WorkTeamMemberSet
+            var current = DataContext.WorkTeamMemberSet
                 .Where(m => m.UserAccountId == actorId
                             && m.WorkTeam.IsActive
                             && m.StartDate <= today
-                            && (m.EndDate == null || m.EndDate >= today)
-                            && (m.Role == WorkTeamRoleType.Manager || m.Role == WorkTeamRoleType.Lead))
-                .Select(m => new
-                {
-                    m.Role,
-                    m.WorkTeam.AllowTeamTimesheets,
-                    m.WorkTeam.AllowTeamScorecards,
-                    m.WorkTeam.LeadsManageAllocations,
-                    m.WorkTeam.LeadsManageRates
-                })
-                .ToList();
+                            && (m.EndDate == null || m.EndDate >= today));
 
             return new WorkTeamCapabilitySummary
             {
-                IsTeamManager = rows.Any(r => r.Role == WorkTeamRoleType.Manager),
-                IsTeamLead = rows.Any(r => r.Role == WorkTeamRoleType.Lead),
-                Timesheets = rows.Any(r => r.AllowTeamTimesheets),
-                Scorecards = rows.Any(r => r.AllowTeamScorecards),
-                TeamAllocations = rows.Any(r => r.Role == WorkTeamRoleType.Manager || r.LeadsManageAllocations),
-                Rates = rows.Any(r => r.Role == WorkTeamRoleType.Manager || r.LeadsManageRates),
-                ManageTeam = rows.Any(r => r.Role == WorkTeamRoleType.Manager)
+                IsTeamManager = current.Any(m => m.Role == WorkTeamRoleType.Manager),
+                IsTeamLead = current.Any(m => m.Role == WorkTeamRoleType.Lead),
+                Timesheets = HasPrivilege(current, WorkTeamPrivilege.TeamTimesheets),
+                Scorecards = HasPrivilege(current, WorkTeamPrivilege.TeamScorecards),
+                TeamAllocations = HasPrivilege(current, WorkTeamPrivilege.ManageMembers),
+                Rates = HasPrivilege(current, WorkTeamPrivilege.ManageRates),
+                ManageTeam = HasPrivilege(current, WorkTeamPrivilege.ManageMembers),
+                MaintainClient = HasPrivilege(current, WorkTeamPrivilege.MaintainClient)
             };
+        }
+
+        /// <summary>Clients on teams where the actor currently has Maintain client. Whole-client allocations only.</summary>
+        public IQueryable<Guid> MaintainedClientIds(Guid actorId)
+        {
+            var today = DateTime.Today;
+            var current = DataContext.WorkTeamMemberSet
+                .Where(m => m.UserAccountId == actorId
+                            && m.WorkTeam.IsActive
+                            && m.StartDate <= today
+                            && (m.EndDate == null || m.EndDate >= today));
+            var teamIds = WithPrivilege(current, WorkTeamPrivilege.MaintainClient).Select(m => m.WorkTeamId);
+            return DataContext.WorkTeamClientSet
+                .Where(c => teamIds.Contains(c.WorkTeamId))
+                .Select(c => c.ClientId)
+                .Distinct();
+        }
+
+        public bool CanMaintainClient(Guid actorId, Guid clientId)
+        {
+            return MaintainedClientIds(actorId).Any(id => id == clientId);
+        }
+
+        private bool HasPrivilege(IQueryable<WorkTeamMember> current, WorkTeamPrivilege privilege)
+        {
+            return WithPrivilege(current, privilege).Any();
+        }
+
+        private IQueryable<WorkTeamMember> WithPrivilege(IQueryable<WorkTeamMember> members, WorkTeamPrivilege privilege)
+        {
+            return WorkTeamAccessRules.WithPrivilege(members,
+                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet, privilege);
         }
     }
 }

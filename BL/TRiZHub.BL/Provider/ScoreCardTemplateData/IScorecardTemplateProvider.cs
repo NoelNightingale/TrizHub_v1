@@ -22,6 +22,8 @@ namespace TRiZHub.BL.Provider.ScorecardTemplateData
 
         void DeleteScorecardTemplate(Guid? id);
 
+        ScorecardTemplate DuplicateScorecardTemplate(Guid sourceId, string newName);
+
         #endregion
 
         #region Scorecard Template Period

@@ -21,5 +21,7 @@ namespace TRiZHub.Models.ScorecardTemplateModels
         public bool IsVariable { get; set; }
 
         public int ReportSortOrder { get; set; }
+
+        public int ScorecardCount { get; set; }
     }
 }

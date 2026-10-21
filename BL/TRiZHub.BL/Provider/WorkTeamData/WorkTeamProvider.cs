@@ -76,14 +76,20 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
             var today = DateTime.Today;
             var userId = CurrentUserId;
-            var teamIds = DataContext.WorkTeamMemberSet
+            var current = DataContext.WorkTeamMemberSet
                 .Where(m => m.UserAccountId == userId
-                            && (m.Role == WorkTeamRoleType.Manager || m.Role == WorkTeamRoleType.Lead)
                             && m.StartDate <= today
-                            && (m.EndDate == null || m.EndDate >= today))
+                            && (m.EndDate == null || m.EndDate >= today));
+            var byRole = current
+                .Where(m => m.Role == WorkTeamRoleType.Manager || m.Role == WorkTeamRoleType.Lead)
                 .Select(m => m.WorkTeamId);
+            var byPrivilege = Privileged(current, WorkTeamPrivilege.TeamTimesheets)
+                .Select(m => m.WorkTeamId)
+                .Union(Privileged(current, WorkTeamPrivilege.TeamScorecards).Select(m => m.WorkTeamId))
+                .Union(Privileged(current, WorkTeamPrivilege.ManageRates).Select(m => m.WorkTeamId))
+                .Union(Privileged(current, WorkTeamPrivilege.ManageMembers).Select(m => m.WorkTeamId));
 
-            return DataContext.WorkTeamSet.Where(t => teamIds.Contains(t.Id));
+            return DataContext.WorkTeamSet.Where(t => byRole.Contains(t.Id) || byPrivilege.Contains(t.Id));
         }
 
         public WorkTeam GetWorkTeam(Guid id)
@@ -101,27 +107,44 @@ namespace TRiZHub.BL.Provider.WorkTeamData
             var active = team != null && team.IsActive;
             var isManager = active && roles.Contains(WorkTeamRoleType.Manager);
             var isLead = active && roles.Contains(WorkTeamRoleType.Lead);
-            var managerOrLead = isManager || isLead;
+            var mine = active ? MyCurrentRows(workTeamId) : DataContext.WorkTeamMemberSet.Where(m => false);
+            var manageMembers = Privileged(mine, WorkTeamPrivilege.ManageMembers).Any();
+            var timesheets = Privileged(mine, WorkTeamPrivilege.TeamTimesheets).Any();
+            var scorecards = Privileged(mine, WorkTeamPrivilege.TeamScorecards).Any();
+            var rates = Privileged(mine, WorkTeamPrivilege.ManageRates).Any();
 
             return new WorkTeamPermissions
             {
                 IsAdmin = isAdmin,
                 IsManager = isManager,
                 IsLead = isLead,
-                CanView = isAdmin || managerOrLead,
+                CanView = isAdmin || isManager || isLead || manageMembers || timesheets || scorecards || rates,
                 CanEditHeader = isAdmin,
                 CanEditAdminFlags = isAdmin,
-                CanEditLeadFlags = isAdmin || isManager,
+                CanEditLeadFlags = isAdmin,
                 CanManageManagers = isAdmin,
-                CanManagePeople = isAdmin || isManager,
-                CanEditAllocations = isAdmin || isManager || (isLead && team.LeadsManageAllocations),
-                CanTimesheets = UserIsAllowed(PrivilegeType.TimesheetCaptureForOtherAccounts)
-                                || (managerOrLead && team.AllowTeamTimesheets),
-                CanScorecards = UserIsAllowed(PrivilegeType.PerformanceManagementCreateScoreCards)
-                                || (managerOrLead && team.AllowTeamScorecards),
-                CanRates = UserIsAllowed(PrivilegeType.UserBillingRatesMaintenance)
-                           || isManager || (isLead && team.LeadsManageRates)
+                CanManagePeople = isAdmin || manageMembers,
+                CanEditAllocations = isAdmin || manageMembers,
+                CanTimesheets = UserIsAllowed(PrivilegeType.TimesheetCaptureForOtherAccounts) || timesheets,
+                CanScorecards = UserIsAllowed(PrivilegeType.PerformanceManagementCreateScoreCards) || scorecards,
+                CanRates = UserIsAllowed(PrivilegeType.UserBillingRatesMaintenance) || rates
             };
+        }
+
+        private IQueryable<WorkTeamMember> MyCurrentRows(Guid workTeamId)
+        {
+            var today = DateTime.Today;
+            var userId = CurrentUserId;
+            return DataContext.WorkTeamMemberSet.Where(m => m.WorkTeamId == workTeamId
+                                                            && m.UserAccountId == userId
+                                                            && m.StartDate <= today
+                                                            && (m.EndDate == null || m.EndDate >= today));
+        }
+
+        private IQueryable<WorkTeamMember> Privileged(IQueryable<WorkTeamMember> members, WorkTeamPrivilege privilege)
+        {
+            return WorkTeamAccessRules.WithPrivilege(members,
+                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet, privilege);
         }
 
         public WorkTeam SaveWorkTeam(Guid? id, string name, string description, bool isActive, Guid teamTypeId,
@@ -150,9 +173,10 @@ namespace TRiZHub.BL.Provider.WorkTeamData
                         || record.TeamTypeId != teamTypeId))
                     throw new WorkTeamException("Only administrators can change the team name, description, type or active status.");
 
-                if (!permissions.CanEditAdminFlags
-                    && (record.AllowTeamTimesheets != allowTeamTimesheets || record.AllowTeamScorecards != allowTeamScorecards))
-                    throw new WorkTeamException("Only administrators can change the team timesheet and scorecard access.");
+                if (!permissions.CanEditHeader
+                    && (record.AllowTeamTimesheets != allowTeamTimesheets || record.AllowTeamScorecards != allowTeamScorecards
+                        || record.LeadsManageAllocations != leadsManageAllocations || record.LeadsManageRates != leadsManageRates))
+                    throw new WorkTeamException("Team access is set on each person, not on the team.");
             }
 
             if (DataContext.WorkTeamSet.Any(t => t.Name == name && t.Id != record.Id))
@@ -188,15 +212,35 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
         private void EnsureCanEditRole(WorkTeamPermissions permissions, WorkTeamRoleType role)
         {
-            var allowed = role == WorkTeamRoleType.Manager ? permissions.CanManageManagers : permissions.CanManagePeople;
-            if (!allowed)
-                throw new WorkTeamException(role == WorkTeamRoleType.Manager
-                    ? "Only administrators can add or change team managers."
-                    : "You are not allowed to change the people in this team.");
+            if (role == WorkTeamRoleType.Manager)
+            {
+                if (!permissions.CanManageManagers)
+                    throw new WorkTeamException("Only administrators can add or change team managers.");
+                return;
+            }
+
+            if (!permissions.CanManagePeople)
+                throw new WorkTeamException("You are not allowed to change the people in this team.");
+
+            if (role == WorkTeamRoleType.Lead && !permissions.IsAdmin && !permissions.IsManager)
+                throw new WorkTeamException("You can only change members of this team.");
+        }
+
+        public List<WorkTeamRolePrivilege> RolePrivilegeDefaults()
+        {
+            return DataContext.WorkTeamRolePrivilegeSet.OrderBy(d => d.Role).ThenBy(d => d.Privilege).ToList();
+        }
+
+        public List<WorkTeamMemberPrivilege> MemberPrivileges(IEnumerable<Guid> memberIds)
+        {
+            var ids = memberIds.Distinct().ToList();
+            if (ids.Count == 0)
+                return new List<WorkTeamMemberPrivilege>();
+            return DataContext.WorkTeamMemberPrivilegeSet.Where(p => ids.Contains(p.WorkTeamMemberId)).ToList();
         }
 
         public WorkTeamMember SaveMember(Guid? id, Guid workTeamId, Guid userAccountId, WorkTeamRoleType role,
-            DateTime startDate, DateTime? endDate)
+            DateTime startDate, DateTime? endDate, IList<KeyValuePair<WorkTeamPrivilege, bool?>> privileges)
         {
             LoadTeam(workTeamId);
             var permissions = PermissionsFor(workTeamId);
@@ -244,8 +288,53 @@ namespace TRiZHub.BL.Provider.WorkTeamData
             record.StartDate = start;
             record.EndDate = end;
 
+            ApplyPrivilegeOverrides(record, privileges ?? new List<KeyValuePair<WorkTeamPrivilege, bool?>>());
+
             DataContextSaveChanges();
             return record;
+        }
+
+        /// <summary>
+        /// Writes a row only when the choice differs from the role default, and removes a row put back to the default.
+        /// </summary>
+        private void ApplyPrivilegeOverrides(WorkTeamMember record, IList<KeyValuePair<WorkTeamPrivilege, bool?>> choices)
+        {
+            var defaults = DataContext.WorkTeamRolePrivilegeSet.Where(d => d.Role == record.Role).ToList();
+            var existing = record.Id == Guid.Empty
+                ? new List<WorkTeamMemberPrivilege>()
+                : DataContext.WorkTeamMemberPrivilegeSet.Where(p => p.WorkTeamMemberId == record.Id).ToList();
+
+            foreach (WorkTeamPrivilege privilege in Enum.GetValues(typeof(WorkTeamPrivilege)))
+            {
+                bool? chosen = null;
+                foreach (var choice in choices)
+                {
+                    if (choice.Key == privilege)
+                    {
+                        chosen = choice.Value;
+                        break;
+                    }
+                }
+
+                var roleDefault = defaults.Any(d => d.Privilege == privilege && d.IsGranted);
+                var keepOverride = chosen.HasValue && chosen.Value != roleDefault;
+                var row = existing.FirstOrDefault(p => p.Privilege == privilege);
+
+                if (!keepOverride)
+                {
+                    if (row != null)
+                        DataContext.WorkTeamMemberPrivilegeSet.Remove(row);
+                    continue;
+                }
+
+                if (row == null)
+                {
+                    row = new WorkTeamMemberPrivilege { WorkTeamMemberId = record.Id, Privilege = privilege };
+                    DataContext.WorkTeamMemberPrivilegeSet.Add(row);
+                }
+
+                row.IsGranted = chosen.Value;
+            }
         }
 
         public void DeleteMember(Guid id)
@@ -256,6 +345,8 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
             EnsureCanEditRole(PermissionsFor(record.WorkTeamId), record.Role);
 
+            var overrides = DataContext.WorkTeamMemberPrivilegeSet.Where(p => p.WorkTeamMemberId == record.Id).ToList();
+            DataContext.WorkTeamMemberPrivilegeSet.RemoveRange(overrides);
             DataContext.WorkTeamMemberSet.Remove(record);
             DataContextSaveChanges();
         }

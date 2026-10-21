@@ -78,51 +78,6 @@
                     </div>
 
                     <hr />
-                    <h6 class="text-muted">Team access (administrators)</h6>
-                    <div class="form-group row">
-                        <label class="col-sm-3 form-control-label">Team timesheets</label>
-                        <div class="col-sm-8">
-                            <label class="md-switch">
-                                <input type="checkbox" ng-model="vm.viewModel.allowTeamTimesheets" ng-disabled="!vm.permissions.canEditAdminFlags">
-                                <i class="indigo"></i>
-                                Managers and leads can view and capture timesheets for their people
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-3 form-control-label">Team scorecards</label>
-                        <div class="col-sm-8">
-                            <label class="md-switch">
-                                <input type="checkbox" ng-model="vm.viewModel.allowTeamScorecards" ng-disabled="!vm.permissions.canEditAdminFlags">
-                                <i class="indigo"></i>
-                                Managers and leads can view and manage scorecards for their people
-                            </label>
-                        </div>
-                    </div>
-
-                    <h6 class="text-muted">Lead delegation (administrators and managers)</h6>
-                    <div class="form-group row">
-                        <label class="col-sm-3 form-control-label">Leads manage allocations</label>
-                        <div class="col-sm-8">
-                            <label class="md-switch">
-                                <input type="checkbox" ng-model="vm.viewModel.leadsManageAllocations" ng-disabled="!vm.permissions.canEditLeadFlags">
-                                <i class="indigo"></i>
-                                Leads can change this team's client and project allocations
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-3 form-control-label">Leads manage rates</label>
-                        <div class="col-sm-8">
-                            <label class="md-switch">
-                                <input type="checkbox" ng-model="vm.viewModel.leadsManageRates" ng-disabled="!vm.permissions.canEditLeadFlags">
-                                <i class="indigo"></i>
-                                Leads can view and edit rates for their members on this team's clients and projects
-                            </label>
-                        </div>
-                    </div>
-
-                    <hr />
                     <div class="form-group row">
                         <div class="col-md-12 pull-right text-right">
                             <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.workTeamMaintenance.grid">
@@ -162,7 +117,7 @@
                             <label class="col-sm-2 form-control-label">Role:</label>
                             <div class="col-sm-4">
                                 <select name="role" class="form-control" ng-options="r.id as r.name for r in vm.editableRoles()"
-                                        ng-model="vm.memberEdit.role" required></select>
+                                        ng-model="vm.memberEdit.role" ng-change="vm.refreshPrivilegeDefaults()" required></select>
                             </div>
                         </div>
                         <div class="form-group row" show-errors>
@@ -180,6 +135,32 @@
                                        name="endDate" data-date-format="yyyy/MM/dd" autoclose="true"
                                        bs-datepicker placeholder="Open ended" autocomplete="off">
                             </div>
+                        </div>
+                        <h6 class="text-muted">Privileges</h6>
+                        <p class="text-muted">Use role default keeps whatever is set for this role in the database. Allow or Deny applies only to this person on this team.</p>
+                        <div class="table-responsive m-b-1">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Privilege</th>
+                                    <th>Role default</th>
+                                    <th>This person</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="p in vm.memberEdit.privileges">
+                                    <td>{{p.name}}</td>
+                                    <td>{{p.roleDefault ? 'Allow' : 'Deny'}}</td>
+                                    <td>
+                                        <select class="form-control" ng-model="p.choice">
+                                            <option value="default">Use role default</option>
+                                            <option value="allow">Allow</option>
+                                            <option value="deny">Deny</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="text-right">
                             <button class="btn btn-outline b-primary text-primary" ng-click="vm.cancelMember()">Cancel</button>

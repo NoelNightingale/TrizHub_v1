@@ -3,33 +3,44 @@
         <i class="fa fa-times"></i>
     </button>
 
-    <div class="tc-action-body">
-        <div class="tc-action-icon">
-            <i class="fa {{dialog.icon}}"></i>
-        </div>
-        <div class="tc-action-text">
-            <h4 class="tc-action-title">{{dialog.title}}</h4>
-            <p class="tc-action-message" ng-if="dialog.message">{{dialog.message}}</p>
-
-            <div class="tc-action-details" ng-if="dialog.details.length">
-                <div class="tc-action-details-label" ng-if="dialog.detailLabel">{{dialog.detailLabel}}</div>
-                <div class="tc-action-chips">
-                    <span class="tc-action-chip" ng-repeat="d in dialog.details track by $index">{{d}}</span>
-                </div>
+    <form novalidate ng-submit="dialog.confirm()">
+        <div class="tc-action-body">
+            <div class="tc-action-icon">
+                <i class="fa {{dialog.icon}}"></i>
             </div>
+            <div class="tc-action-text">
+                <h4 class="tc-action-title">{{dialog.title}}</h4>
+                <p class="tc-action-message" ng-if="dialog.message">{{dialog.message}}</p>
 
-            <p class="tc-action-note" ng-if="dialog.note">
-                <i class="fa fa-info-circle"></i> {{dialog.note}}
-            </p>
+                <div class="tc-action-input" ng-if="dialog.input">
+                    <label for="tcActionInput" ng-if="dialog.input.label">{{dialog.input.label}}</label>
+                    <input id="tcActionInput" type="text" class="form-control input-sm"
+                           ng-model="dialog.input.value"
+                           placeholder="{{dialog.input.placeholder}}"
+                           ng-attr-maxlength="{{dialog.input.maxLength || undefined}}"
+                           autocomplete="off" autofocus />
+                </div>
+
+                <div class="tc-action-details" ng-if="dialog.details.length">
+                    <div class="tc-action-details-label" ng-if="dialog.detailLabel">{{dialog.detailLabel}}</div>
+                    <div class="tc-action-chips">
+                        <span class="tc-action-chip" ng-repeat="d in dialog.details track by $index">{{d}}</span>
+                    </div>
+                </div>
+
+                <p class="tc-action-note" ng-if="dialog.note">
+                    <i class="fa fa-info-circle"></i> {{dialog.note}}
+                </p>
+            </div>
         </div>
-    </div>
 
-    <div class="tc-action-footer">
-        <button type="button" class="btn btn-sm tc-action-cancel" ng-click="dialog.cancel()">
-            {{dialog.cancelText}}
-        </button>
-        <button type="button" class="btn btn-sm tc-action-confirm" ng-click="dialog.confirm()" autofocus>
-            <i class="fa {{dialog.icon}}"></i> {{dialog.confirmText}}
-        </button>
-    </div>
+        <div class="tc-action-footer">
+            <button type="button" class="btn btn-sm tc-action-cancel" ng-click="dialog.cancel()">
+                {{dialog.cancelText}}
+            </button>
+            <button type="submit" class="btn btn-sm tc-action-confirm" ng-disabled="!dialog.canConfirm()" ng-attr-autofocus="{{dialog.input ? undefined : 'autofocus'}}">
+                <i class="fa {{dialog.icon}}"></i> {{dialog.confirmText}}
+            </button>
+        </div>
+    </form>
 </div>

@@ -7,6 +7,7 @@ module WorkTeamServiceModule {
         getWorkTeam: (id: string) => ng.IPromise<WorkTeamEditModel>;
         saveWorkTeam: (viewModel: WorkTeamEditModel) => ng.IPromise<WorkTeamEditModel>;
         workTeamMembers: (id: string, includeEnded: boolean) => ng.IPromise<Array<WorkTeamMemberModel>>;
+        rolePrivilegeDefaults: () => ng.IPromise<Array<any>>;
         saveWorkTeamMember: (viewModel: WorkTeamMemberModel) => ng.IPromise<WorkTeamMemberModel>;
         deleteWorkTeamMember: (id: string) => ng.IPromise<boolean>;
         workTeamAllocationTree: (id: string, includeInactive: boolean) => ng.IPromise<Array<any>>;
@@ -72,6 +73,10 @@ module WorkTeamServiceModule {
 
         workTeamMembers = (id: string, includeEnded: boolean): ng.IPromise<Array<WorkTeamMemberModel>> => {
             return this.resolveGet("WorkTeamMembers/" + id + "?includeEnded=" + includeEnded);
+        };
+
+        rolePrivilegeDefaults = (): ng.IPromise<Array<any>> => {
+            return this.resolveGet("RolePrivilegeDefaults");
         };
 
         saveWorkTeamMember = (viewModel: WorkTeamMemberModel): ng.IPromise<WorkTeamMemberModel> => {

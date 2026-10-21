@@ -31,8 +31,13 @@ namespace TRiZHub.BL.Provider.WorkTeamData
 
         IQueryable<WorkTeamMember> MemberList(Guid workTeamId);
 
+        List<WorkTeamRolePrivilege> RolePrivilegeDefaults();
+
+        List<WorkTeamMemberPrivilege> MemberPrivileges(IEnumerable<Guid> memberIds);
+
+        /// <param name="privileges">Null value means use the role default. A missing privilege means the same.</param>
         WorkTeamMember SaveMember(Guid? id, Guid workTeamId, Guid userAccountId, WorkTeamRoleType role,
-            DateTime startDate, DateTime? endDate);
+            DateTime startDate, DateTime? endDate, IList<KeyValuePair<WorkTeamPrivilege, bool?>> privileges);
 
         void DeleteMember(Guid id);
 

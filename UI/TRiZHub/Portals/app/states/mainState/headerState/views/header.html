@@ -11,7 +11,8 @@
             <li class="nav-item dropdown" ng-show="vm.isAllowed('RoleMaintenance') 
                 || vm.isAllowed('UserMaintenance') 
                 || vm.isAllowed('EmployerMaintenance')
-                || vm.isAllowed('ClientMaintenance')                 
+                || vm.isAllowed('ClientMaintenance')
+                || vm.hasTeamCapability('maintainClient')                 
                 || vm.isAllowed('ProjectMaintenance') 
                 || vm.isAllowed('ScorecardTemplateMaintenance')
                 || vm.isAllowed('BillingCycleMaintenance')
@@ -34,7 +35,7 @@
                     <a class="dropdown-item" ng-show="vm.isAllowed('EmployerMaintenance')" ui-sref="mainState.maintenance.employerMaintenance.grid">
                         <span class="nav-text">Employer Maintenance</span>
                     </a>
-                    <a class="dropdown-item" ng-show="vm.isAllowed('ClientMaintenance')" ui-sref="mainState.maintenance.clientMaintenance.grid">
+                    <a class="dropdown-item" ng-show="vm.isAllowed('ClientMaintenance') || vm.hasTeamCapability('maintainClient')" ui-sref="mainState.maintenance.clientMaintenance.grid">
                         <span class="nav-text">Client Maintenance</span>
                     </a>
                     <a class="dropdown-item" ng-show="vm.isAllowed('ProjectMaintenance')" ui-sref="mainState.maintenance.projectMaintenance.grid">
@@ -70,7 +71,7 @@
                     </a>
                 </div>
             </li>
-            <li class="nav-item" ng-show="!vm.isAllowed('TeamMaintenance') && (vm.hasTeamCapability('isTeamManager') || vm.hasTeamCapability('isTeamLead'))">
+            <li class="nav-item" ng-show="!vm.isAllowed('TeamMaintenance') && (vm.hasTeamCapability('isTeamManager') || vm.hasTeamCapability('isTeamLead') || vm.hasTeamCapability('timesheets') || vm.hasTeamCapability('scorecards') || vm.hasTeamCapability('rates') || vm.hasTeamCapability('manageTeam'))">
                 <a class="nav-link" ui-sref="mainState.maintenance.workTeamMaintenance.grid">
                     <span class="nav-text">My Teams</span>
                 </a>

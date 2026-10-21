@@ -69,7 +69,11 @@ namespace TRiZHub.Controllers
                     Id = a.Id,
                     IsActive = a.IsActive,
                     ScorecardCode = a.ScorecardCode,
-                    ScorecardName = a.ScorecardName
+                    ScorecardName = a.ScorecardName,
+                    ItemCount = a.ScorecardTemplateItems.Count(),
+                    TotalWeight = a.ScorecardTemplateItems.Sum(i => (decimal?)i.Weight) ?? 0,
+                    PeriodCount = a.ScorecardTemplatePeriods.Count(),
+                    ScorecardCount = a.Scorecards.Count()
                 });
 
             if (model.Searchfor != "null")
@@ -113,6 +117,33 @@ namespace TRiZHub.Controllers
             return new GridResultModel<ScorecardTemplateGridModel>(filteredQuery.ToList(), totalNumberOfRecords);
         }
 
+        private ScorecardTemplateModel BuildScorecardTemplateModel(Guid id)
+        {
+            var model = ScorecardTemplateProvider.ScorecardTemplateList()
+                .Where(a => a.Id == id)
+                .Select(a => new ScorecardTemplateModel
+                {
+                    Id = a.Id,
+                    IsActive = a.IsActive,
+                    ScorecardCode = a.ScorecardCode,
+                    ScorecardName = a.ScorecardName,
+                    ExcellentWeight = a.ExcellentWeight,
+                    AdequateWeight = a.AdequateWeight,
+                    InadequateWeight = a.InadequateWeight,
+                    ItemCount = a.ScorecardTemplateItems.Count(),
+                    TotalWeight = a.ScorecardTemplateItems.Sum(i => (decimal?)i.Weight) ?? 0,
+                    PeriodCount = a.ScorecardTemplatePeriods.Count(),
+                    ScorecardCount = a.Scorecards.Count()
+                })
+                .FirstOrDefault();
+
+            if (model == null)
+                throw new ScorecardTemplateException("The scorecard template could not be found.");
+
+            model.TotalAvailableWeight = 100 - model.TotalWeight;
+            return model;
+        }
+
         /// <summary>
         /// Retrieve single Scorecard Template
         /// </summary>
@@ -121,24 +152,7 @@ namespace TRiZHub.Controllers
         {
             try
             {
-                var record = ScorecardTemplateProvider.GetScorecardTemplate(id.Value);
-
-                var model = new ScorecardTemplateModel
-                {
-                    Id = record.Id,
-                    IsActive = record.IsActive,
-                    ScorecardCode = record.ScorecardCode,
-                    ScorecardName = record.ScorecardName,
-                    ExcellentWeight = record.ExcellentWeight,
-                    AdequateWeight = record.AdequateWeight,
-                    InadequateWeight = record.InadequateWeight,
-                    TotalAvailableWeight =
-                        record.ScorecardTemplateItems.Any()
-                            ? 100 - record.ScorecardTemplateItems.Sum(a => a.Weight)
-                            : 100
-                };
-
-                return model;
+                return BuildScorecardTemplateModel(id.Value);
             }
             catch (ScorecardTemplateException e)
             {
@@ -158,18 +172,7 @@ namespace TRiZHub.Controllers
 
                 var record = ScorecardTemplateProvider.SaveScorecardTemplate(model.Id, model.ScorecardName, model.ScorecardCode, model.ExcellentWeight, model.AdequateWeight, model.InadequateWeight, model.IsActive);
 
-                model = new ScorecardTemplateModel
-                {
-                    Id = record.Id,
-                    IsActive = record.IsActive,
-                    ScorecardCode = record.ScorecardCode,
-                    ScorecardName = record.ScorecardName,
-                    ExcellentWeight = record.ExcellentWeight,
-                    AdequateWeight = record.AdequateWeight,
-                    InadequateWeight = record.InadequateWeight,
-                };
-
-                return model;
+                return BuildScorecardTemplateModel(record.Id);
             }
             catch (ScorecardTemplateException e)
             {
@@ -188,6 +191,26 @@ namespace TRiZHub.Controllers
                 CheckModelState();
 
                 ScorecardTemplateProvider.DeleteScorecardTemplate(model.Id);
+            }
+            catch (ScorecardTemplateException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+        }
+
+        /// <summary>
+        /// Copy a Scorecard Template and all of its items to a new, inactive template
+        /// </summary>
+        [HttpPost]
+        public ScorecardTemplateModel ScorecardTemplateDuplicate(ScorecardTemplateDuplicateModel model)
+        {
+            try
+            {
+                CheckModelState();
+
+                var record = ScorecardTemplateProvider.DuplicateScorecardTemplate(model.SourceId, model.ScorecardName);
+
+                return BuildScorecardTemplateModel(record.Id);
             }
             catch (ScorecardTemplateException e)
             {
@@ -272,7 +295,21 @@ namespace TRiZHub.Controllers
 
             filteredQuery = filteredQuery.Skip(begin).Take(model.RecordsPerPage.Value);
 
-            return new GridResultModel<ScorecardTemplatePeriodGridModel>(filteredQuery.ToList(), totalNumberOfRecords);
+            var returnList = filteredQuery.ToList();
+
+            var periodIds = returnList.Select(a => a.Id).ToList();
+            var scorecardCounts = ScorecardProvider.ScorecardList()
+                .Where(s => periodIds.Contains(s.ScorecardTemplatePeriodId))
+                .GroupBy(s => s.ScorecardTemplatePeriodId)
+                .Select(g => new { PeriodId = g.Key, Count = g.Count() })
+                .ToList();
+            foreach (var row in returnList)
+            {
+                var match = scorecardCounts.FirstOrDefault(c => c.PeriodId == row.Id);
+                row.ScorecardCount = match == null ? 0 : match.Count;
+            }
+
+            return new GridResultModel<ScorecardTemplatePeriodGridModel>(returnList, totalNumberOfRecords);
         }
 
         /// <summary>
@@ -364,7 +401,8 @@ namespace TRiZHub.Controllers
                         Id = a.Id,
                         Description = a.Description,
                         Weight = a.Weight,
-                        Order = a.Order
+                        Order = a.Order,
+                        ScorecardScoring = a.ScorecardScoring
                     });
 
             if (model.Searchfor != "null")
@@ -1107,6 +1145,9 @@ namespace TRiZHub.Controllers
                         EvaluatorId = record.EvaluatorId,
                         EvaluatorName = record.Evaluator.FirstName + " " + record.Evaluator.Surname,
                         ScorecardPeriodName = record.ScorecardTemplatePeriod.Description + " " + record.ScorecardTemplatePeriod.StartDate.ToString(@"yyyy\/MM\/dd") + " - " + record.ScorecardTemplatePeriod.EndDate.ToString(@"yyyy\/MM\/dd"),
+                        ExcellentWeight = record.ScorecardTemplate.ExcellentWeight,
+                        AdequateWeight = record.ScorecardTemplate.AdequateWeight,
+                        InadequateWeight = record.ScorecardTemplate.InadequateWeight,
                         EvaluatorMessage = record.EvaluatorMessage,
                         EmployeeMessage = record.EmployeeMessage,
                         locked = record.locked

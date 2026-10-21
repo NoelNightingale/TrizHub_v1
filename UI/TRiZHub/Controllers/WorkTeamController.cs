@@ -9,6 +9,7 @@ using System.Web.Http;
 using TCR.Lib.BL;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Entities.Types;
+using TRiZHub.BL.Entities.WorkTeamData;
 using TRiZHub.BL.Provider.Security;
 using TRiZHub.BL.Provider.WorkTeamData;
 using TRiZHub.Controllers.Filters;
@@ -217,7 +218,11 @@ namespace TRiZHub.Controllers
                 if (!includeEnded)
                     query = query.Where(m => m.EndDate == null || m.EndDate >= today);
 
-                return query
+                var members = query.ToList();
+                var defaults = WorkTeamProvider.RolePrivilegeDefaults();
+                var overrides = WorkTeamProvider.MemberPrivileges(members.Select(m => m.Id));
+
+                return members
                     .Select(m => new WorkTeamMemberModel
                     {
                         Id = m.Id,
@@ -227,14 +232,62 @@ namespace TRiZHub.Controllers
                         Role = m.Role,
                         StartDate = m.StartDate,
                         EndDate = m.EndDate,
-                        IsCurrent = m.StartDate <= today && (m.EndDate == null || m.EndDate >= today)
+                        IsCurrent = m.StartDate <= today && (m.EndDate == null || m.EndDate >= today),
+                        Privileges = PrivilegeChoices(m.Role, m.Id, defaults, overrides)
                     })
-                    .ToList()
                     .OrderBy(m => m.Role)
                     .ThenBy(m => m.UserName)
                     .ThenBy(m => m.StartDate)
                     .ToList();
             });
+        }
+
+        /// <summary>Global role defaults. There is no screen that edits these.</summary>
+        [HttpGet]
+        public List<WorkTeamRolePrivilegeModel> RolePrivilegeDefaults()
+        {
+            return Guarded(() => WorkTeamProvider.RolePrivilegeDefaults()
+                .Select(d => new WorkTeamRolePrivilegeModel
+                {
+                    Role = d.Role,
+                    Privilege = d.Privilege,
+                    Name = PrivilegeName(d.Privilege),
+                    IsGranted = d.IsGranted
+                })
+                .ToList());
+        }
+
+        private static List<WorkTeamMemberPrivilegeModel> PrivilegeChoices(WorkTeamRoleType role, Guid memberId,
+            IEnumerable<WorkTeamRolePrivilege> defaults, IEnumerable<WorkTeamMemberPrivilege> overrides)
+        {
+            return Enum.GetValues(typeof(WorkTeamPrivilege)).Cast<WorkTeamPrivilege>()
+                .Select(privilege =>
+                {
+                    var roleDefault = defaults.Any(d => d.Role == role && d.Privilege == privilege && d.IsGranted);
+                    var over = overrides.FirstOrDefault(o => o.WorkTeamMemberId == memberId && o.Privilege == privilege);
+                    return new WorkTeamMemberPrivilegeModel
+                    {
+                        Privilege = privilege,
+                        Name = PrivilegeName(privilege),
+                        RoleDefault = roleDefault,
+                        Override = over == null ? (bool?)null : over.IsGranted
+                    };
+                })
+                .ToList();
+        }
+
+        private static string PrivilegeName(WorkTeamPrivilege privilege)
+        {
+            switch (privilege)
+            {
+                case WorkTeamPrivilege.CaptureTime: return "Capture time";
+                case WorkTeamPrivilege.TeamTimesheets: return "View/Create my team's timesheets";
+                case WorkTeamPrivilege.TeamScorecards: return "View/Create my team's scorecards";
+                case WorkTeamPrivilege.MaintainClient: return "Maintain client";
+                case WorkTeamPrivilege.ManageRates: return "Manage team rates";
+                case WorkTeamPrivilege.ManageMembers: return "Manage team members";
+                default: return privilege.ToString();
+            }
         }
 
         /// <summary>
@@ -247,17 +300,25 @@ namespace TRiZHub.Controllers
 
             return Guarded(() =>
             {
+                var choices = (model.Privileges ?? new List<WorkTeamMemberPrivilegeModel>())
+                    .Select(p => new KeyValuePair<WorkTeamPrivilege, bool?>(p.Privilege, p.Override))
+                    .ToList();
+
                 var record = WorkTeamProvider.SaveMember(
                     model.Id == Guid.Empty ? null : model.Id,
                     model.WorkTeamId,
                     model.UserAccountId,
                     model.Role,
                     DayOf(model.StartDate),
-                    DayOf(model.EndDate));
+                    DayOf(model.EndDate),
+                    choices);
 
                 model.Id = record.Id;
                 model.StartDate = record.StartDate;
                 model.EndDate = record.EndDate;
+                model.Privileges = PrivilegeChoices(record.Role, record.Id,
+                    WorkTeamProvider.RolePrivilegeDefaults(),
+                    WorkTeamProvider.MemberPrivileges(new[] { record.Id }));
                 return model;
             });
         }

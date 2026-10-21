@@ -1,6 +1,7 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using TRiZHub.BL.Entities.Types;
 
@@ -34,5 +35,31 @@ namespace TRiZHub.Models.WorkTeamModels
         public DateTime? EndDate { get; set; }
 
         public bool IsCurrent { get; set; }
+
+        public List<WorkTeamMemberPrivilegeModel> Privileges { get; set; }
+    }
+
+    public class WorkTeamMemberPrivilegeModel
+    {
+        public WorkTeamPrivilege Privilege { get; set; }
+
+        public string Name { get; set; }
+
+        /// <summary>What this role gets when the membership has no override.</summary>
+        public bool RoleDefault { get; set; }
+
+        /// <summary>Null means use the role default.</summary>
+        public bool? Override { get; set; }
+    }
+
+    public class WorkTeamRolePrivilegeModel
+    {
+        public WorkTeamRoleType Role { get; set; }
+
+        public WorkTeamPrivilege Privilege { get; set; }
+
+        public string Name { get; set; }
+
+        public bool IsGranted { get; set; }
     }
 }

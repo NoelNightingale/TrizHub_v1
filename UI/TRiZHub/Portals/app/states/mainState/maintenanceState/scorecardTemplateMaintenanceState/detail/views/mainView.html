@@ -1,98 +1,338 @@
-﻿<div class="padding">
-    <div class="container">
-        <div class="box">
-            <div class="box-header b-b">
-                <h2>
-                    <a class="text-success" ui-sref="mainState.maintenance.scorecardTemplateMaintenance.grid">Scorecard Template Maintenance</a> / {{vm.viewModel.scorecardName}}
-                </h2>
-           
+﻿<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box br-workbench bp-workbench st-workbench st-workbook">
+                <div class="box-header b-b">
+                    <div class="br-header">
+                        <div class="st-wb-heading">
+                            <div class="st-crumb">
+                                <a ui-sref="mainState.maintenance.scorecardTemplateMaintenance.grid"><i class="fa fa-chevron-left"></i> Scorecard Templates</a>
+                            </div>
+                            <h2>
+                                {{vm.isNew ? 'New scorecard template' : (vm.template.scorecardName || 'Loading…')}}
+                                <span class="bp-status" ng-if="vm.template" ng-class="vm.template.isActive ? 'is-open' : 'is-closed'">
+                                    <i class="fa" ng-class="vm.template.isActive ? 'fa-check-circle' : 'fa-pause-circle'"></i>
+                                    {{vm.template.isActive ? 'Active' : 'Inactive'}}
+                                </span>
+                            </h2>
+                            <p class="br-header-note" ng-if="vm.template">
+                                <strong>{{vm.items.length}}</strong> item{{vm.items.length === 1 ? '' : 's'}}
+                                <span class="bp-dot">&middot;</span>
+                                <strong>{{vm.periods.length}}</strong> period{{vm.periods.length === 1 ? '' : 's'}}
+                                <span class="bp-dot">&middot;</span>
+                                <span ng-class="{'st-in-use': vm.template.scorecardCount > 0}">
+                                    used by <strong>{{vm.template.scorecardCount}}</strong> scorecard{{vm.template.scorecardCount === 1 ? '' : 's'}}
+                                </span>
+                            </p>
+                            <p class="br-header-note" ng-if="vm.isNew">
+                                Save the template settings first. Items and periods can be added once the template exists.
+                            </p>
+                        </div>
+                        <div class="bp-header-tools" ng-if="!vm.isNew && vm.template">
+                            <span title="{{vm.template.scorecardCount ? 'Used by ' + vm.template.scorecardCount + ' scorecard' + (vm.template.scorecardCount === 1 ? '' : 's') + ', so it cannot be deleted' : 'Delete this template'}}">
+                                <button type="button" class="btn btn-sm st-action-btn is-danger" ng-click="vm.deleteTemplate()"
+                                        ng-disabled="vm.busy || vm.template.scorecardCount > 0">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            <div class="box-body">
-                <form role="form" name="EditForm" novalidate>
-                    <div class="form-group row" show-errors>
-                        <label for="scorecardName" class="col-sm-2 form-control-label">Scorecard Name:</label>
-                        <div class="col-sm-9">
-                            <input name="scorecardName" type="text" class="form-control" ng-model="vm.viewModel.scorecardName" ng-required="true">
-                            <span class="text-help" ng-show="EditForm.scorecardName.$invalid">Required</span>
-                        </div>
-                    </div>
-                   
-                    <div class="form-group row">
-                        <label class="col-sm-2 form-control-label"><span class="text-2x">E </span> Weight:</label>
-                        <div class="col-sm-9">
-                            <slider name="excellentWeight" ng-model="vm.viewModel.excellentWeight"
-                                    floor="0"
-                                    ceiling="400"
-                                    translate-fn="vm.percentageFormatting"
-                                    ng-required="true"
-                                  >
-                       
-                            </slider>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="form-group row">
-                        <label class="col-sm-2 form-control-label"><span class="text-2x">A </span> Weight:</label>
-                        <div class="col-sm-9">
-                            <slider name="adequateWeigh" ng-model="vm.viewModel.adequateWeight"
-                                    floor="0"
-                                    ceiling="400"
-                                    translate-fn="vm.percentageFormatting"
-                                    ng-required="true"
-                                >
-                            </slider>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="form-group row">
-                        <label class="col-sm-2 form-control-label"><span class="text-2x">I </span>Weight:</label>
-                        <div class="col-sm-9">
-                            <slider name="inadequateWeight" ng-model="vm.viewModel.inadequateWeight"
-                                    floor="0"
-                                    ceiling="400"
-                                    translate-fn="vm.percentageFormatting"
-                                    ng-required="true">
-                                   
-                            </slider>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="form-group row">
-                        <label for="active" class="col-sm-2 form-control-label">Is Active</label>
-                        <div class="col-sm-9">
 
-                            <div class="row">
-                                <p>
-                                    <label class="md-switch">
-                                        <input type="checkbox" ng-model="vm.viewModel.isActive" />
-                                        <i class="indigo"></i>
-                                    </label>
-                                </p>
+                <div class="box-body">
+                    <div class="st-notice" ng-if="vm.copiedFrom">
+                        <i class="fa fa-clone"></i>
+                        <div>
+                            Copied from <strong>{{vm.copiedFrom}}</strong>. The copy is inactive until you set it to Active in the settings below.
+                        </div>
+                        <button type="button" class="st-notice-close" ng-click="vm.dismissCopiedNotice()" title="Dismiss">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="br-empty" ng-if="vm.loading">
+                        <i class="fa fa-spinner fa-spin"></i> Loading template…
+                    </div>
+
+                    <!-- Template settings -->
+                    <form name="vm.settingsForm" novalidate class="st-panel" ng-if="vm.settings && !vm.loading" ng-submit="vm.saveSettings()">
+                        <div class="st-panel-header">
+                            <div class="st-panel-title"><i class="fa fa-sliders"></i> Template settings</div>
+                            <span class="bp-dirty-hint st-dirty" ng-if="vm.isSettingsDirty() && !vm.settingsSaving">Unsaved changes</span>
+                        </div>
+                        <div class="st-panel-body">
+                            <div class="st-field-grid st-cols-settings">
+                                <div class="st-field" ng-class="{'has-danger': vm.settingsSubmitted && vm.settingsForm.scorecardName.$invalid}">
+                                    <label for="stName">Template name</label>
+                                    <input id="stName" name="scorecardName" type="text" maxlength="500" class="form-control input-sm"
+                                           ng-model="vm.settings.scorecardName" required />
+                                </div>
+                                <div class="st-field">
+                                    <label>Status</label>
+                                    <div class="btn-group st-segmented">
+                                        <button type="button" class="btn btn-sm"
+                                                ng-class="vm.settings.isActive ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setActive(true)">
+                                            <i class="fa fa-check-circle"></i> Active
+                                        </button>
+                                        <button type="button" class="btn btn-sm"
+                                                ng-class="!vm.settings.isActive ? 'btn-primary' : 'btn-default'"
+                                                ng-click="vm.setActive(false)">
+                                            <i class="fa fa-pause-circle"></i> Inactive
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="st-field">
+                                <label>Rating weights</label>
+                                <p class="st-help st-help-top">How much an Excellent, Adequate or Inadequate rating counts. At least one weight is required.</p>
+                            </div>
+                            <div class="st-field-grid st-cols-3">
+                                <div class="st-weight">
+                                    <div class="st-weight-label"><span class="st-eai is-e">E</span> Excellent</div>
+                                    <slider name="excellentWeight" ng-model="vm.settings.excellentWeight"
+                                            floor="0" ceiling="400" translate-fn="vm.percentageFormatting"></slider>
+                                </div>
+                                <div class="st-weight">
+                                    <div class="st-weight-label"><span class="st-eai is-a">A</span> Adequate</div>
+                                    <slider name="adequateWeight" ng-model="vm.settings.adequateWeight"
+                                            floor="0" ceiling="400" translate-fn="vm.percentageFormatting"></slider>
+                                </div>
+                                <div class="st-weight">
+                                    <div class="st-weight-label"><span class="st-eai is-i">I</span> Inadequate</div>
+                                    <slider name="inadequateWeight" ng-model="vm.settings.inadequateWeight"
+                                            floor="0" ceiling="400" translate-fn="vm.percentageFormatting"></slider>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-md-12 pull-right text-right">
-                            <button class="btn btn-outline b-primary text-primary" ui-sref="mainState.maintenance.scorecardTemplateMaintenance.grid">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
-                            </button>
-                            <button class="btn btn-fw primary" ng-click="vm.submitForm()">
-                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+                        <div class="st-panel-footer">
+                            <div class="st-error" ng-if="vm.settingsError">
+                                <i class="fa fa-exclamation-circle"></i> {{vm.settingsError}}
+                            </div>
+                            <div class="st-actions">
+                                <button type="button" class="btn btn-sm btn-default" ng-click="vm.revertSettings()"
+                                        ng-disabled="vm.settingsSaving || (!vm.isNew && !vm.isSettingsDirty())">
+                                    {{vm.isNew ? 'Cancel' : 'Revert'}}
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-primary"
+                                        ng-disabled="vm.settingsSaving || (!vm.isNew && !vm.isSettingsDirty())">
+                                    <i class="fa" ng-class="vm.settingsSaving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+                                    {{vm.settingsSaving ? 'Saving…' : (vm.isNew ? 'Create template' : 'Save settings')}}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Items -->
+                    <section class="st-panel" ng-if="!vm.isNew && vm.template">
+                        <div class="st-panel-header">
+                            <div class="st-panel-title">
+                                <i class="fa fa-list-ol"></i> Items
+                                <span class="br-filter-count" ng-class="{'is-zero': !vm.items.length}">{{vm.items.length}}</span>
+                            </div>
+                            <div class="st-alloc st-alloc-wide" ng-class="vm.weightState()">
+                                <div class="st-alloc-bar">
+                                    <span ng-style="{width: vm.weightPercent() + '%'}"></span>
+                                </div>
+                                <div class="st-alloc-label">
+                                    <i class="fa" ng-class="vm.weightState() === 'is-complete' ? 'fa-check' : 'fa-exclamation-triangle'"></i>
+                                    {{vm.totalWeight()}}% of 100% &middot; {{vm.weightSummary()}}
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary" ng-click="vm.addItem()"
+                                    ng-disabled="vm.editor.saving">
+                                <i class="fa fa-plus"></i> Add item
                             </button>
                         </div>
-                    </div>
 
-                </form>
-            </div>
-        </div>
+                        <div class="st-split">
+                            <!-- Item list -->
+                            <div class="st-item-list">
+                                <div class="br-empty" ng-if="vm.itemsLoading && !vm.items.length">
+                                    <i class="fa fa-spinner fa-spin"></i> Loading items…
+                                </div>
+                                <div class="st-item" ng-repeat="i in vm.items track by i.id"
+                                     role="button" tabindex="0"
+                                     ng-class="{'is-selected': vm.isSelected(i)}"
+                                     ng-click="vm.selectItem(i)"
+                                     ng-keydown="$event.keyCode === 13 && vm.selectItem(i)">
+                                    <span class="st-item-order">{{i.order}}</span>
+                                    <span class="st-item-main">
+                                        <span class="st-item-name">{{i.description}}</span>
+                                        <span class="st-scoring" ng-class="i.scorecardScoring == 1 ? 'is-manual' : 'is-eai'">
+                                            {{i.scorecardScoring == 1 ? 'Manual' : 'E, A, I'}}
+                                        </span>
+                                    </span>
+                                    <span class="st-item-weight">{{i.weight}}%</span>
+                                </div>
+                                <div class="st-item is-selected is-new" ng-if="vm.editor.isNew">
+                                    <span class="st-item-order">{{vm.editor.record.order || '–'}}</span>
+                                    <span class="st-item-main">
+                                        <span class="st-item-name">{{vm.editor.record.description || 'New item'}}</span>
+                                        <span class="st-scoring is-new">New</span>
+                                    </span>
+                                    <span class="st-item-weight">{{vm.editor.record.weight || 0}}%</span>
+                                </div>
+                                <div class="br-empty st-item-empty" ng-if="!vm.itemsLoading && !vm.items.length && !vm.editor.isNew">
+                                    <div>This template has no items yet.</div>
+                                    <a href="" ng-click="vm.addItem()">Add the first item</a>
+                                </div>
+                            </div>
 
-        <div class="container">
-            <div class="col-md-6 col-md-offset-3">
-                <div class="alert alert-danger" ng-if="vm.hasError">{{vm.errorMessage}}</div>
-                <div class="alert alert-success" ng-if="vm.saveSuccess">
-                    <strong>Success!</strong>
+                            <!-- Item editor -->
+                            <div class="st-item-editor">
+                                <div class="br-empty" ng-if="vm.editor.loading">
+                                    <i class="fa fa-spinner fa-spin"></i> Loading item…
+                                </div>
+                                <div class="br-empty st-editor-placeholder" ng-if="!vm.editor.loading && !vm.editor.record">
+                                    <i class="fa fa-hand-o-left"></i>
+                                    <div ng-if="vm.items.length">Select an item to edit it.</div>
+                                    <div ng-if="!vm.items.length">Add an item to start building this template.</div>
+                                </div>
+
+                                <form name="vm.itemForm" novalidate ng-if="vm.editor.record && !vm.editor.loading" ng-submit="vm.saveItem()">
+                                    <div ng-repeat="k in [vm.editor.key] track by k">
+                                        <div class="st-editor-header">
+                                            <div>
+                                                <div class="st-kicker">{{vm.editor.isNew ? 'New item' : 'Item'}}</div>
+                                                <div class="st-editor-title">{{vm.editor.record.description || 'Untitled item'}}</div>
+                                            </div>
+                                            <span class="bp-dirty-hint st-dirty" ng-if="vm.isItemDirty() && !vm.editor.saving">Unsaved changes</span>
+                                        </div>
+
+                                        <div class="st-field-grid st-cols-item">
+                                            <div class="st-field" ng-class="{'has-danger': vm.editor.submitted && !vm.editor.record.description}">
+                                                <label for="stItemDescription">Performance measure</label>
+                                                <input id="stItemDescription" type="text" class="form-control input-sm"
+                                                       ng-model="vm.editor.record.description" />
+                                            </div>
+                                            <div class="st-field" ng-class="{'has-danger': vm.editor.submitted && !vm.editor.record.order}">
+                                                <label for="stItemOrder">Order</label>
+                                                <input id="stItemOrder" type="text" class="form-control input-sm"
+                                                       ng-model="vm.editor.record.order" />
+                                            </div>
+                                        </div>
+
+                                        <div class="st-field">
+                                            <label>
+                                                Weight
+                                                <span class="st-label-note">up to {{vm.maxItemWeight()}}% available</span>
+                                            </label>
+                                            <slider name="weight" ng-model="vm.editor.record.weight"
+                                                    floor="0" ceiling="{{vm.maxItemWeight()}}"
+                                                    translate-fn="vm.percentageFormatting"></slider>
+                                        </div>
+
+                                        <div class="st-field">
+                                            <label>Definition</label>
+                                            <summernote config="vm.summernoteOptions" class="summernote" ng-model="vm.editor.record.definition"></summernote>
+                                        </div>
+
+                                        <div class="st-field">
+                                            <label>Scoring</label>
+                                            <div class="btn-group st-segmented">
+                                                <button type="button" class="btn btn-sm"
+                                                        ng-class="vm.editor.record.scorecardScoring != 1 ? 'btn-primary' : 'btn-default'"
+                                                        ng-click="vm.setScoring(0)">E, A, I rating</button>
+                                                <button type="button" class="btn btn-sm"
+                                                        ng-class="vm.editor.record.scorecardScoring == 1 ? 'btn-primary' : 'btn-default'"
+                                                        ng-click="vm.setScoring(1)">Manual score</button>
+                                            </div>
+                                        </div>
+
+                                        <div ng-if="vm.editor.record.scorecardScoring != 1">
+                                            <div class="st-field">
+                                                <label><span class="st-eai is-e">E</span> Excellent criteria</label>
+                                                <textarea class="form-control input-sm st-textarea" rows="3" ng-model="vm.editor.record.excellentDefinition"></textarea>
+                                            </div>
+                                            <div class="st-field">
+                                                <label><span class="st-eai is-a">A</span> Adequate criteria</label>
+                                                <textarea class="form-control input-sm st-textarea" rows="3" ng-model="vm.editor.record.adequateDefinition"></textarea>
+                                            </div>
+                                            <div class="st-field">
+                                                <label><span class="st-eai is-i">I</span> Inadequate criteria</label>
+                                                <textarea class="form-control input-sm st-textarea" rows="3" ng-model="vm.editor.record.inadequateDefinition"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div ng-if="vm.editor.record.scorecardScoring == 1">
+                                            <div class="st-field-grid st-cols-2">
+                                                <div class="st-field">
+                                                    <label for="stItemMin">Minimum score</label>
+                                                    <input id="stItemMin" type="number" class="form-control input-sm"
+                                                           placeholder="Any value" ng-model="vm.editor.record.minimum" />
+                                                </div>
+                                                <div class="st-field">
+                                                    <label for="stItemMax">Maximum score</label>
+                                                    <input id="stItemMax" type="number" class="form-control input-sm"
+                                                           placeholder="Any value" ng-model="vm.editor.record.maximum" />
+                                                </div>
+                                            </div>
+                                            <div class="st-field">
+                                                <label>Criteria</label>
+                                                <textarea class="form-control input-sm st-textarea" rows="3" ng-model="vm.editor.record.manualDefinition"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="st-editor-footer">
+                                            <div class="st-error" ng-if="vm.editor.error">
+                                                <i class="fa fa-exclamation-circle"></i> {{vm.editor.error}}
+                                            </div>
+                                            <div class="st-actions">
+                                                <button type="button" class="btn btn-sm st-action-btn is-danger st-actions-left"
+                                                        ng-if="!vm.editor.isNew" ng-click="vm.deleteItem()" ng-disabled="vm.editor.saving">
+                                                    <i class="fa fa-trash"></i> Delete item
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-default" ng-click="vm.cancelItem()"
+                                                        ng-disabled="vm.editor.saving || (!vm.editor.isNew && !vm.isItemDirty())">
+                                                    {{vm.editor.isNew ? 'Cancel' : 'Revert'}}
+                                                </button>
+                                                <button type="submit" class="btn btn-sm btn-primary"
+                                                        ng-disabled="vm.editor.saving || (!vm.editor.isNew && !vm.isItemDirty())">
+                                                    <i class="fa" ng-class="vm.editor.saving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+                                                    {{vm.editor.saving ? 'Saving…' : (vm.editor.isNew ? 'Add item' : 'Save item')}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Periods -->
+                    <section class="st-panel" ng-if="!vm.isNew && vm.template">
+                        <div class="st-panel-header">
+                            <div class="st-panel-title">
+                                <i class="fa fa-calendar"></i> Periods
+                                <span class="br-filter-count" ng-class="{'is-zero': !vm.periods.length}">{{vm.periods.length}}</span>
+                            </div>
+                            <a class="btn btn-sm st-action-btn"
+                               ui-sref="mainState.maintenance.scorecardTemplatePeriodMaintenance.grid({scorecardTemplateId: vm.templateId})">
+                                <i class="fa fa-external-link"></i> Manage periods
+                            </a>
+                        </div>
+                        <div class="st-panel-body st-periods">
+                            <div class="br-empty" ng-if="vm.periodsLoading">
+                                <i class="fa fa-spinner fa-spin"></i> Loading periods…
+                            </div>
+                            <div class="br-empty" ng-if="!vm.periodsLoading && !vm.periods.length">
+                                No review periods yet. Use Manage periods to add them.
+                            </div>
+                            <div class="st-period" ng-repeat="p in vm.periods track by p.id">
+                                <span class="st-period-year">{{p.reviewYear}}</span>
+                                <span class="st-period-name">{{p.description}}</span>
+                                <span class="st-period-range" ng-if="!p.isVariable">
+                                    {{p.startDate | date:'d MMM yyyy'}} – {{p.endDate | date:'d MMM yyyy'}}
+                                </span>
+                                <span class="st-period-range" ng-if="p.isVariable">
+                                    <span class="st-scoring is-manual">Variable</span>
+                                </span>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-
             </div>
         </div>
     </div>

@@ -20,10 +20,12 @@ class ScorecardGridController extends CHControllerBase {
     gridAdminScorecards: TcrGridModel;
     onDataLoadedGridAdminScorecards = (event) => { this.onLoadEventGridAdminScorecards(event); };
 
-    pscActive = "";
-    yscActive = "";
-    cscActive = "";
-    ascActive = "";
+    /** Which list is on screen: create, mine, team, or admin. */
+    view = "create";
+    createLoaded = false;
+    mineLoaded = false;
+    teamLoaded = false;
+    adminLoaded = false;
 
     reassignUsers = [];
 
@@ -59,15 +61,14 @@ class ScorecardGridController extends CHControllerBase {
         // Setup initial filter options
         self.setupFilters();
 
-        // Do security checks
         if (self.canCreateScorecards())
-            this.cscActive = "active";
+            self.view = "create";
         else if (self.isAllowed("PerformanceManagementViewMyScoreCards"))
-            self.pscActive = "active";
+            self.view = "mine";
         else if (self.canViewTeamScorecards())
-            self.yscActive = "active";
+            self.view = "team";
         else if (self.isAllowed("PerformanceManagementAdmin"))
-            self.ascActive = "active";
+            self.view = "admin";
 
         // Retrieve scorecard template period years
         this.ScorecardTemplateService.scorecardTemplatePeriodDropdownYear()
@@ -96,20 +97,78 @@ class ScorecardGridController extends CHControllerBase {
         self.getPeriods([self.filterModelPersonal.year], self.filterOptionsPersonal, self.filterModelPersonal, function () { });
         self.getPeriods([self.filterModelTeam.year], self.filterOptionsTeam, self.filterModelTeam, function () { });
 
-        if (self.isAdmin) {
-            self.getPeriods([self.filterModelAdmin.year], self.filterOptionsAdmin, self.filterModelAdmin, function () { });
+        self.bindFilters();
 
-            // Get users for reassigning
-            this.UserService.userDropdownList()
-                .then(
-                    result => {
-                        self.reassignUsers = result;
-                    },
-                    error => {
-                        self.handleError(error);
-                    });
-        }
+        // Privileges and the security list arrive after a refresh, so re-check
+        // until Admin can be decided. The other tabs call isAllowed from the view.
+        self.$scope.$watch(() => self.isAllowed("PerformanceManagementAdmin"), () => self.syncAccess());
     }
+
+    private adminStarted = false;
+
+    syncAccess = () => {
+        const admin = this.isAllowed("PerformanceManagementAdmin");
+        this.isAdmin = admin;
+        if (admin)
+            this.startAdmin();
+        this.ensureViewAllowed();
+    };
+
+    private startAdmin = () => {
+        if (this.adminStarted)
+            return;
+        this.adminStarted = true;
+        const self = this;
+
+        self.getPeriods([self.filterModelAdmin.year], self.filterOptionsAdmin, self.filterModelAdmin, () => {
+            if (self.pageGridAdminScorecards)
+                return;
+            self.pageGridAdminScorecards = new TcrGridServiceModule
+                .TcrGridService("employeename", self.ScorecardService.adminScorecardGrid, self.onDataLoadedGridAdminScorecards, model => {
+                    model.customSearchModel = self.filterModelAdmin;
+                }, null, self.$state);
+            self.pageGridAdminScorecards.loadGrid();
+        });
+
+        self.UserService.userDropdownList()
+            .then(
+                result => {
+                    self.reassignUsers = result;
+                },
+                error => {
+                    self.handleError(error);
+                });
+    };
+
+    private ensureViewAllowed = () => {
+        const user = this.SecurityService.getCurrentUserDetails();
+        if (!user || (!user.isSystemAdmin && !this.SecurityService.userHasPrivileges()))
+            return;
+
+        const any = this.canCreateScorecards()
+            || this.isAllowed("PerformanceManagementViewMyScoreCards")
+            || this.canViewTeamScorecards()
+            || this.isAllowed("PerformanceManagementAdmin");
+        if (!any)
+            return;
+
+        const currentOk =
+            (this.view === "create" && this.canCreateScorecards())
+            || (this.view === "mine" && this.isAllowed("PerformanceManagementViewMyScoreCards"))
+            || (this.view === "team" && this.canViewTeamScorecards())
+            || (this.view === "admin" && this.isAllowed("PerformanceManagementAdmin"));
+        if (currentOk)
+            return;
+
+        if (this.canCreateScorecards())
+            this.setView("create");
+        else if (this.isAllowed("PerformanceManagementViewMyScoreCards"))
+            this.setView("mine");
+        else if (this.canViewTeamScorecards())
+            this.setView("team");
+        else if (this.isAllowed("PerformanceManagementAdmin"))
+            this.setView("admin");
+    };
 
     setupFilters = () => {
         const self = this;
@@ -121,6 +180,7 @@ class ScorecardGridController extends CHControllerBase {
         self.filterOptions.period = {};
 
         self.filterModel = {};
+        self.filterModel.searchText = "";
         self.filterModel.employeeName = "";
         self.filterModel.scoreCardName = "";
         self.filterModel.evaluatorName = "";
@@ -138,6 +198,7 @@ class ScorecardGridController extends CHControllerBase {
         self.filterOptionsPersonal.period = {};
 
         self.filterModelPersonal = {};
+        self.filterModelPersonal.searchText = "";
         self.filterModelPersonal.employeeName = "";
         self.filterModelPersonal.scoreCardName = "";
         self.filterModelPersonal.evaluatorName = "";
@@ -155,6 +216,7 @@ class ScorecardGridController extends CHControllerBase {
         self.filterOptionsTeam.period = {};
 
         self.filterModelTeam = {};
+        self.filterModelTeam.searchText = "";
         self.filterModelTeam.employeeName = "";
         self.filterModelTeam.scoreCardName = "";
         self.filterModelTeam.evaluatorName = "";
@@ -172,6 +234,7 @@ class ScorecardGridController extends CHControllerBase {
         self.filterOptionsAdmin.period = {};
 
         self.filterModelAdmin = {};
+        self.filterModelAdmin.searchText = "";
         self.filterModelAdmin.employeeName = "";
         self.filterModelAdmin.scoreCardName = "";
         self.filterModelAdmin.evaluatorName = "";
@@ -238,20 +301,13 @@ class ScorecardGridController extends CHControllerBase {
                 model.customSearchModel = self.filterModelTeam;
             }, null, self.$state);
         self.pageGridTeamScorecards.loadGrid();
-
-        if (self.isAdmin) {
-            self.pageGridAdminScorecards = new TcrGridServiceModule
-                .TcrGridService("employeename", self.ScorecardService.adminScorecardGrid, self.onDataLoadedGridAdminScorecards, model => {                    
-                    model.customSearchModel = self.filterModelAdmin;
-                }, null, self.$state);
-            self.pageGridAdminScorecards.loadGrid();
-        }
     };
 
     //#endregion
 
     private onLoadEventGridScorecards(event: TcrGridModel): void {
         this.gridScorecards = event;
+        this.createLoaded = true;
         if (this.gridScorecards.totalItems > 0) {
             this.loadingIsDone = true;
         }
@@ -259,6 +315,7 @@ class ScorecardGridController extends CHControllerBase {
 
     private onLoadEventGridPersonalScorecards(event: TcrGridModel): void {
         this.gridPersonalScorecards = event;
+        this.mineLoaded = true;
         if (this.gridPersonalScorecards.totalItems > 0) {
             this.loadingIsDone = true;
         }
@@ -266,6 +323,7 @@ class ScorecardGridController extends CHControllerBase {
 
     private onLoadEventGridTeamScorecards(event: TcrGridModel): void {
         this.gridTeamScorecards = event;
+        this.teamLoaded = true;
         if (this.gridTeamScorecards.totalItems > 0) {
             this.loadingIsDone = true;
         }
@@ -273,6 +331,7 @@ class ScorecardGridController extends CHControllerBase {
 
     private onLoadEventGridAdminScorecards(event: TcrGridModel): void {
         this.gridAdminScorecards = event;
+        this.adminLoaded = true;
         if (this.gridAdminScorecards.totalItems > 0) {
             this.loadingIsDone = true;
         }
@@ -297,31 +356,174 @@ class ScorecardGridController extends CHControllerBase {
     };
 
     searchValueChange = () => {
-        const self = this;
-        self.filterModel.employeeName = self.gridScorecards.searchFor;
-        self.filterModel.scoreCardName = self.gridScorecards.searchFor;
-        self.filterModel.evaluatorName = self.gridScorecards.searchFor;
+        this.applySearchText(this.filterModel, this.gridScorecards);
     };
 
     searchValuePersonalChange = () => {
-        const self = this;
-        self.filterModelPersonal.employeeName = self.gridPersonalScorecards.searchFor;
-        self.filterModelPersonal.scoreCardName = self.gridPersonalScorecards.searchFor;
-        self.filterModelPersonal.evaluatorName = self.gridPersonalScorecards.searchFor;
+        this.applySearchText(this.filterModelPersonal, this.gridPersonalScorecards);
     };
 
     searchValueTeamChange = () => {
-        const self = this;
-        self.filterModelTeam.employeeName = self.gridTeamScorecards.searchFor;
-        self.filterModelTeam.scoreCardName = self.gridTeamScorecards.searchFor;
-        self.filterModelTeam.evaluatorName = self.gridTeamScorecards.searchFor;
+        this.applySearchText(this.filterModelTeam, this.gridTeamScorecards);
     };
 
     searchValueAdminChange = () => {
-        const self = this;
-        self.filterModelAdmin.employeeName = self.gridAdminScorecards.searchFor;
-        self.filterModelAdmin.scoreCardName = self.gridAdminScorecards.searchFor;
-        self.filterModelAdmin.evaluatorName = self.gridAdminScorecards.searchFor;
+        this.applySearchText(this.filterModelAdmin, this.gridAdminScorecards);
+    };
+
+    private applySearchText = (model: any, grid: TcrGridModel) => {
+        const text = model.searchText || "";
+        model.employeeName = text;
+        model.scoreCardName = text;
+        model.evaluatorName = text;
+        if (grid)
+            grid.searchFor = text;
+    };
+
+    searchActive = () => {
+        if (this.view === "mine") {
+            this.searchValuePersonalChange();
+            if (this.pageGridPersonalScorecards)
+                this.pageGridPersonalScorecards.search();
+            return;
+        }
+        if (this.view === "team") {
+            this.searchValueTeamChange();
+            if (this.pageGridTeamScorecards)
+                this.pageGridTeamScorecards.search();
+            return;
+        }
+        if (this.view === "admin") {
+            this.searchValueAdminChange();
+            if (this.pageGridAdminScorecards)
+                this.pageGridAdminScorecards.search();
+            return;
+        }
+        this.searchValueChange();
+        if (this.pageGridScorecards)
+            this.pageGridScorecards.search();
+    };
+
+    /** Bindings for the list that is on screen. Rebuilt when the view changes. */
+    filters: any;
+
+    setView = (view: string) => {
+        this.view = view;
+        this.bindFilters();
+    };
+
+    private bindFilters = () => {
+        if (this.view === "mine")
+            this.filters = {
+                model: this.filterModelPersonal,
+                options: this.filterOptionsPersonal,
+                showSubmitted: false,
+                onSearch: this.searchValuePersonalChange,
+                onLock: this.lockedSubmittedPersonalChange,
+                onYear: this.yearChangePersonal,
+                onPeriod: this.periodChangePersonal
+            };
+        else if (this.view === "team")
+            this.filters = {
+                model: this.filterModelTeam,
+                options: this.filterOptionsTeam,
+                showSubmitted: false,
+                onSearch: this.searchValueTeamChange,
+                onLock: this.lockedSubmittedTeamChange,
+                onYear: this.yearChangeTeam,
+                onPeriod: this.periodChangeTeam
+            };
+        else if (this.view === "admin")
+            this.filters = {
+                model: this.filterModelAdmin,
+                options: this.filterOptionsAdmin,
+                showSubmitted: true,
+                onSearch: this.searchValueAdminChange,
+                onLock: this.lockedSubmittedAdminChange,
+                onYear: this.yearChangeAdmin,
+                onPeriod: this.periodChangeAdmin
+            };
+        else
+            this.filters = {
+                model: this.filterModel,
+                options: this.filterOptions,
+                showSubmitted: true,
+                onSearch: this.searchValueChange,
+                onLock: this.lockedSubmittedChange,
+                onYear: this.yearChange,
+                onPeriod: this.periodChange
+            };
+    };
+
+    activeGrid = (): TcrGridModel => {
+        if (this.view === "mine")
+            return this.gridPersonalScorecards;
+        if (this.view === "team")
+            return this.gridTeamScorecards;
+        if (this.view === "admin")
+            return this.gridAdminScorecards;
+        return this.gridScorecards;
+    };
+
+    isViewLoaded = (): boolean => {
+        if (this.view === "mine")
+            return this.mineLoaded;
+        if (this.view === "team")
+            return this.teamLoaded;
+        if (this.view === "admin")
+            return this.adminLoaded;
+        return this.createLoaded;
+    };
+
+    sortKey = (): string => {
+        const grid = this.activeGrid();
+        return grid && grid.sortKeyOrder ? grid.sortKeyOrder.key : "";
+    };
+
+    sortOrder = (): string => {
+        const grid = this.activeGrid();
+        return grid && grid.sortKeyOrder ? grid.sortKeyOrder.order : "";
+    };
+
+    toggleSort = (key: string) => {
+        const page = this.view === "mine" ? this.pageGridPersonalScorecards
+            : this.view === "team" ? this.pageGridTeamScorecards
+            : this.view === "admin" ? this.pageGridAdminScorecards
+            : this.pageGridScorecards;
+        if (page)
+            page.sort(key);
+    };
+
+    currentSearch = (): string => {
+        if (this.view === "mine")
+            return this.filterModelPersonal.searchText;
+        if (this.view === "team")
+            return this.filterModelTeam.searchText;
+        if (this.view === "admin")
+            return this.filterModelAdmin.searchText;
+        return this.filterModel.searchText;
+    };
+
+    setLockFilter = (model: any, locked: boolean, reload: () => void) => {
+        if (model.locked === locked)
+            return;
+        model.locked = locked;
+        reload();
+    };
+
+    setSubmittedFilter = (model: any, submitted: boolean, reload: () => void) => {
+        if (model.submitted === submitted)
+            return;
+        model.submitted = submitted;
+        reload();
+    };
+
+    openScorecard = (record) => {
+        const readOnly = this.view === "team" ? true : !!record.locked;
+        this.$state.go("mainState.scorecard.submitScorecard", {
+            id: record.scorecardId,
+            readOnly: readOnly ? "true" : "false"
+        });
     };
 
     lockedSubmittedChange = () => {

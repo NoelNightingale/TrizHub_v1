@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security;
 using System.Web.Http;
+using TCR.Lib.BL;
 using TRiZHub.BL.Context;
 using TRiZHub.BL.Provider.ClientEntityData;
 using TRiZHub.BL.Provider.Security;
@@ -55,7 +56,7 @@ namespace TRiZHub.Controllers
         {
             var begin = SetupGridParams(model);
 
-            var filteredQuery = ClientProvider.ClientEntityList().Where(c => !c.IsDeleted).Select(a => new ClientGridModel
+            var filteredQuery = ClientProvider.ClientsForMaintenance().Select(a => new ClientGridModel
             {
                 Id = a.Id,
                 DateCreated = a.DateCreated,
@@ -112,7 +113,10 @@ namespace TRiZHub.Controllers
         {
             try
             {
-                var record = ClientProvider.ClientEntityList().SingleOrDefault(a => a.Id == id.Value);
+                var record = ClientProvider.ClientsForMaintenance().SingleOrDefault(a => a.Id == id.Value);
+                if (record == null)
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden,
+                        "You are not allowed to maintain this client."));
 
                 var model = new ClientGridModel
                 {
@@ -127,6 +131,10 @@ namespace TRiZHub.Controllers
             catch (ClientException e)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
             }
         }
 
@@ -143,6 +151,10 @@ namespace TRiZHub.Controllers
             catch (ClientException e)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
             }
         }
 
@@ -175,6 +187,10 @@ namespace TRiZHub.Controllers
             catch (ClientException e)
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message));
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
             }
         }
 
@@ -213,33 +229,51 @@ namespace TRiZHub.Controllers
         [HttpGet]
         public List<UserDropdownModel> GetClientReporters(Guid id)
         {
-            var users = ClientProvider.GetClientReporters(id)
-                .Select(a =>
-                    new UserDropdownModel
-                    {
-                        Id = a.Id,
-                        Firstname = a.FirstName,
-                        Surname = a.Surname,
-                        AccountName = a.AccountName
-                    }).OrderBy(a => a.Firstname).ThenBy(a => a.Surname)
-                .ToList();
-
-            return users;            
+            try
+            {
+                return ClientProvider.GetClientReporters(id)
+                    .Select(a =>
+                        new UserDropdownModel
+                        {
+                            Id = a.Id,
+                            Firstname = a.FirstName,
+                            Surname = a.Surname,
+                            AccountName = a.AccountName
+                        }).OrderBy(a => a.Firstname).ThenBy(a => a.Surname)
+                    .ToList();
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
+            }
         }
 
         [HttpGet]
         public List<UserDropdownModel> AddClientReporter(Guid clientId, Guid userId)
         {
-            ClientProvider.AddClientReporter(clientId, userId);
-
-            return GetClientReporters(clientId);
+            try
+            {
+                ClientProvider.AddClientReporter(clientId, userId);
+                return GetClientReporters(clientId);
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
+            }
         }
 
         [HttpGet]
         public List<UserDropdownModel> RemoveClientReporter(Guid clientId, Guid userId)
         {
-            ClientProvider.RemoveClientReporter(clientId, userId);
-            return GetClientReporters(clientId);
+            try
+            {
+                ClientProvider.RemoveClientReporter(clientId, userId);
+                return GetClientReporters(clientId);
+            }
+            catch (GenericSecurityException e)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.Forbidden, e.Message));
+            }
         }
     }
 }

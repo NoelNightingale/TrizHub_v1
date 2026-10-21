@@ -15,5 +15,7 @@ namespace TRiZHub.Models.ScorecardTemplateModels
         public string Description { get; set; }
 
         public decimal Weight { get; set; }
+
+        public int ScorecardScoring { get; set; }
     }
 }

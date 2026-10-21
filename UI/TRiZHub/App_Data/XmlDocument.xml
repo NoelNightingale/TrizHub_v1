@@ -105,6 +105,12 @@
         <member name="P:TRiZHub.Models.WorkTeamModels.WorkTeamEditModel.Permissions">
             <summary>Output only: what the current user may do on this team.</summary>
         </member>
+        <member name="P:TRiZHub.Models.WorkTeamModels.WorkTeamMemberPrivilegeModel.RoleDefault">
+            <summary>What this role gets when the membership has no override.</summary>
+        </member>
+        <member name="P:TRiZHub.Models.WorkTeamModels.WorkTeamMemberPrivilegeModel.Override">
+            <summary>Null means use the role default.</summary>
+        </member>
         <member name="M:TRiZHub.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
             <summary>
             Generates an URI-friendly ID for the <see cref="T:System.Web.Http.Description.ApiDescription"/>. E.g. "Get-Values-id_name" instead of "GetValues/{id}?name={name}"
@@ -764,6 +770,11 @@
             Delete Scorecard Template
             </summary>
         </member>
+        <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplateDuplicate(TRiZHub.Models.ScorecardTemplateModels.ScorecardTemplateDuplicateModel)">
+            <summary>
+            Copy a Scorecard Template and all of its items to a new, inactive template
+            </summary>
+        </member>
         <member name="M:TRiZHub.Controllers.ScorecardController.ScorecardTemplatePeriodGrid(TRiZHub.Models.IdGridModel)">
             <summary>
             Retrieve list of Scorecard Template periods based on filter and sort input values
@@ -958,6 +969,9 @@
             <summary>
             Memberships of a team; ended memberships only when requested
             </summary>
+        </member>
+        <member name="M:TRiZHub.Controllers.WorkTeamController.RolePrivilegeDefaults">
+            <summary>Global role defaults. There is no screen that edits these.</summary>
         </member>
         <member name="M:TRiZHub.Controllers.WorkTeamController.SaveWorkTeamMember(TRiZHub.Models.WorkTeamModels.WorkTeamMemberModel)">
             <summary>

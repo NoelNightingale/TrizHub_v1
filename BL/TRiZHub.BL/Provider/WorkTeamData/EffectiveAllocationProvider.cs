@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Context;
+using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Entities.WorkTeamData;
 using TRiZHub.BL.Provider.Security;
 
@@ -59,11 +60,11 @@ namespace TRiZHub.BL.Provider.WorkTeamData
                     result[row.UserAccountId].DirectProjectIds.Add(row.ProjectId.Value);
             }
 
-            var memberships = DataContext.WorkTeamMemberSet
+            var memberships = Capturing(DataContext.WorkTeamMemberSet
                 .Where(m => ids.Contains(m.UserAccountId)
                             && m.WorkTeam.IsActive
                             && m.StartDate <= toDay
-                            && (m.EndDate == null || m.EndDate >= fromDay))
+                            && (m.EndDate == null || m.EndDate >= fromDay)))
                 .Select(m => new { m.UserAccountId, m.WorkTeamId, m.WorkTeam.Name, m.StartDate, m.EndDate })
                 .ToList();
             if (memberships.Count == 0)
@@ -119,10 +120,18 @@ namespace TRiZHub.BL.Provider.WorkTeamData
         {
             var fromDay = from.Date;
             var toDay = to.Date;
-            return DataContext.WorkTeamMemberSet
+            return Capturing(DataContext.WorkTeamMemberSet
                 .Where(m => m.WorkTeam.IsActive
                             && m.StartDate <= toDay
-                            && (m.EndDate == null || m.EndDate >= fromDay));
+                            && (m.EndDate == null || m.EndDate >= fromDay)));
+        }
+
+        /// <summary>Team allocations count only for memberships that may capture time.</summary>
+        private IQueryable<WorkTeamMember> Capturing(IQueryable<WorkTeamMember> members)
+        {
+            return WorkTeamAccessRules.WithPrivilege(members,
+                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet,
+                WorkTeamPrivilege.CaptureTime);
         }
 
         public IQueryable<Guid> TeamUserIdsForClients(IEnumerable<Guid> clientIds, DateTime from, DateTime to)

@@ -24,6 +24,12 @@ namespace TRiZHub.Models.ScorecardTemplateModels
 
         public decimal TotalAvailableWeight { get; set; }
 
+        public int ItemCount { get; set; }
 
+        public decimal TotalWeight { get; set; }
+
+        public int PeriodCount { get; set; }
+
+        public int ScorecardCount { get; set; }
     }
 }

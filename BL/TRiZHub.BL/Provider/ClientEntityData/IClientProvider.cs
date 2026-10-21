@@ -14,6 +14,8 @@ namespace TRiZHub.BL.Provider.ClientEntityData
     public interface IClientProvider : ITRiZHubProvider
     {
         IQueryable<ClientEntity> ClientEntityList();
+
+        IQueryable<ClientEntity> ClientsForMaintenance();
         IQueryable<ClientEntity> ClientEntityListForClientReporter();
         IQueryable<UserIdentityClient> GetUserAllocatedClients(Guid userID);
         void SaveUserAlllocation(Guid userId, List<UserIdentityClient> clients);

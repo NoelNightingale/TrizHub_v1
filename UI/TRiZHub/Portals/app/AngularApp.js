@@ -1046,6 +1046,7 @@ angular.module("AngularApp",
                     .state("mainState.maintenance.scorecardTemplateMaintenance.detail",
                         {
                             url: "/detail/:id",
+                            params: { copiedFrom: null },
                             views: {
                                 'detail': {
                                     templateUrl: "Portals/app/states/mainState/maintenanceState/scorecardTemplateMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,

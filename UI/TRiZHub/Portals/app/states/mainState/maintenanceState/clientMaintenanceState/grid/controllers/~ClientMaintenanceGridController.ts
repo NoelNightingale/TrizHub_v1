@@ -16,7 +16,7 @@ class ClientMaintenanceGridController extends CHControllerBase {
         private $state: ng.ui.IStateService,
         private ClientService: ClientServiceModule.ClientService,
         private Popups: any,
-        private tcrGrid: TcrGridServiceModule.TcrGridService) {
+        private SecurityService: SecurityServiceModule.SecurityService) {
         super($scope, Popups, $state);
         const self = this;
         this.pageGrid = new TcrGridServiceModule
@@ -32,6 +32,10 @@ class ClientMaintenanceGridController extends CHControllerBase {
             this.loadingIsDone = true;
         }
     }
+
+    canCreateClient = (): boolean => {
+        return this.SecurityService.isAllowed("ClientMaintenance");
+    };
 
     newClient = () => {
         this.$state.transitionTo("mainState.maintenance.clientMaintenance.detail", { "id": "new" });
@@ -74,5 +78,6 @@ angular.module("AngularApp")
         "$state",
         "ClientService",
         "Popups",
+        "SecurityService",
         ClientMaintenanceGridController
     ]);

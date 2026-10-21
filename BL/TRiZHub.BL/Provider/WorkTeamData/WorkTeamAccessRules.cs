@@ -2,7 +2,6 @@
 
 using System;
 using System.Linq;
-using System.Linq.Expressions;
 using TRiZHub.BL.Entities.Types;
 using TRiZHub.BL.Entities.WorkTeamData;
 
@@ -13,78 +12,92 @@ namespace TRiZHub.BL.Provider.WorkTeamData
     /// <summary>
     /// Team authorization rules expressed as composable queries, so the same logic runs against
     /// EF (SQL) and against in-memory lists in unit tests.
+    /// A privilege is on when the membership has an override row that grants it, or when it has no
+    /// override and the role default grants it.
     /// </summary>
     public static class WorkTeamAccessRules
     {
-        public static Expression<Func<WorkTeamMember, bool>> GrantsCapability(WorkTeamCapability cap)
+        public static WorkTeamPrivilege PrivilegeFor(WorkTeamCapability cap)
         {
             switch (cap)
             {
                 case WorkTeamCapability.Timesheets:
-                    return m => (m.Role == WorkTeamRoleType.Manager || m.Role == WorkTeamRoleType.Lead)
-                                && m.WorkTeam.AllowTeamTimesheets;
+                    return WorkTeamPrivilege.TeamTimesheets;
                 case WorkTeamCapability.Scorecards:
-                    return m => (m.Role == WorkTeamRoleType.Manager || m.Role == WorkTeamRoleType.Lead)
-                                && m.WorkTeam.AllowTeamScorecards;
-                case WorkTeamCapability.TeamAllocations:
-                    return m => m.Role == WorkTeamRoleType.Manager
-                                || (m.Role == WorkTeamRoleType.Lead && m.WorkTeam.LeadsManageAllocations);
+                    return WorkTeamPrivilege.TeamScorecards;
                 case WorkTeamCapability.Rates:
-                    return m => m.Role == WorkTeamRoleType.Manager
-                                || (m.Role == WorkTeamRoleType.Lead && m.WorkTeam.LeadsManageRates);
+                    return WorkTeamPrivilege.ManageRates;
+                case WorkTeamCapability.TeamAllocations:
                 case WorkTeamCapability.ManageTeam:
-                    return m => m.Role == WorkTeamRoleType.Manager;
+                    return WorkTeamPrivilege.ManageMembers;
                 default:
-                    return m => false;
+                    throw new ArgumentOutOfRangeException("cap");
             }
+        }
+
+        /// <summary>Memberships whose effective <paramref name="privilege"/> is granted.</summary>
+        public static IQueryable<WorkTeamMember> WithPrivilege(IQueryable<WorkTeamMember> members,
+            IQueryable<WorkTeamRolePrivilege> defaults, IQueryable<WorkTeamMemberPrivilege> overrides,
+            WorkTeamPrivilege privilege)
+        {
+            return members.Where(m =>
+                overrides.Any(o => o.WorkTeamMemberId == m.Id && o.Privilege == privilege && o.IsGranted)
+                || (!overrides.Any(o => o.WorkTeamMemberId == m.Id && o.Privilege == privilege)
+                    && defaults.Any(d => d.Role == m.Role && d.Privilege == privilege && d.IsGranted)));
         }
 
         /// <summary>The actor's role rows (in active teams, current on <paramref name="today"/>) that grant <paramref name="cap"/>.</summary>
         public static IQueryable<WorkTeamMember> QualifyingActorRows(IQueryable<WorkTeamMember> members,
+            IQueryable<WorkTeamRolePrivilege> defaults, IQueryable<WorkTeamMemberPrivilege> overrides,
             Guid actorId, WorkTeamCapability cap, DateTime today)
         {
             var day = today.Date;
-            return members
-                .Where(m => m.UserAccountId == actorId
-                            && m.WorkTeam.IsActive
-                            && m.StartDate <= day
-                            && (m.EndDate == null || m.EndDate >= day))
-                .Where(GrantsCapability(cap));
+            var current = members.Where(m => m.UserAccountId == actorId
+                                             && m.WorkTeam.IsActive
+                                             && m.StartDate <= day
+                                             && (m.EndDate == null || m.EndDate >= day));
+            return WithPrivilege(current, defaults, overrides, PrivilegeFor(cap));
         }
 
         /// <summary>
         /// Role rows of people the actor can reach for <paramref name="cap"/> whose own period overlaps
-        /// [<paramref name="from"/>, <paramref name="to"/>]. Managers reach Members and Leads, Leads reach
-        /// Members, and nobody reaches themselves.
+        /// [<paramref name="from"/>, <paramref name="to"/>]. A Manager reaches Members and Leads. A Lead or a
+        /// Member who holds the privilege reaches Members. Nobody reaches themselves.
         /// </summary>
         public static IQueryable<WorkTeamMember> ReachableRows(IQueryable<WorkTeamMember> members,
+            IQueryable<WorkTeamRolePrivilege> defaults, IQueryable<WorkTeamMemberPrivilege> overrides,
             Guid actorId, WorkTeamCapability cap, DateTime today, DateTime from, DateTime to)
         {
             var fromDay = from.Date;
             var toDay = to.Date;
-            var actorRows = QualifyingActorRows(members, actorId, cap, today);
+            var actorRows = QualifyingActorRows(members, defaults, overrides, actorId, cap, today);
 
             return from a in actorRows
                    join t in members on a.WorkTeamId equals t.WorkTeamId
                    where t.UserAccountId != actorId
-                         && (t.Role == WorkTeamRoleType.Member
-                             || (a.Role == WorkTeamRoleType.Manager && t.Role == WorkTeamRoleType.Lead))
+                         && ((a.Role == WorkTeamRoleType.Manager
+                              && (t.Role == WorkTeamRoleType.Member || t.Role == WorkTeamRoleType.Lead))
+                             || (a.Role != WorkTeamRoleType.Manager && t.Role == WorkTeamRoleType.Member))
                          && t.StartDate <= toDay
                          && (t.EndDate == null || t.EndDate >= fromDay)
                    select t;
         }
 
         public static IQueryable<Guid> ReachableUserIds(IQueryable<WorkTeamMember> members,
+            IQueryable<WorkTeamRolePrivilege> defaults, IQueryable<WorkTeamMemberPrivilege> overrides,
             Guid actorId, WorkTeamCapability cap, DateTime today, DateTime from, DateTime to)
         {
-            return ReachableRows(members, actorId, cap, today, from, to).Select(t => t.UserAccountId).Distinct();
+            return ReachableRows(members, defaults, overrides, actorId, cap, today, from, to)
+                .Select(t => t.UserAccountId)
+                .Distinct();
         }
 
         /// <summary>Teams through which the actor reaches <paramref name="targetUserId"/> for <paramref name="cap"/>.</summary>
         public static IQueryable<Guid> ReachingTeamIds(IQueryable<WorkTeamMember> members,
+            IQueryable<WorkTeamRolePrivilege> defaults, IQueryable<WorkTeamMemberPrivilege> overrides,
             Guid actorId, Guid targetUserId, WorkTeamCapability cap, DateTime today, DateTime from, DateTime to)
         {
-            return ReachableRows(members, actorId, cap, today, from, to)
+            return ReachableRows(members, defaults, overrides, actorId, cap, today, from, to)
                 .Where(t => t.UserAccountId == targetUserId)
                 .Select(t => t.WorkTeamId)
                 .Distinct();

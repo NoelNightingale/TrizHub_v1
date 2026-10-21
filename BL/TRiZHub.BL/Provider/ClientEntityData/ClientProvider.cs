@@ -13,6 +13,8 @@ using TRiZHub.BL.Entities.UserIdentityClient;
 
 
 using System.Data.Entity;
+using TCR.Lib.BL;
+using TRiZHub.BL.Provider.WorkTeamData;
 
 #endregion
 
@@ -53,13 +55,42 @@ namespace TRiZHub.BL.Provider.ClientEntityData
 
         public ClientEntity GetClientEntity(Guid id)
         {
-            AuthenticateList(getTokens);
+            EnsureCanMaintainClient(id);
             return DataContext.ClientEntitySet.FirstOrDefault(a => a.Id == id);
+        }
+
+        /// <summary>
+        /// Clients the current user may maintain: every client for ClientMaintenance, otherwise only
+        /// whole-client allocations of teams where they currently have Maintain client.
+        /// </summary>
+        public IQueryable<ClientEntity> ClientsForMaintenance()
+        {
+            var query = ClientEntityList().Where(c => !c.IsDeleted);
+            if (UserIsAllowed(PrivilegeType.ClientMaintenance))
+                return query;
+            if (CurrentUser == null)
+                return query.Where(c => false);
+
+            var ids = new WorkTeamAccessProvider(DataContext, CurrentUser).MaintainedClientIds(CurrentUser.Id);
+            return query.Where(c => ids.Contains(c.Id));
+        }
+
+        private void EnsureCanMaintainClient(Guid? clientId)
+        {
+            if (UserIsAllowed(PrivilegeType.ClientMaintenance))
+                return;
+            if (CurrentUser != null && clientId.HasValue && clientId.Value != Guid.Empty
+                && new WorkTeamAccessProvider(DataContext, CurrentUser).CanMaintainClient(CurrentUser.Id, clientId.Value))
+                return;
+            throw new GenericSecurityException("You are not allowed to maintain this client.");
         }
 
         public ClientEntity SaveClientEntity(Guid? id, string customerName, bool isActive)
         {
-            Authenticate(PrivilegeType.ClientMaintenance);
+            if (!id.HasValue || id.Value == Guid.Empty)
+                Authenticate(PrivilegeType.ClientMaintenance);
+            else
+                EnsureCanMaintainClient(id);
 
             var existing = DataContext.ClientEntitySet.FirstOrDefault(a => a.EntityName == customerName && a.Id != id);
             if (existing != null)
@@ -91,13 +122,13 @@ namespace TRiZHub.BL.Provider.ClientEntityData
 
         public IQueryable<UserIdentity> GetClientReporters(Guid id)
         {
-            AuthenticateList(getTokens);
+            EnsureCanMaintainClient(id);
             return DataContext.ClientReporterSet.Where(u => u.ClientId == id).Select(a => a.UserIdentity);
         }
 
         public void AddClientReporter(Guid clientId, Guid userId)
         {
-            Authenticate(PrivilegeType.ClientMaintenance);
+            EnsureCanMaintainClient(clientId);
             var clientReporter = DataContext.ClientReporterSet
                 .Where(c => c.ClientId == clientId)
                 .Where(c => c.UserAccountId == userId)
@@ -117,7 +148,7 @@ namespace TRiZHub.BL.Provider.ClientEntityData
 
         public void RemoveClientReporter(Guid clientId, Guid userId)
         {
-            Authenticate(PrivilegeType.ClientMaintenance);
+            EnsureCanMaintainClient(clientId);
             var clientReporter = DataContext.ClientReporterSet
                 .Where(c => c.ClientId == clientId)
                 .Where(c => c.UserAccountId == userId)
@@ -132,7 +163,7 @@ namespace TRiZHub.BL.Provider.ClientEntityData
 
         public int DeleteClient(Guid id)
         {
-            Authenticate(PrivilegeType.ClientMaintenance);
+            EnsureCanMaintainClient(id);
 
             // Check if the client is associated with a Project
             var projectCount = DataContext.ProjectSet.Count(p => p.ClientId == id);

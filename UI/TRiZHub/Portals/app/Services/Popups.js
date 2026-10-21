@@ -56,8 +56,10 @@
                     return deferred.promise;
                 };
                 // options: { title, message, confirmText, cancelText, tone: "primary" | "warning" | "success" | "danger",
-                //            icon (font-awesome class), detailLabel, details: string[], note }
+                //            icon (font-awesome class), detailLabel, details: string[], note,
+                //            input: { label, value, placeholder, required, maxLength } }
                 // Resolves true on confirm and false on cancel, Esc or backdrop click.
+                // With input, confirm resolves the trimmed text instead of true.
                 const _actionDialog = function ($scope, options) {
                     const opts = options || {};
                     const deferred = $q.defer();
@@ -73,7 +75,16 @@
                         icon: opts.icon || "fa-question",
                         detailLabel: opts.detailLabel || "",
                         details: opts.details || [],
-                        note: opts.note || ""
+                        note: opts.note || "",
+                        input: opts.input
+                            ? {
+                                label: opts.input.label || "",
+                                value: opts.input.value || "",
+                                placeholder: opts.input.placeholder || "",
+                                required: opts.input.required !== false,
+                                maxLength: opts.input.maxLength || null
+                            }
+                            : null
                     };
 
                     const modalInstance = $uibModal.open({
@@ -84,8 +95,16 @@
                         backdropClass: "tc-action-backdrop"
                     });
 
+                    dialogScope.dialog.canConfirm = function () {
+                        const input = dialogScope.dialog.input;
+                        return !input || !input.required || !!(input.value || "").trim();
+                    };
                     dialogScope.dialog.confirm = function () {
-                        modalInstance.close(true);
+                        if (!dialogScope.dialog.canConfirm()) {
+                            return;
+                        }
+                        const input = dialogScope.dialog.input;
+                        modalInstance.close(input ? { value: (input.value || "").trim() } : true);
                     };
                     dialogScope.dialog.cancel = function () {
                         modalInstance.close(false);
@@ -93,6 +112,10 @@
 
                     modalInstance.result.then(
                         function (result) {
+                            if (result && typeof result === "object") {
+                                deferred.resolve(result.value);
+                                return;
+                            }
                             deferred.resolve(result === true);
                         },
                         function () {

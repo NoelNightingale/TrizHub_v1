@@ -13,6 +13,7 @@ class WorkTeamMaintenanceDetailController extends CHControllerBase {
     members: any;
     includeEnded = false;
     memberEdit: any;
+    roleDefaults: any[] = [];
     treeData: any;
     includeInactive = false;
     memberRates: any;
@@ -100,8 +101,12 @@ class WorkTeamMaintenanceDetailController extends CHControllerBase {
 
     selectTab = (tab: string): void => {
         this.tab = tab;
-        if (tab === "people" && !this.members)
-            this.loadMembers();
+        if (tab === "people") {
+            if (!this.roleDefaults.length)
+                this.loadRoleDefaults();
+            if (!this.members)
+                this.loadMembers();
+        }
         if (tab === "allocations" && !this.treeData)
             this.loadTree();
     };
@@ -163,27 +168,85 @@ class WorkTeamMaintenanceDetailController extends CHControllerBase {
     };
 
     canEditMember = (member: any): boolean => {
-        if (!this.permissions)
+        const p = this.permissions;
+        if (!p)
             return false;
-        return member.role === 0 ? this.permissions.canManageManagers : this.permissions.canManagePeople;
+        if (member.role === 0)
+            return p.canManageManagers;
+        if (!p.canManagePeople)
+            return false;
+        return member.role === 2 || p.isAdmin || p.isManager;
+    };
+
+    loadRoleDefaults = (): void => {
+        const self = this;
+        self.WorkTeamService.rolePrivilegeDefaults()
+            .then(
+                result => {
+                    self.roleDefaults = result || [];
+                    if (self.memberEdit)
+                        self.refreshPrivilegeDefaults();
+                },
+                error => {
+                    self.handleError(error);
+                });
+    };
+
+    privilegeRows = (role: number, existing: any[]): any[] => {
+        const names = [
+            { privilege: 0, name: "Capture time" },
+            { privilege: 1, name: "View/Create my team's timesheets" },
+            { privilege: 2, name: "View/Create my team's scorecards" },
+            { privilege: 3, name: "Maintain client" },
+            { privilege: 4, name: "Manage team rates" },
+            { privilege: 5, name: "Manage team members" }
+        ];
+        return names.map(item => {
+            const roleDefault = (this.roleDefaults || []).filter(d => d.role === role && d.privilege === item.privilege)[0];
+            const current = (existing || []).filter(row => row.privilege === item.privilege)[0];
+            let choice = "default";
+            if (current && current.override === true)
+                choice = "allow";
+            else if (current && current.override === false)
+                choice = "deny";
+            else if (current && current.choice)
+                choice = current.choice;
+            return {
+                privilege: item.privilege,
+                name: item.name,
+                roleDefault: !!(roleDefault && roleDefault.isGranted),
+                choice: choice
+            };
+        });
+    };
+
+    refreshPrivilegeDefaults = (): void => {
+        if (!this.memberEdit)
+            return;
+        this.memberEdit.privileges = this.privilegeRows(this.memberEdit.role, this.memberEdit.privileges);
     };
 
     newMember = (): void => {
         const roles = this.editableRoles();
+        const role = roles.length ? roles[roles.length - 1].id : 2;
         this.memberEdit = {
             id: null,
             workTeamId: this.teamId,
             userAccountId: null,
-            role: roles.length ? roles[roles.length - 1].id : 2,
+            role: role,
             startDate: new Date(),
-            endDate: null
+            endDate: null,
+            privileges: this.privilegeRows(role, [])
         };
+        if (!this.roleDefaults.length)
+            this.loadRoleDefaults();
     };
 
     editMember = (member: any): void => {
         this.memberEdit = angular.copy(member);
         this.memberEdit.startDate = member.startDate ? new Date(member.startDate) : null;
         this.memberEdit.endDate = member.endDate ? new Date(member.endDate) : null;
+        this.memberEdit.privileges = this.privilegeRows(member.role, member.privileges || []);
     };
 
     endMemberToday = (member: any): void => {
@@ -204,6 +267,10 @@ class WorkTeamMaintenanceDetailController extends CHControllerBase {
         const model = angular.copy(self.memberEdit);
         model.startDate = self.getBasic(self.memberEdit.startDate);
         model.endDate = self.memberEdit.endDate ? self.getBasic(self.memberEdit.endDate) : null;
+        model.privileges = (self.memberEdit.privileges || []).map(row => ({
+            privilege: row.privilege,
+            override: row.choice === "allow" ? true : row.choice === "deny" ? false : null
+        }));
 
         self.WorkTeamService.saveWorkTeamMember(model)
             .then(
@@ -236,16 +303,20 @@ class WorkTeamMaintenanceDetailController extends CHControllerBase {
     };
 
     /**
-     * Mirrors the server reach rule for row actions: managers reach leads and members, leads reach members,
-     * nobody reaches themselves. The server re-checks dates and flags.
+     * Team reach: a manager reaches leads and members, a lead or member reaches members, and nobody
+     * reaches themselves. Administrators use their global privileges and can open a manager's row too.
      */
     canActOn = (member: any, capability: string): boolean => {
         const p = this.permissions;
-        if (!p || !p[capability] || member.role === 0)
+        if (!p || !p[capability])
             return false;
         if (member.userAccountId === this.SecurityService.getCurrentUserDetails().id)
             return false;
-        return member.role === 2 || p.isManager || p.isAdmin;
+        if (p.isAdmin)
+            return true;
+        if (member.role === 0)
+            return false;
+        return member.role === 2 || p.isManager;
     };
 
     openTimesheets = (member: any): void => {

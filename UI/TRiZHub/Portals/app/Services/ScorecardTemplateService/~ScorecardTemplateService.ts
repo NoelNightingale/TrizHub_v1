@@ -6,6 +6,7 @@ module ScorecardTemplateServiceModule {
         scorecardTemplateGet: (id: string) => ng.IPromise<ScorecardTemplateModel>;
         scorecardTemplateSave: (viewModel: ScorecardTemplateModel) => ng.IPromise<ScorecardTemplateModel>;
         scorecardTemplateDelete: (viewModel: ScorecardTemplateModel) => ng.IPromise<ScorecardTemplateModel>;
+        scorecardTemplateDuplicate: (viewModel: ScorecardTemplateDuplicateModel) => ng.IPromise<ScorecardTemplateModel>;
 
         scorecardTemplateItemGrid: (req: GridModel) => ng.IPromise<GridResultModel<ScorecardTemplateItemGridModel>>;
         scorecardTemplateItemSave: (viewModel: ScorecardTemplateItemModel) => ng.IPromise<ScorecardTemplateItemModel>;
@@ -89,6 +90,20 @@ module ScorecardTemplateServiceModule {
         scorecardTemplateDelete = (viewModel: ScorecardTemplateModel): ng.IPromise<ScorecardTemplateModel> => {
             const deferred = this.$q.defer();
             this.$http.post(this.urlRoot + "ScorecardTemplateDelete", viewModel)
+                .then(
+                    result => {
+                        deferred.resolve(result.data);
+                    },
+                    error => {
+                        deferred.reject(error.data.message);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        scorecardTemplateDuplicate = (viewModel: ScorecardTemplateDuplicateModel): ng.IPromise<ScorecardTemplateModel> => {
+            const deferred = this.$q.defer();
+            this.$http.post(this.urlRoot + "ScorecardTemplateDuplicate", viewModel)
                 .then(
                     result => {
                         deferred.resolve(result.data);

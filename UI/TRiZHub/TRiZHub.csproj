@@ -309,6 +309,7 @@
     <Compile Include="Models\ScorecardTemplateModels\ScorecardTemplatePeriodSearchModel.cs" />
     <Compile Include="Models\ScorecardTemplateModels\ScorecardTemplatePeriodDropdownModel.cs" />
     <Compile Include="Models\ScorecardTemplateModels\ScorecardTemplateDropdownModel.cs" />
+    <Compile Include="Models\ScorecardTemplateModels\ScorecardTemplateDuplicateModel.cs" />
     <Compile Include="Models\ScorecardModels\ScorecardGridModel.cs" />
     <Compile Include="Models\ScorecardTemplateModels\ScorecardTemplateGridModel.cs" />
     <Compile Include="Models\ScorecardTemplateModels\ScorecardTemplatePeriodGridModel.cs" />

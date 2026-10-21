@@ -32,7 +32,7 @@
                                         <i ng-class="{'fa fa-angle-double-down':vm.gridModel.sortKeyOrder.order=='DESC' && vm.gridModel.sortKeyOrder.key=='isActive'}"></i>
                                     </th>
                                     <th>
-                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newClient()">
+                                        <a class="btn btn-xs btn-fw btn-primary" ng-click="vm.newClient()" ng-show="vm.canCreateClient()">
                                             <i class="fa fa-plus"></i> New
                                         </a>
                                     </th>

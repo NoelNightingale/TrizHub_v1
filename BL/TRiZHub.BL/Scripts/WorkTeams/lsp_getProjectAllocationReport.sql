@@ -9,8 +9,10 @@ GO
   Adds a [Source] column: 'Direct' for UserIdentityProject / UserIdentityClient rows, otherwise the work team name for
   allocations a person receives through a team membership (any role) that is current today, in an active team.
 
-  Requires the AddWorkTeams migration. Deploy together with the ReportProvider change that reads [Source].
-  Run against a local database first, never straight against production.
+  Requires the AddWorkTeams and AddWorkTeamPrivileges migrations. Team rows are included only when the
+  membership may capture time. Deploy together with the ReportProvider change that reads [Source].
+  Run against a local database first, never straight against production. Re-run this script if it was
+  already applied before capture time was added.
 */
 ALTER PROCEDURE [dbo].[GetProjectAllocationReport]
 	@userAccountIDs VARCHAR(MAX),
@@ -35,13 +37,24 @@ IF @onlyActiveClients = 1 SET @clientActive = ' AND c.IsActive = 1 '
 IF @onlyActiveProjects = 1 SET @projectActive = ' AND p.IsActive = 1 '
 IF @onlyActiveSubProjects = 1 SET @subProjectActive = ' AND sp.IsActive = 1 '
 
--- People (any role) in active teams whose membership is current today.
+-- People (any role) in active teams whose membership is current today and who may capture time
+-- (an override row wins; otherwise the role default). CaptureTime = 0.
 DECLARE @teamPeople NVARCHAR(MAX) = '
 	(SELECT DISTINCT m.UserAccountId, m.WorkTeamId, wt.Name AS TeamName
 	 FROM WorkTeamMember m
 		JOIN WorkTeam wt ON wt.Id = m.WorkTeamId AND wt.IsActive = 1
 	 WHERE m.StartDate <= CAST(GETDATE() AS date)
-		AND (m.EndDate IS NULL OR m.EndDate >= CAST(GETDATE() AS date))) tm '
+		AND (m.EndDate IS NULL OR m.EndDate >= CAST(GETDATE() AS date))
+		AND (
+			EXISTS (SELECT 1 FROM WorkTeamMemberPrivilege p
+				WHERE p.WorkTeamMemberId = m.Id AND p.Privilege = 0 AND p.IsGranted = 1)
+			OR (
+				NOT EXISTS (SELECT 1 FROM WorkTeamMemberPrivilege p
+					WHERE p.WorkTeamMemberId = m.Id AND p.Privilege = 0)
+				AND EXISTS (SELECT 1 FROM WorkTeamRolePrivilege d
+					WHERE d.Role = m.Role AND d.Privilege = 0 AND d.IsGranted = 1)
+			)
+		)) tm '
 
 SET @sql = '
 SELECT CONCAT(ui.FirstName, '' '', ui.Surname) AS [FullName], ui.Active AS UserActive, c.EntityName AS [ClientName], c.IsActive AS ClientActive,

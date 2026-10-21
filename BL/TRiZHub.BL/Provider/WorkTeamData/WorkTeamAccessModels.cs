@@ -40,6 +40,7 @@ namespace TRiZHub.BL.Provider.WorkTeamData
         public bool TeamAllocations { get; set; }
         public bool Rates { get; set; }
         public bool ManageTeam { get; set; }
+        public bool MaintainClient { get; set; }
     }
 
     /// <summary>What the current user may do on one team's maintenance screen.</summary>

@@ -101,6 +101,60 @@ namespace TRiZHub.BL.Provider.ScorecardTemplateData
             DataContextSaveChanges();
         }
 
+        public ScorecardTemplate DuplicateScorecardTemplate(Guid sourceId, string newName)
+        {
+            Authenticate(PrivilegeType.ScorecardTemplateMaintenance);
+
+            var name = (newName ?? string.Empty).Trim();
+            if (name.Length == 0)
+                throw new ScorecardTemplateException("Please enter a name for the new scorecard template.");
+            if (name.Length > 500)
+                throw new ScorecardTemplateException("The scorecard template name may not be longer than 500 characters.");
+
+            var source = DataContext.ScorecardTemplateSet
+                .Include(a => a.ScorecardTemplateItems)
+                .FirstOrDefault(a => a.Id == sourceId);
+            if (source == null)
+                throw new ScorecardTemplateException("The scorecard template to duplicate could not be found.");
+
+            if (DataContext.ScorecardTemplateSet.Any(a => a.ScorecardName == name))
+                throw new ScorecardTemplateException("A scorecard with the Name: " + name + " already exists.");
+
+            var copy = new ScorecardTemplate
+            {
+                ScorecardName = name,
+                ScorecardCode = source.ScorecardCode,
+                ExcellentWeight = source.ExcellentWeight,
+                AdequateWeight = source.AdequateWeight,
+                InadequateWeight = source.InadequateWeight,
+                IsActive = false
+            };
+            DataContext.ScorecardTemplateSet.Add(copy);
+
+            foreach (var item in source.ScorecardTemplateItems.ToList())
+            {
+                DataContext.ScorecardTemplateItemSet.Add(new ScorecardTemplateItem
+                {
+                    ScorecardTemplateId = copy.Id,
+                    Order = item.Order,
+                    Description = item.Description,
+                    Definition = item.Definition,
+                    Weight = item.Weight,
+                    Minimum = item.Minimum,
+                    Maximum = item.Maximum,
+                    ScorecardScoring = item.ScorecardScoring,
+                    ManualDefinition = item.ManualDefinition,
+                    ExcellentDefinition = item.ExcellentDefinition,
+                    AdequateDefinition = item.AdequateDefinition,
+                    InadequateDefinition = item.InadequateDefinition
+                });
+            }
+
+            DataContextSaveChanges();
+
+            return copy;
+        }
+
         #endregion
 
         #region Scorecard Template Period

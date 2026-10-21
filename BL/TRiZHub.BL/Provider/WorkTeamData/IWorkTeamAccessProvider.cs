@@ -27,5 +27,10 @@ namespace TRiZHub.BL.Provider.WorkTeamData
         List<WorkTeamTypePeriod> TeamTypePeriodsFor(Guid userId, DateTime from, DateTime to);
 
         WorkTeamCapabilitySummary CapabilitySummary(Guid actorId);
+
+        /// <summary>Clients the actor may maintain through a current Maintain client privilege.</summary>
+        IQueryable<Guid> MaintainedClientIds(Guid actorId);
+
+        bool CanMaintainClient(Guid actorId, Guid clientId);
     }
 }

@@ -15,5 +15,13 @@ namespace TRiZHub.Models.ScorecardTemplateModels
         public string ScorecardCode { get; set; }
 
         public bool IsActive { get; set; }
+
+        public int ItemCount { get; set; }
+
+        public decimal TotalWeight { get; set; }
+
+        public int PeriodCount { get; set; }
+
+        public int ScorecardCount { get; set; }
     }
 }

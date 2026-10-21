@@ -107,6 +107,8 @@ namespace TRiZHub.BL.Context
         public DbSet<WorkTeamMember> WorkTeamMemberSet { get; set; }
         public DbSet<WorkTeamClient> WorkTeamClientSet { get; set; }
         public DbSet<WorkTeamProject> WorkTeamProjectSet { get; set; }
+        public DbSet<WorkTeamRolePrivilege> WorkTeamRolePrivilegeSet { get; set; }
+        public DbSet<WorkTeamMemberPrivilege> WorkTeamMemberPrivilegeSet { get; set; }
 
         // Timesheet
         public DbSet<TimesheetEntry> TimesheetEntrySet { get; set; }
