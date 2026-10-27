@@ -36,7 +36,8 @@ namespace TRiZHub.BL.Entities.Types
         PerformanceManagementAdmin,
         ReportGenerationUserProjects,
         ReportGenerationUserRoles,
-        UserProjectMaintenance
+        UserProjectMaintenance,
+        WorkGroupAdmin
     }
 }
 

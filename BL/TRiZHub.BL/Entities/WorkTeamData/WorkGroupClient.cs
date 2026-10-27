@@ -9,16 +9,16 @@ using TRiZHub.BL.Entities.ClientEntityData;
 
 namespace TRiZHub.BL.Entities.WorkTeamData
 {
-    [Table("WorkTeamClient")]
-    public class WorkTeamClient : DbEntity
+    [Table("WorkGroupClient")]
+    public class WorkGroupClient : DbEntity
     {
-        [Index("UIDX_WorkTeamClient", IsUnique = true, Order = 0)]
-        public virtual Guid WorkTeamId { get; set; }
+        [Index("UIDX_WorkGroupClient", IsUnique = true, Order = 0)]
+        public virtual Guid WorkGroupId { get; set; }
 
-        [ForeignKey("WorkTeamId")]
-        public virtual WorkTeam WorkTeam { get; set; }
+        [ForeignKey("WorkGroupId")]
+        public virtual WorkGroup WorkGroup { get; set; }
 
-        [Index("UIDX_WorkTeamClient", IsUnique = true, Order = 1)]
+        [Index("UIDX_WorkGroupClient", IsUnique = true, Order = 1)]
         public virtual Guid ClientId { get; set; }
 
         [ForeignKey("ClientId")]

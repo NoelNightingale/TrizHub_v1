@@ -6,9 +6,9 @@ using System;
 
 namespace TRiZHub.BL.Provider.WorkTeamData
 {
-    public class WorkTeamException : Exception
+    public class WorkGroupException : Exception
     {
-        public WorkTeamException(string message)
+        public WorkGroupException(string message)
             : base(message)
         {
         }

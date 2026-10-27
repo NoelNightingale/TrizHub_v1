@@ -1,0 +1,297 @@
+<div class="row center-container">
+    <div class="col-sm-12 col-md-12 col-lg-11">
+        <div class="padding">
+            <div class="box br-workbench bp-workbench st-workbench wg-workbench">
+                <div class="box-header b-b">
+                    <div class="br-header">
+                        <div>
+                            <h2>Work Groups</h2>
+                            <p class="br-header-note">
+                                A work group can cover several clients and holds its managers. Each team under it is one team type, with its own leads and members.
+                            </p>
+                        </div>
+                        <div class="bp-header-tools">
+                            <div class="st-search">
+                                <i class="fa fa-search"></i>
+                                <input type="text" class="form-control input-sm" placeholder="Search groups, teams, people"
+                                       ng-model="vm.searchText" />
+                            </div>
+                            <div class="btn-group br-status-toggle st-status-toggle">
+                                <button type="button" class="btn btn-xs"
+                                        ng-class="vm.statusFilter === 'all' ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.statusFilter = 'all'">All</button>
+                                <button type="button" class="btn btn-xs"
+                                        ng-class="vm.statusFilter === 'active' ? 'btn-primary' : 'btn-default'"
+                                        ng-click="vm.statusFilter = 'active'">Active</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary" ng-if="vm.tree.isAdmin" ng-click="vm.newGroup()">
+                                <i class="fa fa-plus"></i> New work group
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-body">
+                    <div class="bp-summary">
+                        <span class="bp-stat">
+                            <span class="bp-stat-n">{{vm.summary.groups}}</span>
+                            <span class="bp-stat-l">Groups</span>
+                        </span>
+                        <span class="bp-stat is-open">
+                            <span class="bp-stat-n">{{vm.summary.teams}}</span>
+                            <span class="bp-stat-l">Teams</span>
+                        </span>
+                        <span class="bp-stat">
+                            <span class="bp-stat-n">{{vm.summary.people}}</span>
+                            <span class="bp-stat-l">People</span>
+                        </span>
+                        <span class="br-loading-hint" ng-if="vm.loading">
+                            <i class="fa fa-spinner fa-spin"></i> Loading…
+                        </span>
+                    </div>
+
+                    <div class="wg-canvas">
+                        <article class="wg-group" ng-repeat="g in vm.filteredGroups() track by g.id"
+                                 ng-class="{'is-inactive': !g.isActive}">
+                            <header class="wg-group-head">
+                                <div class="wg-group-title">
+                                    <h3>{{g.name}}</h3>
+                                    <span class="wg-client" ng-repeat="c in g.clients track by c.clientId" title="Client">{{c.clientName}}</span>
+                                    <span class="wg-none" ng-if="!g.clients.length">No clients</span>
+                                    <span class="bp-status" ng-class="g.isActive ? 'is-open' : 'is-closed'">
+                                        {{g.isActive ? 'Active' : 'Inactive'}}
+                                    </span>
+                                </div>
+                                <button type="button" class="btn btn-xs st-action-btn" ng-if="g.canEdit" ng-click="vm.openGroup(g)">
+                                    <i class="fa fa-edit"></i> Edit group
+                                </button>
+                            </header>
+                            <p class="wg-description" ng-if="g.description">{{g.description}}</p>
+                            <div class="wg-managers">
+                                <span class="wg-kicker">Managers</span>
+                                <span class="wg-chip" ng-repeat="p in g.managers track by p.id" title="{{p.name}}">{{p.name}}</span>
+                                <span class="wg-none" ng-if="!g.managers.length">No managers yet</span>
+                            </div>
+                            <div class="wg-branch">
+                                <button type="button" class="wg-team" ng-repeat="t in g.teams track by t.id"
+                                        ng-class="{'is-inactive': !t.isActive}"
+                                        ng-click="vm.openTeam(g, t)">
+                                    <div class="wg-team-type">{{t.teamTypeName}}</div>
+                                    <div class="wg-team-label">{{t.label}}</div>
+                                    <div class="wg-team-people">
+                                        <span class="wg-kicker">Leads</span>
+                                        <span class="wg-chip wg-chip-sm" ng-repeat="p in t.leads track by p.id"
+                                              title="{{p.name}}{{p.isHomeTeam ? ' (home)' : ''}}">{{p.name}}</span>
+                                        <span class="wg-none" ng-if="!t.leads.length">None</span>
+                                    </div>
+                                    <div class="wg-team-count">{{t.members.length}} member{{t.members.length === 1 ? '' : 's'}}</div>
+                                </button>
+                                <button type="button" class="wg-team wg-add" ng-if="g.canAddTeam" ng-click="vm.newTeam(g)">
+                                    <i class="fa fa-plus"></i>
+                                    <span>Add team</span>
+                                </button>
+                            </div>
+                        </article>
+
+                        <div class="br-empty bp-empty" ng-if="vm.loaded && !vm.filteredGroups().length">
+                            <i class="fa fa-sitemap bp-empty-icon"></i>
+                            <div ng-if="!vm.tree.groups.length && vm.tree.isAdmin">There are no work groups yet.</div>
+                            <div ng-if="!vm.tree.groups.length && !vm.tree.isAdmin">You are not on any work groups.</div>
+                            <div ng-if="vm.tree.groups.length && vm.statusFilter === 'active' && !(vm.searchText || '').trim()">No active work groups. Choose All to see inactive ones.</div>
+                            <div ng-if="vm.tree.groups.length && (vm.statusFilter !== 'active' || (vm.searchText || '').trim())">No work groups match this search.</div>
+                            <a href="" ng-if="vm.tree.isAdmin && !vm.tree.groups.length" ng-click="vm.newGroup()">Create the first one</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bp-drawer-backdrop" ng-class="{'is-open': vm.drawer.open}" ng-click="vm.closeDrawer()"></div>
+<aside class="bp-drawer br-workbench wg-workbench" ng-class="{'is-open': vm.drawer.open}" aria-hidden="{{!vm.drawer.open}}">
+    <form name="vm.editForm" novalidate class="bp-drawer-form" ng-submit="vm.saveDrawer()">
+        <div class="bp-drawer-header">
+            <div class="bp-drawer-heading">
+                <div class="bp-drawer-kicker">{{vm.drawer.kicker}}</div>
+                <h3 class="bp-drawer-title">{{vm.drawer.title}}</h3>
+            </div>
+            <button type="button" class="bp-drawer-close" ng-click="vm.closeDrawer()" title="Close">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+
+        <div class="bp-drawer-body" ng-if="vm.drawer.kind === 'group'">
+            <section class="bp-section">
+                <div class="bp-section-title">Work group</div>
+                <div class="bp-field" ng-class="{'has-danger': vm.drawer.submitted && vm.editForm.groupName.$invalid}">
+                    <label for="wgName">Name</label>
+                    <input id="wgName" name="groupName" type="text" class="form-control input-sm" maxlength="500"
+                           ng-model="vm.drawer.group.name" required ng-disabled="!vm.drawer.group.canEdit" />
+                </div>
+                <div class="bp-field">
+                    <label>Clients</label>
+                    <div class="wg-chip-row">
+                        <span class="wg-chip" ng-repeat="c in vm.drawer.clients track by c.clientId">
+                            <span class="wg-chip-label">{{c.clientName}}</span>
+                            <button type="button" class="wg-remove" ng-if="vm.drawer.group.canEdit" ng-click="vm.removeClient(c)" title="Remove client" aria-label="Remove client">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </span>
+                        <span class="wg-none" ng-if="!vm.drawer.clients.length">No clients yet</span>
+                    </div>
+                    <div class="wg-add-row" ng-if="vm.drawer.group.canEdit">
+                        <select class="form-control input-sm" ng-model="vm.drawer.clientId"
+                                ng-options="c.id as c.entityName for c in vm.availableClients()">
+                            <option value="">Choose a client</option>
+                        </select>
+                        <button type="button" class="wg-add-btn" ng-click="vm.addClient()" ng-disabled="!vm.drawer.clientId">
+                            <i class="fa fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+                <div class="bp-field">
+                    <label for="wgDescription">Description</label>
+                    <textarea id="wgDescription" class="form-control input-sm" rows="3" maxlength="2000"
+                              ng-model="vm.drawer.group.description" ng-disabled="!vm.drawer.group.canEdit"></textarea>
+                </div>
+                <div class="btn-group bp-segmented">
+                    <button type="button" class="btn btn-sm"
+                            ng-class="vm.drawer.group.isActive ? 'btn-primary' : 'btn-default'"
+                            ng-click="vm.drawer.group.isActive = true" ng-disabled="!vm.drawer.group.canEdit">Active</button>
+                    <button type="button" class="btn btn-sm"
+                            ng-class="!vm.drawer.group.isActive ? 'btn-primary' : 'btn-default'"
+                            ng-click="vm.drawer.group.isActive = false" ng-disabled="!vm.drawer.group.canEdit">Inactive</button>
+                </div>
+            </section>
+            <section class="bp-section">
+                <div class="bp-section-title">Managers</div>
+                <div class="wg-person" ng-repeat="p in vm.drawer.managers track by p.userAccountId">
+                    <div class="wg-person-head">
+                        <div class="wg-person-name">{{p.name}}</div>
+                        <button type="button" class="wg-remove" ng-if="vm.drawer.group.canEdit" ng-click="vm.removeManager(p)" title="Remove manager" aria-label="Remove manager">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="wg-flag-row" ng-if="vm.drawer.group.canEdit">
+                        <label class="wg-check"><input type="checkbox" ng-model="p.canView" /> View my work group</label>
+                    </div>
+                </div>
+                <span class="wg-none" ng-if="!vm.drawer.managers.length">No managers yet</span>
+                <div class="wg-add-block" ng-if="vm.drawer.group.canEdit">
+                    <div class="wg-add-row">
+                        <select class="form-control input-sm" ng-model="vm.drawer.managerUserId"
+                                ng-options="u.id as u.description for u in vm.users">
+                            <option value="">Choose a manager</option>
+                        </select>
+                        <button type="button" class="wg-add-btn" ng-click="vm.addManager()" ng-disabled="!vm.drawer.managerUserId">
+                            <i class="fa fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div class="wg-flag-row">
+                        <label class="wg-check"><input type="checkbox" ng-model="vm.drawer.managerFlags.canView" /> View my work group</label>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="bp-drawer-body" ng-if="vm.drawer.kind === 'team'">
+            <section class="bp-section" ng-if="vm.drawer.isNew">
+                <div class="bp-section-title">Team type</div>
+                <p class="bp-help bp-help-top">A work group can have one team of each type. The name is the group plus the type.</p>
+                <select class="form-control input-sm" ng-model="vm.drawer.team.teamTypeId"
+                        ng-options="t.id as t.teamName for t in vm.availableTeamTypes()">
+                    <option value="">Choose a team type</option>
+                </select>
+            </section>
+            <section class="bp-section" ng-if="!vm.drawer.isNew">
+                <div class="bp-section-title">Team</div>
+                <p class="bp-help bp-help-top">{{vm.drawer.team.label}}</p>
+                <div class="btn-group bp-segmented" ng-if="vm.drawer.team.canEdit">
+                    <button type="button" class="btn btn-sm"
+                            ng-class="vm.drawer.team.isActive ? 'btn-primary' : 'btn-default'"
+                            ng-click="vm.setTeamActive(true)" ng-disabled="vm.drawer.saving">Active</button>
+                    <button type="button" class="btn btn-sm"
+                            ng-class="!vm.drawer.team.isActive ? 'btn-primary' : 'btn-default'"
+                            ng-click="vm.setTeamActive(false)" ng-disabled="vm.drawer.saving">Inactive</button>
+                </div>
+                <span class="bp-status" ng-if="!vm.drawer.team.canEdit" ng-class="vm.drawer.team.isActive ? 'is-open' : 'is-closed'">
+                    {{vm.drawer.team.isActive ? 'Active' : 'Inactive'}}
+                </span>
+            </section>
+            <section class="bp-section" ng-if="!vm.drawer.isNew">
+                <div class="bp-section-title">Leads</div>
+                <div class="wg-person" ng-repeat="p in vm.drawer.team.leads track by p.id">
+                    <div class="wg-person-head">
+                        <div class="wg-person-name">{{p.name}}</div>
+                        <button type="button" class="wg-remove" ng-if="vm.drawer.team.canEditLeads" ng-click="vm.removePerson(p)" title="Remove lead" aria-label="Remove lead">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="wg-flag-row" ng-if="vm.drawer.team.canEditLeads">
+                        <label class="wg-check"><input type="checkbox" ng-model="p.isHomeTeam" ng-change="vm.updatePersonFlags(p, 0)" /> Home team</label>
+                        <label class="wg-check"><input type="checkbox" ng-model="p.canView" ng-change="vm.updatePersonFlags(p, 0)" /> View my team</label>
+                    </div>
+                </div>
+                <span class="wg-none" ng-if="!vm.drawer.team.leads.length">No leads yet</span>
+                <div class="wg-add-block" ng-if="vm.drawer.team.canEditLeads">
+                    <div class="wg-add-row">
+                        <select class="form-control input-sm" ng-model="vm.drawer.leadUserId"
+                                ng-options="u.id as u.description for u in vm.users">
+                            <option value="">Choose a lead</option>
+                        </select>
+                        <button type="button" class="wg-add-btn" ng-click="vm.addPerson(0)" ng-disabled="!vm.drawer.leadUserId || vm.drawer.saving">
+                            <i class="fa fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div class="wg-flag-row">
+                        <label class="wg-check"><input type="checkbox" ng-model="vm.drawer.leadFlags.isHomeTeam" /> Home team</label>
+                        <label class="wg-check"><input type="checkbox" ng-model="vm.drawer.leadFlags.canView" /> View my team</label>
+                    </div>
+                </div>
+            </section>
+            <section class="bp-section" ng-if="!vm.drawer.isNew">
+                <div class="bp-section-title">Members</div>
+                <div class="wg-person" ng-repeat="p in vm.drawer.team.members track by p.id">
+                    <div class="wg-person-head">
+                        <div class="wg-person-name">{{p.name}}</div>
+                        <button type="button" class="wg-remove" ng-if="vm.drawer.team.canEditMembers" ng-click="vm.removePerson(p)" title="Remove member" aria-label="Remove member">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="wg-flag-row" ng-if="vm.drawer.team.canEditMembers">
+                        <label class="wg-check"><input type="checkbox" ng-model="p.isHomeTeam" ng-change="vm.updatePersonFlags(p, 1)" /> Home team</label>
+                        <label class="wg-check"><input type="checkbox" ng-model="p.canView" ng-change="vm.updatePersonFlags(p, 1)" /> View my own</label>
+                    </div>
+                </div>
+                <span class="wg-none" ng-if="!vm.drawer.team.members.length">No members yet</span>
+                <div class="wg-add-block" ng-if="vm.drawer.team.canEditMembers">
+                    <div class="wg-add-row">
+                        <select class="form-control input-sm" ng-model="vm.drawer.memberUserId"
+                                ng-options="u.id as u.description for u in vm.users">
+                            <option value="">Choose a member</option>
+                        </select>
+                        <button type="button" class="wg-add-btn" ng-click="vm.addPerson(1)" ng-disabled="!vm.drawer.memberUserId || vm.drawer.saving">
+                            <i class="fa fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div class="wg-flag-row">
+                        <label class="wg-check"><input type="checkbox" ng-model="vm.drawer.memberFlags.isHomeTeam" /> Home team</label>
+                        <label class="wg-check"><input type="checkbox" ng-model="vm.drawer.memberFlags.canView" /> View my own</label>
+                    </div>
+                </div>
+                <p class="bp-help" ng-if="!vm.drawer.team.canEditMembers && !vm.drawer.team.canEdit">
+                    Members can be changed on an active team.
+                </p>
+            </section>
+        </div>
+
+        <div class="bp-drawer-footer">
+            <button type="button" class="btn btn-sm st-action-btn is-danger" ng-if="vm.canDeleteDrawer()"
+                    ng-click="vm.deleteDrawer()" ng-disabled="vm.drawer.saving">Delete</button>
+            <span class="bp-dirty-hint" ng-if="vm.drawer.saving"><i class="fa fa-spinner fa-spin"></i> Saving…</span>
+            <button type="button" class="btn btn-sm btn-default" ng-click="vm.closeDrawer()">Close</button>
+            <button type="submit" class="btn btn-sm btn-primary" ng-if="vm.canSaveDrawer()" ng-disabled="vm.drawer.saving">{{vm.saveButtonLabel()}}</button>
+        </div>
+    </form>
+</aside>

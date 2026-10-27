@@ -102,13 +102,14 @@ namespace TRiZHub.BL.Context
         
         public DbSet<UserIdentityClient> UserIdentityClientSet { get; set; }
 
-        // Work Teams
+        // Work groups and the teams under them
+        public DbSet<WorkGroup> WorkGroupSet { get; set; }
+        public DbSet<WorkGroupClient> WorkGroupClientSet { get; set; }
+        public DbSet<WorkGroupManager> WorkGroupManagerSet { get; set; }
+        public DbSet<WorkGroupManagerCapability> WorkGroupManagerCapabilitySet { get; set; }
         public DbSet<WorkTeam> WorkTeamSet { get; set; }
         public DbSet<WorkTeamMember> WorkTeamMemberSet { get; set; }
-        public DbSet<WorkTeamClient> WorkTeamClientSet { get; set; }
-        public DbSet<WorkTeamProject> WorkTeamProjectSet { get; set; }
-        public DbSet<WorkTeamRolePrivilege> WorkTeamRolePrivilegeSet { get; set; }
-        public DbSet<WorkTeamMemberPrivilege> WorkTeamMemberPrivilegeSet { get; set; }
+        public DbSet<WorkTeamMemberCapability> WorkTeamMemberCapabilitySet { get; set; }
 
         // Timesheet
         public DbSet<TimesheetEntry> TimesheetEntrySet { get; set; }

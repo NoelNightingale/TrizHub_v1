@@ -103,11 +103,6 @@
     };
 
     goBack = () => {
-        if (this.workTeamId) {
-            this.$state.go("mainState.maintenance.workTeamMaintenance.detail",
-                { id: this.workTeamId, tab: "people", ratesFor: this.viewModel.userAccountId });
-            return;
-        }
         this.$state.go("mainState.maintenance.userMaintenance.billingRatesGrid", { id: this.viewModel.userAccountId });
     };
 

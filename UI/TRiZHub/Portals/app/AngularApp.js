@@ -349,55 +349,31 @@ angular.module("AngularApp",
                                 ]
                             }
                         })
-                    // Work Team Maintenance
-                    .state("mainState.maintenance.workTeamMaintenance",
+                    // Work Groups
+                    .state("mainState.maintenance.workGroupMaintenance",
                         {
-                            url: "/workteam",
+                            url: "/workgroups",
                             abstract: true,
                             views: {
                                 'view': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/stateView.html?" + APP_CACHE_VER
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workGroupMaintenanceState/stateView.html?" + APP_CACHE_VER
                                 }
                             }
                         })
-                    // Work Team Maintenance Grid
-                    .state("mainState.maintenance.workTeamMaintenance.grid",
+                    .state("mainState.maintenance.workGroupMaintenance.grid",
                         {
                             url: "/grid",
                             views: {
                                 'grid': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "WorkTeamMaintenanceGridController as vm"
+                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workGroupMaintenanceState/grid/views/mainView.html?" + APP_CACHE_VER,
+                                    controller: "WorkGroupMaintenanceGridController as vm"
                                 }
                             },
                             resolve: {
                                 loadMainCtrl: [
                                     "$ocLazyLoad", function ($ocLazyLoad) {
                                         return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/grid/controllers/~WorkTeamMaintenanceGridController.js?" + APP_CACHE_VER);
-                                    }
-                                ]
-                            }
-                        })
-                    // Work Team Maintenance Detail
-                    .state("mainState.maintenance.workTeamMaintenance.detail",
-                        {
-                            url: "/detail/:id?tab&ratesFor",
-                            params: {
-                                tab: { value: null, squash: true },
-                                ratesFor: { value: null, squash: true }
-                            },
-                            views: {
-                                'detail': {
-                                    templateUrl: "Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/detail/views/mainView.html?" + APP_CACHE_VER,
-                                    controller: "WorkTeamMaintenanceDetailController as vm"
-                                }
-                            },
-                            resolve: {
-                                loadMainCtrl: [
-                                    "$ocLazyLoad", function ($ocLazyLoad) {
-                                        return $ocLazyLoad
-                                            .load("Portals/app/states/mainState/maintenanceState/workTeamMaintenanceState/detail/controllers/~WorkTeamMaintenanceDetailController.js?" + APP_CACHE_VER);
+                                            .load("Portals/app/states/mainState/maintenanceState/workGroupMaintenanceState/grid/controllers/~WorkGroupMaintenanceGridController.js?" + APP_CACHE_VER);
                                     }
                                 ]
                             }

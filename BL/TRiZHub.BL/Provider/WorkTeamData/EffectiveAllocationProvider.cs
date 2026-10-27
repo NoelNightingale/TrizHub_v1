@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TRiZHub.BL.Context;
-using TRiZHub.BL.Entities.Types;
-using TRiZHub.BL.Entities.WorkTeamData;
 using TRiZHub.BL.Provider.Security;
 
 #endregion
@@ -35,8 +33,6 @@ namespace TRiZHub.BL.Provider.WorkTeamData
         public Dictionary<Guid, EffectiveAllocations> ForUsers(IEnumerable<Guid> userIds, DateTime from, DateTime to)
         {
             var ids = userIds.Distinct().ToList();
-            var fromDay = from.Date;
-            var toDay = to.Date;
             var result = ids.ToDictionary(id => id, id => new EffectiveAllocations());
             if (ids.Count == 0)
                 return result;
@@ -60,128 +56,33 @@ namespace TRiZHub.BL.Provider.WorkTeamData
                     result[row.UserAccountId].DirectProjectIds.Add(row.ProjectId.Value);
             }
 
-            var memberships = Capturing(DataContext.WorkTeamMemberSet
-                .Where(m => ids.Contains(m.UserAccountId)
-                            && m.WorkTeam.IsActive
-                            && m.StartDate <= toDay
-                            && (m.EndDate == null || m.EndDate >= fromDay)))
-                .Select(m => new { m.UserAccountId, m.WorkTeamId, m.WorkTeam.Name, m.StartDate, m.EndDate })
-                .ToList();
-            if (memberships.Count == 0)
-                return result;
-
-            var teamIds = memberships.Select(m => m.WorkTeamId).Distinct().ToList();
-            var teamClients = DataContext.WorkTeamClientSet
-                .Where(c => teamIds.Contains(c.WorkTeamId))
-                .Select(c => new { c.WorkTeamId, c.ClientId })
-                .ToList()
-                .ToLookup(c => c.WorkTeamId);
-            var teamProjects = DataContext.WorkTeamProjectSet
-                .Where(p => teamIds.Contains(p.WorkTeamId))
-                .Select(p => new { p.WorkTeamId, p.ProjectId, p.SubProjectId })
-                .ToList()
-                .ToLookup(p => p.WorkTeamId);
-
-            foreach (var m in memberships)
-            {
-                var grants = result[m.UserAccountId].TeamGrants;
-                foreach (var c in teamClients[m.WorkTeamId])
-                {
-                    grants.Add(new TeamAllocationGrant
-                    {
-                        WorkTeamId = m.WorkTeamId,
-                        WorkTeamName = m.Name,
-                        ClientId = c.ClientId,
-                        StartDate = m.StartDate,
-                        EndDate = m.EndDate
-                    });
-                }
-
-                foreach (var p in teamProjects[m.WorkTeamId])
-                {
-                    grants.Add(new TeamAllocationGrant
-                    {
-                        WorkTeamId = m.WorkTeamId,
-                        WorkTeamName = m.Name,
-                        ProjectId = p.ProjectId,
-                        SubProjectId = p.SubProjectId,
-                        StartDate = m.StartDate,
-                        EndDate = m.EndDate
-                    });
-                }
-            }
-
+            // Team allocations are out of scope until the next specification. Direct rows above still apply.
             return result;
-        }
-
-        #region Team part as queries (to union with the direct UserIdentityClient/UserIdentityProject queries)
-
-        private IQueryable<WorkTeamMember> MembershipsOverlapping(DateTime from, DateTime to)
-        {
-            var fromDay = from.Date;
-            var toDay = to.Date;
-            return Capturing(DataContext.WorkTeamMemberSet
-                .Where(m => m.WorkTeam.IsActive
-                            && m.StartDate <= toDay
-                            && (m.EndDate == null || m.EndDate >= fromDay)));
-        }
-
-        /// <summary>Team allocations count only for memberships that may capture time.</summary>
-        private IQueryable<WorkTeamMember> Capturing(IQueryable<WorkTeamMember> members)
-        {
-            return WorkTeamAccessRules.WithPrivilege(members,
-                DataContext.WorkTeamRolePrivilegeSet, DataContext.WorkTeamMemberPrivilegeSet,
-                WorkTeamPrivilege.CaptureTime);
         }
 
         public IQueryable<Guid> TeamUserIdsForClients(IEnumerable<Guid> clientIds, DateTime from, DateTime to)
         {
-            var ids = clientIds.Distinct().ToList();
-            var teamIds = DataContext.WorkTeamClientSet
-                .Where(c => ids.Contains(c.ClientId))
-                .Select(c => c.WorkTeamId);
-            return MembershipsOverlapping(from, to)
-                .Where(m => teamIds.Contains(m.WorkTeamId))
-                .Select(m => m.UserAccountId)
-                .Distinct();
+            return None();
         }
 
         public IQueryable<Guid> TeamUserIdsForProjects(IEnumerable<Guid> projectIds, DateTime from, DateTime to)
         {
-            var ids = projectIds.Distinct().ToList();
-            var teamIds = DataContext.WorkTeamProjectSet
-                .Where(p => ids.Contains(p.ProjectId))
-                .Select(p => p.WorkTeamId);
-            return MembershipsOverlapping(from, to)
-                .Where(m => teamIds.Contains(m.WorkTeamId))
-                .Select(m => m.UserAccountId)
-                .Distinct();
+            return None();
         }
 
         public IQueryable<Guid> TeamClientIdsForUsers(IEnumerable<Guid> userIds, DateTime from, DateTime to)
         {
-            var ids = userIds.Distinct().ToList();
-            var teamIds = MembershipsOverlapping(from, to)
-                .Where(m => ids.Contains(m.UserAccountId))
-                .Select(m => m.WorkTeamId);
-            return DataContext.WorkTeamClientSet
-                .Where(c => teamIds.Contains(c.WorkTeamId))
-                .Select(c => c.ClientId)
-                .Distinct();
+            return None();
         }
 
         public IQueryable<Guid> TeamProjectIdsForUsers(IEnumerable<Guid> userIds, DateTime from, DateTime to)
         {
-            var ids = userIds.Distinct().ToList();
-            var teamIds = MembershipsOverlapping(from, to)
-                .Where(m => ids.Contains(m.UserAccountId))
-                .Select(m => m.WorkTeamId);
-            return DataContext.WorkTeamProjectSet
-                .Where(p => teamIds.Contains(p.WorkTeamId))
-                .Select(p => p.ProjectId)
-                .Distinct();
+            return None();
         }
 
-        #endregion
+        private IQueryable<Guid> None()
+        {
+            return DataContext.UserAccountSet.Where(u => false).Select(u => u.Id);
+        }
     }
 }

@@ -2528,3 +2528,340 @@ tr.br-row-flash > td {
     display: block;
     margin-bottom: 4px;
 }
+
+/* Work Groups organigram */
+.wg-workbench .wg-canvas {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.wg-workbench .wg-group {
+    border: 1px solid #e8ecf0;
+    border-left: 4px solid #3f51b5;
+    border-radius: 6px;
+    background: #fff;
+    padding: 16px 16px 14px;
+}
+
+.wg-workbench .wg-group.is-inactive {
+    border-left-color: #ffb300;
+    background: #fafbfc;
+}
+
+.wg-workbench .wg-group-head,
+.wg-workbench .wg-group-title,
+.wg-workbench .wg-managers,
+.wg-workbench .wg-chip-row,
+.wg-workbench .wg-add-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.wg-workbench .wg-group-head {
+    justify-content: space-between;
+}
+
+.wg-workbench .wg-group-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.wg-workbench .wg-client {
+    font-size: 12px;
+    color: #546e7a;
+    background: #f4f6f8;
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+.wg-workbench .wg-description {
+    margin: 8px 0 0;
+    color: #607d8b;
+    font-size: 13px;
+}
+
+.wg-workbench .wg-managers {
+    margin-top: 12px;
+}
+
+.wg-workbench .wg-kicker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #90a4ae;
+    margin-right: 2px;
+}
+
+.wg-workbench .wg-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    background: #f4f6f8;
+    border: 1px solid #e8ecf0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #37474f;
+    line-height: 1.3;
+}
+
+.wg-workbench .wg-chip-sm {
+    padding: 2px 7px;
+    font-size: 11px;
+}
+
+.wg-workbench .wg-chip-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wg-workbench .wg-remove,
+.bp-drawer.wg-workbench .wg-remove {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: #f4f6f8;
+    color: #78909c;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    outline: none;
+    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.wg-workbench .wg-remove:hover,
+.wg-workbench .wg-remove:focus,
+.bp-drawer.wg-workbench .wg-remove:hover,
+.bp-drawer.wg-workbench .wg-remove:focus {
+    background: #fdecea;
+    border-color: #ef9a9a;
+    color: #c62828;
+}
+
+.wg-workbench .wg-none {
+    color: #b0bec5;
+    font-size: 12px;
+}
+
+.wg-workbench .wg-branch {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-top: 14px;
+    padding-top: 16px;
+    border-top: 2px solid #e8ecf0;
+    overflow-x: auto;
+}
+
+.wg-workbench .wg-team {
+    position: relative;
+    flex: 0 0 200px;
+    text-align: left;
+    border: 1px solid #e8ecf0;
+    border-radius: 6px;
+    background: #fff;
+    padding: 12px;
+    min-height: 132px;
+}
+
+.wg-workbench .wg-team:before {
+    content: "";
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    width: 2px;
+    height: 16px;
+    background: #e8ecf0;
+}
+
+.wg-workbench .wg-team:hover {
+    border-color: #c5cae9;
+    box-shadow: 0 4px 12px rgba(63, 81, 181, 0.12);
+}
+
+.wg-workbench .wg-team.is-inactive {
+    opacity: 0.72;
+}
+
+.wg-workbench .wg-team-type {
+    font-weight: 600;
+}
+
+.wg-workbench .wg-team-label {
+    margin-top: 2px;
+    color: #90a4ae;
+    font-size: 11px;
+}
+
+.wg-workbench .wg-team-people {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.wg-workbench .wg-team-count {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #607d8b;
+}
+
+.wg-workbench .wg-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-style: dashed;
+    color: #3f51b5;
+    background: #fafbfc;
+}
+
+.wg-workbench .wg-add-row {
+    margin-top: 8px;
+    gap: 8px;
+}
+
+.wg-workbench .wg-add-row select {
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+.wg-workbench .wg-add-btn,
+.bp-drawer.wg-workbench .wg-add-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid #c5cae9;
+    border-radius: 6px;
+    background: #e8eaf6;
+    color: #303f9f;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    outline: none;
+    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.wg-workbench .wg-add-btn:hover,
+.wg-workbench .wg-add-btn:focus,
+.bp-drawer.wg-workbench .wg-add-btn:hover,
+.bp-drawer.wg-workbench .wg-add-btn:focus {
+    border-color: #9fa8da;
+    background: #c5cae9;
+    color: #1a237e;
+}
+
+.wg-workbench .wg-add-btn[disabled],
+.bp-drawer.wg-workbench .wg-add-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.wg-workbench .wg-flag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #5d4037;
+    background: #ffe0b2;
+    border-radius: 4px;
+    padding: 1px 6px;
+}
+
+.wg-workbench .wg-flag.is-home {
+    color: #1b5e20;
+    background: #c8e6c9;
+}
+
+.wg-workbench .wg-person {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border: 1px solid #eef2f5;
+    border-radius: 6px;
+    background: #fafbfc;
+}
+
+.wg-workbench .wg-person-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.wg-workbench .wg-person-name {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #37474f;
+}
+
+.wg-workbench .wg-flag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin-top: 8px;
+}
+
+.wg-workbench .wg-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: #546e7a;
+    cursor: pointer;
+}
+
+.wg-workbench .wg-add-block {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eef2f5;
+}
+
+.bp-drawer .bp-field {
+    margin-bottom: 10px;
+}
+
+.bp-drawer .bp-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #78909c;
+    margin-bottom: 4px;
+}

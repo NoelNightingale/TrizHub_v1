@@ -1577,7 +1577,10 @@ namespace TRiZHub.BL.Provider.BillingRatesData
 
         public WorkTeamMemberRatesResult GetWorkTeamMemberRates(Guid workTeamId, Guid userAccountId)
         {
-            var team = DataContext.WorkTeamSet.FirstOrDefault(t => t.Id == workTeamId);
+            var team = DataContext.WorkTeamSet
+                .Where(t => t.Id == workTeamId)
+                .Select(t => new { t.Id, Name = t.WorkGroup.Name + " — " + t.TeamType.TeamName })
+                .FirstOrDefault();
             if (team == null)
                 throw new BillingRatesException("Selected Work Team was not found!");
 

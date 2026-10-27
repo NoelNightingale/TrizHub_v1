@@ -6,6 +6,8 @@ namespace TRiZHub.BL.Migrations
     using System.Data.Entity.Validation;
     using System.Linq;
     using TRiZHub.BL.Entities.ProjectData;
+using TRiZHub.BL.Entities.SecurityData;
+using TRiZHub.BL.Entities.Types;
 
     internal sealed class Configuration : DbMigrationsConfiguration<TRiZHub.BL.Context.DataContext>
     {
@@ -72,6 +74,16 @@ namespace TRiZHub.BL.Migrations
                 }
 
                 messages += ", Added Project Types To Sub Projects";
+
+                if (!context.PrivilegeSet.Any(p => p.Security == PrivilegeType.WorkGroupAdmin))
+                {
+                    context.PrivilegeSet.Add(new Privilege
+                    {
+                        Security = PrivilegeType.WorkGroupAdmin,
+                        Description = "Create and maintain work groups and everything under them"
+                    });
+                    messages += ", Added WorkGroupAdmin";
+                }
 
                 if (context.EmployerSet.Count() == 0)
                 {

@@ -6,11 +6,11 @@ using System;
 
 namespace TRiZHub.BL.Entities.Types
 {
+    /// <summary>Role on a work team. Group managers live on WorkGroupManager, not here.</summary>
     [Serializable]
     public enum WorkTeamRoleType
     {
-        Manager = 0,
-        Lead = 1,
-        Member = 2
+        Lead = 0,
+        Member = 1
     }
 }

@@ -35,6 +35,7 @@ namespace TRiZHub.BL.Provider.WorkTeamData
     {
         public bool IsTeamManager { get; set; }
         public bool IsTeamLead { get; set; }
+        public bool IsTeamMember { get; set; }
         public bool Timesheets { get; set; }
         public bool Scorecards { get; set; }
         public bool TeamAllocations { get; set; }

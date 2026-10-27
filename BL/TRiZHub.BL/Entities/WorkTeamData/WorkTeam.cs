@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TCR.Lib.BL;
 using TRiZHub.BL.Entities.TeamData;
@@ -11,36 +10,27 @@ using TRiZHub.BL.Entities.TeamData;
 
 namespace TRiZHub.BL.Entities.WorkTeamData
 {
+    /// <summary>
+    /// One team type inside a work group. The label is the group name plus the team type name.
+    /// A group can have many teams, and only one of each team type.
+    /// </summary>
     [Table("WorkTeam")]
     public class WorkTeam : DbEntity
     {
-        [Required]
-        [MaxLength(500)]
-        public virtual string Name { get; set; }
+        [Index("UIDX_WorkTeamGroupType", IsUnique = true, Order = 0)]
+        public virtual Guid WorkGroupId { get; set; }
 
-        [MaxLength(2000)]
-        public virtual string Description { get; set; }
+        [ForeignKey("WorkGroupId")]
+        public virtual WorkGroup WorkGroup { get; set; }
 
-        public virtual bool IsActive { get; set; }
-
-        [Index("IDX_WorkTeamTeamType")]
+        [Index("UIDX_WorkTeamGroupType", IsUnique = true, Order = 1)]
         public virtual Guid TeamTypeId { get; set; }
 
         [ForeignKey("TeamTypeId")]
         public virtual Team TeamType { get; set; }
 
-        public virtual bool AllowTeamTimesheets { get; set; }
-
-        public virtual bool AllowTeamScorecards { get; set; }
-
-        public virtual bool LeadsManageAllocations { get; set; }
-
-        public virtual bool LeadsManageRates { get; set; }
+        public virtual bool IsActive { get; set; }
 
         public virtual ICollection<WorkTeamMember> Members { get; set; }
-
-        public virtual ICollection<WorkTeamClient> Clients { get; set; }
-
-        public virtual ICollection<WorkTeamProject> Projects { get; set; }
     }
 }

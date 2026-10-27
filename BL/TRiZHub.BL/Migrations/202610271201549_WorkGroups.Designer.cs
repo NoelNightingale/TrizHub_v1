@@ -7,13 +7,13 @@ namespace TRiZHub.BL.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class AddWorkTeamPrivileges : IMigrationMetadata
+    public sealed partial class WorkGroups : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AddWorkTeamPrivileges));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(WorkGroups));
         
         string IMigrationMetadata.Id
         {
-            get { return "202610201250589_AddWorkTeamPrivileges"; }
+            get { return "202610271201549_WorkGroups"; }
         }
         
         string IMigrationMetadata.Source
