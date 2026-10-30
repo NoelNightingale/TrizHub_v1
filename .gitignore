@@ -421,6 +421,11 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# TypeScript build output under the AngularJS portal. Edit the ~*.ts source;
+# MSBuild rewrites these and they stay on disk, but Git does not track them.
+UI/TRiZHub/Portals/app/**/~*.js
+UI/TRiZHub/Portals/app/**/~*.js.map
+
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 

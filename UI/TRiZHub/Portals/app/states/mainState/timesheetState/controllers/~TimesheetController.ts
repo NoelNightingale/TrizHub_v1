@@ -25,6 +25,8 @@ class TimesheetController extends CHControllerBase {
     weeks: any[] = [];
     selectedWeekIndex = 0;
     selectedWeek: any = null;
+    /** True after the first TimesheetGrid response for the current set of weeks. */
+    private timesheetGridLoaded = false;
 
     private dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     private monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -692,6 +694,7 @@ class TimesheetController extends CHControllerBase {
      */
     buildWeeksFromPeriod = (periodStart: Date, periodEnd: Date): void => {
         const me = this;
+        me.timesheetGridLoaded = false;
         const start = me.stripTime(periodStart);
         const end = me.stripTime(periodEnd);
         if (!start || !end) {
@@ -749,7 +752,8 @@ class TimesheetController extends CHControllerBase {
                     totalBillableHours: 0,
                     totalNonEligibleHours: 0,
                     days: days,
-                    daysByCol: null
+                    daysByCol: null,
+                    expandInitialized: false
                 };
                 me.indexDaysByCol(week);
                 weeks.push(week);
@@ -792,7 +796,7 @@ class TimesheetController extends CHControllerBase {
         }
         this.selectedWeekIndex = index;
         this.selectedWeek = this.weeks[index];
-        this.applyDefaultDayExpand();
+        this.ensureWeekExpandDefault();
     };
 
     /** Switch to the week/day that owns a record (used when save validation fails off-tab). */
@@ -835,6 +839,36 @@ class TimesheetController extends CHControllerBase {
         }
         if (!expandedOne && me.selectedWeek.days.length) {
             me.selectedWeek.days[0].expanded = true;
+        }
+    };
+
+    /**
+     * Apply the page-entry day expansion once per week, after TimesheetGrid has returned.
+     * Later tab visits and reloads leave expanded flags as the user set them.
+     */
+    private ensureWeekExpandDefault = (): void => {
+        const week = this.selectedWeek;
+        if (!this.timesheetGridLoaded || !week || week.expandInitialized) {
+            return;
+        }
+        this.applyDefaultDayExpand();
+        week.expandInitialized = true;
+    };
+
+    /** Open the day that owns this date. Other days are left as they are. */
+    private expandDayForDate = (date: Date): void => {
+        const key = this.dateToKey(this.stripTime(date));
+        if (!key || !this.weeks) {
+            return;
+        }
+        for (let w = 0; w < this.weeks.length; w++) {
+            const days = this.weeks[w].days || [];
+            for (let d = 0; d < days.length; d++) {
+                if (days[d].dateKey === key) {
+                    days[d].expanded = true;
+                    return;
+                }
+            }
         }
     };
 
@@ -917,7 +951,8 @@ class TimesheetController extends CHControllerBase {
 
         this.gridModel = event;
         this.rebuildWeekRecords();
-        this.applyDefaultDayExpand();
+        this.timesheetGridLoaded = true;
+        this.ensureWeekExpandDefault();
         this.summaryList();
         if (this.gridModel.totalItems > 0) {
             this.loadingIsDone = true;
@@ -1219,6 +1254,7 @@ class TimesheetController extends CHControllerBase {
                             };
 
                             me.gridModel.data.push(newRecord);
+                            me.expandDayForDate(date);
 
                             newRecord.valid["dateEntry"] = true;
                             newRecord.valid["teamId"] = false;
@@ -1228,7 +1264,6 @@ class TimesheetController extends CHControllerBase {
                             newRecord.valid["hours"] = false;
                         }
                         me.rebuildWeekRecords();
-                        me.applyDefaultDayExpand();
                         me.summaryList();
                     }
                 },
@@ -1483,7 +1518,6 @@ class TimesheetController extends CHControllerBase {
 
                 me.saveSuccess = false;
                 me.rebuildWeekRecords();
-                me.applyDefaultDayExpand();
                 me.summaryList();
             },
             error => {
@@ -1519,7 +1553,6 @@ class TimesheetController extends CHControllerBase {
 
                 me.saveSuccess = false;
                 me.rebuildWeekRecords();
-                me.applyDefaultDayExpand();
                 me.summaryList();
             },
             error => {
@@ -1989,7 +2022,6 @@ class TimesheetController extends CHControllerBase {
         me.clipboardPasteItem = null;
         me.clipboardPasteTarget = null;
         me.rebuildWeekRecords();
-        me.applyDefaultDayExpand();
         me.summaryList();
     };
 
@@ -2001,6 +2033,9 @@ class TimesheetController extends CHControllerBase {
         const entryDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 0, 0, 0, 0);
         for (let i = 0; i < item.rows.length; i++) {
             me.createRecordFromClipboardRow(item.rows[i], entryDate, i);
+        }
+        if (item.rows && item.rows.length) {
+            day.expanded = true;
         }
     }
 
@@ -2020,6 +2055,7 @@ class TimesheetController extends CHControllerBase {
             }
             const entryDate = new Date(targetDay.date.getFullYear(), targetDay.date.getMonth(), targetDay.date.getDate(), 0, 0, 0, 0);
             me.createRecordFromClipboardRow(row, entryDate, i);
+            targetDay.expanded = true;
         }
     }
 
